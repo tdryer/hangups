@@ -20,21 +20,9 @@ hangups aims to be an open client for the undocumented Hangouts chat API.
 
 ## Running
 
-For now, running hangups requires some magic values.
-
 `cookies.txt` is required to authenticate with Google. Copy your Google cookies
-into this file. You can copy them direct from a request header.
+into this file. You can copy them directly from a request header.
 
-Copy the `key` parameter of a Hangouts `clients6.google.com` request into
-`key.txt`.
-
-Copy a Hangouts request body header into `request_header.json`. It should look
-something like this:
 ```
-[
-    [3, 3, "chat_wcs_20140424.130115_RC5", 1398706440],
-    ["AChromeExtensionXXXXXXXXX", "XXXXXXXXXXXXXXXX"],
-    null,
-    "en"
-]
+python -m hangups
 ```

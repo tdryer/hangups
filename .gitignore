@@ -1,4 +1,2 @@
 *.py[cod]
 cookies.txt
-request_header.json
-key.txt

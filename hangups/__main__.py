@@ -1,3 +1,5 @@
+import yaml
+import re
 import random
 import json
 import requests
@@ -7,11 +9,113 @@ import hashlib
 
 class HangupsClient(object):
 
-    def __init__(self, cookies, origin_url, key, request_header):
+    def __init__(self, cookies, origin_url):
         self._cookies = cookies
         self._origin_url = origin_url
-        self._key = key
-        self._request_header = request_header
+
+        # discovered automatically:
+
+        # the api key sent with every request
+        self.api_key = None
+        # fields sent in request headers
+        self.header_date = None
+        self.header_version = None
+        self.header_id = None
+        self.header_client = None
+        # parameters related talkgadget channel requests
+        self.channel_path = None
+        self.gsessionid = None
+        self.clid = None
+        self.channel_ec_param = None
+        self.channel_prop_param = None
+
+        # make initialization requests
+        self._init_talkgadget_1()
+        self._init_talkgadget_2()
+
+    def _init_talkgadget_1(self):
+        """Make first talkgadget request and parse response.
+
+        The response body is a HTML document containing a series of script tags
+        containing JavaScript object. We need to parse the object to get at the
+        data.
+        """
+        url = 'https://talkgadget.google.com/u/0/talkgadget/_/chat'
+        params = {
+            'prop': 'aChromeExtension',
+            'fid': 'gtn-roster-iframe-id',
+            'ec': '["ci:ec",true,true,false]',
+        }
+        headers = {
+            # appears to require a browser user agent
+            'user-agent': (
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
+                '(KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36'
+            ),
+        }
+        res = requests.get(url, cookies=self._cookies, params=params,
+                           headers=headers)
+        if res.status_code != 200:
+            raise ValueError("First talkgadget request failed")
+        res = res.text.encode('utf-8')
+
+        # Parse the response by using a regex to find all the JS objects, and
+        # hacking them until they can be parsed as YAML.
+        res = res.replace('\n', '')
+        regex = re.compile(
+            r"(?:<script>AF_initDataCallback\((.*?)\);</script>)"
+        )
+        data_dict = {}
+        for data in regex.findall(res):
+            try:
+                # hack at the data to make it yaml-parsable
+                while ',,' in data:
+                    data = data.replace(',,', ',null,')
+                    data = data.replace('[,', '[null,')
+                data = yaml.safe_load(data)
+                data_dict[data['key']] = data['data']
+            except (yaml.parser.ParserError, yaml.scanner.ScannerError,
+                    yaml.reader.ReaderError):
+                pass # not everything will be parsable, but we don't care
+
+        self.api_key = data_dict['ds:7'][0][2]
+        self.header_date = data_dict['ds:2'][0][4]
+        self.header_version = data_dict['ds:2'][0][6]
+        self.header_id = data_dict['ds:4'][0][7]
+        self.channel_path = data_dict['ds:4'][0][1]
+        self.gsessionid = data_dict['ds:4'][0][3]
+        self.clid = data_dict['ds:4'][0][7]
+        self.channel_ec_param = data_dict['ds:4'][0][4]
+        self.channel_prop_param = data_dict['ds:4'][0][5]
+
+    def _init_talkgadget_2(self):
+        """Make second talkgadget request and parse response."""
+        url = 'https://talkgadget.google.com{}bind'.format(self.channel_path)
+        params = {
+            'VER': 8,
+            'clid': self.clid,
+            'prop': self.channel_prop_param,
+            'ec': self.channel_ec_param,
+            'gsessionid': self.gsessionid,
+            'RID': 81187, # TODO
+            'CVER': 1,
+            't': 1, # trial
+        }
+        res = requests.post(url, cookies=self._cookies, params=params,
+                            data='count=0')
+        if res.status_code != 200:
+            raise ValueError("Second talkgadget request failed")
+        res = res.text
+
+        # XXX hack to parse out the client ID
+        # find something that looks like "username@domain.com/clientID"
+        regex = re.compile("\".*?@.*?/(.*?)\"")
+        client_id = regex.findall(res)
+        if len(client_id) == 1:
+            client_id = client_id[0]
+        else:
+            raise ValueError("Failed to parse client ID")
+        self.header_client = client_id
 
     def _get_authorization_header(self):
         # technically, it doesn't matter what the url and time are
@@ -28,7 +132,12 @@ class HangupsClient(object):
             raise KeyError("Cookie '{}' is required".format(name))
 
     def _get_request_header(self):
-        return self._request_header
+        return [
+            [3, 3, self.header_version, self.header_date],
+            [self.header_client, self.header_id],
+            None,
+            "en"
+        ]
 
     def _request(self, endpoint, body_json):
         url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
@@ -42,7 +151,7 @@ class HangupsClient(object):
         cookies = {cookie: self._get_cookie(cookie)
                    for cookie in required_cookies}
         params = {
-            'key': self._key,
+            'key': self.api_key,
             'alt': 'json', # json or protojson
         }
         return requests.post(url, headers=headers, cookies=cookies,
@@ -157,21 +266,10 @@ def load_cookies_txt():
     return {cookie[0]: cookie[1] for cookie in cookies_list}
 
 
-def load_key_txt():
-    """Return key parameter loaded from key.txt file."""
-    return open('key.txt').read().strip('\n')
-
-
-def load_request_header_json():
-    """Return request header json loaded from request_header.json."""
-    return json.load(open('request_header.json'))
-
-
 def main():
     """Make a chat request."""
     cookies = load_cookies_txt()
-    hangups = HangupsClient(cookies, 'https://talkgadget.google.com',
-                            load_key_txt(), load_request_header_json())
+    hangups = HangupsClient(cookies, 'https://talkgadget.google.com')
 
     # Get all events in the past hour
     now = time.time() * 1000000
