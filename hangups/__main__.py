@@ -57,7 +57,7 @@ class HangupsClient(object):
                            headers=headers)
         if res.status_code != 200:
             raise ValueError("First talkgadget request failed")
-        res = res.text.encode('utf-8')
+        res = res.text
 
         # Parse the response by using a regex to find all the JS objects, and
         # hacking them until they can be parsed as YAML.
@@ -122,7 +122,7 @@ class HangupsClient(object):
         time_msec = int(time.time() * 1000)
         auth_string = '{} {} {}'.format(time_msec, self._get_cookie("SAPISID"),
                                         self._origin_url)
-        auth_hash = hashlib.sha1(auth_string).hexdigest()
+        auth_hash = hashlib.sha1(auth_string.encode()).hexdigest()
         return 'SAPISIDHASH {}_{}'.format(time_msec, auth_hash)
 
     def _get_cookie(self, name):
@@ -274,7 +274,7 @@ def main():
     # Get all events in the past hour
     now = time.time() * 1000000
     one_hour = 60 * 60 * 1000000
-    print json.dumps(hangups.syncallnewevents(now - one_hour), indent=4)
+    print(json.dumps(hangups.syncallnewevents(now - one_hour), indent=4))
 
 
 if __name__ == '__main__':
