@@ -7,7 +7,7 @@ import requests
 import time
 import hashlib
 
-from hangups import javascript
+from hangups import javascript, longpoll
 
 
 class HangupsClient(object):
@@ -101,11 +101,10 @@ class HangupsClient(object):
             't': 1, # trial
         }
         res = requests.post(url, cookies=self._cookies, params=params,
-                            data='count=0')
+                            data='count=0', stream=True)
         if res.status_code != 200:
             raise ValueError("Second talkgadget request failed")
-        res = '\n'.join(res.text.split('\n')[1:]) # remove the number of bytes
-        res = javascript.loads(res)
+        res = longpoll.loads(res.raw)[0]
         val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
         self.header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
 
