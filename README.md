@@ -22,6 +22,10 @@ hangups aims to be an open client for the undocumented Hangouts chat API.
 
 Python 3.4 is required (earlier Python 3.x might work but is not tested).
 
+```
+pip install -r requirements.txt
+```
+
 `cookies.txt` is required to authenticate with Google. Copy your Google cookies
 into this file. You can copy them directly from a request header.
 

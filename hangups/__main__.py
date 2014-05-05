@@ -1,10 +1,13 @@
-import yaml
+"""Hangups - open client for the undocumented Hangouts chat API."""
+
 import re
 import random
 import json
 import requests
 import time
 import hashlib
+
+from hangups import javascript
 
 
 class HangupsClient(object):
@@ -60,7 +63,7 @@ class HangupsClient(object):
         res = res.text
 
         # Parse the response by using a regex to find all the JS objects, and
-        # hacking them until they can be parsed as YAML.
+        # parsing them.
         res = res.replace('\n', '')
         regex = re.compile(
             r"(?:<script>AF_initDataCallback\((.*?)\);</script>)"
@@ -68,16 +71,12 @@ class HangupsClient(object):
         data_dict = {}
         for data in regex.findall(res):
             try:
-                # hack at the data to make it yaml-parsable
-                while ',,' in data:
-                    data = data.replace(',,', ',null,')
-                    data = data.replace('[,', '[null,')
-                data = yaml.safe_load(data)
+                data = javascript.loads(data)
                 data_dict[data['key']] = data['data']
-            except (yaml.parser.ParserError, yaml.scanner.ScannerError,
-                    yaml.reader.ReaderError):
+            except ValueError:
                 pass # not everything will be parsable, but we don't care
 
+        # TODO: handle errors here
         self.api_key = data_dict['ds:7'][0][2]
         self.header_date = data_dict['ds:2'][0][4]
         self.header_version = data_dict['ds:2'][0][6]
@@ -105,17 +104,10 @@ class HangupsClient(object):
                             data='count=0')
         if res.status_code != 200:
             raise ValueError("Second talkgadget request failed")
-        res = res.text
-
-        # XXX hack to parse out the client ID
-        # find something that looks like "username@domain.com/clientID"
-        regex = re.compile("\".*?@.*?/(.*?)\"")
-        client_id = regex.findall(res)
-        if len(client_id) == 1:
-            client_id = client_id[0]
-        else:
-            raise ValueError("Failed to parse client ID")
-        self.header_client = client_id
+        res = '\n'.join(res.text.split('\n')[1:]) # remove the number of bytes
+        res = javascript.loads(res)
+        val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
+        self.header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
 
     def _get_authorization_header(self):
         # technically, it doesn't matter what the url and time are
