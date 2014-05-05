@@ -31,6 +31,7 @@ class HangupsClient(object):
         self.clid = None
         self.channel_ec_param = None
         self.channel_prop_param = None
+        self.channel_session_id = None
 
         # make initialization requests
         self._init_talkgadget_1()
@@ -104,9 +105,33 @@ class HangupsClient(object):
                             data='count=0', stream=True)
         if res.status_code != 200:
             raise ValueError("Second talkgadget request failed")
-        res = longpoll.loads(res.raw)[0]
+        res = list(longpoll.load(res.raw))[0]
         val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
         self.header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
+        self.channel_session_id = res[0][1][1]
+
+    def _receive_push_events(self):
+        """Open channel to receive push events."""
+        url = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
+        params = {
+            'VER': 8,
+            'clid': self.clid,
+            'prop': self.channel_prop_param,
+            'ec': self.channel_ec_param,
+            'gsessionid': self.gsessionid,
+            'RID': 'rpc',
+            't': 1, # trial
+            'SID': self.channel_session_id,
+            'CI': 0,
+        }
+        res = requests.get(url, params=params, cookies=self._cookies,
+                           stream=True)
+        if res.status_code != 200:
+            raise ValueError('Push channel request returned {}: {}'
+                             .format(res.status_code, res.raw.read()))
+        for message in longpoll.load(res.raw):
+            # print messages as they arrive, until the response ends
+            print(message)
 
     def _get_authorization_header(self):
         # technically, it doesn't matter what the url and time are
@@ -263,9 +288,11 @@ def main():
     hangups = HangupsClient(cookies, 'https://talkgadget.google.com')
 
     # Get all events in the past hour
-    now = time.time() * 1000000
-    one_hour = 60 * 60 * 1000000
-    print(json.dumps(hangups.syncallnewevents(now - one_hour), indent=4))
+    #now = time.time() * 1000000
+    #one_hour = 60 * 60 * 1000000
+    #print(json.dumps(hangups.syncallnewevents(now - one_hour), indent=4))
+
+    hangups._receive_push_events()
 
 
 if __name__ == '__main__':

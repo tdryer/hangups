@@ -3,16 +3,14 @@
 from hangups import javascript
 
 
-def loads(f):
-    """Parse long poll response into a list of objects.
+def load(f):
+    """Generate messages by reading a file-like object.
 
-    Supports unseekable streams.
+    f must be a binary file-like object, which does not have to support
+    seeking.
 
-    Raises ValueError if the stream cannot be parsed.
-
-    f must be a binary file-like object.
+    Raises ValueError if parsing fails.
     """
-    msgs = []
     while True:
         c = f.read(1)
         if len(c) == 1:
@@ -20,9 +18,9 @@ def loads(f):
             msg_str = f.read(msg_len)
             if len(msg_str) < msg_len:
                 raise ValueError("Unexpected EOF while parsing message")
-            msgs.append(javascript.loads(msg_str.decode()))
+            yield javascript.loads(msg_str.decode())
         else:
-            return msgs
+            break
 
 
 def _read_int(f, already_read=''):
