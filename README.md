@@ -13,10 +13,10 @@ hangups aims to be an open client for the undocumented Hangouts chat API.
 
 * has basic Python methods for calling some API endpoints
 * polling for events works
+* receiving push events works
 * sending chat messages to a conversation works
 * login is not implemented, can be worked around by copying cookies from a
   browser
-* recieving push events is not implemented (only polling)
 
 ## Running
 

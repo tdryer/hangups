@@ -130,8 +130,7 @@ class HangupsClient(object):
             raise ValueError('Push channel request returned {}: {}'
                              .format(res.status_code, res.raw.read()))
         for message in longpoll.load(res.raw):
-            # print messages as they arrive, until the response ends
-            print(message)
+            yield message
 
     def _get_authorization_header(self):
         # technically, it doesn't matter what the url and time are
@@ -287,12 +286,16 @@ def main():
     cookies = load_cookies_txt()
     hangups = HangupsClient(cookies, 'https://talkgadget.google.com')
 
-    # Get all events in the past hour
+    ## Get all events in the past hour
     #now = time.time() * 1000000
     #one_hour = 60 * 60 * 1000000
     #print(json.dumps(hangups.syncallnewevents(now - one_hour), indent=4))
 
-    hangups._receive_push_events()
+    for msg in hangups._receive_push_events():
+        msg = longpoll.parse_message(msg)
+        if 'payload_type' in msg and msg['payload_type'] == 'list':
+            for submsg in longpoll.parse_list_payload(msg['payload']):
+                print(submsg)
 
 
 if __name__ == '__main__':
