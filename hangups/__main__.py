@@ -6,6 +6,7 @@ import json
 import requests
 import time
 import hashlib
+import datetime
 
 from hangups import javascript, longpoll
 
@@ -104,7 +105,8 @@ class HangupsClient(object):
         res = requests.post(url, cookies=self._cookies, params=params,
                             data='count=0', stream=True)
         if res.status_code != 200:
-            raise ValueError("Second talkgadget request failed")
+            raise ValueError("Second talkgadget request failed with {}: {}"
+                             .format(res.status_code, res.raw.read()))
         res = list(longpoll.load(res.raw))[0]
         val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
         self.header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
@@ -286,16 +288,47 @@ def main():
     cookies = load_cookies_txt()
     hangups = HangupsClient(cookies, 'https://talkgadget.google.com')
 
-    ## Get all events in the past hour
-    #now = time.time() * 1000000
-    #one_hour = 60 * 60 * 1000000
-    #print(json.dumps(hangups.syncallnewevents(now - one_hour), indent=4))
+    # Get all events in the past hour
+    now = time.time() * 1000000
+    one_hour = 60 * 60 * 1000000
+    events = hangups.syncallnewevents(now - one_hour)
+
+    conversations = {}
+    for conversation in events['conversation_state']:
+        id_ = conversation['conversation']['id']['id']
+        participants = {
+            (p['id']['chat_id'], p['id']['gaia_id']): p['fallback_name']
+            for p in conversation['conversation']['participant_data']
+        }
+        conversations[id_] = {
+            'participants': participants,
+        }
+
+    conversations_list = list(enumerate(conversations.items()))
+    print('Activity has recently occurred in the conversations:')
+    for n, (_, conversation) in conversations_list:
+        print(' [{}] {}'
+              .format(n,
+                      ', '.join(sorted(conversation['participants'].values()))))
+    conversation_index = int(input('Select a conversation to listen to: '))
+    conversation_id = conversations_list[conversation_index][1][0]
+    conversation = conversations_list[conversation_index][1][1]
+    print('Now listening to conversation\n')
 
     for msg in hangups._receive_push_events():
         msg = longpoll.parse_message(msg)
         if 'payload_type' in msg and msg['payload_type'] == 'list':
             for submsg in longpoll.parse_list_payload(msg['payload']):
-                print(submsg)
+                if submsg['conversation_id'] == conversation_id:
+                    print('({}) {}: {}'.format(
+                        datetime.datetime.fromtimestamp(
+                            submsg['timestamp'] / 1000000
+                        ).strftime('%I:%M:%S %p'),
+                        conversation['participants'][submsg['sender_ids']],
+                        submsg['text']
+                    ))
+
+    print('Connection closed')
 
 
 if __name__ == '__main__':

@@ -126,8 +126,12 @@ def parse_list_payload(payload):
             else:
                 raise ValueError('Unknown message type {} for message: {}'
                                  .format(type_, submsg))
-            yield ('at {}, {} send a message in the conversation {}: "{}"'
-                   .format(timestamp, sender_ids, conversation_id, text))
+            yield {
+                'conversation_id': conversation_id,
+                'timestamp': timestamp,
+                'sender_ids': tuple(sender_ids),
+                'text': text,
+            }
 
         elif submsg_type == 2:
             # TODO: parse unknown
