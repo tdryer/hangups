@@ -1,6 +1,11 @@
 """Parser for long-polling responses from the talkgadget API."""
 
+import pprint
+
 from hangups import javascript
+
+
+PP = pprint.PrettyPrinter(indent=4)
 
 
 def load(f):
@@ -109,9 +114,11 @@ def parse_list_payload(payload):
     # The type of a submessage is determined by its position in the array
     submsgs = payload[1][0][1:]
     for submsg_type, submsg in enumerate(submsgs):
+        log_submsg = True
         if submsg is None:
-            pass
+            log_submsg = False
         elif submsg_type == 1:
+            log_submsg = False
             # parse chat message
             conversation_id = submsg[0][0][0]
             sender_ids = submsg[0][1]
@@ -134,8 +141,8 @@ def parse_list_payload(payload):
             }
 
         elif submsg_type == 2:
-            # TODO: parse unknown
-            # conversation_id, sender_ids, timestamp, 1, 20
+            # TODO: parse unknown (related to conversation focus?)
+            # conversation_id, sender_ids, timestamp, 1/2, 20/300
             pass
         elif submsg_type == 3:
             # TODO: parse unknown
@@ -151,16 +158,22 @@ def parse_list_payload(payload):
         elif submsg_type == 12:
             # TODO: parse unknown
             pass
+        elif submsg_type == 13:
+            # TODO: parse unknown
+            pass
+        elif submsg_type == 14:
+            # TODO: parse unknown
+            pass
         else:
             raise ValueError('Unknown submessage type {} for submessage {}'
                              .format(submsg_type, submsg))
+        if log_submsg:
+            print('Unknown event {}:\n{}'
+                  .format(submsg_type, PP.pformat(submsg)))
 
 
 if __name__ == '__main__':
     # temporary debugging stuff
-    import pprint
-    PP = pprint.PrettyPrinter(indent=4)
-
     for msg in load(open('push_example', 'rb')):
         msg = parse_message(msg)
         #if 'payload' in msg and msg['payload'] is not None:
