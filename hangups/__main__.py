@@ -7,8 +7,12 @@ import requests
 import time
 import hashlib
 import datetime
+import logging
 
 from hangups import javascript, longpoll
+
+
+logger = logging.getLogger(__name__)
 
 
 class HangupsClient(object):
@@ -285,10 +289,14 @@ def load_cookies_txt():
 
 def main():
     """Make a chat request."""
+    logging.basicConfig(filename='hangups.log', level=logging.DEBUG)
+
+    logger.info('Initializing HangupsClient')
     cookies = load_cookies_txt()
     hangups = HangupsClient(cookies, 'https://talkgadget.google.com')
 
     # Get all events in the past hour
+    logger.info('Requesting all events from the past hour')
     now = time.time() * 1000000
     one_hour = 60 * 60 * 1000000
     events = hangups.syncallnewevents(now - one_hour)

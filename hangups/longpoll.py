@@ -1,10 +1,12 @@
 """Parser for long-polling responses from the talkgadget API."""
 
 import pprint
+import logging
 
 from hangups import javascript
 
 
+logger = logging.getLogger(__name__)
 PP = pprint.PrettyPrinter(indent=4)
 
 
@@ -114,11 +116,13 @@ def parse_list_payload(payload):
     # The type of a submessage is determined by its position in the array
     submsgs = payload[1][0][1:]
     for submsg_type, submsg in enumerate(submsgs):
-        log_submsg = True
+        if submsg is not None:
+            logger.debug('Received submsg of type {}:\n{}'
+                         .format(submsg_type, PP.pformat(submsg)))
+
         if submsg is None:
-            log_submsg = False
+            pass # don't try to parse a null submsg
         elif submsg_type == 1:
-            log_submsg = False
             # parse chat message
             conversation_id = submsg[0][0][0]
             sender_ids = submsg[0][1]
@@ -165,11 +169,7 @@ def parse_list_payload(payload):
             # TODO: parse unknown
             pass
         else:
-            raise ValueError('Unknown submessage type {} for submessage {}'
-                             .format(submsg_type, submsg))
-        if log_submsg:
-            print('Unknown event {}:\n{}'
-                  .format(submsg_type, PP.pformat(submsg)))
+            logging.warning('submsg type {} is unknown'.format(submsg_type))
 
 
 if __name__ == '__main__':
