@@ -2,49 +2,39 @@
 
 import pprint
 import logging
+import re
 
 from hangups import javascript
 
 
 logger = logging.getLogger(__name__)
 PP = pprint.PrettyPrinter(indent=4)
+LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 
 
-def load(f):
-    """Generate messages by reading a file-like object.
+def parse_push_data():
+    """Consume characters from the push channel, and generate messages.
 
-    f must be a binary file-like object, which does not have to support
-    seeking.
-
-    Raises ValueError if parsing fails.
+    A message begins with an integer stating its length in characters followed
+    by a newline, followed by the message itself. Any number of messages may be
+    present.
     """
+    buf = ''
     while True:
-        c = f.read(1)
-        if len(c) == 1:
-            msg_len = _read_int(f, already_read=c)
-            msg_str = f.read(msg_len)
-            if len(msg_str) < msg_len:
-                raise ValueError("Unexpected EOF while parsing message")
-            yield javascript.loads(msg_str.decode())
+        lengths = LEN_REGEX.findall(buf)
+        if len(lengths) == 0:
+            s = yield
+            if s is not None:
+                buf += s
         else:
-            break
-
-
-def _read_int(f, already_read=''):
-    """Read characters until newline is reached and return integer."""
-    len_str = already_read
-    while True:
-        c = f.read(1)
-        if c == b'\n':
-            break
-        elif len(c) == 0:
-            raise ValueError("Unexpected EOF while parsing message length")
-        else:
-            len_str = len_str + c
-    try:
-        return int(len_str)
-    except ValueError:
-        raise ValueError("Malformed message length")
+            length = int(lengths[0])
+            buf = buf[len(lengths[0]) + 1:]
+            while len(buf) < length:
+                s = yield
+                if s is not None:
+                    buf += s
+            yield buf[:length]
+            buf = buf[length:]
 
 
 def parse_content_message(msg, number):
@@ -170,14 +160,3 @@ def parse_list_payload(payload):
             pass
         else:
             logging.warning('submsg type {} is unknown'.format(submsg_type))
-
-
-if __name__ == '__main__':
-    # temporary debugging stuff
-    for msg in load(open('push_example', 'rb')):
-        msg = parse_message(msg)
-        #if 'payload' in msg and msg['payload'] is not None:
-        #    msg['payload'] = '...'
-        #print(msg)
-        if 'payload_type' in msg and msg['payload_type'] == 'list':
-            parse_list_payload(msg['payload'])
