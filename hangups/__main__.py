@@ -56,6 +56,12 @@ class DemoClient(HangupsClient):
                 ).strftime('%I:%M:%S %p'),
                 user.name, message.text
             ))
+            # respond to a \time message with the unix time
+            if message.text == '\\time':
+                yield self.send_message(
+                    conversation_id,
+                    'The current unix time is {}.'.format(int(time.time()))
+                )
 
     @gen.coroutine
     def on_disconnect(self):

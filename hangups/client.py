@@ -86,6 +86,11 @@ class HangupsClient(object):
         return self._users[(chat_id, gaia_id)]
 
     @gen.coroutine
+    def send_message(self, conversation_id, text):
+        """Send a message to a conversation."""
+        yield self.sendchatmessage(conversation_id, text)
+
+    @gen.coroutine
     def on_message_receive(self, conversation_id, message):
         """Abstract method called when a new message is received."""
         pass
