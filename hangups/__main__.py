@@ -79,7 +79,7 @@ class HangupsClient(object):
         self.channel_session_id = None
 
     @gen.coroutine
-    def on_message_received(self, conversation_id, message):
+    def on_message_receive(self, conversation_id, message):
         """Abstract method called when a new message is received."""
         pass
 
@@ -454,7 +454,7 @@ class DemoClient(HangupsClient):
         self.listen_id = conversation_id
 
     @gen.coroutine
-    def on_message_received(self, conversation_id, message):
+    def on_message_receive(self, conversation_id, message):
         if conversation_id == self.listen_id:
             print('({}) {}: {}'.format(
                 datetime.datetime.fromtimestamp(
