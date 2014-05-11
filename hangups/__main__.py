@@ -9,11 +9,18 @@ import datetime
 import logging
 import http.cookies
 from tornado import ioloop, gen, httpclient, httputil
+from collections import namedtuple
 
 from hangups import javascript, longpoll
 
 
 logger = logging.getLogger(__name__)
+
+
+Conversation = namedtuple('Conversation', ['id_', 'user_list', 'message_list'])
+Message = namedtuple('Message', ['text', 'timestamp', 'user_gaia_id',
+                                 'user_chat_id'])
+User = namedtuple('User', ['chat_id', 'gaia_id', 'name'])
 
 
 @gen.coroutine
@@ -45,8 +52,13 @@ class HangupsClient(object):
         self._cookies = cookies
         self._origin_url = origin_url
 
-        self.on_submsg = lambda submsg: None
         self._push_parser = None
+
+        # (chat_id, gaia_id) -> User instance
+        self._users = {}
+        # conversation_id -> Conversation instance
+        self._conversations = {}
+
 
         # discovered automatically:
 
@@ -66,10 +78,44 @@ class HangupsClient(object):
         self.channel_session_id = None
 
     @gen.coroutine
+    def on_message_received(self, conversation_id, message):
+        """Abstract method called when a new message is received."""
+        pass
+
+    @gen.coroutine
     def connect(self):
         """Initialize to gather connection parameters."""
         yield self._init_talkgadget_1()
         yield self._init_talkgadget_2()
+
+    @gen.coroutine
+    def run_forever(self):
+        """Block forever to receive chat events."""
+        url = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
+        params = {
+            'VER': 8,
+            'clid': self.clid,
+            'prop': self.channel_prop_param,
+            'ec': self.channel_ec_param,
+            'gsessionid': self.gsessionid,
+            'RID': 'rpc',
+            't': 1, # trial
+            'SID': self.channel_session_id,
+            'CI': 0,
+        }
+        # Initialize the parser
+        self._push_parser = longpoll.parse_push_data()
+        self._push_parser.send(None)
+        def streaming_callback(data):
+            """Make the callback run a coroutine with exception handling."""
+            future = self._on_push_data(data)
+            ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
+        res = yield _fetch(url, params=params, cookies=self._cookies,
+                           streaming_callback=streaming_callback)
+        # XXX doesn't seem to get here until after all data is received
+        if res.code != 200:
+            raise ValueError('Push channel request returned {}: {}'
+                             .format(res.status_code, res.body))
 
     @gen.coroutine
     def _init_talkgadget_1(self):
@@ -155,31 +201,6 @@ class HangupsClient(object):
         self.channel_session_id = res[0][1][1]
 
     @gen.coroutine
-    def _receive_push_events(self):
-        """Open channel to receive push events."""
-        url = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
-        params = {
-            'VER': 8,
-            'clid': self.clid,
-            'prop': self.channel_prop_param,
-            'ec': self.channel_ec_param,
-            'gsessionid': self.gsessionid,
-            'RID': 'rpc',
-            't': 1, # trial
-            'SID': self.channel_session_id,
-            'CI': 0,
-        }
-        # Initialize the parser
-        self._push_parser = longpoll.parse_push_data()
-        self._push_parser.send(None)
-        res = yield _fetch(url, params=params, cookies=self._cookies,
-                           streaming_callback=self._on_push_data)
-        # XXX doesn't seem to get here until after all data is received
-        if res.code != 200:
-            raise ValueError('Push channel request returned {}: {}'
-                             .format(res.status_code, res.body))
-
-    @gen.coroutine
     def _on_push_data(self, data_bytes):
         """Parse push data and call self._on_submsg for each submessage."""
         event = self._push_parser.send(data_bytes.decode())
@@ -189,11 +210,26 @@ class HangupsClient(object):
             if event is None:
                 break
             events.append(event)
+
+        message = None
+        conversation_id = None
+
+        # Process all new data before making any callbacks, so we won't make
+        # any redundant requests for data.
         for event in events:
             msg = longpoll.parse_message(javascript.loads(event))
             if 'payload_type' in msg and msg['payload_type'] == 'list':
                 for submsg in longpoll.parse_list_payload(msg['payload']):
-                    self.on_submsg(submsg)
+                    message = Message(text=submsg['text'],
+                                      user_chat_id=submsg['sender_ids'][0],
+                                      user_gaia_id=submsg['sender_ids'][1],
+                                      timestamp=submsg['timestamp'])
+                    conversation_id = submsg['conversation_id']
+                    logger.info('Received message: {}'.format(message))
+
+        # Make callbacks for new data.
+        if message is not None:
+            yield self.on_message_received(conversation_id, message)
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""
@@ -359,19 +395,34 @@ def load_cookies_txt():
     return {cookie[0]: cookie[1] for cookie in cookies_list}
 
 
+class DemoClient(HangupsClient):
+    """Demo client for hangups."""
+
+    @gen.coroutine
+    def on_message_received(self, conversation_id, message):
+        if conversation_id == self.listen_id:
+            print('({}) {}: {}'.format(
+                datetime.datetime.fromtimestamp(
+                    message.timestamp / 1000000
+                ).strftime('%I:%M:%S %p'),
+                message.user_chat_id, # TODO: resolve name
+                message.text
+            ))
+
+
 @gen.coroutine
 def main_coroutine():
     """Make a chat request."""
     logger.info('Initializing HangupsClient')
     cookies = load_cookies_txt()
-    hangups = HangupsClient(cookies, 'https://talkgadget.google.com')
-    yield hangups.connect()
+    client = DemoClient(cookies, 'https://talkgadget.google.com')
+    yield client.connect()
 
     # Get all events in the past hour
     logger.info('Requesting all events from the past hour')
     now = time.time() * 1000000
     one_hour = 60 * 60 * 1000000
-    events = yield hangups.syncallnewevents(now - one_hour)
+    events = yield client.syncallnewevents(now - one_hour)
 
     conversations = {}
     for conversation in events['conversation_state']:
@@ -395,17 +446,8 @@ def main_coroutine():
     conversation = conversations_list[conversation_index][1][1]
     print('Now listening to conversation\n')
 
-    def on_submessage(submsg):
-        if submsg['conversation_id'] == conversation_id:
-            print('({}) {}: {}'.format(
-                datetime.datetime.fromtimestamp(
-                    submsg['timestamp'] / 1000000
-                ).strftime('%I:%M:%S %p'),
-                conversation['participants'][submsg['sender_ids']],
-                submsg['text']
-            ))
-    hangups.on_submsg = on_submessage
-    yield hangups._receive_push_events()
+    client.listen_id = conversation_id
+    yield client.run_forever()
     print('Connection closed')
 
 
