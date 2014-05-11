@@ -77,6 +77,14 @@ class HangupsClient(object):
         self.channel_prop_param = None
         self.channel_session_id = None
 
+    def get_user(self, chat_id, gaia_id):
+        """Return a User instance from its ids.
+
+        Raises KeyError if the user does not exist.
+        """
+        # TODO: we could also make a separate query if the user is not cached
+        return self._users[(chat_id, gaia_id)]
+
     @gen.coroutine
     def on_message_receive(self, conversation_id, message):
         """Abstract method called when a new message is received."""
@@ -235,12 +243,33 @@ class HangupsClient(object):
             msg = longpoll.parse_message(javascript.loads(event))
             if 'payload_type' in msg and msg['payload_type'] == 'list':
                 for submsg in longpoll.parse_list_payload(msg['payload']):
-                    message = Message(text=submsg['text'],
-                                      user_chat_id=submsg['sender_ids'][0],
-                                      user_gaia_id=submsg['sender_ids'][1],
-                                      timestamp=submsg['timestamp'])
-                    conversation_id = submsg['conversation_id']
-                    logger.info('Received message: {}'.format(message))
+                    if 'text' in submsg: # it's a message
+                        message = Message(text=submsg['text'],
+                                          user_chat_id=submsg['sender_ids'][0],
+                                          user_gaia_id=submsg['sender_ids'][1],
+                                          timestamp=submsg['timestamp'])
+                        conversation_id = submsg['conversation_id']
+                        logger.info('Received message: {}'.format(message))
+                    else: # it's a conversation update
+                        # TODO: may not want to track message_list like this
+                        conversation = Conversation(
+                            id_=submsg['conversation_id'],
+                            user_list=submsg['participants'].keys(),
+                            message_list=[]
+                        )
+                        if submsg['conversation_id'] not in self._conversations:
+                            self._conversations[submsg['conversation_id']] = conversation
+                            logger.info('Found new conversation: {}'.format(conversation))
+                        else:
+                            logger.info('Found existing conversation')
+                        for (chat_id, gaia_id), name in submsg['participants'].items():
+                            user = User(chat_id=chat_id, gaia_id=gaia_id,
+                                        name=name)
+                            if (chat_id, gaia_id) not in self._users:
+                                self._users[(chat_id, gaia_id)] = user
+                                logger.info('Added new user: {}'.format(user))
+                            else:
+                                logger.info('Found existing user')
 
         # Make callbacks for new data.
         if message is not None:

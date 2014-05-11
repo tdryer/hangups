@@ -49,12 +49,12 @@ class DemoClient(HangupsClient):
     @gen.coroutine
     def on_message_receive(self, conversation_id, message):
         if conversation_id == self.listen_id:
+            user = self.get_user(message.user_chat_id, message.user_gaia_id)
             print('({}) {}: {}'.format(
                 datetime.datetime.fromtimestamp(
                     message.timestamp / 1000000
                 ).strftime('%I:%M:%S %p'),
-                message.user_chat_id, # TODO: resolve name
-                message.text
+                user.name, message.text
             ))
 
     @gen.coroutine

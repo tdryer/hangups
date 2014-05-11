@@ -148,7 +148,10 @@ def parse_list_payload(payload):
             pass
         elif submsg_type == 11:
             # TODO: parse conversation update
-            pass
+            yield {
+                'conversation_id': submsg[0][0],
+                'participants': {tuple(ids): name for ids, name in submsg[13]},
+            }
         elif submsg_type == 12:
             # TODO: parse unknown
             pass
