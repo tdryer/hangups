@@ -25,7 +25,7 @@ User = namedtuple('User', ['chat_id', 'gaia_id', 'name'])
 
 @gen.coroutine
 def _fetch(url, method='GET', params=None, headers=None, cookies=None,
-           data=None, streaming_callback=None):
+           data=None, streaming_callback=None, header_callback=None):
     """Wrapper for tornado.httpclient.AsyncHTTPClient.fetch."""
     if headers is None:
         headers = {}
@@ -41,7 +41,8 @@ def _fetch(url, method='GET', params=None, headers=None, cookies=None,
     res = yield http_client.fetch(httpclient.HTTPRequest(
         httputil.url_concat(url, params), method=method,
         headers=httputil.HTTPHeaders(headers), body=data,
-        streaming_callback=streaming_callback, request_timeout=60*60
+        streaming_callback=streaming_callback, header_callback=None,
+        request_timeout=60*60
     ))
     return res
 
@@ -83,6 +84,16 @@ class HangupsClient(object):
         pass
 
     @gen.coroutine
+    def on_connect(self):
+        """Abstract method called when push connection is established."""
+        pass
+
+    @gen.coroutine
+    def on_disconnect(self):
+        """Abstract method called when push connection is disconnected."""
+        pass
+
+    @gen.coroutine
     def connect(self):
         """Initialize to gather connection parameters."""
         yield self._init_talkgadget_1()
@@ -110,12 +121,18 @@ class HangupsClient(object):
             """Make the callback run a coroutine with exception handling."""
             future = self._on_push_data(data)
             ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
-        res = yield _fetch(url, params=params, cookies=self._cookies,
-                           streaming_callback=streaming_callback)
-        # XXX doesn't seem to get here until after all data is received
-        if res.code != 200:
-            raise ValueError('Push channel request returned {}: {}'
-                             .format(res.status_code, res.body))
+        fetch_future = _fetch(url, params=params, cookies=self._cookies,
+                              streaming_callback=streaming_callback,
+                              header_callback=gen.Callback('header'))
+        # TODO: At this join we are "connected", but we don't know if the
+        # request was successful.
+        yield self.on_connect()
+
+        # Wait for response to finish.
+        yield fetch_future
+
+        # TODO: Re-establish the connection instead of disconnecting.
+        yield self.on_disconnect()
 
     @gen.coroutine
     def _init_talkgadget_1(self):
@@ -276,6 +293,9 @@ class HangupsClient(object):
         res = yield _fetch(url, method='POST', headers=headers,
                            cookies=cookies, params=params,
                            data=json.dumps(body_json))
+        if res.code != 200:
+            raise ValueError('Request to {} endpoint failed with {}: {}'
+                             .format(endpoint, res.code, res.body.decode()))
         return res
 
     @gen.coroutine
@@ -399,6 +419,41 @@ class DemoClient(HangupsClient):
     """Demo client for hangups."""
 
     @gen.coroutine
+    def on_connect(self):
+        print('Connection established')
+        # Get all events in the past hour
+        print('Requesting all events from the past hour')
+        now = time.time() * 1000000
+        one_hour = 60 * 60 * 1000000
+        # TODO: add a proper API for this
+        # XXX: doesn't work if there haven't been any events
+        events = yield self.syncallnewevents(now - one_hour)
+
+        conversations = {}
+        for conversation in events['conversation_state']:
+            id_ = conversation['conversation']['id']['id']
+            participants = {
+                (p['id']['chat_id'], p['id']['gaia_id']): p['fallback_name']
+                for p in conversation['conversation']['participant_data']
+            }
+            conversations[id_] = {
+                'participants': participants,
+            }
+
+        conversations_list = list(enumerate(conversations.items()))
+        print('Activity has recently occurred in the conversations:')
+        for n, (_, conversation) in conversations_list:
+            print(' [{}] {}'.format(
+                n, ', '.join(sorted(conversation['participants'].values()))
+            ))
+        # TODO: do this without blocking the IO loop
+        conversation_index = int(input('Select a conversation to listen to: '))
+        conversation_id = conversations_list[conversation_index][1][0]
+        conversation = conversations_list[conversation_index][1][1]
+        print('Now listening to conversation\n')
+        self.listen_id = conversation_id
+
+    @gen.coroutine
     def on_message_received(self, conversation_id, message):
         if conversation_id == self.listen_id:
             print('({}) {}: {}'.format(
@@ -409,6 +464,10 @@ class DemoClient(HangupsClient):
                 message.text
             ))
 
+    @gen.coroutine
+    def on_disconnect(self):
+        print('Connection lost')
+
 
 @gen.coroutine
 def main_coroutine():
@@ -417,38 +476,7 @@ def main_coroutine():
     cookies = load_cookies_txt()
     client = DemoClient(cookies, 'https://talkgadget.google.com')
     yield client.connect()
-
-    # Get all events in the past hour
-    logger.info('Requesting all events from the past hour')
-    now = time.time() * 1000000
-    one_hour = 60 * 60 * 1000000
-    events = yield client.syncallnewevents(now - one_hour)
-
-    conversations = {}
-    for conversation in events['conversation_state']:
-        id_ = conversation['conversation']['id']['id']
-        participants = {
-            (p['id']['chat_id'], p['id']['gaia_id']): p['fallback_name']
-            for p in conversation['conversation']['participant_data']
-        }
-        conversations[id_] = {
-            'participants': participants,
-        }
-
-    conversations_list = list(enumerate(conversations.items()))
-    print('Activity has recently occurred in the conversations:')
-    for n, (_, conversation) in conversations_list:
-        print(' [{}] {}'
-              .format(n,
-                      ', '.join(sorted(conversation['participants'].values()))))
-    conversation_index = int(input('Select a conversation to listen to: '))
-    conversation_id = conversations_list[conversation_index][1][0]
-    conversation = conversations_list[conversation_index][1][1]
-    print('Now listening to conversation\n')
-
-    client.listen_id = conversation_id
     yield client.run_forever()
-    print('Connection closed')
 
 
 def main():
