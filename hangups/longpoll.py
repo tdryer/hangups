@@ -126,21 +126,22 @@ def parse_list_payload(payload):
             conversation_id = submsg[0][0][0]
             sender_ids = submsg[0][1]
             timestamp = submsg[0][2]
-            content = submsg[0][6]
-            type_ = content[2][0][0][0]
-            if type_ == 0: # text
-                type_, text, formatting = content[2][0][0]
-                links = None
-            elif type_ == 2: # link
-                type_, text, formatting, links = content[2][0][0]
-            else:
-                raise ValueError('Unknown message type {} for message: {}'
-                                 .format(type_, submsg))
+
+            # The message content is a list of message segments, which have a
+            # type. For now, let's ignore the types and just use the textual
+            # representation, appending all the segments into one string.
+            message_text = ''
+            message_content = submsg[0][6][2][0]
+            for segment in message_content:
+                # known types: 0: text, 1: linebreak, 2: link
+                type_ = segment[0]
+                message_text += segment[1]
+
             yield {
                 'conversation_id': conversation_id,
                 'timestamp': timestamp,
                 'sender_ids': tuple(sender_ids),
-                'text': text,
+                'text': message_text,
             }
 
         elif submsg_type == 2:
