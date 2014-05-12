@@ -34,6 +34,7 @@ def test_malformed_length():
     # TODO: could detect errors like these with some extra work
     assert next(p) == None
 
+
 def test_incremental():
     p = longpoll.parse_push_data()
     p.send(None)
@@ -41,4 +42,12 @@ def test_incremental():
     assert p.send('\n') == None
     assert p.send('abc') == None
     assert p.send('de') == 'abcde'
+    assert next(p) == None
+
+
+def test_unicode():
+    s = '3\na😀' # smile is actually 2 code units
+    p = longpoll.parse_push_data()
+    p.send(None)
+    assert p.send(s) == "a😀"
     assert next(p) == None
