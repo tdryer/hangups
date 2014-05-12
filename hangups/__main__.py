@@ -6,6 +6,7 @@ import logging
 from tornado import ioloop, gen
 
 from hangups.client import HangupsClient
+from hangups import auth
 
 
 class DemoClient(HangupsClient):
@@ -68,22 +69,11 @@ class DemoClient(HangupsClient):
         print('Connection lost')
 
 
-def load_cookies_txt():
-    """Return cookies dictionary loaded from cookies.txt file.
-
-    Expected format is the same as the body of an HTTP cookie header.
-    """
-    cookies_str = open('cookies.txt').read()
-    cookies_list = [s.split('=', 1) for s in
-                    cookies_str.strip('\n').split('; ')]
-    return {cookie[0]: cookie[1] for cookie in cookies_list}
-
-
 @gen.coroutine
 def main():
     """Start an example chat client."""
-    cookies = load_cookies_txt()
-    client = DemoClient(cookies, 'https://talkgadget.google.com')
+    auth.login(input("Email: "), input("Password: "))
+    client = DemoClient(auth.get_auth_cookies(), 'https://talkgadget.google.com')
     yield client.connect()
     yield client.run_forever()
 

@@ -15,8 +15,7 @@ hangups aims to be an open client for the undocumented Hangouts chat API.
 * polling for events works
 * receiving push events works
 * sending chat messages to a conversation works
-* login is not implemented, can be worked around by copying cookies from a
-  browser
+* basic Google login is implemented
 
 ## Running
 
@@ -25,9 +24,6 @@ Python 3.4 is required (earlier Python 3.x might work but is not tested).
 ```
 pip install -r requirements.txt
 ```
-
-`cookies.txt` is required to authenticate with Google. Copy your Google cookies
-into this file. You can copy them directly from a request header.
 
 ```
 python -m hangups
