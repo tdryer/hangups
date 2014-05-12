@@ -15,25 +15,34 @@ LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 def parse_push_data():
     """Consume characters from the push channel, and generate messages.
 
-    A message begins with an integer stating its length in characters followed
-    by a newline, followed by the message itself. Any number of messages may be
-    present.
+    Responses from the push endpoint consist of a sequence of messages. Each
+    message is prefixed with its length followed by a newline.
+
+    The length is actually the length of the string as reported by JavaScript.
+    JavaScript's string length function returns the number of code units in the
+    string, represented in UTF-16. We can emulate this by encoding everything
+    in UTF-16 and multipling the reported length by 2.
+
+    Note that when encoding a string in UTF-16, Python will prepend a
+    byte-order character, so we need to remove the first two bytes.
     """
-    buf = ''
+    buf = b'' # utf-16 encoded text
     while True:
-        lengths = LEN_REGEX.findall(buf)
+        lengths = LEN_REGEX.findall(buf.decode('utf-16'))
         if len(lengths) == 0:
             s = yield
             if s is not None:
-                buf += s
+                buf += s.encode('utf-16')[2:]
         else:
-            length = int(lengths[0])
-            buf = buf[len(lengths[0]) + 1:]
+            length = int(lengths[0]) * 2 # number of bytes in UTF-16 encoding
+            # pop the length and newline from the buffer
+            pop_length = len((lengths[0] + '\n').encode('utf-16')[2:])
+            buf = buf[pop_length:]
             while len(buf) < length:
                 s = yield
                 if s is not None:
-                    buf += s
-            yield buf[:length]
+                    buf += s.encode('utf-16')[2:]
+            yield buf[:length].decode('utf-16')
             buf = buf[length:]
 
 
@@ -117,21 +126,22 @@ def parse_list_payload(payload):
             conversation_id = submsg[0][0][0]
             sender_ids = submsg[0][1]
             timestamp = submsg[0][2]
-            content = submsg[0][6]
-            type_ = content[2][0][0][0]
-            if type_ == 0: # text
-                type_, text, formatting = content[2][0][0]
-                links = None
-            elif type_ == 2: # link
-                type_, text, formatting, links = content[2][0][0]
-            else:
-                raise ValueError('Unknown message type {} for message: {}'
-                                 .format(type_, submsg))
+
+            # The message content is a list of message segments, which have a
+            # type. For now, let's ignore the types and just use the textual
+            # representation, appending all the segments into one string.
+            message_text = ''
+            message_content = submsg[0][6][2][0]
+            for segment in message_content:
+                # known types: 0: text, 1: linebreak, 2: link
+                type_ = segment[0]
+                message_text += segment[1]
+
             yield {
                 'conversation_id': conversation_id,
                 'timestamp': timestamp,
                 'sender_ids': tuple(sender_ids),
-                'text': text,
+                'text': message_text,
             }
 
         elif submsg_type == 2:

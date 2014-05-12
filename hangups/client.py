@@ -231,6 +231,7 @@ class HangupsClient(object):
     @gen.coroutine
     def _on_push_data(self, data_bytes):
         """Parse push data and call self._on_submsg for each submessage."""
+        logger.debug('Received push data:\n{}'.format(data_bytes))
         event = self._push_parser.send(data_bytes.decode())
         events = [event] if event is not None else []
         while True:

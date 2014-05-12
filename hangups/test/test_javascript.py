@@ -30,6 +30,7 @@ from hangups import javascript
     ('"foo"', 'foo'),
     (r'"\u003d"', '='),
     ('[["foo","bar"],,,1232]', [['foo', 'bar'], None, None, 1232]),
+    ('"😀"', '😀'),
     # objects
     ('{ }', {}),
     ('{"foo": 1}', {'foo': 1}),
