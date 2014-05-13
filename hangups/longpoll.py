@@ -66,6 +66,10 @@ def parse_content_message(msg, number):
         # session_id, and appear to be just heartbeats.
         payload = None
         payload_type_pretty = 'null'
+    elif payload_type == 'otr':
+        # not sure what this is for, something to do with xmpp?
+        payload = None
+        payload_type_pretty = 'otr'
     else:
         raise ValueError('Unknown payload type: {}'.format(payload_type))
     return {'num': number, 'type': 'content', 'session_id': session_id,
@@ -160,7 +164,10 @@ def parse_list_payload(payload):
             # TODO: parse conversation update
             yield {
                 'conversation_id': submsg[0][0],
-                'participants': {tuple(ids): name for ids, name in submsg[13]},
+                # participant list items sometimes can be length 2 or 3
+                # ids, name, ?
+                'participants': {tuple(item[0]): item[1]
+                                 for item in submsg[13]},
             }
         elif submsg_type == 12:
             # TODO: parse unknown
