@@ -326,6 +326,8 @@ class HangupsClient(object):
         res = yield _fetch(url, method='POST', headers=headers,
                            cookies=cookies, params=params,
                            data=json.dumps(body_json))
+        logger.debug('Response to request for {} was {}:\n{}'
+                     .format(endpoint, res.code, res.body))
         if res.code != 200:
             raise ValueError('Request to {} endpoint failed with {}: {}'
                              .format(endpoint, res.code, res.body.decode()))

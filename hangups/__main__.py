@@ -1,9 +1,10 @@
 """Demo chat client using Hangups."""
 
-import time
+from tornado import ioloop, gen
 import datetime
 import logging
-from tornado import ioloop, gen
+import sys
+import time
 
 from hangups.client import HangupsClient
 from hangups import auth
@@ -24,7 +25,7 @@ class DemoClient(HangupsClient):
         events = yield self.syncallnewevents(now - one_hour)
 
         conversations = {}
-        for conversation in events['conversation_state']:
+        for conversation in events.get('conversation_state', []):
             id_ = conversation['conversation']['id']['id']
             participants = {
                 (p['id']['chat_id'], p['id']['gaia_id']): p['fallback_name']
@@ -35,6 +36,10 @@ class DemoClient(HangupsClient):
             }
 
         conversations_list = list(enumerate(conversations.items()))
+        if len(conversations_list) == 0:
+            print(('No recent activity. '
+                   'Interact with a conversation and try again.'))
+            sys.exit(1)
         print('Activity has recently occurred in the conversations:')
         for n, (_, conversation) in conversations_list:
             print(' [{}] {}'.format(
