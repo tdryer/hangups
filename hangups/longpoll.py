@@ -19,7 +19,7 @@ class PushDataParser(object):
         self._buf = b'' # utf-16 encoded text
 
     def get_submissions(self, new_data):
-        """Yield submissions generated from recieved data.
+        """Yield submissions generated from received data.
 
         Responses from the push endpoint consist of a sequence of submissions.
         Each submission is prefixed with its length followed by a newline.
@@ -51,59 +51,65 @@ class PushDataParser(object):
                 yield submission.decode('utf-16')
                 self._buf = self._buf[length_length + length:]
 
+    def get_messages(self, new_data):
+        """Yield messages generated from received data.
 
-def parse_content_message(msg, number):
-    """Parse content message."""
-    # session ID, should be the same for every request
-    session_id = msg[0][1][1][0]
-    # payload type
-    payload_type = msg[0][1][1][1][0]
-    if payload_type == 'bfo':
-        # payload is submessages in the list format
-        payload = javascript.loads(msg[0][1][1][1][1])
-        payload_type_pretty = 'list'
-    elif payload_type == 'tm':
-        # payload is object format
-        payload = javascript.loads(msg[0][1][1][1][1])
-        payload_type_pretty = 'object'
-    elif payload_type == 'wh':
-        # payload is null
-        # These messages don't contain any information other than the
-        # session_id, and appear to be just heartbeats.
-        payload = None
-        payload_type_pretty = 'null'
-    elif payload_type == 'otr':
-        # not sure what this is for, something to do with xmpp?
-        payload = None
-        payload_type_pretty = 'otr'
+        One submission may contain multiple messages.
+        """
+        for submission in self.get_submissions(new_data):
+            # get submission payload, or None if it doesn't have one we care about
+            payload = _get_submission_payload(submission)
+            if payload is not None:
+                # yield messages from the payload
+                yield from _parse_payload(payload)
+
+
+def _get_submission_payload(submission):
+    """Return a submission's payload, or None if it doesn't have one."""
+    sub = javascript.loads(submission)
+    payload = None
+
+    # the submission number, increments with each message
+    sub_num = sub[0][0]
+    # the submission type
+    sub_type = sub[0][1][0]
+
+    if sub_type == 'c':
+
+        # session ID, should be the same for every request
+        session_id = sub[0][1][1][0]
+        # payload type
+        payload_type = sub[0][1][1][1][0]
+
+        if payload_type == 'bfo':
+            # Payload is submessages in the list format. These are the payloads
+            # we care about.
+            return javascript.loads(sub[0][1][1][1][1])
+        elif payload_type == 'tm':
+            # Payload is object format. I'm not sure what these are for, but
+            # they don't seem very important.
+            pass
+        elif payload_type == 'wh':
+            # Payload is null. These messages don't contain any information
+            # other than the session_id, and appear to be just heartbeats.
+            pass
+        elif payload_type == 'otr':
+            # Not sure what this is for, might be something to do with XMPP.
+            pass
+        else:
+            logger.warning('Got submission with unknown payload type {}:\n{}'
+                           .format(payload_type, sub))
+    elif sub_type == 'noop':
+        # These contain no information and only seem to appear once as the
+        # first message when a channel is opened.
+        pass
     else:
-        raise ValueError('Unknown payload type: {}'.format(payload_type))
-    return {'num': number, 'type': 'content', 'session_id': session_id,
-            'payload': payload, 'payload_type': payload_type_pretty}
+        logger.warning('Got submission with unknown submission type: {}\n{}'
+                       .format(sub_type, sub))
+    return payload
 
 
-def parse_noop_message(msg, number):
-    """Parse noop message.
-
-    These contain no information and only seem to appear once as the first
-    message when a channel is opened.
-    """
-    return {'num': number, 'type': 'noop'}
-
-
-def parse_message(msg):
-    """Parse a message to get its payload."""
-    # the message number, increments with each message
-    msg_number = msg[0][0]
-    # the message type
-    msg_type = msg[0][1][0]
-    return {
-        'noop': parse_noop_message,
-        'c': parse_content_message,
-    }[msg_type](msg, msg_number)
-
-
-def parse_list_payload(payload):
+def _parse_payload(payload):
     """Parse the list payload format into events."""
     # the payload begins with a constant header
     if payload[0] != 'cbu':
