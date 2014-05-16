@@ -231,35 +231,34 @@ class HangupsClient(object):
         """Parse push data and call self._on_submsg for each submessage."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
 
-        submissions = self._push_parser.get_submissions(data_bytes.decode())
-
         message = None
         conversation_id = None
 
         # Process all new data before making any callbacks, so we won't make
         # any redundant requests for data.
-        for msg in self._push_parser.get_messages(data_bytes.decode()):
-            if 'text' in msg: # it's a message
-                message = Message(text=msg['text'],
-                                  user_chat_id=msg['sender_ids'][0],
-                                  user_gaia_id=msg['sender_ids'][1],
-                                  timestamp=msg['timestamp'])
-                conversation_id = msg['conversation_id']
-                logger.info('Received message: {}'.format(message))
-            else: # it's a conversation update
-                # TODO: may not want to track message_list like this
+        for event in self._push_parser.get_events(data_bytes.decode()):
+
+            event_type = event['event_type']
+            if event_type == 'chat_message':
+                message = Message(text=event['text'],
+                                  user_chat_id=event['sender_ids'][0],
+                                  user_gaia_id=event['sender_ids'][1],
+                                  timestamp=event['timestamp'])
+                conversation_id = event['conversation_id']
+            elif event_type == 'conversation_update':
+                # TODO: this may be higher-level functionality than we want
                 conversation = Conversation(
-                    id_=msg['conversation_id'],
-                    user_list=msg['participants'].keys(),
+                    id_=event['conversation_id'],
+                    user_list=event['participants'].keys(),
                     message_list=[]
                 )
-                if msg['conversation_id'] not in self._conversations:
-                    self._conversations[msg['conversation_id']] = conversation
+                if event['conversation_id'] not in self._conversations:
+                    self._conversations[event['conversation_id']] = conversation
                     logger.info('Found new conversation: {}'
                                 .format(conversation))
                 else:
                     logger.info('Found existing conversation')
-                for (chat_id, gaia_id), name in msg['participants'].items():
+                for (chat_id, gaia_id), name in event['participants'].items():
                     user = User(chat_id=chat_id, gaia_id=gaia_id,
                                 name=name)
                     if (chat_id, gaia_id) not in self._users:

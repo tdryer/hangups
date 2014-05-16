@@ -52,16 +52,25 @@ class PushDataParser(object):
                 self._buf = self._buf[length_length + length:]
 
     def get_messages(self, new_data):
-        """Yield messages generated from received data.
+        """Yield tuples containing message type and message from received data.
 
         One submission may contain multiple messages.
         """
         for submission in self.get_submissions(new_data):
-            # get submission payload, or None if it doesn't have one we care about
+            # Get submission payload, or None if it doesn't have one we care
+            # about.
             payload = _get_submission_payload(submission)
             if payload is not None:
                 # yield messages from the payload
                 yield from _parse_payload(payload)
+
+    def get_events(self, new_data):
+        """Yield events generated from received data."""
+        for msg_type, msg in self.get_messages(new_data):
+            logger.debug('Received message of type {}:\n{}'
+                         .format(msg_type, PP.pformat(msg)))
+            if msg_type in MESSAGE_PARSERS:
+                yield MESSAGE_PARSERS[msg_type](msg)
 
 
 def _get_submission_payload(submission):
@@ -110,12 +119,12 @@ def _get_submission_payload(submission):
 
 
 def _parse_payload(payload):
-    """Parse the list payload format into events."""
+    """Parse the list payload format into messages."""
     # the payload begins with a constant header
     if payload[0] != 'cbu':
         raise ValueError('Invalid list payload header: {}'.format(payload[0]))
 
-    # the first submessage is always present, so let's treat it light a header
+    # the first submessage is always present, so let's treat it like a header
     first_submsg = payload[1][0][0]
     if len(first_submsg) == 5:
         (unknown_int, unknown_none, unknown_str, unknown_none_or_list,
@@ -129,97 +138,108 @@ def _parse_payload(payload):
                          .format(first_submsg))
 
     # The type of a submessage is determined by its position in the array
-    submsgs = payload[1][0][1:]
-    for submsg_type, submsg in enumerate(submsgs):
-        if submsg is not None:
-            logger.debug('Received submsg of type {}:\n{}'
-                         .format(submsg_type, PP.pformat(submsg)))
+    yield from ((msg_type, msg) for msg_type, msg in
+                enumerate(payload[1][0][1:]) if msg is not None)
 
-        if submsg is None:
-            pass # don't try to parse a null submsg
-        elif submsg_type == 1:
-            # parse chat message
-            conversation_id = submsg[0][0][0]
-            sender_ids = submsg[0][1]
-            timestamp = submsg[0][2]
 
-            # The message content is a list of message segments, which have a
-            # type. For now, let's ignore the types and just use the textual
-            # representation, appending all the segments into one string.
-            message_text = ''
-            message_content = submsg[0][6][2][0]
-            for segment in message_content:
-                # known types: 0: text, 1: linebreak, 2: link
-                type_ = segment[0]
-                message_text += segment[1]
+def _parse_chat_message(message):
+    """Parse chat message message."""
+    conversation_id = message[0][0][0]
+    sender_ids = message[0][1]
+    timestamp = message[0][2]
 
-            yield {
-                'conversation_id': conversation_id,
-                'timestamp': timestamp,
-                'sender_ids': tuple(sender_ids),
-                'text': message_text,
-            }
+    # The message content is a list of message segments, which have a
+    # type. For now, let's ignore the types and just use the textual
+    # representation, appending all the segments into one string.
+    message_text = ''
+    message_content = message[0][6][2][0]
+    for segment in message_content:
+        # known types: 0: text, 1: linebreak, 2: link
+        message_text += segment[1]
 
-        elif submsg_type == 2:
-            # parse focus status
-            FOCUS_STATUSES = {
-                1: 'focused',
-                2: 'unfocused',
-            }
-            FOCUS_DEVICES = {
-                20: 'desktop',
-                300: 'mobile',
-            }
-            conversation_id = submsg[0][0]
-            user_ids = submsg[1]
-            timestamp = submsg[2]
-            try:
-                focus_status = FOCUS_STATUSES[submsg[3]]
-            except KeyError:
-                logging.warning('Unknown focus status: {}'.format(submsg[3]))
-            try:
-                focus_device = FOCUS_DEVICES[submsg[4]]
-            except KeyError:
-                logging.warning('Unknown focus device: {}'.format(submsg[4]))
-        elif submsg_type == 3:
-            # parse typing status
-            # Note that the same status may be sent multiple times
-            # consecutively, and that when a message is sent the typing status
-            # will not change to stopped.
-            TYPING_STATUSES = {
-                1: 'typing', # the user is typing
-                2: 'paused', # the user stopped typing with inputted text
-                3: 'stopped', # the user stopped typing with no inputted text
-            }
-            conversation_id = submsg[0][0]
-            user_ids = submsg[1]
-            timestamp = submsg[2]
-            try:
-                typing_status = TYPING_STATUSES[submsg[3]]
-            except KeyError:
-                typing_status = None
-                logging.warning('Unknown typing status: {}'.format(submsg[3]))
-        elif submsg_type == 6:
-            # TODO: parse unknown
-            # sender_ids, conversation_id, timestamp
-            pass
-        elif submsg_type == 11:
-            # TODO: parse conversation update
-            yield {
-                'conversation_id': submsg[0][0],
-                # participant list items sometimes can be length 2 or 3
-                # ids, name, ?
-                'participants': {tuple(item[0]): item[1]
-                                 for item in submsg[13]},
-            }
-        elif submsg_type == 12:
-            # TODO: parse unknown
-            pass
-        elif submsg_type == 13:
-            # TODO: parse unknown
-            pass
-        elif submsg_type == 14:
-            # TODO: parse unknown
-            pass
-        else:
-            logging.warning('submsg type {} is unknown'.format(submsg_type))
+    return {
+        'event_type': 'chat_message',
+        'conversation_id': conversation_id,
+        'timestamp': timestamp,
+        'sender_ids': tuple(sender_ids),
+        'text': message_text,
+    }
+
+
+def _parse_conversation_status(message):
+    """Parse conversation status message."""
+    # TODO: there's a lot more info here
+    return {
+        'event_type': 'conversation_update',
+        'conversation_id': message[0][0],
+        # participant list items sometimes can be length 2 or 3
+        # ids, name, ?
+        'participants': {tuple(item[0]): item[1] for item in message[13]},
+    }
+
+
+def _parse_focus_status(message):
+    """Parse focus status message."""
+    FOCUS_STATUSES = {
+        1: 'focused',
+        2: 'unfocused',
+    }
+    FOCUS_DEVICES = {
+        20: 'desktop',
+        300: 'mobile',
+    }
+    conversation_id = message[0][0]
+    user_ids = message[1]
+    timestamp = message[2]
+    try:
+        focus_status = FOCUS_STATUSES[message[3]]
+    except KeyError:
+        logging.warning('Unknown focus status: {}'.format(message[3]))
+    try:
+        focus_device = FOCUS_DEVICES[message[4]]
+    except KeyError:
+        logging.warning('Unknown focus device: {}'.format(message[4]))
+    return {
+        'event_type': 'focus_update',
+        'conversation_id': conversation_id,
+        'user_ids': user_ids,
+        'timestamp': timestamp,
+        'focus_status': focus_status,
+        'focus_device': focus_device,
+    }
+
+
+def _parse_typing_status(message):
+    """Parse typing status message."""
+    # Note that the same status may be sent multiple times
+    # consecutively, and that when a message is sent the typing status
+    # will not change to stopped.
+    TYPING_STATUSES = {
+        1: 'typing', # the user is typing
+        2: 'paused', # the user stopped typing with inputted text
+        3: 'stopped', # the user stopped typing with no inputted text
+    }
+    conversation_id = message[0][0]
+    user_ids = message[1]
+    timestamp = message[2]
+    try:
+        typing_status = TYPING_STATUSES[message[3]]
+    except KeyError:
+        typing_status = None
+        logging.warning('Unknown typing status: {}'.format(message[3]))
+    return {
+        'event_type': 'typing_date',
+        'conversation_id': conversation_id,
+        'user_ids': user_ids,
+        'timestamp': timestamp,
+        'typing_status': typing_status,
+    }
+
+
+# message types have been observed to range from 1 to 14
+MESSAGE_PARSERS = {
+    1: _parse_chat_message,
+    2: _parse_focus_status,
+    3: _parse_typing_status,
+    11: _parse_conversation_status,
+}
