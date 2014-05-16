@@ -127,8 +127,7 @@ class HangupsClient(object):
             'CI': 0,
         }
         # Initialize the parser
-        self._push_parser = longpoll.parse_push_data()
-        self._push_parser.send(None)
+        self._push_parser = longpoll.PushDataParser()
         def streaming_callback(data):
             """Make the callback run a coroutine with exception handling."""
             future = self._on_push_data(data)
@@ -220,9 +219,8 @@ class HangupsClient(object):
         if res.code != 200:
             raise ValueError("Second talkgadget request failed with {}: {}"
                              .format(res.code, res.raw.read()))
-        p = longpoll.parse_push_data()
-        p.send(None)
-        res = javascript.loads(p.send(res.body.decode()))
+        p = longpoll.PushDataParser()
+        res = javascript.loads(list(p.get_submissions(res.body.decode()))[0])
         # TODO: handle errors here
         val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
         self.header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
@@ -232,21 +230,16 @@ class HangupsClient(object):
     def _on_push_data(self, data_bytes):
         """Parse push data and call self._on_submsg for each submessage."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
-        event = self._push_parser.send(data_bytes.decode())
-        events = [event] if event is not None else []
-        while True:
-            event = next(self._push_parser)
-            if event is None:
-                break
-            events.append(event)
+
+        submissions = self._push_parser.get_submissions(data_bytes.decode())
 
         message = None
         conversation_id = None
 
         # Process all new data before making any callbacks, so we won't make
         # any redundant requests for data.
-        for event in events:
-            msg = longpoll.parse_message(javascript.loads(event))
+        for submission in submissions:
+            msg = longpoll.parse_message(javascript.loads(submission))
             if 'payload_type' in msg and msg['payload_type'] == 'list':
                 for submsg in longpoll.parse_list_payload(msg['payload']):
                     if 'text' in submsg: # it's a message

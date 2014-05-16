@@ -4,50 +4,42 @@ from hangups import longpoll
 
 
 def test_simple():
-    s = '10\n01234567893\nabc'
-    p = longpoll.parse_push_data()
-    p.send(None)
-    assert p.send(s) == "0123456789"
-    assert next(p) == "abc"
-    assert next(p) == None
+    p = longpoll.PushDataParser()
+    assert list(p.get_submissions('10\n01234567893\nabc')) == [
+        '0123456789',
+        'abc',
+    ]
 
 
 def test_truncated_message():
-    s = '12\n012345678'
-    p = longpoll.parse_push_data()
-    p.send(None)
-    assert p.send(s) == None
+    p = longpoll.PushDataParser()
+    assert list(p.get_submissions('12\n012345678')) == []
 
 
 def test_truncated_length():
-    s = '13'
-    p = longpoll.parse_push_data()
-    p.send(None)
-    assert p.send(s) == None
+    p = longpoll.PushDataParser()
+    assert list(p.get_submissions('13')) == []
 
 
 def test_malformed_length():
-    s = '11\n0123456789\n5e\n"abc"'
-    p = longpoll.parse_push_data()
-    p.send(None)
-    assert p.send(s) == '0123456789\n'
+    p = longpoll.PushDataParser()
     # TODO: could detect errors like these with some extra work
-    assert next(p) == None
+    assert list(p.get_submissions('11\n0123456789\n5e\n"abc"')) == [
+        '0123456789\n'
+    ]
 
 
 def test_incremental():
-    p = longpoll.parse_push_data()
-    p.send(None)
-    assert p.send('5') == None
-    assert p.send('\n') == None
-    assert p.send('abc') == None
-    assert p.send('de') == 'abcde'
-    assert next(p) == None
+    p = longpoll.PushDataParser()
+    assert list(p.get_submissions('')) == []
+    assert list(p.get_submissions('5')) == []
+    assert list(p.get_submissions('\n')) == []
+    assert list(p.get_submissions('abc')) == []
+    assert list(p.get_submissions('de')) == ['abcde']
+    assert list(p.get_submissions('')) == []
 
 
 def test_unicode():
-    s = '3\na😀' # smile is actually 2 code units
-    p = longpoll.parse_push_data()
-    p.send(None)
-    assert p.send(s) == "a😀"
-    assert next(p) == None
+    p = longpoll.PushDataParser()
+    # smile is actually 2 code units
+    assert list(p.get_submissions('3\na😀')) == ['a😀']
