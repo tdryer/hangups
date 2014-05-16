@@ -149,9 +149,26 @@ def parse_list_payload(payload):
             }
 
         elif submsg_type == 2:
-            # TODO: parse unknown (related to conversation focus?)
-            # conversation_id, sender_ids, timestamp, 1/2, 20/300
-            pass
+            # parse focus status
+            FOCUS_STATUSES = {
+                1: 'focused',
+                2: 'unfocused',
+            }
+            FOCUS_DEVICES = {
+                20: 'desktop',
+                300: 'mobile',
+            }
+            conversation_id = submsg[0][0]
+            user_ids = submsg[1]
+            timestamp = submsg[2]
+            try:
+                focus_status = FOCUS_STATUSES[submsg[3]]
+            except KeyError:
+                logging.warning('Unknown focus status: {}'.format(submsg[3]))
+            try:
+                focus_device = FOCUS_DEVICES[submsg[4]]
+            except KeyError:
+                logging.warning('Unknown focus device: {}'.format(submsg[4]))
         elif submsg_type == 3:
             # parse typing status
             # Note that the same status may be sent multiple times
