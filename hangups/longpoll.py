@@ -153,9 +153,23 @@ def parse_list_payload(payload):
             # conversation_id, sender_ids, timestamp, 1/2, 20/300
             pass
         elif submsg_type == 3:
-            # TODO: parse unknown
-            # conversation_id, sender_ids, timestand, 1 or 2
-            pass
+            # parse typing status
+            # Note that the same status may be sent multiple times
+            # consecutively, and that when a message is sent the typing status
+            # will not change to stopped.
+            TYPING_STATUSES = {
+                1: 'typing', # the user is typing
+                2: 'paused', # the user stopped typing with inputted text
+                3: 'stopped', # the user stopped typing with no inputted text
+            }
+            conversation_id = submsg[0][0]
+            user_ids = submsg[1]
+            timestamp = submsg[2]
+            try:
+                typing_status = TYPING_STATUSES[submsg[3]]
+            except KeyError:
+                typing_status = None
+                logging.warning('Unknown typing status: {}'.format(submsg[3]))
         elif submsg_type == 6:
             # TODO: parse unknown
             # sender_ids, conversation_id, timestamp
