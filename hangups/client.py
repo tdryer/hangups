@@ -46,19 +46,21 @@ def _fetch(url, method='GET', params=None, headers=None, cookies=None,
 
 
 class HangupsClient(object):
-    """Abstract class for writing chat clients."""
+    """Abstract class for writing chat clients.
 
-    def __init__(self, cookies, origin_url):
-        self._cookies = cookies
-        self._origin_url = origin_url
+    Designed to allow building a chat client by subclassing the abstract
+    methods. If __init__ is subclassed, super().__init__() must be called.
+    """
 
+    def __init__(self):
+        self._cookies = None
+        self._origin_url = None
         self._push_parser = None
 
         # (chat_id, gaia_id) -> User instance
         self._users = {}
         # conversation_id -> Conversation instance
         self._conversations = {}
-
 
         # discovered automatically:
 
@@ -128,8 +130,10 @@ class HangupsClient(object):
         yield self._sendchatmessage(conversation_id, text)
 
     @gen.coroutine
-    def connect(self):
+    def connect(self, cookies, origin_url='https://talkgadget.google.com'):
         """Initialize to gather connection parameters."""
+        self._cookies = cookies
+        self._origin_url = origin_url
         yield self._init_talkgadget_1()
         yield self._init_talkgadget_2()
 

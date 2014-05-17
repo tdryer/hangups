@@ -91,9 +91,9 @@ class DemoClient(HangupsClient):
 @gen.coroutine
 def main():
     """Start an example chat client."""
+    client = DemoClient()
     cookies = auth.get_auth_stdin('cookies.json')
-    client = DemoClient(cookies, 'https://talkgadget.google.com')
-    yield client.connect()
+    yield client.connect(cookies)
     yield client.run_forever()
 
 
