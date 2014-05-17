@@ -466,6 +466,18 @@ class HangupsClient(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
+    def _syncrecentconversations(self):
+        """List the contents of recent conversations, including messages.
+
+        Similar to syncallnewevents, but appears to return a limited number of
+        conversations (20) rather than all conversations in a given date range.
+        """
+        res = yield self._request('conversations/syncrecentconversations', [
+            self._get_request_header(),
+        ])
+        return json.loads(res.body.decode())
+
+    @gen.coroutine
     def _sendchatmessage(self, conversation_id, message, is_bold=False,
                          is_italic=False, is_strikethrough=False,
                          is_underlined=False):
