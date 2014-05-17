@@ -13,6 +13,12 @@ from hangups import auth
 class DemoClient(HangupsClient):
     """Demo client for hangups."""
 
+    def __init__(self):
+        super().__init__()
+
+        # ID of the conversation to listen to
+        self.conversation_id = None
+
     @gen.coroutine
     def on_connect(self):
         print('Connection established')
@@ -21,7 +27,6 @@ class DemoClient(HangupsClient):
         now = time.time() * 1000000
         one_hour = 60 * 60 * 1000000
         # TODO: add a proper API for this
-        # XXX: doesn't work if there haven't been any events
         events = yield self._syncallnewevents(now - one_hour)
 
         conversations = {}
@@ -50,11 +55,11 @@ class DemoClient(HangupsClient):
         conversation_id = conversations_list[conversation_index][1][0]
         conversation = conversations_list[conversation_index][1][1]
         print('Now listening to conversation\n')
-        self.listen_id = conversation_id
+        self.conversation_id = conversation_id
 
     @gen.coroutine
     def on_message_receive(self, conversation_id, message):
-        if conversation_id == self.listen_id:
+        if conversation_id == self.conversation_id:
             user = self.get_user(message.user_chat_id, message.user_gaia_id)
             print('({}) {}: {}'.format(
                 datetime.datetime.fromtimestamp(
@@ -72,14 +77,14 @@ class DemoClient(HangupsClient):
     @gen.coroutine
     def on_focus_update(self, conversation_id, user_ids, focus_status,
                         focus_device):
-        if conversation_id == self.listen_id:
+        if conversation_id == self.conversation_id:
             user = self.get_user(user_ids[0], user_ids[1])
             print('{} {} the conversation on {}'
                   .format(user.name, focus_status, focus_device))
 
     @gen.coroutine
     def on_typing_update(self, conversation_id, user_ids, typing_status):
-        if conversation_id == self.listen_id:
+        if conversation_id == self.conversation_id:
             user = self.get_user(user_ids[0], user_ids[1])
             print('{} {}'.format(user.name, typing_status))
 
