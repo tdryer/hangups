@@ -22,7 +22,7 @@ class DemoClient(HangupsClient):
         one_hour = 60 * 60 * 1000000
         # TODO: add a proper API for this
         # XXX: doesn't work if there haven't been any events
-        events = yield self.syncallnewevents(now - one_hour)
+        events = yield self._syncallnewevents(now - one_hour)
 
         conversations = {}
         for conversation in events.get('conversation_state', []):

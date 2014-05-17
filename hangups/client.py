@@ -63,35 +63,23 @@ class HangupsClient(object):
         # discovered automatically:
 
         # the api key sent with every request
-        self.api_key = None
+        self._api_key = None
         # fields sent in request headers
-        self.header_date = None
-        self.header_version = None
-        self.header_id = None
-        self.header_client = None
+        self._header_date = None
+        self._header_version = None
+        self._header_id = None
+        self._header_client = None
         # parameters related talkgadget channel requests
-        self.channel_path = None
-        self.gsessionid = None
-        self.clid = None
-        self.channel_ec_param = None
-        self.channel_prop_param = None
-        self.channel_session_id = None
+        self._channel_path = None
+        self._gsessionid = None
+        self._clid = None
+        self._channel_ec_param = None
+        self._channel_prop_param = None
+        self._channel_session_id = None
 
-    def get_user(self, chat_id, gaia_id):
-        """Return a User instance from its ids.
-
-        Raises KeyError if the user does not exist.
-        """
-        # TODO: we could also make a separate query if the user is not cached
-        try:
-            return self._users[(chat_id, gaia_id)]
-        except KeyError:
-            return User(0, 0, 'Unknown User')
-
-    @gen.coroutine
-    def send_message(self, conversation_id, text):
-        """Send a message to a conversation."""
-        yield self.sendchatmessage(conversation_id, text)
+    ##########################################################################
+    # Abstract methods
+    ##########################################################################
 
     @gen.coroutine
     def on_message_receive(self, conversation_id, message):
@@ -119,6 +107,26 @@ class HangupsClient(object):
         """Abstract method called when push connection is disconnected."""
         pass
 
+    ##########################################################################
+    # Public methods
+    ##########################################################################
+
+    def get_user(self, chat_id, gaia_id):
+        """Return a User instance from its ids.
+
+        Raises KeyError if the user does not exist.
+        """
+        # TODO: we could also make a separate query if the user is not cached
+        try:
+            return self._users[(chat_id, gaia_id)]
+        except KeyError:
+            return User(0, 0, 'Unknown User')
+
+    @gen.coroutine
+    def send_message(self, conversation_id, text):
+        """Send a message to a conversation."""
+        yield self._sendchatmessage(conversation_id, text)
+
     @gen.coroutine
     def connect(self):
         """Initialize to gather connection parameters."""
@@ -131,13 +139,13 @@ class HangupsClient(object):
         url = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
         params = {
             'VER': 8,
-            'clid': self.clid,
-            'prop': self.channel_prop_param,
-            'ec': self.channel_ec_param,
-            'gsessionid': self.gsessionid,
+            'clid': self._clid,
+            'prop': self._channel_prop_param,
+            'ec': self._channel_ec_param,
+            'gsessionid': self._gsessionid,
             'RID': 'rpc',
             't': 1, # trial
-            'SID': self.channel_session_id,
+            'SID': self._channel_session_id,
             'CI': 0,
         }
         def streaming_callback(data):
@@ -178,6 +186,10 @@ class HangupsClient(object):
                 break
 
         yield self.on_disconnect()
+
+    ##########################################################################
+    # Private methods
+    ##########################################################################
 
     @gen.coroutine
     def _init_talkgadget_1(self):
@@ -224,26 +236,26 @@ class HangupsClient(object):
                 logger.debug('Failed to parse JavaScript:\n{}'.format(data))
 
         # TODO: handle errors here
-        self.api_key = data_dict['ds:7'][0][2]
-        self.header_date = data_dict['ds:2'][0][4]
-        self.header_version = data_dict['ds:2'][0][6]
-        self.header_id = data_dict['ds:4'][0][7]
-        self.channel_path = data_dict['ds:4'][0][1]
-        self.gsessionid = data_dict['ds:4'][0][3]
-        self.clid = data_dict['ds:4'][0][7]
-        self.channel_ec_param = data_dict['ds:4'][0][4]
-        self.channel_prop_param = data_dict['ds:4'][0][5]
+        self._api_key = data_dict['ds:7'][0][2]
+        self._header_date = data_dict['ds:2'][0][4]
+        self._header_version = data_dict['ds:2'][0][6]
+        self._header_id = data_dict['ds:4'][0][7]
+        self._channel_path = data_dict['ds:4'][0][1]
+        self._gsessionid = data_dict['ds:4'][0][3]
+        self._clid = data_dict['ds:4'][0][7]
+        self._channel_ec_param = data_dict['ds:4'][0][4]
+        self._channel_prop_param = data_dict['ds:4'][0][5]
 
     @gen.coroutine
     def _init_talkgadget_2(self):
         """Make second talkgadget request and parse response."""
-        url = 'https://talkgadget.google.com{}bind'.format(self.channel_path)
+        url = 'https://talkgadget.google.com{}bind'.format(self._channel_path)
         params = {
             'VER': 8,
-            'clid': self.clid,
-            'prop': self.channel_prop_param,
-            'ec': self.channel_ec_param,
-            'gsessionid': self.gsessionid,
+            'clid': self._clid,
+            'prop': self._channel_prop_param,
+            'ec': self._channel_ec_param,
+            'gsessionid': self._gsessionid,
             'RID': 81187, # TODO
             'CVER': 1,
             't': 1, # trial
@@ -258,8 +270,8 @@ class HangupsClient(object):
         res = javascript.loads(list(p.get_submissions(res.body.decode()))[0])
         # TODO: handle errors here
         val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
-        self.header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
-        self.channel_session_id = res[0][1][1]
+        self._header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
+        self._channel_session_id = res[0][1][1]
 
     @gen.coroutine
     def _on_push_data(self, data_bytes):
@@ -335,8 +347,8 @@ class HangupsClient(object):
     def _get_request_header(self):
         """Return request header for chat API request."""
         return [
-            [3, 3, self.header_version, self.header_date],
-            [self.header_client, self.header_id],
+            [3, 3, self._header_version, self._header_date],
+            [self._header_client, self._header_id],
             None,
             "en"
         ]
@@ -355,7 +367,7 @@ class HangupsClient(object):
         cookies = {cookie: self._get_cookie(cookie)
                    for cookie in required_cookies}
         params = {
-            'key': self.api_key,
+            'key': self._api_key,
             'alt': 'json', # json or protojson
         }
         res = yield _fetch(url, method='POST', headers=headers,
@@ -369,7 +381,7 @@ class HangupsClient(object):
         return res
 
     @gen.coroutine
-    def getselfinfo(self):
+    def _getselfinfo(self):
         """Return information about your account."""
         res = yield self._request('contacts/getselfinfo', [
             self._get_request_header(),
@@ -378,7 +390,7 @@ class HangupsClient(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def setfocus(self, conversation_id):
+    def _setfocus(self, conversation_id):
         """Set focus (occurs whenever you give focus to a client)."""
         res = yield self._request('conversations/setfocus', [
             self._get_request_header(),
@@ -389,7 +401,7 @@ class HangupsClient(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def searchentities(self, search_string, max_results):
+    def _searchentities(self, search_string, max_results):
         """Search for people."""
         res = yield self._request('contacts/searchentities', [
             self._get_request_header(),
@@ -400,7 +412,7 @@ class HangupsClient(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def querypresence(self, chat_id):
+    def _querypresence(self, chat_id):
         """Check someone's presence status."""
         res = yield self._request('presence/querypresence', [
             self._get_request_header(),
@@ -412,7 +424,7 @@ class HangupsClient(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def getentitybyid(self, chat_id_list):
+    def _getentitybyid(self, chat_id_list):
         """Return information about a list of contacts."""
         res = yield self._request('contacts/getentitybyid', [
             self._get_request_header(),
@@ -422,8 +434,8 @@ class HangupsClient(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def getconversation(self, conversation_id, num_events,
-                        storage_continuation_token, event_timestamp):
+    def _getconversation(self, conversation_id, num_events,
+                         storage_continuation_token, event_timestamp):
         """Return data about a conversation.
 
         Seems to require both a timestamp and a token from a previous event
@@ -439,7 +451,7 @@ class HangupsClient(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def syncallnewevents(self, after_timestamp):
+    def _syncallnewevents(self, after_timestamp):
         """List all events occuring at or after timestamp."""
         res = yield self._request('conversations/syncallnewevents', [
             self._get_request_header(),
@@ -450,9 +462,9 @@ class HangupsClient(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def sendchatmessage(self, conversation_id, message, is_bold=False,
-                        is_italic=False, is_strikethrough=False,
-                        is_underlined=False):
+    def _sendchatmessage(self, conversation_id, message, is_bold=False,
+                         is_italic=False, is_strikethrough=False,
+                         is_underlined=False):
         """Send a chat message to a conversation."""
         client_generated_id = random.randint(0, 2**32)
         res = yield self._request('conversations/sendchatmessage', [
