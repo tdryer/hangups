@@ -99,9 +99,14 @@ class HangupsClient(object):
         pass
 
     @gen.coroutine
-    def on_focus_updated(self, conversation_id, user_ids, focus_status,
-                         focus_device):
+    def on_focus_update(self, conversation_id, user_ids, focus_status,
+                        focus_device):
         """Abstract method called when conversation focus changes."""
+        pass
+
+    @gen.coroutine
+    def on_typing_update(self, conversation_id, user_ids, typing_status):
+        """Abstract method called when someone starts or stops typing."""
         pass
 
     @gen.coroutine
@@ -276,9 +281,14 @@ class HangupsClient(object):
                     else:
                         logger.info('Found existing user')
             elif event_type == 'focus_update':
-                yield self.on_focus_updated(
+                yield self.on_focus_update(
                     event['conversation_id'], event['user_ids'],
                     event['focus_status'], event['focus_device']
+                )
+            elif event_type == 'typing_update':
+                yield self.on_typing_update(
+                    event['conversation_id'], event['user_ids'],
+                    event['typing_status']
                 )
 
         # Make callbacks for new data.

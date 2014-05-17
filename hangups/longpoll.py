@@ -228,7 +228,7 @@ def _parse_typing_status(message):
         typing_status = None
         logging.warning('Unknown typing status: {}'.format(message[3]))
     return {
-        'event_type': 'typing_date',
+        'event_type': 'typing_update',
         'conversation_id': conversation_id,
         'user_ids': user_ids,
         'timestamp': timestamp,

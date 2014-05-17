@@ -70,12 +70,18 @@ class DemoClient(HangupsClient):
                 )
 
     @gen.coroutine
-    def on_focus_updated(self, conversation_id, user_ids, focus_status,
-                         focus_device):
+    def on_focus_update(self, conversation_id, user_ids, focus_status,
+                        focus_device):
         if conversation_id == self.listen_id:
             user = self.get_user(user_ids[0], user_ids[1])
             print('{} {} the conversation on {}'
                   .format(user.name, focus_status, focus_device))
+
+    @gen.coroutine
+    def on_typing_update(self, conversation_id, user_ids, typing_status):
+        if conversation_id == self.listen_id:
+            user = self.get_user(user_ids[0], user_ids[1])
+            print('{} {}'.format(user.name, typing_status))
 
     @gen.coroutine
     def on_disconnect(self):
