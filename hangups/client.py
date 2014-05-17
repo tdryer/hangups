@@ -140,22 +140,43 @@ class HangupsClient(object):
             'SID': self.channel_session_id,
             'CI': 0,
         }
-        # Initialize the parser
-        self._push_parser = longpoll.PushDataParser()
         def streaming_callback(data):
             """Make the callback run a coroutine with exception handling."""
             future = self._on_push_data(data)
             ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
-        fetch_future = _fetch(url, params=params, cookies=self._cookies,
-                              streaming_callback=streaming_callback)
-        # TODO: At this join we are "connected", but we don't know if the
-        # request was successful.
-        yield self.on_connect()
 
-        # Wait for response to finish.
-        yield fetch_future
+        is_connected = False
+        MIN_CONNECT_TIME = 60
+        # time we last tried to connect in seconds
+        last_connect_time = 0
 
-        # TODO: Re-establish the connection instead of disconnecting.
+        while True:
+            # If it's been too short a time since we last connected, assume
+            # something has gone wrong.
+            if time.time() - last_connect_time < MIN_CONNECT_TIME:
+                logging.error('Disconnecting because last long-polling '
+                              'request was too short.')
+                break
+            else:
+                logging.info('Opening new long-polling request')
+            last_connect_time = time.time()
+
+            self._push_parser = longpoll.PushDataParser()
+            fetch_future = _fetch(url, params=params, cookies=self._cookies,
+                                  streaming_callback=streaming_callback)
+            # TODO: At this join we are "connected", but we don't know if the
+            # request was successful.
+            if not is_connected:
+                yield self.on_connect()
+                is_connected = True
+
+            # Wait for response to finish.
+            try:
+                yield fetch_future
+            except httpclient.HTTPError as e:
+                logging.error('Long-polling request failed: {}'.format(e))
+                break
+
         yield self.on_disconnect()
 
     @gen.coroutine
