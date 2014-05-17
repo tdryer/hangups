@@ -5,6 +5,8 @@ import datetime
 import logging
 import sys
 import time
+import curses
+import sys
 
 from hangups.client import HangupsClient
 from hangups import auth
@@ -26,6 +28,17 @@ class DemoClient(HangupsClient):
 
     @gen.coroutine
     def on_connect(self, conversations, contacts):
+        def on_stdin(fd, events):
+            try:
+                print('FOO')
+                # TODO: this blocks until ctrl+d
+                s = sys.stdin.read(1)
+                print ('from stdin: "{}"'.format(s))
+            except Exception as e:
+                print(e)
+        ioloop.IOLoop.instance().add_handler(1, on_stdin,
+                                             ioloop.IOLoop.READ)
+
         print('Connection established')
         conv_ids = list(conversations.keys())
         for num, conv_id in enumerate(conv_ids):
@@ -37,7 +50,8 @@ class DemoClient(HangupsClient):
             print('No conversations. Start one and try again.')
             sys.exit(1)
         # TODO: this blocks the IO loop
-        num = int(input('Select a conversation: '))
+        #num = int(input('Select a conversation: '))
+        num = 0
         self.conversation_id = conv_ids[num]
         self.contacts = contacts
 
@@ -84,7 +98,16 @@ def main():
     client = DemoClient()
     cookies = auth.get_auth_stdin('cookies.json')
     yield client.connect(cookies)
-    yield client.run_forever()
+    try:
+        # disable input line-buffering
+        curses.initscr()
+        #curses.nonl()
+        #curses.cbreak()
+        yield client.run_forever()
+    finally:
+        pass
+        #curses.nocbreak()
+        curses.endwin()
 
 
 if __name__ == '__main__':
