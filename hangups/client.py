@@ -83,7 +83,10 @@ class HangupsClient(object):
         Raises KeyError if the user does not exist.
         """
         # TODO: we could also make a separate query if the user is not cached
-        return self._users[(chat_id, gaia_id)]
+        try:
+            return self._users[(chat_id, gaia_id)]
+        except KeyError:
+            return User(0, 0, 'Unknown User')
 
     @gen.coroutine
     def send_message(self, conversation_id, text):
@@ -93,6 +96,12 @@ class HangupsClient(object):
     @gen.coroutine
     def on_message_receive(self, conversation_id, message):
         """Abstract method called when a new message is received."""
+        pass
+
+    @gen.coroutine
+    def on_focus_updated(self, conversation_id, user_ids, focus_status,
+                         focus_device):
+        """Abstract method called when conversation focus changes."""
         pass
 
     @gen.coroutine
@@ -266,6 +275,11 @@ class HangupsClient(object):
                         logger.info('Added new user: {}'.format(user))
                     else:
                         logger.info('Found existing user')
+            elif event_type == 'focus_update':
+                yield self.on_focus_updated(
+                    event['conversation_id'], event['user_ids'],
+                    event['focus_status'], event['focus_device']
+                )
 
         # Make callbacks for new data.
         if message is not None:

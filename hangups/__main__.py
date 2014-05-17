@@ -70,6 +70,14 @@ class DemoClient(HangupsClient):
                 )
 
     @gen.coroutine
+    def on_focus_updated(self, conversation_id, user_ids, focus_status,
+                         focus_device):
+        if conversation_id == self.listen_id:
+            user = self.get_user(user_ids[0], user_ids[1])
+            print('{} {} the conversation on {}'
+                  .format(user.name, focus_status, focus_device))
+
+    @gen.coroutine
     def on_disconnect(self):
         print('Connection lost')
 
