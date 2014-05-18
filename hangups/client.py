@@ -64,6 +64,8 @@ class HangupsClient(object):
 
         # discovered automatically:
 
+        self._initial_conversations = None
+        self._initial_contacts = None
         # the api key sent with every request
         self._api_key = None
         # fields sent in request headers
@@ -100,7 +102,7 @@ class HangupsClient(object):
         pass
 
     @gen.coroutine
-    def on_connect(self):
+    def on_connect(self, conversations, contacts):
         """Abstract method called when push connection is established."""
         pass
 
@@ -179,7 +181,8 @@ class HangupsClient(object):
             # TODO: At this join we are "connected", but we don't know if the
             # request was successful.
             if not is_connected:
-                yield self.on_connect()
+                yield self.on_connect(self._initial_conversations,
+                                      self._initial_contacts)
                 is_connected = True
 
             # Wait for response to finish.
@@ -235,9 +238,9 @@ class HangupsClient(object):
             try:
                 data = javascript.loads(data)
                 data_dict[data['key']] = data['data']
-            except ValueError:
+            except ValueError as e:
                 # not everything will be parsable, but we don't care
-                logger.debug('Failed to parse JavaScript:\n{}'.format(data))
+                logger.debug('Failed to parse JavaScript: {}\n{}'.format(e, data))
 
         # TODO: handle errors here
         self._api_key = data_dict['ds:7'][0][2]
@@ -249,6 +252,45 @@ class HangupsClient(object):
         self._clid = data_dict['ds:4'][0][7]
         self._channel_ec_param = data_dict['ds:4'][0][4]
         self._channel_prop_param = data_dict['ds:4'][0][5]
+
+        # build dict of conversations and their participants
+        self._initial_conversations = {}
+        conversations = data_dict['ds:19'][0][3]
+        for c in conversations:
+            id_ = c[1][0][0]
+            participants = c[1][13]
+            self._initial_conversations[id_] = {'participants': []}
+            for p in participants:
+                user_ids = tuple(p[0])
+                self._initial_conversations[id_]['participants'].append(
+                    user_ids
+                )
+        logging.info('Found {} conversations'
+                     .format(len(self._initial_conversations)))
+
+        # build dict of contacts and their names
+        self._initial_contacts = {}
+        contacts_main = data_dict['ds:21'][0]
+        # contacts_main[2] has some, but the format is slightly different
+        contacts = (contacts_main[4][2] + contacts_main[5][2] +
+                    contacts_main[6][2] + contacts_main[7][2] +
+                    contacts_main[8][2])
+        for c in contacts:
+            user_ids = tuple(c[0][8])
+            full_name = c[0][9][1]
+            first_name = c[0][9][2]
+            self._initial_contacts[user_ids] = {
+                'first_name': first_name,
+                'full_name': full_name,
+            }
+        logging.info('Found {} contacts'.format(len(self._initial_contacts)))
+
+        # add self to the contacts
+        self_contact = data_dict['ds:20'][0][2]
+        self._initial_contacts[tuple(self_contact[8])] = {
+            'first_name': self_contact[9][2],
+            'full_name': self_contact[9][1],
+        }
 
     @gen.coroutine
     def _init_talkgadget_2(self):

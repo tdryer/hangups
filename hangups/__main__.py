@@ -20,42 +20,20 @@ class DemoClient(HangupsClient):
         self.conversation_id = None
 
     @gen.coroutine
-    def on_connect(self):
+    def on_connect(self, conversations, contacts):
         print('Connection established')
-        # Get all events in the past hour
-        print('Requesting all events from the past hour')
-        now = time.time() * 1000000
-        one_hour = 60 * 60 * 1000000
-        # TODO: add a proper API for this
-        events = yield self._syncallnewevents(now - one_hour)
-
-        conversations = {}
-        for conversation in events.get('conversation_state', []):
-            id_ = conversation['conversation']['id']['id']
-            participants = {
-                (p['id']['chat_id'], p['id']['gaia_id']): p['fallback_name']
-                for p in conversation['conversation']['participant_data']
-            }
-            conversations[id_] = {
-                'participants': participants,
-            }
-
-        conversations_list = list(enumerate(conversations.items()))
-        if len(conversations_list) == 0:
-            print(('No recent activity. '
-                   'Interact with a conversation and try again.'))
+        conv_ids = list(conversations.keys())
+        for num, conv_id in enumerate(conv_ids):
+            first_names = [contacts[user_ids]['first_name']
+                           for user_ids in
+                           conversations[conv_id]['participants']]
+            print(' [{}] {}'.format(num, ', '.join(sorted(first_names))))
+        if len(conv_ids) == 0:
+            print('No conversations. Start one and try again.')
             sys.exit(1)
-        print('Activity has recently occurred in the conversations:')
-        for n, (_, conversation) in conversations_list:
-            print(' [{}] {}'.format(
-                n, ', '.join(sorted(conversation['participants'].values()))
-            ))
-        # TODO: do this without blocking the IO loop
-        conversation_index = int(input('Select a conversation to listen to: '))
-        conversation_id = conversations_list[conversation_index][1][0]
-        conversation = conversations_list[conversation_index][1][1]
-        print('Now listening to conversation\n')
-        self.conversation_id = conversation_id
+        # TODO: this blocks the IO loop
+        num = int(input('Select a conversation: '))
+        self.conversation_id = conv_ids[num]
 
     @gen.coroutine
     def on_message_receive(self, conversation_id, message):
