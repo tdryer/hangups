@@ -50,17 +50,14 @@ class HangupsClient(object):
 
     Designed to allow building a chat client by subclassing the abstract
     methods. If __init__ is subclassed, super().__init__() must be called.
+
+    This is only low-level abstraction around the API.
     """
 
     def __init__(self):
         self._cookies = None
         self._origin_url = None
         self._push_parser = None
-
-        # (chat_id, gaia_id) -> User instance
-        self._users = {}
-        # conversation_id -> Conversation instance
-        self._conversations = {}
 
         # discovered automatically:
 
@@ -114,17 +111,6 @@ class HangupsClient(object):
     ##########################################################################
     # Public methods
     ##########################################################################
-
-    def get_user(self, chat_id, gaia_id):
-        """Return a User instance from its ids.
-
-        Raises KeyError if the user does not exist.
-        """
-        # TODO: we could also make a separate query if the user is not cached
-        try:
-            return self._users[(chat_id, gaia_id)]
-        except KeyError:
-            return User(0, 0, 'Unknown User')
 
     @gen.coroutine
     def send_message(self, conversation_id, text):
@@ -339,26 +325,7 @@ class HangupsClient(object):
                                   timestamp=event['timestamp'])
                 conversation_id = event['conversation_id']
             elif event_type == 'conversation_update':
-                # TODO: this may be higher-level functionality than we want
-                conversation = Conversation(
-                    id_=event['conversation_id'],
-                    user_list=event['participants'].keys(),
-                    message_list=[]
-                )
-                if event['conversation_id'] not in self._conversations:
-                    self._conversations[event['conversation_id']] = conversation
-                    logger.info('Found new conversation: {}'
-                                .format(conversation))
-                else:
-                    logger.info('Found existing conversation')
-                for (chat_id, gaia_id), name in event['participants'].items():
-                    user = User(chat_id=chat_id, gaia_id=gaia_id,
-                                name=name)
-                    if (chat_id, gaia_id) not in self._users:
-                        self._users[(chat_id, gaia_id)] = user
-                        logger.info('Added new user: {}'.format(user))
-                    else:
-                        logger.info('Found existing user')
+                pass # TODO: pass this info along to the subclass
             elif event_type == 'focus_update':
                 yield self.on_focus_update(
                     event['conversation_id'], event['user_ids'],

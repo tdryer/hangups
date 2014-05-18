@@ -18,6 +18,11 @@ class DemoClient(HangupsClient):
 
         # ID of the conversation to listen to
         self.conversation_id = None
+        self.contacts = None
+
+    def get_contact_name(self, user_ids):
+        """Return the name of a contact."""
+        return self.contacts[user_ids]['first_name']
 
     @gen.coroutine
     def on_connect(self, conversations, contacts):
@@ -34,37 +39,39 @@ class DemoClient(HangupsClient):
         # TODO: this blocks the IO loop
         num = int(input('Select a conversation: '))
         self.conversation_id = conv_ids[num]
+        self.contacts = contacts
 
     @gen.coroutine
     def on_message_receive(self, conversation_id, message):
         if conversation_id == self.conversation_id:
-            user = self.get_user(message.user_chat_id, message.user_gaia_id)
+            user_ids = (message.user_chat_id, message.user_gaia_id)
             print('({}) {}: {}'.format(
                 datetime.datetime.fromtimestamp(
                     message.timestamp / 1000000
-                ).strftime('%I:%M:%S %p'),
-                user.name, message.text
+                ).strftime('%I:%M:%S %p'), self.get_contact_name(user_ids),
+                message.text
             ))
             # respond to a \time message with the unix time
             if message.text == '\\time':
                 yield self.send_message(
                     conversation_id,
-                    'The current unix time is {}.'.format(int(time.time()))
+                    'Hi {}, the current unix time is {}.'
+                    .format(self.get_contact_name(user_ids), int(time.time()))
                 )
 
     @gen.coroutine
     def on_focus_update(self, conversation_id, user_ids, focus_status,
                         focus_device):
         if conversation_id == self.conversation_id:
-            user = self.get_user(user_ids[0], user_ids[1])
             print('{} {} the conversation on {}'
-                  .format(user.name, focus_status, focus_device))
+                  .format(self.get_contact_name(user_ids), focus_status,
+                          focus_device))
 
     @gen.coroutine
     def on_typing_update(self, conversation_id, user_ids, typing_status):
         if conversation_id == self.conversation_id:
-            user = self.get_user(user_ids[0], user_ids[1])
-            print('{} {}'.format(user.name, typing_status))
+            print('{} {}'.format(self.get_contact_name(user_ids),
+                                 typing_status))
 
     @gen.coroutine
     def on_disconnect(self):

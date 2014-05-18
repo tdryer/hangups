@@ -189,7 +189,7 @@ def _parse_focus_status(message):
         300: 'mobile',
     }
     conversation_id = message[0][0]
-    user_ids = message[1]
+    user_ids = tuple(message[1])
     timestamp = message[2]
     try:
         focus_status = FOCUS_STATUSES[message[3]]
@@ -220,7 +220,7 @@ def _parse_typing_status(message):
         3: 'stopped', # the user stopped typing with no inputted text
     }
     conversation_id = message[0][0]
-    user_ids = message[1]
+    user_ids = tuple(message[1])
     timestamp = message[2]
     try:
         typing_status = TYPING_STATUSES[message[3]]
