@@ -70,6 +70,7 @@ class JavaScriptLexer(purplex.Lexer):
     """Lexer for a subset of JavaScript."""
     # TODO negatives? floats?
     INTEGER = purplex.TokenDef(r'\d+')
+    FLOAT = purplex.TokenDef(r'[-+]?\d*[.]\d+')
 
     NULL = purplex.TokenDef(r'null')
     TRUE = purplex.TokenDef(r'true')
@@ -143,6 +144,10 @@ class JavaScriptParser(purplex.Parser):
     @purplex.attach('e : INTEGER')
     def number(self, num):
         return int(num)
+
+    @purplex.attach('e : FLOAT')
+    def float_number(self, num):
+        return float(num)
 
     @purplex.attach('e : NULL')
     def null(self, t):
