@@ -11,6 +11,11 @@ from hangups import javascript
     ('null', None),
     ('true', True),
     ('false', False),
+    # floats
+    ('123.0', 123.0),
+    ('-123.0', -123.0),
+    ('.123', 0.123),
+    ('-.123', -0.123),
     # lists
     ('[ ]', []),
     ('[12]', [12]),
