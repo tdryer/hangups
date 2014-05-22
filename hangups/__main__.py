@@ -67,7 +67,7 @@ class DemoClient(HangupsClient):
             )
 
         # show the conversation menu
-        self._urwid_loop.widget = conversation_menu(
+        self._urwid_loop.widget = ConversationPickerWidget(
             conv_dict, self.on_select_conversation
         )
 
@@ -101,19 +101,26 @@ class DemoClient(HangupsClient):
         print('Connection lost')
 
 
-def conversation_menu(conv_dict, on_select_coroutine):
-    """Return an urwid menu for choosing a conversation."""
-    def on_press(button, conv_id):
-        future = on_select_coroutine(conv_id)
+class ConversationPickerWidget(urwid.WidgetWrap):
+    """Widget for picking a conversation."""
+
+    def __init__(self, conv_dict, select_coroutine):
+        self._select_coroutine = select_coroutine
+        header = urwid.Text(('header', 'Conversations'), align='center')
+        buttons = [urwid.Button(conv_name, on_press=self._on_press,
+                                user_data=conv_id)
+                   for conv_id, conv_name in conv_dict.items()]
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
+        widget = urwid.Pile([
+            ('pack', header),
+            ('weight', 1, urwid.Padding(listbox, left=2, right=2))
+        ])
+        super().__init__(widget)
+
+    def _on_press(self, button, conv_id):
+        """Called when a conversation button is pressed."""
+        future = self._select_coroutine(conv_id)
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
-    header = urwid.Text('Conversations')
-    buttons = [urwid.Button(conv_name, on_press=on_press, user_data=conv_id)
-               for num, (conv_id, conv_name) in enumerate(conv_dict.items())]
-    listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
-    return urwid.Pile([
-        ('pack', header),
-        ('weight', 1, urwid.Padding(listbox, left=2, right=2))
-    ])
 
 
 class ReturnableEdit(urwid.Edit):
@@ -200,6 +207,8 @@ if __name__ == '__main__':
     logging.basicConfig(filename='hangups.log', level=logging.DEBUG)
     try:
         ioloop.IOLoop.instance().run_sync(main)
+    except KeyboardInterrupt:
+        pass
     except:
         # XXX this is needed to get exceptions out of urwid for some reason
         print('')
