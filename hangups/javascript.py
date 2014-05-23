@@ -15,10 +15,8 @@ def loads(string):
     """
     try:
         return _PARSER.parse(string)
-    except Exception as e:
-        # XXX THIS IS EVIL, but have to catch all exceptions because purplex
-        # will raise generic Exception when no token definition matches.
-        raise ValueError('Parsing JavaScript failed: {}'.format(e))
+    except purplex.exception.PurplexError as e:
+        raise ValueError('Failed to load JavaScript: {}'.format(e))
 
 
 # TODO: there are more possible escape sequences
@@ -166,7 +164,7 @@ class JavaScriptParser(purplex.Parser):
         return _unescape_string(s[1:-1])
 
     def on_error(self, p):
-        raise ValueError("Parse failed")
+        raise ValueError('Failed to load JavaScript: parse failed')
 
 
 # instantiate the parser at module-load time for better performance

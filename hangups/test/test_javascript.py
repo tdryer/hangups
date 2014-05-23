@@ -49,5 +49,17 @@ from hangups import javascript
 
 ])
 def test_loads(input_, expected):
-    """Test loading Javascript from a string."""
+    """Test loading JS from a string."""
     assert javascript.loads(input_) == expected
+
+
+def test_loads_lex_error():
+    """Test loading invalid JS that fails lexing."""
+    with pytest.raises(ValueError):
+        javascript.loads('{""": 1}')
+
+
+def test_loads_parse_error():
+    """Test loading invalid JS that fails parsing."""
+    with pytest.raises(ValueError):
+        javascript.loads('{"foo": 1}}')
