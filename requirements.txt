@@ -2,3 +2,4 @@ purplex==0.1.5
 pytest==2.5.2
 tornado==3.2.1
 requests==2.2.1
+urwid==1.2.1
