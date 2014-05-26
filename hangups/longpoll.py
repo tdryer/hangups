@@ -187,6 +187,7 @@ def _parse_focus_status(message):
     FOCUS_DEVICES = {
         20: 'desktop',
         300: 'mobile',
+        None: 'unspecified',
     }
     conversation_id = message[0][0]
     user_ids = tuple(message[1])
@@ -196,7 +197,8 @@ def _parse_focus_status(message):
     except KeyError:
         logging.warning('Unknown focus status: {}'.format(message[3]))
     try:
-        focus_device = FOCUS_DEVICES[message[4]]
+        # sometimes the device is unspecified so the message is shorter
+        focus_device = FOCUS_DEVICES[message[4] if len(message) > 4 else None]
     except KeyError:
         logging.warning('Unknown focus device: {}'.format(message[4]))
     return {
