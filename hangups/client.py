@@ -63,6 +63,7 @@ class HangupsClient(object):
 
         self._initial_conversations = None
         self._initial_contacts = None
+        self._self_user_ids = None
         # the api key sent with every request
         self._api_key = None
         # fields sent in request headers
@@ -99,7 +100,7 @@ class HangupsClient(object):
         pass
 
     @gen.coroutine
-    def on_connect(self, conversations, contacts):
+    def on_connect(self, conversations, contacts, self_user_ids):
         """Abstract method called when push connection is established."""
         pass
 
@@ -186,7 +187,8 @@ class HangupsClient(object):
             # request was successful.
             if not is_connected:
                 yield self.on_connect(self._initial_conversations,
-                                      self._initial_contacts)
+                                      self._initial_contacts,
+                                      self._self_user_ids)
                 is_connected = True
 
             # Wait for response to finish.
@@ -292,7 +294,8 @@ class HangupsClient(object):
 
         # add self to the contacts
         self_contact = data_dict['ds:20'][0][2]
-        self._initial_contacts[tuple(self_contact[8])] = {
+        self._self_user_ids = tuple(self_contact[8])
+        self._initial_contacts[self._self_user_ids] = {
             'first_name': self_contact[9][2],
             'full_name': self_contact[9][1],
         }

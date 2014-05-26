@@ -55,7 +55,7 @@ class DemoClient(HangupsClient):
         yield self.send_message(self.conversation_id, text)
 
     @gen.coroutine
-    def on_connect(self, conversations, contacts):
+    def on_connect(self, conversations, contacts, self_user_ids):
         self.contacts = contacts
         self.conversations = conversations
 
@@ -75,9 +75,11 @@ class DemoClient(HangupsClient):
             conv_dict[conv_id] = ', '.join(
                 self.get_contact_name(user_ids) for user_ids in
                 conversations[conv_id]['participants']
+                if user_ids != self_user_ids
             )
 
         # show the conversation menu
+        # TODO: the widget class should handle formatting the conv names
         self._urwid_loop.widget = ConversationPickerWidget(
             conv_dict, self.on_select_conversation
         )
