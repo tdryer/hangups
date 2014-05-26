@@ -113,6 +113,24 @@ class HangupsClient(object):
     ##########################################################################
 
     @gen.coroutine
+    def get_users(self, user_ids_list):
+        """Look up a list of users by their IDs."""
+        chat_ids = [u[0] for u in user_ids_list] # TODO should be chat_id
+        res = yield self._getentitybyid(chat_ids)
+        # TODO handle users that are not found
+        users = {}
+        for entity in res['entity_result']:
+            entity = entity['entity'][0]
+            user_ids = (entity['id']['chat_id'], entity['id']['gaia_id'])
+            first_name = entity['properties']['first_name']
+            full_name = entity['properties']['display_name']
+            users[user_ids] = {
+                'first_name': first_name,
+                'full_name': full_name,
+            }
+        return users
+
+    @gen.coroutine
     def send_message(self, conversation_id, text):
         """Send a message to a conversation."""
         yield self._sendchatmessage(conversation_id, text)
@@ -254,7 +272,8 @@ class HangupsClient(object):
         logging.info('Found {} conversations'
                      .format(len(self._initial_conversations)))
 
-        # build dict of contacts and their names
+        # build dict of contacts and their names (doesn't include users not in
+        # contacts)
         self._initial_contacts = {}
         contacts_main = data_dict['ds:21'][0]
         # contacts_main[2] has some, but the format is slightly different

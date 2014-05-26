@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 import time
 import urwid
+from itertools import chain
 
 from hangups.client import HangupsClient
 from hangups import auth
@@ -58,11 +59,21 @@ class DemoClient(HangupsClient):
         self.contacts = contacts
         self.conversations = conversations
 
+        # populate the contacts dict with users who aren't in our contacts
+        required_users = set(chain.from_iterable(
+            conversations[conv_id]['participants']
+            for conv_id in conversations
+        ))
+        missing_users = required_users - set(self.contacts)
+        if missing_users:
+            users = yield self.get_users(missing_users)
+            contacts.update(users)
+
         # build dict of conv ID -> conv name
         conv_dict = {}
         for conv_id in conversations.keys():
             conv_dict[conv_id] = ', '.join(
-                contacts[user_ids]['first_name'] for user_ids in
+                self.get_contact_name(user_ids) for user_ids in
                 conversations[conv_id]['participants']
             )
 
