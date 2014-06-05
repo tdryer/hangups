@@ -12,10 +12,14 @@ from hangups import auth
 
 
 URWID_PALETTE = [
-    ('header', 'bold', 'default'),
+    # ConversationWidget
     ('msg_date', 'dark blue', 'default'),
     ('msg_sender', 'dark blue', 'default'),
     ('msg_text', '', 'default'),
+    # TabBarWidget
+    ('active_tab', 'light gray', 'light blue'),
+    ('inactive_tab', 'underline', 'light green'),
+    ('tab_background', 'underline', 'black'),
 ]
 
 
@@ -26,33 +30,51 @@ class DemoClient(HangupsClient):
         super().__init__()
 
         self._urwid_loop = urwid_loop
-        self.conv_widget = None
 
-        # ID of the conversation to listen to
-        self.conversation_id = None
+        # {conversation_id: ConversationWidget}
+        self._conv_widgets = {}
+        # TabbedWindowWidget
+        self._tabbed_window = None
+
         self.contacts = None
         self.conversations = None
+
+    def get_conv_widget(self, conv_id):
+        """Return an existing or new ConversationWidget."""
+        if conv_id not in self._conv_widgets:
+            participants_dict = {
+                user_ids: self.contacts[user_ids] for user_ids in
+                self.conversations[conv_id]['participants']
+            }
+            self._conv_widgets[conv_id] = ConversationWidget(
+                conv_id, participants_dict, self.on_send_message
+            )
+        return self._conv_widgets[conv_id]
 
     def get_contact_name(self, user_ids):
         """Return the name of a contact."""
         return self.contacts[user_ids]['first_name']
 
+    def add_conversation_tab(self, conv_id, switch=False):
+        """Add conversation tab if not present, and optionally switch to it."""
+        conv_widget = self.get_conv_widget(conv_id)
+        try:
+            self._tabbed_window.change_tab(
+                self._tabbed_window.index(conv_widget)
+            )
+        except ValueError:
+            self._tabbed_window.add_tab(conv_widget, switch=switch)
+
     @gen.coroutine
     def on_select_conversation(self, conv_id):
         """Called when the user selects a new conversation to listen to."""
-        self.conversation_id = conv_id
-
-        # show the conversation view
-        participants_dict = {user_ids: self.contacts[user_ids] for user_ids
-                             in self.conversations[conv_id]['participants']}
-        self.conv_widget = ConversationWidget(participants_dict,
-                                              self.on_send_message)
-        self._urwid_loop.widget = self.conv_widget
+        # switch to new or existing tab for the conversation
+        self.add_conversation_tab(conv_id, switch=True)
 
     @gen.coroutine
-    def on_send_message(self, text):
+    def on_send_message(self, conv_id, text):
         """Called when the user sends a message to the current conversation."""
-        yield self.send_message(self.conversation_id, text)
+        yield self.send_message(conv_id, text)
 
     @gen.coroutine
     def on_connect(self, conversations, contacts, self_user_ids):
@@ -80,37 +102,40 @@ class DemoClient(HangupsClient):
 
         # show the conversation menu
         # TODO: the widget class should handle formatting the conv names
-        self._urwid_loop.widget = ConversationPickerWidget(
-            conv_dict, self.on_select_conversation
-        )
+        self._tabbed_window = TabbedWindowWidget([
+            ConversationPickerWidget(conv_dict, self.on_select_conversation)
+        ])
+        self._urwid_loop.widget = self._tabbed_window
 
     @gen.coroutine
     def on_message_receive(self, conversation_id, message):
-        if conversation_id == self.conversation_id:
-            user_ids = (message.user_chat_id, message.user_gaia_id)
-            self.conv_widget.display_message(message)
+        # pass the message to the approproate ConversationWidget
+        conv_widget = self.get_conv_widget(conversation_id)
+        conv_widget.display_message(message)
 
-            # respond to a \time message with the unix time
-            if message.text == '\\time':
-                yield self.send_message(
-                    conversation_id,
-                    'Hi {}, the current unix time is {}.'
-                    .format(self.get_contact_name(user_ids), int(time.time()))
-                )
+        # open conversation tab in the background if not already present
+        self.add_conversation_tab(conversation_id)
+
+        # respond to a \time message with the unix time
+        user_ids = (message.user_chat_id, message.user_gaia_id)
+        if message.text == '\\time':
+            name = self.get_contact_name(user_ids)
+            response = ('Hi {}, the current unix time is {}.'
+                        .format(name, int(time.time())))
+            yield self.send_message(conversation_id, response)
 
     @gen.coroutine
     def on_focus_update(self, conversation_id, user_ids, focus_status,
                         focus_device):
-        if conversation_id == self.conversation_id:
-            pass # TODO implement displaying this in the ConversationWidget
+        pass # TODO implement displaying this in the ConversationWidget
 
     @gen.coroutine
     def on_typing_update(self, conversation_id, user_ids, typing_status):
-        if conversation_id == self.conversation_id:
-            pass # TODO implement displaying this in the ConversationWidget
+        pass # TODO implement displaying this in the ConversationWidget
 
     @gen.coroutine
     def on_disconnect(self):
+        # TODO: handle this
         print('Connection lost')
 
 
@@ -118,16 +143,13 @@ class ConversationPickerWidget(urwid.WidgetWrap):
     """Widget for picking a conversation."""
 
     def __init__(self, conv_dict, select_coroutine):
+        self.tab_title = 'Conversations'
         self._select_coroutine = select_coroutine
-        header = urwid.Text(('header', 'Conversations'), align='center')
         buttons = [urwid.Button(conv_name, on_press=self._on_press,
                                 user_data=conv_id)
                    for conv_id, conv_name in conv_dict.items()]
         listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
-        widget = urwid.Pile([
-            ('pack', header),
-            ('weight', 1, urwid.Padding(listbox, left=2, right=2))
-        ])
+        widget = urwid.Padding(listbox, left=2, right=2)
         super().__init__(widget)
 
     def _on_press(self, button, conv_id):
@@ -154,27 +176,28 @@ class ReturnableEdit(urwid.Edit):
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
-    def __init__(self, participants_dict, send_message_coroutine):
+    def __init__(self, conv_id, participants_dict, send_message_coroutine):
+        self._conv_id = conv_id
         self._participants = participants_dict
         self._send_message_coroutine = send_message_coroutine
 
-        names_str = ', '.join(p['first_name']
-                              for p in participants_dict.values())
-        title = 'Conversation: {}'.format(names_str)
+        # TODO: abbreviate names and exclude self
+        self.tab_title = ', '.join(p['first_name']
+                                   for p in participants_dict.values())
+
         self._list_walker = urwid.SimpleFocusListWalker([])
         self._list_box = urwid.ListBox(self._list_walker)
         self._widget = urwid.Pile([
-            ('pack', urwid.Text(('header', title), align='center')),
             ('weight', 1, self._list_box),
             ('pack', ReturnableEdit(self._on_return, caption='Send message: ')),
         ])
         # focus the edit widget by default
-        self._widget.focus_position = 2
+        self._widget.focus_position = 1
         super().__init__(self._widget)
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
-        future = self._send_message_coroutine(text)
+        future = self._send_message_coroutine(self._conv_id, text)
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
     def display_message(self, message):
@@ -194,6 +217,103 @@ class ConversationWidget(urwid.WidgetWrap):
 
         # scroll down to the new message
         self._list_box.set_focus(len(self._list_walker) - 1)
+
+
+class TabBarWidget(urwid.WidgetWrap):
+    """A horizontal tab bar for switching between a list of items.
+
+    Every item is assumed to have a tab_title property which is used as the
+    title for the item's tab.
+    """
+
+    def __init__(self, items):
+        self._widget = urwid.Text('')
+        self._items = items
+        self._selected_index = 0
+        super().__init__(self._widget)
+
+    def render(self, size, focus=False):
+        # TODO: handle overflow
+        max_col = size[0]
+        text = []
+        for num, item in enumerate(self._items):
+            palette = ('active_tab' if num == self._selected_index
+                       else 'inactive_tab')
+            text += [
+                (palette, ' {} '.format(item.tab_title).encode()),
+                ('tab_background', b' '),
+            ]
+        text_len = sum(len(t) for a, t in text)
+        text.append(('tab_background', b' ' * (max_col - text_len)))
+        self._widget.set_text(text)
+        return super().render(size, focus)
+
+    def change_tab(self, index):
+        """Change to the tab at the given index."""
+        self._selected_index = index
+        self._invalidate()
+
+    def get_selected_item(self):
+        """Return the selected item."""
+        return self._items[self._selected_index]
+
+    def get_selected_index(self):
+        """Return the index of the selected tab."""
+        return self._selected_index
+
+    def get_num_tabs(self):
+        """Return the number of tabs."""
+        return len(self._items)
+
+
+class TabbedWindowWidget(urwid.WidgetWrap):
+    """A tabbed-window widget for displaying other widgets under a tab bar.
+
+    Every widget is assumed to have a tab_title property which is used as the
+    widget's title in the tab bar.
+    """
+
+    def __init__(self, widget_list):
+        self._window_widget_list = widget_list
+        self._frame = urwid.Frame(widget_list[0])
+        self._tab_widget = TabBarWidget(widget_list)
+        self._widget = urwid.Pile([
+            ('pack', self._tab_widget),
+            ('weight', 1, self._frame),
+        ])
+        super().__init__(self._widget)
+
+    def keypress(self, size, key):
+        """Handle keypresses for changing tabs."""
+        key = super().keypress(size, key)
+        # TODO: add a way to close tabs
+        if key == 'ctrl u':
+            self.change_tab((self._tab_widget.get_selected_index() -
+                             1) % self._tab_widget.get_num_tabs())
+        elif key == 'ctrl d':
+            self.change_tab((self._tab_widget.get_selected_index() +
+                             1) % self._tab_widget.get_num_tabs())
+        else:
+            return key
+
+    def add_tab(self, widget, switch=False):
+        """Add a new tab and optionally switch to it."""
+        self._window_widget_list.append(widget)
+        self._tab_widget._invalidate()
+        if switch:
+            self.change_tab(self._tab_widget.get_num_tabs() - 1)
+
+    def change_tab(self, index):
+        """Change to the tab at the given index."""
+        self._tab_widget.change_tab(index)
+        self._frame.contents['body'] = (self._tab_widget.get_selected_item(),
+                                        None)
+
+    def index(self, widget):
+        """Return the index of the tab associated with the given widget.
+
+        Raises ValueError if widget is not in the tabbed window."""
+        return self._window_widget_list.index(widget)
 
 
 @gen.coroutine
