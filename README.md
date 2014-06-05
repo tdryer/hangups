@@ -10,13 +10,15 @@ For now it's still possible to connect to Hangouts over XMPP using a
 third-party client like Pidgin, but features including group messaging are not
 available.
 
+![screenshot](screenshot.png)
+
 ## What works
 
 * login with second factor support
 * receiving chat messages and other events via push
 * sending chat messages
 * simple API for writing clients
-* example client with text UI for selecting and listening to a conversation
+* example client with text UI for interacting with conversations
 
 ## Running
 
