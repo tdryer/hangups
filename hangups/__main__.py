@@ -38,6 +38,7 @@ class DemoClient(HangupsClient):
 
         self.contacts = None
         self.conversations = None
+        self._self_user_ids = None
 
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
@@ -47,7 +48,8 @@ class DemoClient(HangupsClient):
                 self.conversations[conv_id]['participants']
             }
             self._conv_widgets[conv_id] = ConversationWidget(
-                conv_id, participants_dict, self.on_send_message
+                conv_id, self._self_user_ids, participants_dict,
+                self.on_send_message
             )
         return self._conv_widgets[conv_id]
 
@@ -80,6 +82,7 @@ class DemoClient(HangupsClient):
     def on_connect(self, conversations, contacts, self_user_ids):
         self.contacts = contacts
         self.conversations = conversations
+        self._self_user_ids = self_user_ids
 
         # populate the contacts dict with users who aren't in our contacts
         required_users = set(chain.from_iterable(
@@ -94,16 +97,15 @@ class DemoClient(HangupsClient):
         # build dict of conv ID -> conv name
         conv_dict = {}
         for conv_id in conversations.keys():
-            conv_dict[conv_id] = ', '.join(
-                self.get_contact_name(user_ids) for user_ids in
-                conversations[conv_id]['participants']
-                if user_ids != self_user_ids
-            )
+            conv_dict[conv_id] = {
+                user_ids: self.contacts[user_ids] for user_ids in
+                self.conversations[conv_id]['participants']
+            }
 
         # show the conversation menu
-        # TODO: the widget class should handle formatting the conv names
         self._tabbed_window = TabbedWindowWidget([
-            ConversationPickerWidget(conv_dict, self.on_select_conversation)
+            ConversationPickerWidget(conv_dict, self_user_ids,
+                                     self.on_select_conversation)
         ])
         self._urwid_loop.widget = self._tabbed_window
 
@@ -139,15 +141,36 @@ class DemoClient(HangupsClient):
         print('Connection lost')
 
 
+def get_conv_name(self_user_ids, participants_dict):
+    """Return the readable name for a conversation.
+
+    For one-to-one conversations, the name is the full name of the other user.
+    For group conversations, the name is a comma-separated list of first names.
+    """
+    participants = [p for ids, p in participants_dict.items()
+                    if ids != self_user_ids]
+    if len(participants) == 1:
+        return participants[0]['full_name']
+    else:
+        names = sorted(p['first_name'] for p in participants)
+        return ', '.join(names)
+
+
 class ConversationPickerWidget(urwid.WidgetWrap):
     """Widget for picking a conversation."""
 
-    def __init__(self, conv_dict, select_coroutine):
+    def __init__(self, conversations, self_user_ids, select_coroutine):
         self.tab_title = 'Conversations'
         self._select_coroutine = select_coroutine
-        buttons = [urwid.Button(conv_name, on_press=self._on_press,
-                                user_data=conv_id)
-                   for conv_id, conv_name in conv_dict.items()]
+        # TODO sort conversations by most recent message
+        conv_names = {
+            conv_id: get_conv_name(self_user_ids, participants_dict)
+            for conv_id, participants_dict in conversations.items()
+        }
+        buttons = [
+            urwid.Button(conv_name, on_press=self._on_press, user_data=conv_id)
+            for conv_id, conv_name in conv_names.items()
+        ]
         listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
         widget = urwid.Padding(listbox, left=2, right=2)
         super().__init__(widget)
@@ -176,14 +199,13 @@ class ReturnableEdit(urwid.Edit):
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
-    def __init__(self, conv_id, participants_dict, send_message_coroutine):
+    def __init__(self, conv_id, self_user_ids, participants_dict,
+                 send_message_coroutine):
         self._conv_id = conv_id
         self._participants = participants_dict
         self._send_message_coroutine = send_message_coroutine
 
-        # TODO: abbreviate names and exclude self
-        self.tab_title = ', '.join(p['first_name']
-                                   for p in participants_dict.values())
+        self.tab_title = get_conv_name(self_user_ids, participants_dict)
 
         self._list_walker = urwid.SimpleFocusListWalker([])
         self._list_box = urwid.ListBox(self._list_walker)
