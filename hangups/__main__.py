@@ -141,18 +141,22 @@ class DemoClient(HangupsClient):
         print('Connection lost')
 
 
-def get_conv_name(self_user_ids, participants_dict):
+def get_conv_name(self_user_ids, participants_dict, truncate=False):
     """Return the readable name for a conversation.
 
     For one-to-one conversations, the name is the full name of the other user.
     For group conversations, the name is a comma-separated list of first names.
+
+    If truncate is true, only show up to two names in a group conversation.
     """
     participants = [p for ids, p in participants_dict.items()
                     if ids != self_user_ids]
+    names = sorted(p['first_name'] for p in participants)
     if len(participants) == 1:
         return participants[0]['full_name']
+    elif truncate and len(participants) > 2:
+        return ', '.join(names[:2] + ['+{}'.format(len(names) - 2)])
     else:
-        names = sorted(p['first_name'] for p in participants)
         return ', '.join(names)
 
 
@@ -205,7 +209,8 @@ class ConversationWidget(urwid.WidgetWrap):
         self._participants = participants_dict
         self._send_message_coroutine = send_message_coroutine
 
-        self.tab_title = get_conv_name(self_user_ids, participants_dict)
+        self.tab_title = get_conv_name(self_user_ids, participants_dict,
+                                       truncate=True)
 
         self._list_walker = urwid.SimpleFocusListWalker([])
         self._list_box = urwid.ListBox(self._list_walker)
