@@ -145,18 +145,9 @@ def _parse_payload(payload):
     if payload[0] != 'cbu':
         raise ValueError('Invalid list payload header: {}'.format(payload[0]))
 
-    # the first submessage is always present, so let's treat it like a header
-    first_submsg = payload[1][0][0]
-    if len(first_submsg) == 5:
-        (unknown_int, unknown_none, unknown_str, unknown_none_or_list,
-         timestamp) = first_submsg
-        unknown_list = None
-    elif len(first_submsg) == 6:
-        (unknown_int, unknown_none, unknown_str, unknown_none_or_list,
-         timestamp, unknown_list) = first_submsg
-    else:
-        raise ValueError('Cannot parse first submessage: {}'
-                         .format(first_submsg))
+    # The first submessage is always present, so let's treat it like a header.
+    # It doesn't have anything we need so ignore it.
+    # first_submsg = payload[1][0][0]
 
     # The type of a submessage is determined by its position in the array
     yield from ((msg_type, msg) for msg_type, msg in
