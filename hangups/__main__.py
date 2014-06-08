@@ -94,17 +94,9 @@ class DemoClient(HangupsClient):
             users = yield self.get_users(missing_users)
             contacts.update(users)
 
-        # build dict of conv ID -> conv name
-        conv_dict = {}
-        for conv_id in conversations.keys():
-            conv_dict[conv_id] = {
-                user_ids: self.contacts[user_ids] for user_ids in
-                self.conversations[conv_id]['participants']
-            }
-
         # show the conversation menu
         self._tabbed_window = TabbedWindowWidget([
-            ConversationPickerWidget(conv_dict, self_user_ids,
+            ConversationPickerWidget(self_user_ids, conversations, contacts,
                                      self.on_select_conversation)
         ])
         self._urwid_loop.widget = self._tabbed_window
@@ -163,17 +155,27 @@ def get_conv_name(self_user_ids, participants_dict, truncate=False):
 class ConversationPickerWidget(urwid.WidgetWrap):
     """Widget for picking a conversation."""
 
-    def __init__(self, conversations, self_user_ids, select_coroutine):
+    def __init__(self, self_user_ids, conversations, contacts,
+                 select_coroutine):
         self.tab_title = 'Conversations'
         self._select_coroutine = select_coroutine
-        # TODO sort conversations by most recent message
-        conv_names = {
-            conv_id: get_conv_name(self_user_ids, participants_dict)
-            for conv_id, participants_dict in conversations.items()
-        }
+
+        # build conversation labels and sort by last modified
+        labelled_convs = []
+        for conv_id in conversations:
+            participants_dict = {user_ids: contacts[user_ids] for user_ids
+                                 in conversations[conv_id]['participants']}
+            label = get_conv_name(self_user_ids, participants_dict)
+            labelled_convs.append({
+                'id': conv_id,
+                'label': label,
+                'last_modified': conversations[conv_id]['last_modified']
+            })
+        labelled_convs = sorted(labelled_convs, reverse=True,
+                                key=lambda c: c['last_modified'])
         buttons = [
-            urwid.Button(conv_name, on_press=self._on_press, user_data=conv_id)
-            for conv_id, conv_name in conv_names.items()
+            urwid.Button(f['label'], on_press=self._on_press, user_data=f['id'])
+            for f in labelled_convs
         ]
         listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
         widget = urwid.Padding(listbox, left=2, right=2)

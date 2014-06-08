@@ -265,7 +265,11 @@ class HangupsClient(object):
         for c in conversations:
             id_ = c[1][0][0]
             participants = c[1][13]
-            self._initial_conversations[id_] = {'participants': []}
+            last_modified = c[1][3][12]
+            self._initial_conversations[id_] = {
+                'participants': [],
+                'last_modified': last_modified,
+            }
             for p in participants:
                 user_ids = tuple(p[0])
                 self._initial_conversations[id_]['participants'].append(
