@@ -7,8 +7,7 @@ import time
 import urwid
 from itertools import chain
 
-from hangups.client import HangupsClient
-from hangups import auth
+import hangups
 
 
 URWID_PALETTE = [
@@ -23,7 +22,7 @@ URWID_PALETTE = [
 ]
 
 
-class DemoClient(HangupsClient):
+class DemoClient(hangups.HangupsClient):
     """Demo client for hangups."""
 
     def __init__(self, urwid_loop):
@@ -102,30 +101,25 @@ class DemoClient(HangupsClient):
         self._urwid_loop.widget = self._tabbed_window
 
     @gen.coroutine
-    def on_message_receive(self, conversation_id, message):
-        # pass the message to the approproate ConversationWidget
-        conv_widget = self.get_conv_widget(conversation_id)
-        conv_widget.display_message(message)
+    def on_event(self, event):
+        if isinstance(event, hangups.NewMessageEvent):
 
-        # open conversation tab in the background if not already present
-        self.add_conversation_tab(conversation_id)
+            # pass the message to the approproate ConversationWidget
+            conv_widget = self.get_conv_widget(event.conv_id)
+            conv_widget.display_message(event.timestamp, event.sender_id,
+                                        event.text)
 
-        # respond to a \time message with the unix time
-        user_ids = (message.user_chat_id, message.user_gaia_id)
-        if message.text == '\\time':
-            name = self.get_contact_name(user_ids)
-            response = ('Hi {}, the current unix time is {}.'
-                        .format(name, int(time.time())))
-            yield self.send_message(conversation_id, response)
+            # open conversation tab in the background if not already present
+            self.add_conversation_tab(event.conv_id)
 
-    @gen.coroutine
-    def on_focus_update(self, conversation_id, user_ids, focus_status,
-                        focus_device):
-        pass # TODO implement displaying this in the ConversationWidget
+            # respond to a \time message with the unix time
+            if event.text == '\\time':
+                name = self.get_contact_name(event.sender_id)
+                response = ('Hi {}, the current unix time is {}.'
+                            .format(name, int(time.time())))
+                yield self.send_message(event.conv_id, response)
 
-    @gen.coroutine
-    def on_typing_update(self, conversation_id, user_ids, typing_status):
-        pass # TODO implement displaying this in the ConversationWidget
+        # TODO: use the other event types
 
     @gen.coroutine
     def on_disconnect(self):
@@ -229,19 +223,18 @@ class ConversationWidget(urwid.WidgetWrap):
         future = self._send_message_coroutine(self._conv_id, text)
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
-    def display_message(self, message):
+    def display_message(self, timestamp, user_id, text):
         """Display a new conversation message."""
         # format the message
-        date_int = message.timestamp / 1000000
+        date_int = timestamp / 1000000
         date_str = datetime.fromtimestamp(date_int).strftime('%I:%M:%S %p')
-        user_ids = (message.user_chat_id, message.user_gaia_id)
-        name = self._participants[user_ids]['first_name']
+        name = self._participants[user_id]['first_name']
 
         # add the message to the list box
         self._list_walker.append(urwid.Text([
             ('msg_date', '(' + date_str + ') '),
             ('msg_sender', name + ': '),
-            ('msg_text', message.text)
+            ('msg_text', text)
         ]))
 
         # scroll down to the new message
@@ -356,7 +349,7 @@ def main():
     # start the chat client
     client = DemoClient(loop)
     # TODO urwid widget for getting auth
-    cookies = auth.get_auth_stdin('cookies.json')
+    cookies = hangups.auth.get_auth_stdin('cookies.json')
     yield client.connect(cookies)
     future = client.run_forever()
     ioloop.IOLoop.instance().add_future(future, lambda f: f.result())

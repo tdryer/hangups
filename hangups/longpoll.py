@@ -3,6 +3,7 @@
 import pprint
 import logging
 import re
+from collections import namedtuple
 
 from hangups import javascript
 
@@ -10,6 +11,26 @@ from hangups import javascript
 logger = logging.getLogger(__name__)
 PP = pprint.PrettyPrinter(indent=4)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
+
+
+NewMessageEvent = namedtuple('NewMessageEvent', [
+    'conv_id', 'sender_id', 'timestamp', 'text'
+])
+
+
+FocusChangedEvent = namedtuple('FocusChangedEvent', [
+    'conv_id', 'user_id', 'timestamp', 'focus_status', 'focus_device'
+])
+
+
+TypingChangedEvent = namedtuple('TypingChangedEvent', [
+    'conv_id', 'user_id', 'timestamp', 'typing_status'
+])
+
+
+ConvChangedEvent = namedtuple('ConvChangedEvent', [
+    'conv_id', 'participants'
+])
 
 
 class PushDataParser(object):
@@ -144,10 +165,6 @@ def _parse_payload(payload):
 
 def _parse_chat_message(message):
     """Parse chat message message."""
-    conversation_id = message[0][0][0]
-    sender_ids = message[0][1]
-    timestamp = message[0][2]
-
     # The message content is a list of message segments, which have a
     # type. For now, let's ignore the types and just use the textual
     # representation, appending all the segments into one string.
@@ -156,26 +173,23 @@ def _parse_chat_message(message):
     for segment in message_content:
         # known types: 0: text, 1: linebreak, 2: link
         message_text += segment[1]
-
-    return {
-        'event_type': 'chat_message',
-        'conversation_id': conversation_id,
-        'timestamp': timestamp,
-        'sender_ids': tuple(sender_ids),
-        'text': message_text,
-    }
+    return NewMessageEvent(
+        conv_id=message[0][0][0],
+        timestamp=message[0][2], # TODO: convert to useful format
+        sender_id=tuple(message[0][1]),
+        text=message_text
+    )
 
 
 def _parse_conversation_status(message):
     """Parse conversation status message."""
     # TODO: there's a lot more info here
-    return {
-        'event_type': 'conversation_update',
-        'conversation_id': message[0][0],
+    return ConvChangedEvent(
+        conv_id=message[0][0],
         # participant list items sometimes can be length 2 or 3
         # ids, name, ?
-        'participants': {tuple(item[0]): item[1] for item in message[13]},
-    }
+        participants={tuple(item[0]): item[1] for item in message[13]}
+    )
 
 
 def _parse_focus_status(message):
@@ -184,31 +198,32 @@ def _parse_focus_status(message):
         1: 'focused',
         2: 'unfocused',
     }
+    try:
+        focus_status = FOCUS_STATUSES[message[3]]
+    except KeyError:
+        # TODO: should probably just discard the event in this case
+        focus_status = None
+        logging.warning('Unknown focus status: {}'.format(message[3]))
+
     FOCUS_DEVICES = {
         20: 'desktop',
         300: 'mobile',
         None: 'unspecified',
     }
-    conversation_id = message[0][0]
-    user_ids = tuple(message[1])
-    timestamp = message[2]
-    try:
-        focus_status = FOCUS_STATUSES[message[3]]
-    except KeyError:
-        logging.warning('Unknown focus status: {}'.format(message[3]))
     try:
         # sometimes the device is unspecified so the message is shorter
         focus_device = FOCUS_DEVICES[message[4] if len(message) > 4 else None]
     except KeyError:
+        focus_device = None
         logging.warning('Unknown focus device: {}'.format(message[4]))
-    return {
-        'event_type': 'focus_update',
-        'conversation_id': conversation_id,
-        'user_ids': user_ids,
-        'timestamp': timestamp,
-        'focus_status': focus_status,
-        'focus_device': focus_device,
-    }
+
+    return FocusChangedEvent(
+        conv_id=message[0][0],
+        user_id=tuple(message[1]),
+        timestamp=message[2],
+        focus_status=focus_status,
+        focus_device=focus_device,
+    )
 
 
 def _parse_typing_status(message):
@@ -221,21 +236,18 @@ def _parse_typing_status(message):
         2: 'paused', # the user stopped typing with inputted text
         3: 'stopped', # the user stopped typing with no inputted text
     }
-    conversation_id = message[0][0]
-    user_ids = tuple(message[1])
-    timestamp = message[2]
     try:
         typing_status = TYPING_STATUSES[message[3]]
     except KeyError:
-        typing_status = None
+        typing_status = None # TODO should probably discard event in this case
         logging.warning('Unknown typing status: {}'.format(message[3]))
-    return {
-        'event_type': 'typing_update',
-        'conversation_id': conversation_id,
-        'user_ids': user_ids,
-        'timestamp': timestamp,
-        'typing_status': typing_status,
-    }
+
+    return TypingChangedEvent(
+        conv_id=message[0][0],
+        user_id=tuple(message[1]),
+        timestamp=message[2],
+        typing_status=typing_status,
+    )
 
 
 # message types have been observed to range from 1 to 14

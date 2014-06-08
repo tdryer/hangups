@@ -1,6 +1,5 @@
 """Abstract class for writing chat clients."""
 
-from collections import namedtuple
 from tornado import ioloop, gen, httpclient, httputil
 import hashlib
 import http.cookies
@@ -14,12 +13,6 @@ from hangups import javascript, longpoll
 
 
 logger = logging.getLogger(__name__)
-
-
-Conversation = namedtuple('Conversation', ['id_', 'user_list', 'message_list'])
-Message = namedtuple('Message', ['text', 'timestamp', 'user_gaia_id',
-                                 'user_chat_id'])
-User = namedtuple('User', ['chat_id', 'gaia_id', 'name'])
 
 
 @gen.coroutine
@@ -84,19 +77,8 @@ class HangupsClient(object):
     ##########################################################################
 
     @gen.coroutine
-    def on_message_receive(self, conversation_id, message):
-        """Abstract method called when a new message is received."""
-        pass
-
-    @gen.coroutine
-    def on_focus_update(self, conversation_id, user_ids, focus_status,
-                        focus_device):
-        """Abstract method called when conversation focus changes."""
-        pass
-
-    @gen.coroutine
-    def on_typing_update(self, conversation_id, user_ids, typing_status):
-        """Abstract method called when someone starts or stops typing."""
+    def on_event(self, event):
+        """Abstract method called with new events."""
         pass
 
     @gen.coroutine
@@ -333,39 +315,11 @@ class HangupsClient(object):
 
     @gen.coroutine
     def _on_push_data(self, data_bytes):
-        """Parse push data and call self._on_submsg for each submessage."""
+        """Parse push data and pass parsed events to on_event."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
-
-        message = None
-        conversation_id = None
-
-        # Process all new data before making any callbacks, so we won't make
-        # any redundant requests for data.
         for event in self._push_parser.get_events(data_bytes.decode()):
-
-            event_type = event['event_type']
-            if event_type == 'chat_message':
-                message = Message(text=event['text'],
-                                  user_chat_id=event['sender_ids'][0],
-                                  user_gaia_id=event['sender_ids'][1],
-                                  timestamp=event['timestamp'])
-                conversation_id = event['conversation_id']
-            elif event_type == 'conversation_update':
-                pass # TODO: pass this info along to the subclass
-            elif event_type == 'focus_update':
-                yield self.on_focus_update(
-                    event['conversation_id'], event['user_ids'],
-                    event['focus_status'], event['focus_device']
-                )
-            elif event_type == 'typing_update':
-                yield self.on_typing_update(
-                    event['conversation_id'], event['user_ids'],
-                    event['typing_status']
-                )
-
-        # Make callbacks for new data.
-        if message is not None:
-            yield self.on_message_receive(conversation_id, message)
+            logger.info('Received event: {}'.format(event))
+            yield self.on_event(event)
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""
