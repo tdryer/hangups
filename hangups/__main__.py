@@ -1,7 +1,6 @@
 """Demo chat client using Hangups."""
 
 from tornado import ioloop, gen
-from datetime import datetime
 import logging
 import time
 import urwid
@@ -225,12 +224,9 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def display_message(self, timestamp, user_id, text):
         """Display a new conversation message."""
-        # format the message
-        date_int = timestamp / 1000000
-        date_str = datetime.fromtimestamp(date_int).strftime('%I:%M:%S %p')
+        # format the message and add it to the list box
+        date_str = timestamp.astimezone().strftime('%I:%M:%S %p')
         name = self._participants[user_id]['first_name']
-
-        # add the message to the list box
         self._list_walker.append(urwid.Text([
             ('msg_date', '(' + date_str + ') '),
             ('msg_sender', name + ': '),

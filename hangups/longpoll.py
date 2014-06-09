@@ -4,6 +4,7 @@ import pprint
 import logging
 import re
 from collections import namedtuple
+import datetime
 
 from hangups import javascript
 
@@ -154,6 +155,12 @@ def _parse_payload(payload):
                 enumerate(payload[1][0][1:]) if msg is not None)
 
 
+def from_timestamp(timestamp):
+    """Convert a microsecond timestamp to a UTC datetime instance."""
+    return datetime.datetime.fromtimestamp(timestamp / 1000000,
+                                           datetime.timezone.utc)
+
+
 def _parse_chat_message(message):
     """Parse chat message message."""
     # The message content is a list of message segments, which have a
@@ -166,7 +173,7 @@ def _parse_chat_message(message):
         message_text += segment[1]
     return NewMessageEvent(
         conv_id=message[0][0][0],
-        timestamp=message[0][2], # TODO: convert to useful format
+        timestamp=from_timestamp(message[0][2]),
         sender_id=tuple(message[0][1]),
         text=message_text
     )
@@ -211,7 +218,7 @@ def _parse_focus_status(message):
     return FocusChangedEvent(
         conv_id=message[0][0],
         user_id=tuple(message[1]),
-        timestamp=message[2],
+        timestamp=from_timestamp(message[2]),
         focus_status=focus_status,
         focus_device=focus_device,
     )
@@ -236,10 +243,9 @@ def _parse_typing_status(message):
     return TypingChangedEvent(
         conv_id=message[0][0],
         user_id=tuple(message[1]),
-        timestamp=message[2],
+        timestamp=from_timestamp(message[2]),
         typing_status=typing_status,
     )
-
 
 # message types have been observed to range from 1 to 14
 MESSAGE_PARSERS = {
