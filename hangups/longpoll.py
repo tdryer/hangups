@@ -210,7 +210,7 @@ def _parse_focus_status(message):
     except KeyError:
         # TODO: should probably just discard the event in this case
         focus_status = None
-        logging.warning('Unknown focus status: {}'.format(message[3]))
+        logger.warning('Unknown focus status: {}'.format(message[3]))
 
     FOCUS_DEVICES = {
         20: 'desktop',
@@ -222,7 +222,7 @@ def _parse_focus_status(message):
         focus_device = FOCUS_DEVICES[message[4] if len(message) > 4 else None]
     except KeyError:
         focus_device = None
-        logging.warning('Unknown focus device: {}'.format(message[4]))
+        logger.warning('Unknown focus device: {}'.format(message[4]))
 
     return FocusChangedEvent(
         conv_id=message[0][0],
@@ -247,7 +247,7 @@ def _parse_typing_status(message):
         typing_status = TYPING_STATUSES[message[3]]
     except KeyError:
         typing_status = None # TODO should probably discard event in this case
-        logging.warning('Unknown typing status: {}'.format(message[3]))
+        logger.warning('Unknown typing status: {}'.format(message[3]))
 
     return TypingChangedEvent(
         conv_id=message[0][0],

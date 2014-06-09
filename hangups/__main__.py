@@ -355,7 +355,10 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='hangups.log', level=logging.DEBUG)
+    logging.basicConfig(
+        filename='hangups.log', level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
     try:
         ioloop.IOLoop.instance().run_sync(main)
     except KeyboardInterrupt:

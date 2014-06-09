@@ -155,11 +155,11 @@ class HangupsClient(object):
             # If it's been too short a time since we last connected, assume
             # something has gone wrong.
             if time.time() - last_connect_time < MIN_CONNECT_TIME:
-                logging.error('Disconnecting because last long-polling '
-                              'request was too short.')
+                logger.error('Disconnecting because last long-polling '
+                             'request was too short.')
                 break
             else:
-                logging.info('Opening new long-polling request')
+                logger.info('Opening new long-polling request')
             last_connect_time = time.time()
 
             self._push_parser = longpoll.PushDataParser()
@@ -177,7 +177,7 @@ class HangupsClient(object):
             try:
                 yield fetch_future
             except httpclient.HTTPError as e:
-                logging.error('Long-polling request failed: {}'.format(e))
+                logger.error('Long-polling request failed: {}'.format(e))
                 break
 
         yield self.on_disconnect()
@@ -257,8 +257,8 @@ class HangupsClient(object):
                 self._initial_conversations[id_]['participants'].append(
                     user_ids
                 )
-        logging.info('Found {} conversations'
-                     .format(len(self._initial_conversations)))
+        logger.info('Found {} conversations'
+                    .format(len(self._initial_conversations)))
 
         # build dict of contacts and their names (doesn't include users not in
         # contacts)
@@ -276,7 +276,7 @@ class HangupsClient(object):
                 'first_name': first_name,
                 'full_name': full_name,
             }
-        logging.info('Found {} contacts'.format(len(self._initial_contacts)))
+        logger.info('Found {} contacts'.format(len(self._initial_contacts)))
 
         # add self to the contacts
         self_contact = data_dict['ds:20'][0][2]
