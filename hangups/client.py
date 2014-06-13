@@ -124,45 +124,44 @@ class HangupsClient(object):
         self._cookies = cookies
         self._origin_url = origin_url
         yield self._init_talkgadget_1()
-        yield self._fetch_channel_sid()
 
     @gen.coroutine
     def run_forever(self):
         """Block forever to receive chat events."""
         url = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
-        params = {
-            'VER': 8,
-            'clid': self._clid,
-            'prop': self._channel_prop_param,
-            'ec': self._channel_ec_param,
-            'gsessionid': self._gsessionid,
-            'RID': 'rpc',
-            't': 1, # trial
-            'SID': self._channel_session_id,
-            'CI': 0,
-        }
         def streaming_callback(data):
             """Make the callback run a coroutine with exception handling."""
             future = self._on_push_data(data)
             ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
         is_connected = False
-        MIN_CONNECT_TIME = 60
-        # time we last tried to connect in seconds
-        last_connect_time = 0
+        # maximum number of times to retry after a failure
+        MAX_RETRIES = 1
+        retries = MAX_RETRIES
+        # whether a new SID is needed
+        need_new_sid = True
 
-        while True:
-            # If it's been too short a time since we last connected, assume
-            # something has gone wrong.
-            if time.time() - last_connect_time < MIN_CONNECT_TIME:
-                logger.error('Disconnecting because last long-polling '
-                             'request was too short.')
-                break
-            else:
-                logger.info('Opening new long-polling request')
-            last_connect_time = time.time()
+        while retries >= 0:
+
+            # Request a new SID if necessary.
+            if need_new_sid:
+                # TODO: error handling
+                # TODO: might need to sync any missed events
+                yield self._fetch_channel_sid()
+                need_new_sid = False
 
             self._push_parser = longpoll.PushDataParser()
+            params = {
+                'VER': 8,
+                'clid': self._clid,
+                'prop': self._channel_prop_param,
+                'ec': self._channel_ec_param,
+                'gsessionid': self._gsessionid,
+                'RID': 'rpc',
+                't': 1, # trial
+                'SID': self._channel_session_id,
+                'CI': 0,
+            }
             fetch_future = _fetch(url, params=params, cookies=self._cookies,
                                   streaming_callback=streaming_callback)
             # TODO: At this join we are "connected", but we don't know if the
@@ -177,18 +176,26 @@ class HangupsClient(object):
             try:
                 yield fetch_future
             except httpclient.HTTPError as e:
-                logger.error('Long-polling request failed: {}'.format(e))
+                # An error occurred, so decrement the number of retries.
+                retries -= 1
                 if e.code == 400 and e.response.reason == 'Unknown SID':
                     logger.error('Long-polling request because SID became '
-                                 'invalid.')
+                                 'invalid. Will attempt to recover.')
+                    need_new_sid = True
                 elif e.code == 599:
                     logger.error('Long-polling request because connection was '
-                                 'closed.')
+                                 'closed. Will attempt to recover.')
+                    # TODO: exponential backoff
                 else:
                     logger.error('Long-polling request for unknown reason: {}'
                                  .format(e))
-                break
+                    break # Do not retry.
+            else:
+                # The connection closed successfully, so reset the number of
+                # retries.
+                retries = MAX_RETRIES
 
+        logger.error('Ran out of retries for push channel')
         yield self.on_disconnect()
 
     ##########################################################################
