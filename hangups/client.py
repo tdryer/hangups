@@ -124,7 +124,7 @@ class HangupsClient(object):
         self._cookies = cookies
         self._origin_url = origin_url
         yield self._init_talkgadget_1()
-        yield self._init_talkgadget_2()
+        yield self._fetch_channel_sid()
 
     @gen.coroutine
     def run_forever(self):
@@ -178,6 +178,15 @@ class HangupsClient(object):
                 yield fetch_future
             except httpclient.HTTPError as e:
                 logger.error('Long-polling request failed: {}'.format(e))
+                if e.code == 400 and e.response.reason == 'Unknown SID':
+                    logger.error('Long-polling request because SID became '
+                                 'invalid.')
+                elif e.code == 599:
+                    logger.error('Long-polling request because connection was '
+                                 'closed.')
+                else:
+                    logger.error('Long-polling request for unknown reason: {}'
+                                 .format(e))
                 break
 
         yield self.on_disconnect()
@@ -236,7 +245,6 @@ class HangupsClient(object):
         self._header_version = data_dict['ds:2'][0][6]
         self._header_id = data_dict['ds:4'][0][7]
         self._channel_path = data_dict['ds:4'][0][1]
-        self._gsessionid = data_dict['ds:4'][0][3]
         self._clid = data_dict['ds:4'][0][7]
         self._channel_ec_param = data_dict['ds:4'][0][4]
         self._channel_prop_param = data_dict['ds:4'][0][5]
@@ -287,23 +295,21 @@ class HangupsClient(object):
         }
 
     @gen.coroutine
-    def _init_talkgadget_2(self):
-        """Make second talkgadget request and parse response."""
+    def _fetch_channel_sid(self):
+        """Request a new session ID for the push channel."""
+        logger.info('Requesting new session ID...')
         url = 'https://talkgadget.google.com{}bind'.format(self._channel_path)
         params = {
             'VER': 8,
             'clid': self._clid,
-            'prop': self._channel_prop_param,
             'ec': self._channel_ec_param,
-            'gsessionid': self._gsessionid,
-            'RID': 81187, # TODO
-            'CVER': 1,
-            't': 1, # trial
+            'RID': 81187, # TODO: "request ID"? should probably increment
         }
         res = yield _fetch(url, method='POST', cookies=self._cookies,
                            params=params, data='count=0')
-        logger.debug('Second talkgadget request result:\n{}'.format(res.body))
+        logger.debug('Fetch SID response:\n{}'.format(res.body))
         if res.code != 200:
+            # TODO use better exception
             raise ValueError("Second talkgadget request failed with {}: {}"
                              .format(res.code, res.raw.read()))
         p = longpoll.PushDataParser()
@@ -312,6 +318,9 @@ class HangupsClient(object):
         val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
         self._header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
         self._channel_session_id = res[0][1][1]
+        self._gsessionid = res[4][1][1][1][1]
+        logger.info('Received new session ID: {}'
+                    .format(self._channel_session_id))
 
     @gen.coroutine
     def _on_push_data(self, data_bytes):
