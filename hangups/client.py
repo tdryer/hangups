@@ -311,6 +311,8 @@ class HangupsClient(object):
             'clid': self._clid,
             'ec': self._channel_ec_param,
             'RID': 81187, # TODO: "request ID"? should probably increment
+            # Required if we want our client to be called "AChromeExtension":
+            'prop': self._channel_prop_param,
         }
         res = yield _fetch(url, method='POST', cookies=self._cookies,
                            params=params, data='count=0')
