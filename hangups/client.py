@@ -38,6 +38,31 @@ def _fetch(url, method='GET', params=None, headers=None, cookies=None,
     return res
 
 
+def _parse_sid_response(res):
+    """Parse response format for request for new channel SID.
+
+    Returns (SID, header_client, gsessionid).
+    """
+    sid = None
+    header_client = None
+    gsessionid = None
+
+    p = longpoll.PushDataParser()
+    res = javascript.loads(list(p.get_submissions(res.decode()))[0])
+    for segment in res:
+        num, message = segment
+        if num == 0:
+            sid = message[1]
+        elif message[0] == 'c':
+            type_ = message[1][1][0]
+            if type_ == 'cfj':
+                header_client = message[1][1][1].split('/')[1]
+            elif type_ == 'ei':
+                gsessionid = message[1][1][1]
+
+    return(sid, header_client, gsessionid)
+
+
 class HangupsClient(object):
     """Abstract class for writing chat clients.
 
@@ -297,16 +322,12 @@ class HangupsClient(object):
         logger.debug('Fetch SID response:\n{}'.format(res.body))
         if res.code != 200:
             # TODO use better exception
-            raise ValueError("Second talkgadget request failed with {}: {}"
+            raise ValueError("SID fetch request failed with {}: {}"
                              .format(res.code, res.raw.read()))
-        p = longpoll.PushDataParser()
-        res = javascript.loads(list(p.get_submissions(res.body.decode()))[0])
-        # TODO: this parsing needs to be more sophisticated
         # TODO: handle errors here
-        val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
-        self._header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
-        self._channel_session_id = res[0][1][1]
-        self._gsessionid = res[4][1][1][1][1]
+        self._channel_session_id, self._header_client, self._gsessionid = (
+            _parse_sid_response(res.body)
+        )
         logger.info('Received new session ID: {}'
                     .format(self._channel_session_id))
 
