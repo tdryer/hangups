@@ -124,71 +124,49 @@ class HangupsClient(object):
         self._cookies = cookies
         self._origin_url = origin_url
         yield self._init_talkgadget_1()
+        yield self.on_connect(self._initial_conversations,
+                              self._initial_contacts,
+                              self._self_user_ids)
 
     @gen.coroutine
     def run_forever(self):
-        """Block forever to receive chat events."""
-        url = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
-        def streaming_callback(data):
-            """Make the callback run a coroutine with exception handling."""
-            future = self._on_push_data(data)
-            ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
+        """Make repeated long-polling requests to receive events.
 
-        is_connected = False
-        # maximum number of times to retry after a failure
-        MAX_RETRIES = 1
-        retries = MAX_RETRIES
-        # whether a new SID is needed
-        need_new_sid = True
+        This method only returns when the connection has been closed due to an
+        error.
+        """
+        MAX_RETRIES = 1  # maximum number of times to retry after a failure
+        retries = MAX_RETRIES # number of remaining retries
+        need_new_sid = True  # whether a new SID is needed
 
         while retries >= 0:
-
-            # Request a new SID if necessary.
+            # Request a new SID if we don't have one yet, or the previous one
+            # became invalid.
             if need_new_sid:
                 # TODO: error handling
                 # TODO: might need to sync any missed events
                 yield self._fetch_channel_sid()
                 need_new_sid = False
-
+            # Clear any previous push data, since if there was an error it
+            # could contain garbage.
             self._push_parser = longpoll.PushDataParser()
-            params = {
-                'VER': 8,
-                'clid': self._clid,
-                'prop': self._channel_prop_param,
-                'ec': self._channel_ec_param,
-                'gsessionid': self._gsessionid,
-                'RID': 'rpc',
-                't': 1, # trial
-                'SID': self._channel_session_id,
-                'CI': 0,
-            }
-            fetch_future = _fetch(url, params=params, cookies=self._cookies,
-                                  streaming_callback=streaming_callback)
-            # TODO: At this join we are "connected", but we don't know if the
-            # request was successful.
-            if not is_connected:
-                yield self.on_connect(self._initial_conversations,
-                                      self._initial_contacts,
-                                      self._self_user_ids)
-                is_connected = True
-
-            # Wait for response to finish.
             try:
-                yield fetch_future
+                yield self._longpoll_request()
             except httpclient.HTTPError as e:
                 # An error occurred, so decrement the number of retries.
                 retries -= 1
                 if e.code == 400 and e.response.reason == 'Unknown SID':
-                    logger.error('Long-polling request because SID became '
-                                 'invalid. Will attempt to recover.')
+                    logger.error('Long-polling request failed because SID '
+                                 'became invalid. Will attempt to recover.')
                     need_new_sid = True
                 elif e.code == 599:
-                    logger.error('Long-polling request because connection was '
-                                 'closed. Will attempt to recover.')
+                    logger.error('Long-polling request failed because '
+                                 'connection was closed. Will attempt to '
+                                 'recover.')
                     # TODO: exponential backoff
                 else:
-                    logger.error('Long-polling request for unknown reason: {}'
-                                 .format(e))
+                    logger.error('Long-polling request failed for unknown '
+                                 'reason: {}'.format(e))
                     break # Do not retry.
             else:
                 # The connection closed successfully, so reset the number of
@@ -323,6 +301,7 @@ class HangupsClient(object):
                              .format(res.code, res.raw.read()))
         p = longpoll.PushDataParser()
         res = javascript.loads(list(p.get_submissions(res.body.decode()))[0])
+        # TODO: this parsing needs to be more sophisticated
         # TODO: handle errors here
         val = res[3][1][1][1][1] # ex. foo@bar.com/AChromeExtensionBEEFBEEF
         self._header_client = val.split('/')[1] # ex. AChromeExtensionwBEEFBEEF
@@ -330,6 +309,33 @@ class HangupsClient(object):
         self._gsessionid = res[4][1][1][1][1]
         logger.info('Received new session ID: {}'
                     .format(self._channel_session_id))
+
+    @gen.coroutine
+    def _longpoll_request(self):
+        """Open a long-polling request to receive push events.
+
+        Raises HTTPError.
+        """
+        def streaming_callback(data):
+            """Make the callback run a coroutine with exception handling."""
+            future = self._on_push_data(data)
+            ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
+        params = {
+            'VER': 8,
+            'clid': self._clid,
+            'prop': self._channel_prop_param,
+            'ec': self._channel_ec_param,
+            'gsessionid': self._gsessionid,
+            'RID': 'rpc',
+            't': 1, # trial
+            'SID': self._channel_session_id,
+            'CI': 0,
+        }
+        URL = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
+        res = yield _fetch(URL, params=params, cookies=self._cookies,
+                           streaming_callback=streaming_callback)
+        return res
+
 
     @gen.coroutine
     def _on_push_data(self, data_bytes):
