@@ -79,12 +79,11 @@ class PushDataParser(object):
         One submission may contain multiple messages.
         """
         for submission in self.get_submissions(new_data):
-            # Get submission payload, or None if it doesn't have one we care
-            # about.
-            payload = _get_submission_payload(submission)
-            if payload is not None:
-                # yield messages from the payload
-                yield from _parse_payload(payload)
+            # For each submission payload, yield its messages
+            for payload in _get_submission_payloads(submission):
+                if payload is not None:
+                    yield from _parse_payload(payload)
+
 
     def get_events(self, new_data):
         """Yield events generated from received data."""
@@ -95,49 +94,55 @@ class PushDataParser(object):
                 yield MESSAGE_PARSERS[msg_type](msg)
 
 
-def _get_submission_payload(submission):
-    """Return a submission's payload, or None if it doesn't have one."""
-    sub = javascript.loads(submission)
-    payload = None
+def _get_submission_payloads(submission):
+    """Yield a submission's payloads.
 
-    # the submission number, increments with each message
-    sub_num = sub[0][0]
-    # the submission type
-    sub_type = sub[0][1][0]
+    Most submissions only contain one payload, but if the long-polling
+    connection was closed while something happened, there can be multiple
+    payloads.
+    """
+    for sub in javascript.loads(submission):
 
-    if sub_type == 'c':
+        # the submission number, increments with each payload
+        # sub_num = sub[0]
+        # the submission type
+        sub_type = sub[1][0]
 
-        # session ID, should be the same for every request
-        session_id = sub[0][1][1][0]
-        # payload type
-        payload_type = sub[0][1][1][1][0]
+        if sub_type == 'c':
 
-        if payload_type == 'bfo':
-            # Payload is submessages in the list format. These are the payloads
-            # we care about.
-            return javascript.loads(sub[0][1][1][1][1])
-        elif payload_type == 'tm':
-            # Payload is object format. I'm not sure what these are for, but
-            # they don't seem very important.
-            pass
-        elif payload_type == 'wh':
-            # Payload is null. These messages don't contain any information
-            # other than the session_id, and appear to be just heartbeats.
-            pass
-        elif payload_type == 'otr':
-            # Not sure what this is for, might be something to do with XMPP.
+            # session ID, should be the same for every request
+            # session_id = sub[1][1][0]
+            # payload type
+            payload_type = sub[1][1][1][0]
+
+            if payload_type == 'bfo':
+                # Payload is submessages in the list format. These are the
+                # payloads we care about.
+                yield javascript.loads(sub[1][1][1][1])
+            elif payload_type == 'tm':
+                # Payload is object format. I'm not sure what these are for,
+                # but they don't seem very important.
+                pass
+            elif payload_type == 'wh':
+                # Payload is null. These messages don't contain any information
+                # other than the session_id, and appear to be just heartbeats.
+                pass
+            elif payload_type == 'otr':
+                # Not sure what this is for, might be something to do with
+                # XMPP.
+                pass
+            else:
+                logger.warning(
+                    'Got submission with unknown payload type {}:\n{}'
+                    .format(payload_type, sub)
+                )
+        elif sub_type == 'noop':
+            # These contain no information and only seem to appear once as the
+            # first message when a channel is opened.
             pass
         else:
-            logger.warning('Got submission with unknown payload type {}:\n{}'
-                           .format(payload_type, sub))
-    elif sub_type == 'noop':
-        # These contain no information and only seem to appear once as the
-        # first message when a channel is opened.
-        pass
-    else:
-        logger.warning('Got submission with unknown submission type: {}\n{}'
-                       .format(sub_type, sub))
-    return payload
+            logger.warning('Got submission with unknown submission type: {}\n{}'
+                           .format(sub_type, sub))
 
 
 def _parse_payload(payload):
