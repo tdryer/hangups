@@ -1,6 +1,6 @@
 """Abstract class for writing chat clients."""
 
-from tornado import ioloop, gen, httpclient, httputil
+from tornado import ioloop, gen, httpclient, httputil, concurrent
 import hashlib
 import http.cookies
 import json
@@ -8,6 +8,7 @@ import logging
 import random
 import re
 import time
+import datetime
 
 from hangups import javascript, longpoll
 
@@ -36,6 +37,13 @@ def _fetch(url, method='GET', params=None, headers=None, cookies=None,
         streaming_callback=streaming_callback, request_timeout=60*60
     ))
     return res
+
+
+@concurrent.return_future
+def _future_sleep(seconds, callback=None):
+    """Return a future that finishes after a given number of seconds."""
+    ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=seconds),
+                                         callback)
 
 
 def _parse_sid_response(res):
@@ -160,11 +168,19 @@ class HangupsClient(object):
         This method only returns when the connection has been closed due to an
         error.
         """
-        MAX_RETRIES = 2  # maximum number of times to retry after a failure
+        MAX_RETRIES = 5  # maximum number of times to retry after a failure
         retries = MAX_RETRIES # number of remaining retries
         need_new_sid = True  # whether a new SID is needed
 
         while retries >= 0:
+            # After the first failed retry, back off exponentially longer after
+            # each attempt.
+            if retries + 1 < MAX_RETRIES:
+                backoff_seconds = 2 ** (MAX_RETRIES - retries)
+                logger.info('Backing off for {} seconds'
+                            .format(backoff_seconds))
+                yield _future_sleep(backoff_seconds)
+
             # Request a new SID if we don't have one yet, or the previous one
             # became invalid.
             if need_new_sid:
@@ -184,10 +200,13 @@ class HangupsClient(object):
                                  'became invalid. Will attempt to recover.')
                     need_new_sid = True
                 elif e.code == 599:
+                    # TODO: Depending on how the connection is lost, it may
+                    # hang for a long time before an exception is raised, so we
+                    # need a another way of determining that the connection is
+                    # alive.
                     logger.error('Long-polling request failed because '
                                  'connection was closed. Will attempt to '
                                  'recover.')
-                    # TODO: exponential backoff
                 else:
                     logger.error('Long-polling request failed for unknown '
                                  'reason: {}'.format(e))
@@ -199,7 +218,7 @@ class HangupsClient(object):
 
             # TODO: If there was an error, messages could be lost in this time.
 
-        logger.error('Ran out of retries for push channel')
+        logger.error('Ran out of retries for long-polling request')
         yield self.on_disconnect()
 
     ##########################################################################
@@ -354,6 +373,7 @@ class HangupsClient(object):
             'CI': 0,
         }
         URL = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
+        logger.info('Opening new long-polling request')
         res = yield _fetch(URL, params=params, cookies=self._cookies,
                            streaming_callback=streaming_callback)
         return res
