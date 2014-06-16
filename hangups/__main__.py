@@ -335,7 +335,7 @@ class TabbedWindowWidget(urwid.WidgetWrap):
 
 
 @gen.coroutine
-def main():
+def main_coroutine():
     """Start an example chat client."""
     # prepare urwid UI
     top_widget = urwid.Filler(urwid.Text('loading...'))
@@ -354,16 +354,21 @@ def main():
     loop.run()
 
 
-if __name__ == '__main__':
+def main():
+    """Main entry point."""
     logging.basicConfig(
         filename='hangups.log', level=logging.DEBUG,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     try:
-        ioloop.IOLoop.instance().run_sync(main)
+        ioloop.IOLoop.instance().run_sync(main_coroutine)
     except KeyboardInterrupt:
         pass
     except:
         # XXX this is needed to get exceptions out of urwid for some reason
         print('')
         raise
+
+
+if __name__ == '__main__':
+    main()
