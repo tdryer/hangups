@@ -160,7 +160,7 @@ class HangupsClient(object):
         This method only returns when the connection has been closed due to an
         error.
         """
-        MAX_RETRIES = 1  # maximum number of times to retry after a failure
+        MAX_RETRIES = 2  # maximum number of times to retry after a failure
         retries = MAX_RETRIES # number of remaining retries
         need_new_sid = True  # whether a new SID is needed
 
@@ -169,7 +169,6 @@ class HangupsClient(object):
             # became invalid.
             if need_new_sid:
                 # TODO: error handling
-                # TODO: might need to sync any missed events
                 yield self._fetch_channel_sid()
                 need_new_sid = False
             # Clear any previous push data, since if there was an error it
@@ -197,6 +196,8 @@ class HangupsClient(object):
                 # The connection closed successfully, so reset the number of
                 # retries.
                 retries = MAX_RETRIES
+
+            # TODO: If there was an error, messages could be lost in this time.
 
         logger.error('Ran out of retries for push channel')
         yield self.on_disconnect()
