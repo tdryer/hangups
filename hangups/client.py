@@ -30,11 +30,12 @@ def _fetch(url, method='GET', params=None, headers=None, cookies=None,
         headers['cookie'] = '; '.join(val.output(header='')[1:]
                                       for val in simple_cookies.values())
     http_client = httpclient.AsyncHTTPClient()
-    # set the timeout nice and nice for long-polling
+    # Set the request timeout just high enough for long-polling.
     res = yield http_client.fetch(httpclient.HTTPRequest(
         httputil.url_concat(url, params), method=method,
         headers=httputil.HTTPHeaders(headers), body=data,
-        streaming_callback=streaming_callback, request_timeout=60*60
+        streaming_callback=streaming_callback, connect_timeout=10,
+        request_timeout=60*4
     ))
     return res
 
