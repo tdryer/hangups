@@ -176,7 +176,13 @@ def _parse_chat_message(message):
     if len(message_content) > 0:
         for segment in message_content:
             # known types: 0: text, 1: linebreak, 2: link
-            message_text += segment[1]
+            # Hangouts for Android (unlike the Chrome extension) doesn't set
+            # the message text for linebreaks, so we have to handle that case
+            # separately.
+            if segment[0] == 1:
+                message_text += '\n'
+            else:
+                message_text += segment[1]
     else:
         # Try to parse an image message. Image messages contain no message
         # segments, and thus have no automatic textual fallback.
