@@ -101,6 +101,10 @@ class DemoClient(hangups.HangupsClient):
 
     @gen.coroutine
     def on_event(self, event):
+        conv_widget = self._conv_widgets.get(event.conv_id)
+        if conv_widget is not None:
+            conv_widget.on_event(event)
+
         if isinstance(event, hangups.NewMessageEvent):
 
             # pass the message to the approproate ConversationWidget
@@ -195,6 +199,36 @@ class ReturnableEdit(urwid.Edit):
         else:
             return key
 
+
+class StatusLineWidget(urwid.WidgetWrap):
+    """Widget for showing typing status."""
+
+    def __init__(self, participants_dict):
+        self._widget = urwid.Text('', align='center')
+        self._typing_statuses = {}
+        self._participants = participants_dict
+        super().__init__(self._widget)
+
+    def on_event(self, event):
+        """Handle events."""
+        if isinstance(event, hangups.TypingChangedEvent):
+            self._typing_statuses[event.user_id] = event.typing_status
+        elif isinstance(event, hangups.NewMessageEvent):
+            self._typing_statuses[event.sender_id] = 'stopped'
+
+        typers = [self._participants[user_id]['first_name']
+                  for user_id, status in self._typing_statuses.items()
+                  if status == 'typing']
+        if len(typers) > 0:
+            msg = '{} {} typing...'.format(
+                ', '.join(sorted(typers)),
+                'is' if len(typers) == 1 else 'are'
+            )
+        else:
+            msg = ''
+        self._widget.set_text(msg)
+
+
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
@@ -209,13 +243,19 @@ class ConversationWidget(urwid.WidgetWrap):
 
         self._list_walker = urwid.SimpleFocusListWalker([])
         self._list_box = urwid.ListBox(self._list_walker)
+        self._status_widget = StatusLineWidget(participants_dict)
         self._widget = urwid.Pile([
             ('weight', 1, self._list_box),
+            ('pack', self._status_widget),
             ('pack', ReturnableEdit(self._on_return, caption='Send message: ')),
         ])
         # focus the edit widget by default
         self._widget.focus_position = 1
         super().__init__(self._widget)
+
+    def on_event(self, event):
+        """Handle events."""
+        self._status_widget.on_event(event)
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
