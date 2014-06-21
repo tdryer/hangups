@@ -2,7 +2,6 @@
 
 from tornado import ioloop, gen
 import logging
-import time
 import urwid
 from itertools import chain
 
@@ -59,11 +58,11 @@ class DemoClient(hangups.HangupsClient):
         """Add conversation tab if not present, and optionally switch to it."""
         conv_widget = self.get_conv_widget(conv_id)
         try:
-            self._tabbed_window.change_tab(
-                self._tabbed_window.index(conv_widget)
-            )
+            index = self._tabbed_window.index(conv_widget)
         except ValueError:
-            self._tabbed_window.add_tab(conv_widget, switch=switch)
+            index = self._tabbed_window.add_tab(conv_widget)
+        if switch:
+            self._tabbed_window.change_tab(index)
 
     @gen.coroutine
     def on_select_conversation(self, conv_id):
@@ -101,28 +100,14 @@ class DemoClient(hangups.HangupsClient):
 
     @gen.coroutine
     def on_event(self, event):
-        conv_widget = self._conv_widgets.get(event.conv_id)
-        if conv_widget is not None:
-            conv_widget.on_event(event)
-
-        if isinstance(event, hangups.NewMessageEvent):
-
-            # pass the message to the approproate ConversationWidget
+        """Handle events."""
+        # Filter events we don't care about and don't want to open tabs for.
+        if type(event) in [hangups.NewMessageEvent,
+                           hangups.TypingChangedEvent]:
             conv_widget = self.get_conv_widget(event.conv_id)
-            conv_widget.display_message(event.timestamp, event.sender_id,
-                                        event.text)
-
+            conv_widget.on_event(event)
             # open conversation tab in the background if not already present
             self.add_conversation_tab(event.conv_id)
-
-            # respond to a \time message with the unix time
-            if event.text == '\\time':
-                name = self.get_contact_name(event.sender_id)
-                response = ('Hi {}, the current unix time is {}.'
-                            .format(name, int(time.time())))
-                yield self.send_message(event.conv_id, response)
-
-        # TODO: use the other event types
 
     @gen.coroutine
     def on_disconnect(self):
@@ -256,13 +241,15 @@ class ConversationWidget(urwid.WidgetWrap):
     def on_event(self, event):
         """Handle events."""
         self._status_widget.on_event(event)
+        if isinstance(event, hangups.NewMessageEvent):
+            self._display_message(event.timestamp, event.sender_id, event.text)
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
         future = self._send_message_coroutine(self._conv_id, text)
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
-    def display_message(self, timestamp, user_id, text):
+    def _display_message(self, timestamp, user_id, text):
         """Display a new conversation message."""
         # format the message and add it to the list box
         date_str = timestamp.astimezone().strftime('%I:%M:%S %p')
@@ -354,12 +341,11 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         else:
             return key
 
-    def add_tab(self, widget, switch=False):
-        """Add a new tab and optionally switch to it."""
+    def add_tab(self, widget):
+        """Add a new tab and return its index."""
         self._window_widget_list.append(widget)
         self._tab_widget._invalidate()
-        if switch:
-            self.change_tab(self._tab_widget.get_num_tabs() - 1)
+        return self._tab_widget.get_num_tabs() - 1
 
     def change_tab(self, index):
         """Change to the tab at the given index."""
