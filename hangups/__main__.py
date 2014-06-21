@@ -250,7 +250,7 @@ class ConversationWidget(urwid.WidgetWrap):
             ('pack', ReturnableEdit(self._on_return, caption='Send message: ')),
         ])
         # focus the edit widget by default
-        self._widget.focus_position = 1
+        self._widget.focus_position = 2
         super().__init__(self._widget)
 
     def on_event(self, event):
