@@ -316,6 +316,7 @@ class HangupsClient(object):
 
         # build dict of conversations and their participants
         self._initial_conversations = {}
+        self._initial_contacts = {}
         conversations = data_dict['ds:19'][0][3]
         for c in conversations:
             id_ = c[1][0][0]
@@ -330,12 +331,20 @@ class HangupsClient(object):
                 self._initial_conversations[id_]['participants'].append(
                     user_ids
                 )
+                # Add the user to our list of contacts if their name is
+                # present. This is a hack to deal with some contacts not being
+                # found via the other methods.
+                if len(p) > 1:
+                    display_name = p[1]
+                    self._initial_contacts[user_ids] = {
+                        'first_name': display_name.split()[0],
+                        'full_name': display_name,
+                    }
         logger.info('Found {} conversations'
                     .format(len(self._initial_conversations)))
 
         # build dict of contacts and their names (doesn't include users not in
         # contacts)
-        self._initial_contacts = {}
         contacts_main = data_dict['ds:21'][0]
         # contacts_main[2] has some, but the format is slightly different
         contacts = (contacts_main[4][2] + contacts_main[5][2] +
