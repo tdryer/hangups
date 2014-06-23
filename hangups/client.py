@@ -72,6 +72,32 @@ def _parse_sid_response(res):
     return(sid, header_client, gsessionid)
 
 
+def _parse_user_entity(entity):
+    """Parse entities returned from the getentitybyid endpoint.
+
+    Raises ValueError if the entity cannot be parsed.
+    """
+    # Known entity types:
+    # GAIA: regular user
+    # INVALID: entity does not exist
+    entity_type = entity.get('entity_type', None)
+    if entity_type != 'GAIA':
+        raise ValueError('Cannot parse entity with entity type {}'
+                         .format(entity_type))
+    try:
+        chat_id = entity['id']['chat_id']
+        gaia_id = entity['id']['gaia_id']
+    except KeyError:
+        raise ValueError('Cannot determine entity ID')
+    properties = entity.get('properties', {})
+    return {
+        'chat_id': chat_id,
+        'gaia_id': gaia_id,
+        'first_name': properties.get('first_name', 'UNKNOWN'),
+        'full_name': properties.get('display_name', 'UNKNOWN'),
+    }
+
+
 class HangupsClient(object):
     """Abstract class for writing chat clients.
 
@@ -132,19 +158,27 @@ class HangupsClient(object):
     @gen.coroutine
     def get_users(self, user_ids_list):
         """Look up a list of users by their IDs."""
-        chat_ids = [u[0] for u in user_ids_list] # TODO should be chat_id
+        chat_ids = [u[0] for u in user_ids_list]
         res = yield self._getentitybyid(chat_ids)
-        # TODO handle users that are not found
         users = {}
-        for entity in res['entity_result']:
-            entity = entity['entity'][0]
-            user_ids = (entity['id']['chat_id'], entity['id']['gaia_id'])
-            first_name = entity['properties']['first_name']
-            full_name = entity['properties']['display_name']
-            users[user_ids] = {
-                'first_name': first_name,
-                'full_name': full_name,
-            }
+        for entity in res['entity']:
+            try:
+                user = _parse_user_entity(entity)
+            except ValueError as e:
+                logger.warning('Failed to parse user entity: {}: {}'
+                               .format(e, entity))
+            else:
+                users[(user['chat_id'], user['gaia_id'])] = {
+                    'first_name': user['first_name'],
+                    'full_name': user['full_name'],
+                }
+        # Return stubs for users that we could not look up.
+        for chat_id in chat_ids:
+            if (chat_id, chat_id) not in users:
+                users[(chat_id, chat_id)] = {
+                    'first_name': 'UNKNOWN',
+                    'full_name': 'UNKNOWN',
+                }
         return users
 
     @gen.coroutine
