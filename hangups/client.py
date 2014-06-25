@@ -16,6 +16,14 @@ from hangups import javascript, longpoll
 logger = logging.getLogger(__name__)
 
 
+# Set the connection timeout low so we fail fast when there's a network
+# problem.
+CONNECT_TIMEOUT = 10
+# Set the request timeout high enough for long-polling (the requests last ~3-4
+# minutes), but low enough that we find out fast if there's a network problem.
+REQUEST_TIMEOUT = 60*5
+
+
 @gen.coroutine
 def _fetch(url, method='GET', params=None, headers=None, cookies=None,
            data=None, streaming_callback=None):
@@ -30,12 +38,11 @@ def _fetch(url, method='GET', params=None, headers=None, cookies=None,
         headers['cookie'] = '; '.join(val.output(header='')[1:]
                                       for val in simple_cookies.values())
     http_client = httpclient.AsyncHTTPClient()
-    # Set the request timeout just high enough for long-polling.
     res = yield http_client.fetch(httpclient.HTTPRequest(
         httputil.url_concat(url, params), method=method,
         headers=httputil.HTTPHeaders(headers), body=data,
-        streaming_callback=streaming_callback, connect_timeout=10,
-        request_timeout=60*4
+        streaming_callback=streaming_callback, connect_timeout=CONNECT_TIMEOUT,
+        request_timeout=REQUEST_TIMEOUT
     ))
     return res
 
