@@ -4,6 +4,7 @@ from tornado import ioloop, gen
 import logging
 import urwid
 from itertools import chain
+from math import floor, ceil
 
 import hangups
 
@@ -17,6 +18,7 @@ URWID_PALETTE = [
     ('active_tab', 'light gray', 'light blue'),
     ('inactive_tab', 'underline', 'light green'),
     ('tab_background', 'underline', 'black'),
+    ('status_line', '', 'black'),
 ]
 
 
@@ -189,10 +191,22 @@ class StatusLineWidget(urwid.WidgetWrap):
     """Widget for showing typing status."""
 
     def __init__(self, participants_dict):
-        self._widget = urwid.Text('', align='center')
+        self._widget = urwid.Text('')
         self._typing_statuses = {}
         self._participants = participants_dict
         super().__init__(self._widget)
+
+    def render(self, size, focus=False):
+        # custom render function to change background colour
+        msg = self._widget.text
+        msg = msg if isinstance(msg, bytes) else msg.encode()
+        num_padding = (size[0] - len(msg))
+        # center the text by putting padding on each side
+        padding_left = b' ' * floor(num_padding / 2)
+        padding_right = b' ' * ceil(num_padding / 2)
+        text = ('status_line', padding_left + msg + padding_right)
+        self._widget.set_text(text)
+        return super().render(size, focus)
 
     def on_event(self, event):
         """Handle events."""
