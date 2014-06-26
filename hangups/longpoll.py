@@ -172,7 +172,14 @@ def _parse_chat_message(message):
     # type. For now, let's ignore the types and just use the textual
     # representation, appending all the segments into one string.
     message_text = ''
-    message_content = message[0][6][2][0]
+    try:
+        message_content = message[0][6][2][0]
+    except (TypeError, IndexError):
+        # Sometimes there aren't actually chat messages (conversation name
+        # changes, and video call initiations).
+        # TODO: handle these cases
+        logger.warning('Failed to parse chat message')
+        return None
     if len(message_content) > 0:
         for segment in message_content:
             # known types: 0: text, 1: linebreak, 2: link
@@ -189,8 +196,9 @@ def _parse_chat_message(message):
         try:
             # set the message text to the image URL
             message_text = list(message[0][6][2][1][0][0][1].values())[0][0][3]
-        except (IndexError, ValueError) as e:
+        except (TypeError, IndexError, ValueError) as e:
             logger.warning('Failed to parse image message: {}'.format(e))
+            return None
     return NewMessageEvent(
         conv_id=message[0][0][0],
         timestamp=from_timestamp(message[0][2]),
