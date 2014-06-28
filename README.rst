@@ -15,7 +15,7 @@ but this restricts features like group messaging that hangups allows.
 hangups is working, but is pre-alpha quality. The API will change, and it
 shouldn't be relied on for serious work.
 
-.. image:: screenshot.png
+`Screenshot <https://github.com/tdryer/hangups/blob/master/screenshot.png>`
 
 What works
 ----------
