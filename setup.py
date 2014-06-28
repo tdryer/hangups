@@ -18,7 +18,7 @@ with open('README.rst') as f:
 
 setup(
     name='hangups',
-    version='0.1',
+    version='0.1.1',
     description=('reverse-engineered library and basic client for using '
                  'Google\'s Hangouts chat protocol'),
     long_description=readme,
