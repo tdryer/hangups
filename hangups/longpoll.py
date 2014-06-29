@@ -14,9 +14,17 @@ PP = pprint.PrettyPrinter(indent=4)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 
 
+User = namedtuple('User', ['id_', 'full_name', 'first_name'])
+
+
+UserID = namedtuple('UserID', ['chat_id', 'gaia_id'])
+
+
 ConnectedEvent = namedtuple('ConnectedEvent', [])
 
+
 DisconnectedEvent = namedtuple('DisconnectedEvent', [])
+
 
 NewMessageEvent = namedtuple('NewMessageEvent', [
     'conv_id', 'sender_id', 'timestamp', 'text'
@@ -206,7 +214,7 @@ def _parse_chat_message(message):
     return NewMessageEvent(
         conv_id=message[0][0][0],
         timestamp=from_timestamp(message[0][2]),
-        sender_id=tuple(message[0][1]),
+        sender_id=UserID(chat_id=message[0][1][0], gaia_id=message[0][1][0]),
         text=message_text
     )
 
@@ -249,7 +257,7 @@ def _parse_focus_status(message):
 
     return FocusChangedEvent(
         conv_id=message[0][0],
-        user_id=tuple(message[1]),
+        user_id=UserID(chat_id=message[1][0], gaia_id=message[1][1]),
         timestamp=from_timestamp(message[2]),
         focus_status=focus_status,
         focus_device=focus_device,
@@ -274,7 +282,7 @@ def _parse_typing_status(message):
 
     return TypingChangedEvent(
         conv_id=message[0][0],
-        user_id=tuple(message[1]),
+        user_id=UserID(chat_id=message[1][0], gaia_id=message[1][1]),
         timestamp=from_timestamp(message[2]),
         typing_status=typing_status,
     )

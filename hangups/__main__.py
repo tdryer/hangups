@@ -68,10 +68,6 @@ class UserInterface(object):
             )
         return self._conv_widgets[conv_id]
 
-    def get_contact_name(self, user_ids):
-        """Return the name of a contact."""
-        return self.contacts[user_ids]['first_name']
-
     def add_conversation_tab(self, conv_id, switch=False):
         """Add conversation tab if not present, and optionally switch to it."""
         conv_widget = self.get_conv_widget(conv_id)
@@ -92,9 +88,9 @@ class UserInterface(object):
     def on_connect(self):
         """Handle connecting for the first time."""
         # TODO: add public api for getting these
-        self.contacts = self._client._initial_contacts
+        self.contacts = self._client.users._users
         self.conversations = self._client._initial_conversations
-        self._self_user_ids = self._client._self_user_ids
+        self._self_user_ids = self._client.users.get_self_id()
 
         # populate the contacts dict with users who aren't in our contacts
         required_users = set(chain.from_iterable(
@@ -103,7 +99,7 @@ class UserInterface(object):
         ))
         missing_users = required_users - set(self.contacts)
         if missing_users:
-            users = yield self._client.get_users(missing_users)
+            users = yield self._client.users.get_users(missing_users)
             self.contacts.update(users)
 
         # show the conversation menu
@@ -137,7 +133,7 @@ class UserInterface(object):
         print('Connection lost')
 
 
-def get_conv_name(self_user_ids, participants_dict, truncate=False):
+def get_conv_name(self_user_id, participants_dict, truncate=False):
     """Return the readable name for a conversation.
 
     For one-to-one conversations, the name is the full name of the other user.
@@ -145,11 +141,11 @@ def get_conv_name(self_user_ids, participants_dict, truncate=False):
 
     If truncate is true, only show up to two names in a group conversation.
     """
-    participants = [p for ids, p in participants_dict.items()
-                    if ids != self_user_ids]
-    names = sorted(p['first_name'] for p in participants)
+    participants = [user for user_id, user in participants_dict.items()
+                    if user_id != self_user_id]
+    names = sorted(user.first_name for user in participants)
     if len(participants) == 1:
-        return participants[0]['full_name']
+        return participants[0].full_name
     elif truncate and len(participants) > 2:
         return ', '.join(names[:2] + ['+{}'.format(len(names) - 2)])
     else:
@@ -245,7 +241,7 @@ class StatusLineWidget(urwid.WidgetWrap):
         elif isinstance(event, hangups.NewMessageEvent):
             self._typing_statuses[event.sender_id] = 'stopped'
 
-        typers = [self._participants[user_id]['first_name']
+        typers = [self._participants[user_id].first_name
                   for user_id, status in self._typing_statuses.items()
                   if status == 'typing']
         if len(typers) > 0:
@@ -297,7 +293,7 @@ class ConversationWidget(urwid.WidgetWrap):
         """Display a new conversation message."""
         # format the message and add it to the list box
         date_str = timestamp.astimezone().strftime('%I:%M:%S %p')
-        name = self._participants[user_id]['first_name']
+        name = self._participants[user_id].first_name
         self._list_walker.append(urwid.Text([
             ('msg_date', '(' + date_str + ') '),
             ('msg_sender', name + ': '),

@@ -1,5 +1,6 @@
 """Abstract class for writing chat clients."""
 
+from collections import namedtuple
 from tornado import ioloop, gen, httpclient, httputil, concurrent
 import hashlib
 import http.cookies
@@ -11,6 +12,7 @@ import time
 import datetime
 
 from hangups import javascript, longpoll
+from hangups.longpoll import UserID, User
 
 
 logger = logging.getLogger(__name__)
@@ -107,6 +109,78 @@ def _parse_user_entity(entity):
     }
 
 
+class UserList(object):
+    """Allows querying known chat users."""
+
+    def __init__(self, self_user_id, initial_users, get_entity_by_id):
+        logger.info('UserList initialized with {} users'
+                    .format(len(initial_users)))
+        self._get_entity_by_id = get_entity_by_id
+        self._users = dict(initial_users)
+        self._self_user_id = self_user_id
+
+    def get_self_id(self):
+        """Return UserID of the logged in user."""
+        return self._self_user_id
+
+    @gen.coroutine
+    def get_self_user(self):
+        """Return User who is logged in."""
+        yield self.get_users([self._self_user_id])[0]
+
+    @gen.coroutine
+    def get_user(self, user_id):
+        """Wrapper for get_users for getting a single user."""
+        users = yield self.get_users([user_id])
+        return users[0]
+
+    @gen.coroutine
+    def get_users(self, user_id_list):
+        """Gets Users by a list of IDs.
+
+        Returns a dict user_id -> User.
+
+        Until we can find all users reliably, this method will return dummy
+        users rather than raising an exception when a user can't be found.
+        """
+        # Request any new user IDs if necessary
+        unknown_user_ids = set(user_id_list) - set(self._users.keys())
+        if unknown_user_ids:
+            logger.info('Need to request users: {}'.format(unknown_user_ids))
+            yield self._request_users(unknown_user_ids)
+
+        # Return Users and add dummies for Users we couldn't find.
+        return {user_id: (self._users[user_id] if user_id in self._users
+                          else self._make_dummy_user(user_id))
+                for user_id in user_id_list}
+
+    def _make_dummy_user(self, user_id):
+        """Return a dummy User and add it to the list."""
+        logger.info('Creating dummy user for {}'.format(user_id))
+        user = User(id_=user_id, full_name='UNKNOWN', first_name='UNKNOWN')
+        self._users[user_id] = user
+        return user
+
+    @gen.coroutine
+    def _request_users(self, user_id_list):
+        """Make request for a list of users by ID."""
+        res = yield self._get_entity_by_id([user_id.chat_id for user_id
+                                            in user_id_list])
+        for entity in res['entity']:
+            try:
+                user = _parse_user_entity(entity)
+            except ValueError as e:
+                logger.warning('Failed to parse user entity: {}: {}'
+                               .format(e, entity))
+            else:
+                user_id = UserID(chat_id=user['chat_id'],
+                                 gaia_id=user['gaia_id'])
+                self._users[user_id] = User(
+                    id_=user_id, full_name=user['full_name'],
+                    first_name=user['first_name']
+                )
+
+
 class Client(object):
     """Instant messaging client for Hangouts.
 
@@ -124,11 +198,11 @@ class Client(object):
 
         self._push_parser = None
 
+        self.users = None # UserList available after ConnectionEvent
+
         # discovered automatically:
 
         self._initial_conversations = None
-        self._initial_contacts = None
-        self._self_user_ids = None
         # the api key sent with every request
         self._api_key = None
         # fields sent in request headers
@@ -154,32 +228,6 @@ class Client(object):
         yield self._init_talkgadget_1()
         yield self._on_event(longpoll.ConnectedEvent())
         yield self._run_forever()
-
-    @gen.coroutine
-    def get_users(self, user_ids_list):
-        """Look up a list of users by their IDs."""
-        chat_ids = [u[0] for u in user_ids_list]
-        res = yield self._getentitybyid(chat_ids)
-        users = {}
-        for entity in res['entity']:
-            try:
-                user = _parse_user_entity(entity)
-            except ValueError as e:
-                logger.warning('Failed to parse user entity: {}: {}'
-                               .format(e, entity))
-            else:
-                users[(user['chat_id'], user['gaia_id'])] = {
-                    'first_name': user['first_name'],
-                    'full_name': user['full_name'],
-                }
-        # Return stubs for users that we could not look up.
-        for chat_id in chat_ids:
-            if (chat_id, chat_id) not in users:
-                users[(chat_id, chat_id)] = {
-                    'first_name': 'UNKNOWN',
-                    'full_name': 'UNKNOWN',
-                }
-        return users
 
     @gen.coroutine
     def send_message(self, conversation_id, text):
@@ -247,7 +295,7 @@ class Client(object):
 
         # build dict of conversations and their participants
         self._initial_conversations = {}
-        self._initial_contacts = {}
+        initial_users = {} # UserID -> User
         conversations = data_dict['ds:19'][0][3]
         for c in conversations:
             id_ = c[1][0][0]
@@ -258,19 +306,21 @@ class Client(object):
                 'last_modified': last_modified,
             }
             for p in participants:
-                user_ids = tuple(p[0])
+                user_id = UserID(chat_id=p[0][0], gaia_id=p[0][1])
                 self._initial_conversations[id_]['participants'].append(
-                    user_ids
+                    user_id
                 )
                 # Add the user to our list of contacts if their name is
                 # present. This is a hack to deal with some contacts not being
                 # found via the other methods.
+                # TODO We should note who these users are and try to request
+                # them.
                 if len(p) > 1:
                     display_name = p[1]
-                    self._initial_contacts[user_ids] = {
-                        'first_name': display_name.split()[0],
-                        'full_name': display_name,
-                    }
+                    initial_users[user_id] = User(
+                        id_=user_id, first_name=display_name.split()[0],
+                        full_name=display_name
+                    )
         logger.info('Found {} conversations'
                     .format(len(self._initial_conversations)))
 
@@ -282,22 +332,21 @@ class Client(object):
                     contacts_main[6][2] + contacts_main[7][2] +
                     contacts_main[8][2])
         for c in contacts:
-            user_ids = tuple(c[0][8])
-            full_name = c[0][9][1]
-            first_name = c[0][9][2]
-            self._initial_contacts[user_ids] = {
-                'first_name': first_name,
-                'full_name': full_name,
-            }
-        logger.info('Found {} contacts'.format(len(self._initial_contacts)))
+            user_id = UserID(chat_id=c[0][8][0], gaia_id=c[0][8][1])
+            initial_users[user_id] = User(
+                id_=user_id, full_name=c[0][9][1], first_name=c[0][9][2]
+            )
 
         # add self to the contacts
         self_contact = data_dict['ds:20'][0][2]
-        self._self_user_ids = tuple(self_contact[8])
-        self._initial_contacts[self._self_user_ids] = {
-            'first_name': self_contact[9][2],
-            'full_name': self_contact[9][1],
-        }
+        self_user_id = UserID(chat_id=self_contact[8][0],
+                              gaia_id=self_contact[8][1])
+        initial_users[self_user_id] = User(id_=self_user_id,
+                                           full_name=self_contact[9][1],
+                                           first_name=self_contact[9][2])
+
+        # Initialize the UserList
+        self.users = UserList(self_user_id, initial_users, self._getentitybyid)
 
     @gen.coroutine
     def _run_forever(self):
