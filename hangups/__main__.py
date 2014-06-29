@@ -5,6 +5,7 @@ import logging
 import urwid
 from itertools import chain
 from math import floor, ceil
+from sys import exit
 
 import hangups
 
@@ -29,7 +30,11 @@ class UserInterface(object):
     def __init__(self):
         """Start the user interface."""
         # TODO urwid widget for getting auth
-        cookies = hangups.auth.get_auth_stdin('cookies.json')
+        try:
+            cookies = hangups.auth.get_auth_stdin('cookies.json')
+        except hangups.GoogleAuthError as e:
+            print('Login failed ({})'.format(e))
+            exit(1)
 
         tornado_loop = urwid.TornadoEventLoop(ioloop.IOLoop.instance())
         self._urwid_loop = urwid.MainLoop(LoadingWidget(), URWID_PALETTE,
