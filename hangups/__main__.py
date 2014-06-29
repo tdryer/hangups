@@ -37,8 +37,10 @@ class UserInterface(object):
             exit(1)
 
         tornado_loop = urwid.TornadoEventLoop(ioloop.IOLoop.instance())
-        self._urwid_loop = urwid.MainLoop(LoadingWidget(), URWID_PALETTE,
-                                          event_loop=tornado_loop)
+        self._urwid_loop = urwid.MainLoop(
+            LoadingWidget(), URWID_PALETTE, event_loop=tornado_loop,
+            handle_mouse=False
+        )
         self._client = hangups.Client(cookies, self.on_event)
         future = self._client.connect()
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
