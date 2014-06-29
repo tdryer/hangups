@@ -9,6 +9,7 @@ from math import floor, ceil
 import hangups
 
 
+LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 URWID_PALETTE = [
     # ConversationWidget
     ('msg_date', 'dark blue', 'default'),
@@ -22,22 +23,30 @@ URWID_PALETTE = [
 ]
 
 
-class DemoClient(hangups.HangupsClient):
-    """Demo client for hangups."""
+class UserInterface(object):
+    """User interface for hangups."""
 
-    def __init__(self, urwid_loop):
-        super().__init__()
+    def __init__(self):
+        """Start the user interface."""
+        # TODO urwid widget for getting auth
+        cookies = hangups.auth.get_auth_stdin('cookies.json')
 
-        self._urwid_loop = urwid_loop
+        tornado_loop = urwid.TornadoEventLoop(ioloop.IOLoop.instance())
+        self._urwid_loop = urwid.MainLoop(LoadingWidget(), URWID_PALETTE,
+                                          event_loop=tornado_loop)
+        self._client = hangups.Client(cookies, self.on_event)
+        future = self._client.connect()
+        ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
-        # {conversation_id: ConversationWidget}
-        self._conv_widgets = {}
-        # TabbedWindowWidget
-        self._tabbed_window = None
-
+        # populated by on_connect
+        self._conv_widgets = {} # {conversation_id: ConversationWidget}
+        self._tabbed_window = None # TabbedWindowWidget
         self.contacts = None
         self.conversations = None
         self._self_user_ids = None
+
+        # Blocks forever
+        self._urwid_loop.run()
 
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
@@ -48,7 +57,7 @@ class DemoClient(hangups.HangupsClient):
             }
             self._conv_widgets[conv_id] = ConversationWidget(
                 conv_id, self._self_user_ids, participants_dict,
-                self.on_send_message
+                self._client.send_message
             )
         return self._conv_widgets[conv_id]
 
@@ -73,39 +82,42 @@ class DemoClient(hangups.HangupsClient):
         self.add_conversation_tab(conv_id, switch=True)
 
     @gen.coroutine
-    def on_send_message(self, conv_id, text):
-        """Called when the user sends a message to the current conversation."""
-        yield self.send_message(conv_id, text)
-
-    @gen.coroutine
-    def on_connect(self, conversations, contacts, self_user_ids):
-        self.contacts = contacts
-        self.conversations = conversations
-        self._self_user_ids = self_user_ids
+    def on_connect(self):
+        """Handle connecting for the first time."""
+        # TODO: add public api for getting these
+        self.contacts = self._client._initial_contacts
+        self.conversations = self._client._initial_conversations
+        self._self_user_ids = self._client._self_user_ids
 
         # populate the contacts dict with users who aren't in our contacts
         required_users = set(chain.from_iterable(
-            conversations[conv_id]['participants']
-            for conv_id in conversations
+            self.conversations[conv_id]['participants']
+            for conv_id in self.conversations
         ))
         missing_users = required_users - set(self.contacts)
         if missing_users:
-            users = yield self.get_users(missing_users)
-            contacts.update(users)
+            users = yield self._client.get_users(missing_users)
+            self.contacts.update(users)
 
         # show the conversation menu
         self._tabbed_window = TabbedWindowWidget([
-            ConversationPickerWidget(self_user_ids, conversations, contacts,
-                                     self.on_select_conversation)
+            ConversationPickerWidget(
+                self._self_user_ids, self.conversations, self.contacts,
+                self.on_select_conversation
+            )
         ])
         self._urwid_loop.widget = self._tabbed_window
 
     @gen.coroutine
     def on_event(self, event):
-        """Handle events."""
+        """Handle client events."""
+        if isinstance(event, hangups.ConnectedEvent):
+            yield self.on_connect()
+        elif isinstance(event, hangups.DisconnectedEvent):
+            yield self.on_disconnect()
         # Filter events we don't care about and don't want to open tabs for.
-        if type(event) in [hangups.NewMessageEvent,
-                           hangups.TypingChangedEvent]:
+        elif type(event) in [hangups.NewMessageEvent,
+                             hangups.TypingChangedEvent]:
             conv_widget = self.get_conv_widget(event.conv_id)
             conv_widget.on_event(event)
             # open conversation tab in the background if not already present
@@ -113,6 +125,7 @@ class DemoClient(hangups.HangupsClient):
 
     @gen.coroutine
     def on_disconnect(self):
+        """Handle disconnecting."""
         # TODO: handle this
         print('Connection lost')
 
@@ -134,6 +147,16 @@ def get_conv_name(self_user_ids, participants_dict, truncate=False):
         return ', '.join(names[:2] + ['+{}'.format(len(names) - 2)])
     else:
         return ', '.join(names)
+
+
+class LoadingWidget(urwid.WidgetWrap):
+    """Widget that shows a loading indicator."""
+
+    def __init__(self):
+        # show message in the center of the screen
+        super().__init__(urwid.Filler(
+            urwid.Text('Connecting...', align='center')
+        ))
 
 
 class ConversationPickerWidget(urwid.WidgetWrap):
@@ -374,40 +397,14 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         return self._window_widget_list.index(widget)
 
 
-@gen.coroutine
-def main_coroutine():
-    """Start an example chat client."""
-    # prepare urwid UI
-    top_widget = urwid.Filler(urwid.Text('loading...'))
-    tornado_loop = urwid.TornadoEventLoop(ioloop.IOLoop.instance())
-    loop = urwid.MainLoop(top_widget, URWID_PALETTE, event_loop=tornado_loop)
-
-    # start the chat client
-    client = DemoClient(loop)
-    # TODO urwid widget for getting auth
-    cookies = hangups.auth.get_auth_stdin('cookies.json')
-    yield client.connect(cookies)
-    future = client.run_forever()
-    ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
-
-    # start urwid
-    loop.run()
-
-
 def main():
     """Main entry point."""
-    logging.basicConfig(
-        filename='hangups.log', level=logging.DEBUG,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
+    logging.basicConfig(filename='hangups.log', level=logging.DEBUG,
+                        format=LOG_FORMAT)
     try:
-        ioloop.IOLoop.instance().run_sync(main_coroutine)
+        UserInterface()
     except KeyboardInterrupt:
         pass
-    except:
-        # XXX this is needed to get exceptions out of urwid for some reason
-        print('')
-        raise
 
 
 if __name__ == '__main__':

@@ -14,6 +14,10 @@ PP = pprint.PrettyPrinter(indent=4)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 
 
+ConnectedEvent = namedtuple('ConnectedEvent', [])
+
+DisconnectedEvent = namedtuple('DisconnectedEvent', [])
+
 NewMessageEvent = namedtuple('NewMessageEvent', [
     'conv_id', 'sender_id', 'timestamp', 'text'
 ])

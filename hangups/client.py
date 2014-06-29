@@ -23,6 +23,8 @@ CONNECT_TIMEOUT = 10
 # minutes), but low enough that we find out fast if there's a network problem.
 REQUEST_TIMEOUT = 60*5
 
+ORIGIN_URL = 'https://talkgadget.google.com'
+
 
 @gen.coroutine
 def _fetch(url, method='GET', params=None, headers=None, cookies=None,
@@ -105,18 +107,21 @@ def _parse_user_entity(entity):
     }
 
 
-class HangupsClient(object):
-    """Abstract class for writing chat clients.
+class Client(object):
+    """Instant messaging client for Hangouts.
 
-    Designed to allow building a chat client by subclassing the abstract
-    methods. If __init__ is subclassed, super().__init__() must be called.
-
-    This is only low-level abstraction around the API.
+    Maintains a connections to the servers, emits events, and accepts commands.
     """
 
-    def __init__(self):
-        self._cookies = None
-        self._origin_url = None
+    def __init__(self, cookies, on_event):
+        """Create new client.
+
+        cookies is a dictionary of authentication cookies. on_event is a
+        coroutine called with an event instance.
+        """
+        self._cookies = cookies
+        self._on_event = on_event
+
         self._push_parser = None
 
         # discovered automatically:
@@ -140,27 +145,15 @@ class HangupsClient(object):
         self._channel_session_id = None
 
     ##########################################################################
-    # Abstract methods
-    ##########################################################################
-
-    @gen.coroutine
-    def on_event(self, event):
-        """Abstract method called with new events."""
-        pass
-
-    @gen.coroutine
-    def on_connect(self, conversations, contacts, self_user_ids):
-        """Abstract method called when push connection is established."""
-        pass
-
-    @gen.coroutine
-    def on_disconnect(self):
-        """Abstract method called when push connection is disconnected."""
-        pass
-
-    ##########################################################################
     # Public methods
     ##########################################################################
+
+    @gen.coroutine
+    def connect(self):
+        """Connect to the server and receive events."""
+        yield self._init_talkgadget_1()
+        yield self._on_event(longpoll.ConnectedEvent())
+        yield self._run_forever()
 
     @gen.coroutine
     def get_users(self, user_ids_list):
@@ -192,76 +185,6 @@ class HangupsClient(object):
     def send_message(self, conversation_id, text):
         """Send a message to a conversation."""
         yield self._sendchatmessage(conversation_id, text)
-
-    @gen.coroutine
-    def connect(self, cookies, origin_url='https://talkgadget.google.com'):
-        """Initialize to gather connection parameters."""
-        self._cookies = cookies
-        self._origin_url = origin_url
-        yield self._init_talkgadget_1()
-        yield self.on_connect(self._initial_conversations,
-                              self._initial_contacts,
-                              self._self_user_ids)
-
-    @gen.coroutine
-    def run_forever(self):
-        """Make repeated long-polling requests to receive events.
-
-        This method only returns when the connection has been closed due to an
-        error.
-        """
-        MAX_RETRIES = 5  # maximum number of times to retry after a failure
-        retries = MAX_RETRIES # number of remaining retries
-        need_new_sid = True  # whether a new SID is needed
-
-        while retries >= 0:
-            # After the first failed retry, back off exponentially longer after
-            # each attempt.
-            if retries + 1 < MAX_RETRIES:
-                backoff_seconds = 2 ** (MAX_RETRIES - retries)
-                logger.info('Backing off for {} seconds'
-                            .format(backoff_seconds))
-                yield _future_sleep(backoff_seconds)
-
-            # Request a new SID if we don't have one yet, or the previous one
-            # became invalid.
-            if need_new_sid:
-                # TODO: error handling
-                yield self._fetch_channel_sid()
-                need_new_sid = False
-            # Clear any previous push data, since if there was an error it
-            # could contain garbage.
-            self._push_parser = longpoll.PushDataParser()
-            try:
-                yield self._longpoll_request()
-            except httpclient.HTTPError as e:
-                # An error occurred, so decrement the number of retries.
-                retries -= 1
-                if e.code == 400 and e.response.reason == 'Unknown SID':
-                    logger.error('Long-polling request failed because SID '
-                                 'became invalid. Will attempt to recover.')
-                    need_new_sid = True
-                elif e.code == 599:
-                    # TODO: Depending on how the connection is lost, it may
-                    # hang for a long time before an exception is raised, so we
-                    # need a another way of determining that the connection is
-                    # alive.
-                    logger.error('Long-polling request failed because '
-                                 'connection was closed. Will attempt to '
-                                 'recover.')
-                else:
-                    logger.error('Long-polling request failed for unknown '
-                                 'reason: {}'.format(e))
-                    break # Do not retry.
-            else:
-                # The connection closed successfully, so reset the number of
-                # retries.
-                retries = MAX_RETRIES
-
-            # TODO: If there was an error, messages could be lost in this time.
-
-        logger.error('Ran out of retries for long-polling request')
-        yield self.on_disconnect()
 
     ##########################################################################
     # Private methods
@@ -309,7 +232,8 @@ class HangupsClient(object):
                 data_dict[data['key']] = data['data']
             except ValueError as e:
                 # not everything will be parsable, but we don't care
-                logger.debug('Failed to parse JavaScript: {}\n{}'.format(e, data))
+                logger.debug('Failed to parse JavaScript: {}\n{}'
+                             .format(e, data))
 
         # TODO: handle errors here
         self._api_key = data_dict['ds:7'][0][2]
@@ -376,6 +300,66 @@ class HangupsClient(object):
         }
 
     @gen.coroutine
+    def _run_forever(self):
+        """Make repeated long-polling requests to receive events.
+
+        This method only returns when the connection has been closed due to an
+        error.
+        """
+        MAX_RETRIES = 5  # maximum number of times to retry after a failure
+        retries = MAX_RETRIES # number of remaining retries
+        need_new_sid = True  # whether a new SID is needed
+
+        while retries >= 0:
+            # After the first failed retry, back off exponentially longer after
+            # each attempt.
+            if retries + 1 < MAX_RETRIES:
+                backoff_seconds = 2 ** (MAX_RETRIES - retries)
+                logger.info('Backing off for {} seconds'
+                            .format(backoff_seconds))
+                yield _future_sleep(backoff_seconds)
+
+            # Request a new SID if we don't have one yet, or the previous one
+            # became invalid.
+            if need_new_sid:
+                # TODO: error handling
+                yield self._fetch_channel_sid()
+                need_new_sid = False
+            # Clear any previous push data, since if there was an error it
+            # could contain garbage.
+            self._push_parser = longpoll.PushDataParser()
+            try:
+                yield self._longpoll_request()
+            except httpclient.HTTPError as e:
+                # An error occurred, so decrement the number of retries.
+                retries -= 1
+                if e.code == 400 and e.response.reason == 'Unknown SID':
+                    logger.error('Long-polling request failed because SID '
+                                 'became invalid. Will attempt to recover.')
+                    need_new_sid = True
+                elif e.code == 599:
+                    # TODO: Depending on how the connection is lost, it may
+                    # hang for a long time before an exception is raised, so we
+                    # need a another way of determining that the connection is
+                    # alive.
+                    logger.error('Long-polling request failed because '
+                                 'connection was closed. Will attempt to '
+                                 'recover.')
+                else:
+                    logger.error('Long-polling request failed for unknown '
+                                 'reason: {}'.format(e))
+                    break # Do not retry.
+            else:
+                # The connection closed successfully, so reset the number of
+                # retries.
+                retries = MAX_RETRIES
+
+            # TODO: If there was an error, messages could be lost in this time.
+
+        logger.error('Ran out of retries for long-polling request')
+        yield self._on_event(longpoll.DisconnectedEvent)
+
+    @gen.coroutine
     def _fetch_channel_sid(self):
         """Request a new session ID for the push channel."""
         logger.info('Requesting new session ID...')
@@ -429,21 +413,20 @@ class HangupsClient(object):
                            streaming_callback=streaming_callback)
         return res
 
-
     @gen.coroutine
     def _on_push_data(self, data_bytes):
         """Parse push data and pass parsed events to on_event."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
         for event in self._push_parser.get_events(data_bytes.decode()):
             logger.info('Received event: {}'.format(event))
-            yield self.on_event(event)
+            yield self._on_event(event)
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""
         # technically, it doesn't matter what the url and time are
         time_msec = int(time.time() * 1000)
         auth_string = '{} {} {}'.format(time_msec, self._get_cookie("SAPISID"),
-                                        self._origin_url)
+                                        ORIGIN_URL)
         auth_hash = hashlib.sha1(auth_string.encode()).hexdigest()
         return 'SAPISIDHASH {}_{}'.format(time_msec, auth_hash)
 
@@ -469,7 +452,7 @@ class HangupsClient(object):
         url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
         headers = {
             'authorization': self._get_authorization_header(),
-            'x-origin': self._origin_url,
+            'x-origin': ORIGIN_URL,
             'x-goog-authuser': '0',
             'content-type': 'application/json+protobuf',
         }
