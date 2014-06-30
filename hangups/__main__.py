@@ -48,9 +48,6 @@ class UserInterface(object):
         # populated by on_connect
         self._conv_widgets = {} # {conversation_id: ConversationWidget}
         self._tabbed_window = None # TabbedWindowWidget
-        self.contacts = None
-        self.conversations = None
-        self._self_user_ids = None
 
         # Blocks forever
         self._urwid_loop.run()
@@ -58,12 +55,8 @@ class UserInterface(object):
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
         if conv_id not in self._conv_widgets:
-            participants_dict = {
-                user_ids: self.contacts[user_ids] for user_ids in
-                self.conversations[conv_id]['participants']
-            }
             self._conv_widgets[conv_id] = ConversationWidget(
-                conv_id, self._self_user_ids, participants_dict,
+                self._client.conversations.get(conv_id),
                 self._client.send_message
             )
         return self._conv_widgets[conv_id]
@@ -87,26 +80,10 @@ class UserInterface(object):
     @gen.coroutine
     def on_connect(self):
         """Handle connecting for the first time."""
-        # TODO: add public api for getting these
-        self.contacts = self._client.users._users
-        self.conversations = self._client._initial_conversations
-        self._self_user_ids = self._client.users.get_self_id()
-
-        # populate the contacts dict with users who aren't in our contacts
-        required_users = set(chain.from_iterable(
-            self.conversations[conv_id]['participants']
-            for conv_id in self.conversations
-        ))
-        missing_users = required_users - set(self.contacts)
-        if missing_users:
-            users = yield self._client.users.get_users(missing_users)
-            self.contacts.update(users)
-
         # show the conversation menu
         self._tabbed_window = TabbedWindowWidget([
             ConversationPickerWidget(
-                self._self_user_ids, self.conversations, self.contacts,
-                self.on_select_conversation
+                self._client.conversations, self.on_select_conversation
             )
         ])
         self._urwid_loop.widget = self._tabbed_window
@@ -133,7 +110,7 @@ class UserInterface(object):
         print('Connection lost')
 
 
-def get_conv_name(self_user_id, participants_dict, truncate=False):
+def get_conv_name(conv, truncate=False):
     """Return the readable name for a conversation.
 
     For one-to-one conversations, the name is the full name of the other user.
@@ -141,9 +118,8 @@ def get_conv_name(self_user_id, participants_dict, truncate=False):
 
     If truncate is true, only show up to two names in a group conversation.
     """
-    participants = [user for user_id, user in participants_dict.items()
-                    if user_id != self_user_id]
-    names = sorted(user.first_name for user in participants)
+    participants = sorted(user for user in conv.users if not user.is_self)
+    names = [user.first_name for user in participants]
     if len(participants) == 1:
         return participants[0].full_name
     elif truncate and len(participants) > 2:
@@ -165,28 +141,17 @@ class LoadingWidget(urwid.WidgetWrap):
 class ConversationPickerWidget(urwid.WidgetWrap):
     """Widget for picking a conversation."""
 
-    def __init__(self, self_user_ids, conversations, contacts,
-                 select_coroutine):
+    def __init__(self, conversation_list, select_coroutine):
         self.tab_title = 'Conversations'
         self._select_coroutine = select_coroutine
 
-        # build conversation labels and sort by last modified
-        labelled_convs = []
-        for conv_id in conversations:
-            participants_dict = {user_ids: contacts[user_ids] for user_ids
-                                 in conversations[conv_id]['participants']}
-            label = get_conv_name(self_user_ids, participants_dict)
-            labelled_convs.append({
-                'id': conv_id,
-                'label': label,
-                'last_modified': conversations[conv_id]['last_modified']
-            })
-        labelled_convs = sorted(labelled_convs, reverse=True,
-                                key=lambda c: c['last_modified'])
-        buttons = [
-            urwid.Button(f['label'], on_press=self._on_press, user_data=f['id'])
-            for f in labelled_convs
-        ]
+        # Build buttons for selecting conversations ordered by most recently
+        # modified first.
+        convs = sorted(conversation_list.get().values(),
+                       reverse=True, key=lambda c: c.last_modified)
+        buttons = [urwid.Button(get_conv_name(conv),
+                                on_press=self._on_press, user_data=conv.id_)
+                   for conv in convs]
         listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
         widget = urwid.Padding(listbox, left=2, right=2)
         super().__init__(widget)
@@ -216,10 +181,10 @@ class ReturnableEdit(urwid.Edit):
 class StatusLineWidget(urwid.WidgetWrap):
     """Widget for showing typing status."""
 
-    def __init__(self, participants_dict):
+    def __init__(self, conversation):
         self._widget = urwid.Text('')
         self._typing_statuses = {}
-        self._participants = participants_dict
+        self._conversation = conversation
         super().__init__(self._widget)
 
     def render(self, size, focus=False):
@@ -241,7 +206,7 @@ class StatusLineWidget(urwid.WidgetWrap):
         elif isinstance(event, hangups.NewMessageEvent):
             self._typing_statuses[event.sender_id] = 'stopped'
 
-        typers = [self._participants[user_id].first_name
+        typers = [self._conversation.get_user(user_id).first_name
                   for user_id, status in self._typing_statuses.items()
                   if status == 'typing']
         if len(typers) > 0:
@@ -257,18 +222,15 @@ class StatusLineWidget(urwid.WidgetWrap):
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
-    def __init__(self, conv_id, self_user_ids, participants_dict,
-                 send_message_coroutine):
-        self._conv_id = conv_id
-        self._participants = participants_dict
+    def __init__(self, conversation, send_message_coroutine):
+        self._conversation = conversation
         self._send_message_coroutine = send_message_coroutine
 
-        self.tab_title = get_conv_name(self_user_ids, participants_dict,
-                                       truncate=True)
+        self.tab_title = get_conv_name(conversation, truncate=True)
 
         self._list_walker = urwid.SimpleFocusListWalker([])
         self._list_box = urwid.ListBox(self._list_walker)
-        self._status_widget = StatusLineWidget(participants_dict)
+        self._status_widget = StatusLineWidget(conversation)
         self._widget = urwid.Pile([
             ('weight', 1, self._list_box),
             ('pack', self._status_widget),
@@ -286,14 +248,14 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
-        future = self._send_message_coroutine(self._conv_id, text)
+        future = self._send_message_coroutine(self._conversation.id_, text)
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
     def _display_message(self, timestamp, user_id, text):
         """Display a new conversation message."""
         # format the message and add it to the list box
         date_str = timestamp.astimezone().strftime('%I:%M:%S %p')
-        name = self._participants[user_id].first_name
+        name = self._conversation.get_user(user_id).first_name
         self._list_walker.append(urwid.Text([
             ('msg_date', '(' + date_str + ') '),
             ('msg_sender', name + ': '),

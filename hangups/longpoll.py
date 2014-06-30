@@ -14,7 +14,7 @@ PP = pprint.PrettyPrinter(indent=4)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 
 
-User = namedtuple('User', ['id_', 'full_name', 'first_name'])
+User = namedtuple('User', ['id_', 'full_name', 'first_name', 'is_self'])
 
 
 UserID = namedtuple('UserID', ['chat_id', 'gaia_id'])
