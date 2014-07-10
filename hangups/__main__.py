@@ -29,27 +29,40 @@ class UserInterface(object):
 
     def __init__(self):
         """Start the user interface."""
-        # TODO urwid widget for getting auth
+        # These are populated by on_connect when it's called.
+        self._conv_widgets = {} # {conversation_id: ConversationWidget}
+        self._tabbed_window = None # TabbedWindowWidget
+
+        # TODO Add urwid widget for getting auth.
         try:
             cookies = hangups.auth.get_auth_stdin('cookies.json')
         except hangups.GoogleAuthError as e:
             print('Login failed ({})'.format(e))
             exit(1)
 
-        tornado_loop = urwid.TornadoEventLoop(ioloop.IOLoop.instance())
-        self._urwid_loop = urwid.MainLoop(
-            LoadingWidget(), URWID_PALETTE, event_loop=tornado_loop,
-            handle_mouse=False
-        )
         self._client = hangups.Client(cookies, self.on_event)
-        future = self._client.connect()
-        ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
-        # populated by on_connect
-        self._conv_widgets = {} # {conversation_id: ConversationWidget}
-        self._tabbed_window = None # TabbedWindowWidget
+        # Patch urwid's TornadoEventLoop to run_sync() our connection coroutine
+        # rather than calling start(). This "fixes" exception handling, causing
+        # all uncaught exceptions to be fatal.
+        class MyEventLoop(urwid.TornadoEventLoop):
+            _client = self._client
+            def run(self):
+                try:
+                    ioloop.IOLoop.instance().run_sync(self._client.connect)
+                except ioloop.TimeoutError:
+                    # Ignore spurious timeout when there's another exception.
+                    pass
+                # Raise exception if there was one.
+                if self._exception:
+                    exc, self._exception = self._exception, None
+                    raise exc
 
-        # Blocks forever
+        # Initialize urwid, starting the IOLoop, and block until the IOLoop
+        # exits.
+        self._urwid_loop = urwid.MainLoop(LoadingWidget(), URWID_PALETTE,
+                                          event_loop=MyEventLoop(),
+                                          handle_mouse=False)
         self._urwid_loop.run()
 
     def get_conv_widget(self, conv_id):
@@ -370,6 +383,11 @@ def main():
         UserInterface()
     except KeyboardInterrupt:
         pass
+    except:
+        # urwid will prevent some exceptions from being printed unless we use
+        # print a newline first.
+        print('')
+        raise
 
 
 if __name__ == '__main__':
