@@ -42,9 +42,10 @@ class UserInterface(object):
             print('Login failed ({})'.format(e))
             exit(1)
 
-        self._client = hangups.Client(cookies, self.on_event)
-        self._client.on_connect += self.on_connect
-        self._client.on_disconnect += self.on_disconnect
+        self._client = hangups.Client(cookies)
+        self._client.on_connect += self._on_connect
+        self._client.on_disconnect += self._on_disconnect
+        self._client.on_message += self._on_message
 
         # Patch urwid's TornadoEventLoop to run_sync() our connection coroutine
         # rather than calling start(). This "fixes" exception handling, causing
@@ -94,7 +95,7 @@ class UserInterface(object):
         # switch to new or existing tab for the conversation
         self.add_conversation_tab(conv_id, switch=True)
 
-    def on_connect(self, _client):
+    def _on_connect(self, client):
         """Handle connecting for the first time."""
         self._conv_list = hangups.ConversationList(self._client)
         self._user_list = hangups.UserList(self._client)
@@ -106,17 +107,11 @@ class UserInterface(object):
         ])
         self._urwid_loop.widget = self._tabbed_window
 
-    @gen.coroutine
-    def on_event(self, event):
-        """Handle client events."""
-        if type(event) in [hangups.NewMessageEvent,
-                           hangups.TypingChangedEvent]:
-            conv_widget = self.get_conv_widget(event.conv_id)
-            conv_widget.on_event(event)
-            # open conversation tab in the background if not already present
-            self.add_conversation_tab(event.conv_id)
+    def _on_message(self, _client, conv_id, user_id, timestamp, text):
+        """Open conversation tab for new messages when they arrive."""
+        self.add_conversation_tab(conv_id)
 
-    def on_disconnect(self, _client):
+    def _on_disconnect(self, client):
         """Handle disconnecting."""
         # TODO: handle this
         print('Connection lost')
@@ -197,6 +192,8 @@ class StatusLineWidget(urwid.WidgetWrap):
         self._widget = urwid.Text('')
         self._typing_statuses = {}
         self._conversation = conversation
+        self._conversation.on_message += self._on_message
+        self._conversation.on_typing += self._on_typing
         super().__init__(self._widget)
 
     def render(self, size, focus=False):
@@ -211,13 +208,18 @@ class StatusLineWidget(urwid.WidgetWrap):
         self._widget.set_text(text)
         return super().render(size, focus)
 
-    def on_event(self, event):
-        """Handle events."""
-        if isinstance(event, hangups.TypingChangedEvent):
-            self._typing_statuses[event.user_id] = event.typing_status
-        elif isinstance(event, hangups.NewMessageEvent):
-            self._typing_statuses[event.sender_id] = 'stopped'
+    def _on_message(self, conversation, user_id, timestamp, text):
+        """Make users stop typing when they send a message."""
+        self._typing_statuses[user_id] = 'stopped'
+        self._update()
 
+    def _on_typing(self, conversation, user_id, timestamp, status):
+        """Handle typing updates."""
+        self._typing_statuses[user_id] = status
+        self._update()
+
+    def _update(self):
+        """Update list of typers."""
         typers = [self._conversation.get_user(user_id).first_name
                   for user_id, status in self._typing_statuses.items()
                   if status == 'typing']
@@ -254,16 +256,12 @@ class ConversationWidget(urwid.WidgetWrap):
         self._widget.focus_position = 2
         super().__init__(self._widget)
 
-    def on_event(self, event):
-        """Handle events."""
-        self._status_widget.on_event(event)
-
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
         future = self._send_message_coroutine(self._conversation.id_, text)
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
-    def _on_message(self, _conv, user_id, timestamp, text):
+    def _on_message(self, conversation, user_id, timestamp, text):
         """Display a new conversation message."""
         # format the message and add it to the list box
         date_str = timestamp.astimezone().strftime('%I:%M:%S %p')

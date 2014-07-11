@@ -123,15 +123,27 @@ class ConversationList(object):
                     .format(len(self._conv_dict)))
         # Register event handlers:
         self._client.on_message += self._on_message
+        self._client.on_typing += self._on_typing
+        self._client.on_focus += self._on_focus
+        self._client.on_conversation += self._on_conversation
 
-    def _on_message(self, _client, conv_id, user_id, timestamp, text):
-        """Route new message events to appropriate Conversation."""
-        try:
-            conv = self.get(conv_id)
-        except KeyError:
-            logger.warning('ConversationList ignoring message for unknown '
-                           'conversation')
-        conv.on_message(user_id, timestamp, text)
+    # TODO: Avoid this routing by adding observers when conversations are
+    # created.
+    def _on_message(self, client, conv_id, user_id, timestamp, text):
+        """Route on_message event to appropriate Conversation."""
+        self.get(conv_id).on_message(user_id, timestamp, text)
+
+    def _on_typing(self, client, conv_id, user_id, timestamp, status):
+        """Route on_typing event to appropriate Conversation."""
+        self.get(conv_id).on_typing(user_id, timestamp, status)
+
+    def _on_focus(self, client, conv_id, user_id, timestamp, status, device):
+        """Route on_focus event to appropriate Conversation."""
+        self.get(conv_id).on_focus(user_id, timestamp, status, device)
+
+    def _on_conversation(self, client, conv_id, participants):
+        """Route on_conversation event to appropriate Conversation."""
+        self.get(conv_id).on_conversation(participants)
 
     # TODO consider returning list instead or splitting into two methods
     def get(self, conv_id=None):
@@ -178,8 +190,23 @@ class Conversation(object):
 
     @event
     def on_message(self, user_id, timestamp, text):
-        "Event triggered when Conversation receives a message."""
+        """Event called when a new message arrives."""
         logger.info('Triggered event Conversation.on_message')
+
+    @event
+    def on_typing(self, user_id, timestamp, status):
+        """Event called when a user starts or stops typing."""
+        logger.info('Triggered event Conversation.on_typing')
+
+    @event
+    def on_focus(self, user_id, timestamp, status, device):
+        """Event called when a user changes focus on a conversation."""
+        logger.info('Triggered event Conversation.on_focus')
+
+    @event
+    def on_conversation(self, participants):
+        """Event called when a conversation updates."""
+        logger.info('Triggered event Conversation.on_conversation')
 
 
 # TODO: This class isn't really being used yet.
@@ -263,14 +290,12 @@ class Client(object):
     Maintains a connections to the servers, emits events, and accepts commands.
     """
 
-    def __init__(self, cookies, on_event):
+    def __init__(self, cookies):
         """Create new client.
 
-        cookies is a dictionary of authentication cookies. on_event is a
-        coroutine called with an event instance.
+        cookies is a dictionary of authentication cookies.
         """
         self._cookies = cookies
-        self._on_event = on_event
 
         self._push_parser = None
 
@@ -330,6 +355,21 @@ class Client(object):
     def on_message(self, conv_id, user_id, timestamp, text):
         """Event called when a new message arrives."""
         logger.info('Triggered event Client.on_message')
+
+    @event
+    def on_typing(self, conv_id, user_id, timestamp, status):
+        """Event called when a user starts or stops typing."""
+        logger.info('Triggered event Client.on_typing')
+
+    @event
+    def on_focus(self, conv_id, user_id, timestamp, status, device):
+        """Event called when a user changes focus on a conversation."""
+        logger.info('Triggered event Client.on_focus')
+
+    @event
+    def on_conversation(self, conv_id, participants):
+        """Event called when a conversation updates."""
+        logger.info('Triggered event Client.on_conversation')
 
     ##########################################################################
     # Private methods
@@ -568,15 +608,23 @@ class Client(object):
 
     @gen.coroutine
     def _on_push_data(self, data_bytes):
-        """Parse push data and pass parsed events to on_event."""
+        """Parse push data and trigger events."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
         for event in self._push_parser.get_events(data_bytes.decode()):
             logger.info('Received event: {}'.format(event))
-            # TODO: refactor this
+            # TODO: Refactor so *Event classes aren't needed anymore and we
+            # don't need this boilerplate.
             if isinstance(event, longpoll.NewMessageEvent):
                 self.on_message(event.conv_id, event.sender_id,
                                 event.timestamp, event.text)
-            yield self._on_event(event)
+            elif isinstance(event, longpoll.TypingChangedEvent):
+                self.on_typing(event.conv_id, event.user_id, event.timestamp,
+                               event.typing_status)
+            elif isinstance(event, longpoll.FocusChangedEvent):
+                self.on_focus(event.conv_id, event.user_id, event.timestamp,
+                              event.focus_status, event.focus_device)
+            elif isinstance(event, longpoll.ConvChangedEvent):
+                self.on_conversation(event.conv_id, event.participants)
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""
