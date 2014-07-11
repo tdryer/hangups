@@ -10,6 +10,7 @@ import random
 import re
 import time
 import datetime
+from obsub import event
 
 from hangups import javascript, longpoll
 from hangups.longpoll import UserID, User
@@ -287,13 +288,23 @@ class Client(object):
     def connect(self):
         """Connect to the server and receive events."""
         yield self._init_talkgadget_1()
-        yield self._on_event(longpoll.ConnectedEvent())
+        self.on_connect()
         yield self._run_forever()
 
     @gen.coroutine
     def send_message(self, conversation_id, text):
         """Send a message to a conversation."""
         yield self._sendchatmessage(conversation_id, text)
+
+    @event
+    def on_connect(self):
+        """Event called when the client connects for the first time."""
+        logger.info('Triggered event Client.on_connect')
+
+    @event
+    def on_disconnect(self):
+        """Event called when the client is disconnected from the server."""
+        logger.info('Triggered event Client.on_disconnect')
 
     ##########################################################################
     # Private methods
@@ -474,7 +485,7 @@ class Client(object):
             # TODO: If there was an error, messages could be lost in this time.
 
         logger.error('Ran out of retries for long-polling request')
-        yield self._on_event(longpoll.DisconnectedEvent)
+        self.on_disconnect()
 
     @gen.coroutine
     def _fetch_channel_sid(self):

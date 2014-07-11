@@ -20,12 +20,6 @@ User = namedtuple('User', ['id_', 'full_name', 'first_name', 'is_self'])
 UserID = namedtuple('UserID', ['chat_id', 'gaia_id'])
 
 
-ConnectedEvent = namedtuple('ConnectedEvent', [])
-
-
-DisconnectedEvent = namedtuple('DisconnectedEvent', [])
-
-
 NewMessageEvent = namedtuple('NewMessageEvent', [
     'conv_id', 'sender_id', 'timestamp', 'text'
 ])

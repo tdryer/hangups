@@ -43,6 +43,8 @@ class UserInterface(object):
             exit(1)
 
         self._client = hangups.Client(cookies, self.on_event)
+        self._client.on_connect += self.on_connect
+        self._client.on_disconnect += self.on_disconnect
 
         # Patch urwid's TornadoEventLoop to run_sync() our connection coroutine
         # rather than calling start(). This "fixes" exception handling, causing
@@ -92,8 +94,7 @@ class UserInterface(object):
         # switch to new or existing tab for the conversation
         self.add_conversation_tab(conv_id, switch=True)
 
-    @gen.coroutine
-    def on_connect(self):
+    def on_connect(self, _client):
         """Handle connecting for the first time."""
         self._conv_list = hangups.ConversationList(self._client)
         self._user_list = hangups.UserList(self._client)
@@ -108,20 +109,14 @@ class UserInterface(object):
     @gen.coroutine
     def on_event(self, event):
         """Handle client events."""
-        if isinstance(event, hangups.ConnectedEvent):
-            yield self.on_connect()
-        elif isinstance(event, hangups.DisconnectedEvent):
-            yield self.on_disconnect()
-        # Filter events we don't care about and don't want to open tabs for.
-        elif type(event) in [hangups.NewMessageEvent,
-                             hangups.TypingChangedEvent]:
+        if type(event) in [hangups.NewMessageEvent,
+                           hangups.TypingChangedEvent]:
             conv_widget = self.get_conv_widget(event.conv_id)
             conv_widget.on_event(event)
             # open conversation tab in the background if not already present
             self.add_conversation_tab(event.conv_id)
 
-    @gen.coroutine
-    def on_disconnect(self):
+    def on_disconnect(self, _client):
         """Handle disconnecting."""
         # TODO: handle this
         print('Connection lost')
