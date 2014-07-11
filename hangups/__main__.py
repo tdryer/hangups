@@ -61,7 +61,7 @@ class UserInterface(object):
                 # Raise exception if there was one.
                 if self._exception:
                     exc, self._exception = self._exception, None
-                    raise exc
+                    raise exc # pylint: disable=E0702
 
         # Initialize urwid, starting the IOLoop, and block until the IOLoop
         # exits.
