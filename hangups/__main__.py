@@ -32,6 +32,7 @@ class UserInterface(object):
         # These are populated by on_connect when it's called.
         self._conv_widgets = {} # {conversation_id: ConversationWidget}
         self._tabbed_window = None # TabbedWindowWidget
+        self._conv_list = None # hangups.ConversationList
 
         # TODO Add urwid widget for getting auth.
         try:
@@ -69,7 +70,7 @@ class UserInterface(object):
         """Return an existing or new ConversationWidget."""
         if conv_id not in self._conv_widgets:
             self._conv_widgets[conv_id] = ConversationWidget(
-                self._client.conversations.get(conv_id),
+                self._conv_list.get(conv_id),
                 self._client.send_message
             )
         return self._conv_widgets[conv_id]
@@ -93,10 +94,11 @@ class UserInterface(object):
     @gen.coroutine
     def on_connect(self):
         """Handle connecting for the first time."""
+        self._conv_list = hangups.ConversationList(self._client)
         # show the conversation menu
         self._tabbed_window = TabbedWindowWidget([
             ConversationPickerWidget(
-                self._client.conversations, self.on_select_conversation
+                self._conv_list, self.on_select_conversation
             )
         ])
         self._urwid_loop.widget = self._tabbed_window

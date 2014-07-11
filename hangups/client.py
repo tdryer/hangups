@@ -110,15 +110,16 @@ def _parse_user_entity(entity):
 
 
 class ConversationList(object):
-    """Collection of Conversations.
+    """Wrapper around Client that presents a list of Conversations.
 
     TODO: Should receive events so the list is always up to date.
     """
 
-    def __init__(self, conv_dict):
+    def __init__(self, client):
+        self._client = client
+        self._conv_dict = client.initial_conversations
         logger.info('ConversationList initialized with {} conversation(s)'
-                    .format(len(conv_dict)))
-        self._conv_dict = conv_dict
+                    .format(len(self._conv_dict)))
 
     # TODO consider returning list instead or splitting into two methods
     def get(self, conv_id=None):
@@ -258,7 +259,7 @@ class Client(object):
 
         # These are available after ConnectionEvent:
         self.users = None # UserList
-        self.conversations = None # ConversationList
+        self.initial_conversations = None # {conv_id: Conversation}
 
         # discovered automatically:
 
@@ -408,12 +409,12 @@ class Client(object):
         # Initialize the UserList.
         self.users = UserList(self_user_id, initial_users, self._getentitybyid)
 
-        # Initialize the ConversationList.
-        self.conversations = ConversationList({conv_id: Conversation(
+        # Create a dict of the known conversations.
+        self.initial_conversations = {conv_id: Conversation(
             conv_id,
             [initial_users[user_id] for user_id in conv_info['participants']],
             conv_info['last_modified'],
-        ) for conv_id, conv_info in initial_conversations.items()})
+        ) for conv_id, conv_info in initial_conversations.items()}
 
     @gen.coroutine
     def _run_forever(self):
