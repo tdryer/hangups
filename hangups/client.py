@@ -165,16 +165,16 @@ class Conversation(object):
         pass # TODO: implement this
 
 
-# TODO: the chat client doesn't use this currently
+# TODO: This class isn't really being used yet.
 class UserList(object):
     """Allows querying known chat users."""
 
-    def __init__(self, self_user_id, initial_users, get_entity_by_id):
+    def __init__(self, client):
+        self._client = client
+        self._users = dict(client.initial_users)
+        self._self_user_id = client.self_user_id
         logger.info('UserList initialized with {} user(s)'
-                    .format(len(initial_users)))
-        self._get_entity_by_id = get_entity_by_id
-        self._users = dict(initial_users)
-        self._self_user_id = self_user_id
+                    .format(len(self._users)))
 
     def get_self_id(self):
         """Return UserID of the logged in user."""
@@ -222,8 +222,8 @@ class UserList(object):
     @gen.coroutine
     def _request_users(self, user_id_list):
         """Make request for a list of users by ID."""
-        res = yield self._get_entity_by_id([user_id.chat_id for user_id
-                                            in user_id_list])
+        res = yield self._client._getentitybyid([user_id.chat_id for user_id
+                                                 in user_id_list])
         for entity in res['entity']:
             try:
                 user = _parse_user_entity(entity)
@@ -258,7 +258,8 @@ class Client(object):
         self._push_parser = None
 
         # These are available after ConnectionEvent:
-        self.users = None # UserList
+        self.initial_users = None # {UserID: User}
+        self.self_user_id = None # UserID
         self.initial_conversations = None # {conv_id: Conversation}
 
         # discovered automatically:
@@ -355,14 +356,14 @@ class Client(object):
 
         # build dict of conversations and their participants
         initial_conversations = {}
-        initial_users = {} # UserID -> User
+        self.initial_users = {} # {UserID: User}
 
         # add self to the contacts
         self_contact = data_dict['ds:20'][0][2]
-        self_user_id = UserID(chat_id=self_contact[8][0],
-                              gaia_id=self_contact[8][1])
-        initial_users[self_user_id] = User(
-            id_=self_user_id, full_name=self_contact[9][1],
+        self.self_user_id = UserID(chat_id=self_contact[8][0],
+                                   gaia_id=self_contact[8][1])
+        self.initial_users[self.self_user_id] = User(
+            id_=self.self_user_id, full_name=self_contact[9][1],
             first_name=self_contact[9][2], is_self=True
         )
 
@@ -387,9 +388,10 @@ class Client(object):
                 # them.
                 if len(p) > 1:
                     display_name = p[1]
-                    initial_users[user_id] = User(
+                    self.initial_users[user_id] = User(
                         id_=user_id, first_name=display_name.split()[0],
-                        full_name=display_name, is_self=user_id==self_user_id
+                        full_name=display_name,
+                        is_self=(user_id == self.self_user_id)
                     )
 
         # build dict of contacts and their names (doesn't include users not in
@@ -401,18 +403,16 @@ class Client(object):
                     contacts_main[8][2])
         for c in contacts:
             user_id = UserID(chat_id=c[0][8][0], gaia_id=c[0][8][1])
-            initial_users[user_id] = User(
+            self.initial_users[user_id] = User(
                 id_=user_id, full_name=c[0][9][1], first_name=c[0][9][2],
-                is_self=user_id==self_user_id
+                is_self=(user_id == self.self_user_id)
             )
-
-        # Initialize the UserList.
-        self.users = UserList(self_user_id, initial_users, self._getentitybyid)
 
         # Create a dict of the known conversations.
         self.initial_conversations = {conv_id: Conversation(
             conv_id,
-            [initial_users[user_id] for user_id in conv_info['participants']],
+            [self.initial_users[user_id] for user_id
+             in conv_info['participants']],
             conv_info['last_modified'],
         ) for conv_id, conv_info in initial_conversations.items()}
 

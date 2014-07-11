@@ -33,6 +33,7 @@ class UserInterface(object):
         self._conv_widgets = {} # {conversation_id: ConversationWidget}
         self._tabbed_window = None # TabbedWindowWidget
         self._conv_list = None # hangups.ConversationList
+        self._user_list = None # hangups.UserList
 
         # TODO Add urwid widget for getting auth.
         try:
@@ -95,6 +96,7 @@ class UserInterface(object):
     def on_connect(self):
         """Handle connecting for the first time."""
         self._conv_list = hangups.ConversationList(self._client)
+        self._user_list = hangups.UserList(self._client)
         # show the conversation menu
         self._tabbed_window = TabbedWindowWidget([
             ConversationPickerWidget(
