@@ -145,16 +145,16 @@ class ConversationList(object):
         """Route on_conversation event to appropriate Conversation."""
         self.get(conv_id).on_conversation(participants)
 
-    # TODO consider returning list instead or splitting into two methods
-    def get(self, conv_id=None):
-        """Return a dict of ID -> Conversation or a Conversation by its ID.
+    def get_all(self):
+        """Return list of all Conversations."""
+        return list(self._conv_dict.values())
+
+    def get(self, conv_id):
+        """Return a Conversation from its ID.
 
         Raises KeyError if the conversation ID is invalid.
         """
-        if conv_id:
-            return self._conv_dict[conv_id]
-        else:
-            return dict(self._conv_dict)
+        return self._conv_dict[conv_id]
 
 
 class Conversation(object):

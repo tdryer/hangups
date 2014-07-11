@@ -74,8 +74,7 @@ class UserInterface(object):
         """Return an existing or new ConversationWidget."""
         if conv_id not in self._conv_widgets:
             self._conv_widgets[conv_id] = ConversationWidget(
-                self._conv_list.get(conv_id),
-                self._client.send_message
+                self._conv_list.get(conv_id), self._client.send_message
             )
         return self._conv_widgets[conv_id]
 
@@ -154,8 +153,8 @@ class ConversationPickerWidget(urwid.WidgetWrap):
 
         # Build buttons for selecting conversations ordered by most recently
         # modified first.
-        convs = sorted(conversation_list.get().values(),
-                       reverse=True, key=lambda c: c.last_modified)
+        convs = sorted(conversation_list.get_all(), reverse=True,
+                       key=lambda c: c.last_modified)
         buttons = [urwid.Button(get_conv_name(conv),
                                 on_press=self._on_press, user_data=conv.id_)
                    for conv in convs]
