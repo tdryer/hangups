@@ -121,6 +121,17 @@ class ConversationList(object):
         self._conv_dict = client.initial_conversations
         logger.info('ConversationList initialized with {} conversation(s)'
                     .format(len(self._conv_dict)))
+        # Register event handlers:
+        self._client.on_message += self._on_message
+
+    def _on_message(self, _client, conv_id, user_id, timestamp, text):
+        """Route new message events to appropriate Conversation."""
+        try:
+            conv = self.get(conv_id)
+        except KeyError:
+            logger.warning('ConversationList ignoring message for unknown '
+                           'conversation')
+        conv.on_message(user_id, timestamp, text)
 
     # TODO consider returning list instead or splitting into two methods
     def get(self, conv_id=None):
@@ -164,6 +175,11 @@ class Conversation(object):
     @gen.coroutine
     def send_message(self, content):
         pass # TODO: implement this
+
+    @event
+    def on_message(self, user_id, timestamp, text):
+        "Event triggered when Conversation receives a message."""
+        logger.info('Triggered event Conversation.on_message')
 
 
 # TODO: This class isn't really being used yet.
@@ -296,6 +312,10 @@ class Client(object):
         """Send a message to a conversation."""
         yield self._sendchatmessage(conversation_id, text)
 
+    ##########################################################################
+    # Events
+    ##########################################################################
+
     @event
     def on_connect(self):
         """Event called when the client connects for the first time."""
@@ -305,6 +325,11 @@ class Client(object):
     def on_disconnect(self):
         """Event called when the client is disconnected from the server."""
         logger.info('Triggered event Client.on_disconnect')
+
+    @event
+    def on_message(self, conv_id, user_id, timestamp, text):
+        """Event called when a new message arrives."""
+        logger.info('Triggered event Client.on_message')
 
     ##########################################################################
     # Private methods
@@ -547,6 +572,10 @@ class Client(object):
         logger.debug('Received push data:\n{}'.format(data_bytes))
         for event in self._push_parser.get_events(data_bytes.decode()):
             logger.info('Received event: {}'.format(event))
+            # TODO: refactor this
+            if isinstance(event, longpoll.NewMessageEvent):
+                self.on_message(event.conv_id, event.sender_id,
+                                event.timestamp, event.text)
             yield self._on_event(event)
 
     def _get_authorization_header(self):

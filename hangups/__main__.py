@@ -236,6 +236,8 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def __init__(self, conversation, send_message_coroutine):
         self._conversation = conversation
+        self._conversation.on_message += self._on_message
+        # TODO: refactor so we don't need this:
         self._send_message_coroutine = send_message_coroutine
 
         self.tab_title = get_conv_name(conversation, truncate=True)
@@ -255,15 +257,13 @@ class ConversationWidget(urwid.WidgetWrap):
     def on_event(self, event):
         """Handle events."""
         self._status_widget.on_event(event)
-        if isinstance(event, hangups.NewMessageEvent):
-            self._display_message(event.timestamp, event.sender_id, event.text)
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
         future = self._send_message_coroutine(self._conversation.id_, text)
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
-    def _display_message(self, timestamp, user_id, text):
+    def _on_message(self, _conv, user_id, timestamp, text):
         """Display a new conversation message."""
         # format the message and add it to the list box
         date_str = timestamp.astimezone().strftime('%I:%M:%S %p')
