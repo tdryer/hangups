@@ -157,9 +157,10 @@ class ConversationList(object):
 
 
 class Conversation(object):
-    """A conversation between two or more Users."""
+    """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, id_, users, last_modified):
+    def __init__(self, client, id_, users, last_modified):
+        self._client = client
         self._id = id_ # ConversationID
         self._users = users # [User]
         self._last_modified = last_modified # datetime
@@ -185,9 +186,9 @@ class Conversation(object):
         return self._last_modified
 
     @gen.coroutine
-    def send_message(self, content):
-        """Send a message to the conversation."""
-        pass # TODO: implement this
+    def send_message(self, text):
+        """Send a message to this conversation."""
+        yield self._client.sendchatmessage(self._id, text)
 
     @event
     def on_message(self, user_id, timestamp, text):
@@ -332,11 +333,6 @@ class Client(object):
         yield self._init_talkgadget_1()
         self.on_connect()
         yield self._run_forever()
-
-    @gen.coroutine
-    def send_message(self, conversation_id, text):
-        """Send a message to a conversation."""
-        yield self._sendchatmessage(conversation_id, text)
 
     ##########################################################################
     # Events
@@ -487,9 +483,8 @@ class Client(object):
 
         # Create a dict of the known conversations.
         self.initial_conversations = {conv_id: Conversation(
-            conv_id,
-            [self.initial_users[user_id] for user_id
-             in conv_info['participants']],
+            self, conv_id, [self.initial_users[user_id] for user_id
+                            in conv_info['participants']],
             conv_info['last_modified'],
         ) for conv_id, conv_info in initial_conversations.items()}
 
@@ -773,9 +768,9 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def _sendchatmessage(self, conversation_id, message, is_bold=False,
-                         is_italic=False, is_strikethrough=False,
-                         is_underlined=False):
+    def sendchatmessage(self, conversation_id, message, is_bold=False,
+                        is_italic=False, is_strikethrough=False,
+                        is_underlined=False):
         """Send a chat message to a conversation."""
         client_generated_id = random.randint(0, 2**32)
         res = yield self._request('conversations/sendchatmessage', [

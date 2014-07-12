@@ -78,9 +78,8 @@ class ChatUI(object):
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
         if conv_id not in self._conv_widgets:
-            self._conv_widgets[conv_id] = ConversationWidget(
-                self._conv_list.get(conv_id), self._client.send_message
-            )
+            widget = ConversationWidget(self._conv_list.get(conv_id))
+            self._conv_widgets[conv_id] = widget
         return self._conv_widgets[conv_id]
 
     def add_conversation_tab(self, conv_id, switch=False):
@@ -240,11 +239,9 @@ class StatusLineWidget(urwid.WidgetWrap):
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
-    def __init__(self, conversation, send_message_coroutine):
+    def __init__(self, conversation):
         self._conversation = conversation
         self._conversation.on_message += self._on_message
-        # TODO: refactor so we don't need this:
-        self._send_message_coroutine = send_message_coroutine
 
         self.tab_title = get_conv_name(conversation, truncate=True)
 
@@ -262,7 +259,7 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
-        future = self._send_message_coroutine(self._conversation.id_, text)
+        future = self._conversation.send_message(text)
         ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
     def _on_message(self, conversation, user_id, timestamp, text):
