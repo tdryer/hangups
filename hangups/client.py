@@ -604,23 +604,15 @@ class Client(object):
 
     @gen.coroutine
     def _on_push_data(self, data_bytes):
-        """Parse push data and trigger events."""
+        """Parse push data and trigger event methods."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
-        for event in self._push_parser.get_events(data_bytes.decode()):
-            logger.info('Received event: {}'.format(event))
-            # TODO: Refactor so *Event classes aren't needed anymore and we
-            # don't need this boilerplate.
-            if isinstance(event, longpoll.NewMessageEvent):
-                self.on_message(event.conv_id, event.sender_id,
-                                event.timestamp, event.text)
-            elif isinstance(event, longpoll.TypingChangedEvent):
-                self.on_typing(event.conv_id, event.user_id, event.timestamp,
-                               event.typing_status)
-            elif isinstance(event, longpoll.FocusChangedEvent):
-                self.on_focus(event.conv_id, event.user_id, event.timestamp,
-                              event.focus_status, event.focus_device)
-            elif isinstance(event, longpoll.ConvChangedEvent):
-                self.on_conversation(event.conv_id, event.participants)
+        for event_tuple in self._push_parser.get_events(data_bytes.decode()):
+            event_name, args = event_tuple[0], event_tuple[1:]
+            logger.debug(
+                'Received event: {}({})'
+                .format(event_name, ', '.join(str(arg) for arg in args))
+            )
+            getattr(self, event_name)(*args)
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""

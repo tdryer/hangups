@@ -20,26 +20,6 @@ User = namedtuple('User', ['id_', 'full_name', 'first_name', 'is_self'])
 UserID = namedtuple('UserID', ['chat_id', 'gaia_id'])
 
 
-NewMessageEvent = namedtuple('NewMessageEvent', [
-    'conv_id', 'sender_id', 'timestamp', 'text'
-])
-
-
-FocusChangedEvent = namedtuple('FocusChangedEvent', [
-    'conv_id', 'user_id', 'timestamp', 'focus_status', 'focus_device'
-])
-
-
-TypingChangedEvent = namedtuple('TypingChangedEvent', [
-    'conv_id', 'user_id', 'timestamp', 'typing_status'
-])
-
-
-ConvChangedEvent = namedtuple('ConvChangedEvent', [
-    'conv_id', 'participants'
-])
-
-
 class PushDataParser(object):
     """Parse data from the long-polling endpoint."""
 
@@ -205,22 +185,24 @@ def _parse_chat_message(message):
         except (TypeError, IndexError, ValueError) as e:
             logger.warning('Failed to parse image message: {}'.format(e))
             return None
-    return NewMessageEvent(
-        conv_id=message[0][0][0],
-        timestamp=from_timestamp(message[0][2]),
-        sender_id=UserID(chat_id=message[0][1][0], gaia_id=message[0][1][0]),
-        text=message_text
+    return (
+        'on_message',
+        message[0][0][0],
+        UserID(chat_id=message[0][1][0], gaia_id=message[0][1][0]),
+        from_timestamp(message[0][2]),
+        message_text
     )
 
 
 def _parse_conversation_status(message):
     """Parse conversation status message."""
     # TODO: there's a lot more info here
-    return ConvChangedEvent(
-        conv_id=message[0][0],
+    return (
+        'on_conversation',
+        message[0][0],
         # participant list items sometimes can be length 2 or 3
         # ids, name, ?
-        participants={tuple(item[0]): item[1] for item in message[13]}
+        {tuple(item[0]): item[1] for item in message[13]}
     )
 
 
@@ -249,12 +231,13 @@ def _parse_focus_status(message):
         focus_device = None
         logger.warning('Unknown focus device: {}'.format(message[4]))
 
-    return FocusChangedEvent(
-        conv_id=message[0][0],
-        user_id=UserID(chat_id=message[1][0], gaia_id=message[1][1]),
-        timestamp=from_timestamp(message[2]),
-        focus_status=focus_status,
-        focus_device=focus_device,
+    return (
+        'on_focus',
+        message[0][0],
+        UserID(chat_id=message[1][0], gaia_id=message[1][1]),
+        from_timestamp(message[2]),
+        focus_status,
+        focus_device,
     )
 
 
@@ -274,11 +257,12 @@ def _parse_typing_status(message):
         typing_status = None # TODO should probably discard event in this case
         logger.warning('Unknown typing status: {}'.format(message[3]))
 
-    return TypingChangedEvent(
-        conv_id=message[0][0],
-        user_id=UserID(chat_id=message[1][0], gaia_id=message[1][1]),
-        timestamp=from_timestamp(message[2]),
-        typing_status=typing_status,
+    return (
+        'on_typing',
+        message[0][0],
+        UserID(chat_id=message[1][0], gaia_id=message[1][1]),
+        from_timestamp(message[2]),
+        typing_status,
     )
 
 # message types have been observed to range from 1 to 14
