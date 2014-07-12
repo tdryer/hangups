@@ -126,8 +126,6 @@ class ConversationList(object):
         self._client.on_focus += self._on_focus
         self._client.on_conversation += self._on_conversation
 
-    # TODO: Avoid this routing by adding observers when conversations are
-    # created.
     def _on_message(self, client, conv_id, user_id, timestamp, text):
         """Route on_message event to appropriate Conversation."""
         self.get(conv_id).on_message(user_id, timestamp, text)
