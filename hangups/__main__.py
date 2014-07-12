@@ -1,11 +1,13 @@
 """Demo chat client using Hangups."""
 
+# "unused argument" are unavoidable because of obsub events.
+# pylint: disable=W0613
+
+from math import floor, ceil
 from tornado import ioloop, gen
 import logging
+import sys
 import urwid
-from itertools import chain
-from math import floor, ceil
-from sys import exit
 
 import hangups
 
@@ -24,7 +26,7 @@ URWID_PALETTE = [
 ]
 
 
-class UserInterface(object):
+class ChatUI(object):
     """User interface for hangups."""
 
     def __init__(self):
@@ -40,17 +42,20 @@ class UserInterface(object):
             cookies = hangups.auth.get_auth_stdin('cookies.json')
         except hangups.GoogleAuthError as e:
             print('Login failed ({})'.format(e))
-            exit(1)
+            sys.exit(1)
 
         self._client = hangups.Client(cookies)
         self._client.on_connect += self._on_connect
         self._client.on_disconnect += self._on_disconnect
         self._client.on_message += self._on_message
 
-        # Patch urwid's TornadoEventLoop to run_sync() our connection coroutine
-        # rather than calling start(). This "fixes" exception handling, causing
-        # all uncaught exceptions to be fatal.
         class MyEventLoop(urwid.TornadoEventLoop):
+            """Patched Tornado event loop for urwid.
+
+            Patch urwid's TornadoEventLoop to run_sync() our connection
+            coroutine rather than calling start(). This "fixes" exception
+            handling, causing all uncaught exceptions to be fatal.
+            """
             _client = self._client
             def run(self):
                 try:
@@ -106,7 +111,7 @@ class UserInterface(object):
         ])
         self._urwid_loop.widget = self._tabbed_window
 
-    def _on_message(self, _client, conv_id, user_id, timestamp, text):
+    def _on_message(self, client, conv_id, user_id, timestamp, text):
         """Open conversation tab for new messages when they arrive."""
         self.add_conversation_tab(conv_id)
 
@@ -376,7 +381,7 @@ def main():
     logging.basicConfig(filename='hangups.log', level=logging.DEBUG,
                         format=LOG_FORMAT)
     try:
-        UserInterface()
+        ChatUI()
     except KeyboardInterrupt:
         pass
     except:

@@ -1,7 +1,11 @@
 """Abstract class for writing chat clients."""
 
-from collections import namedtuple
+# "unused argument" are unavoidable because of obsub events.
+# pylint: disable=W0613
+
+from obsub import event
 from tornado import ioloop, gen, httpclient, httputil, concurrent
+import datetime
 import hashlib
 import http.cookies
 import json
@@ -9,8 +13,6 @@ import logging
 import random
 import re
 import time
-import datetime
-from obsub import event
 
 from hangups import javascript, longpoll
 from hangups.longpoll import UserID, User
@@ -111,10 +113,7 @@ def _parse_user_entity(entity):
 
 
 class ConversationList(object):
-    """Wrapper around Client that presents a list of Conversations.
-
-    TODO: Should receive events so the list is always up to date.
-    """
+    """Wrapper around Client that presents a list of Conversations."""
 
     def __init__(self, client):
         self._client = client
@@ -158,10 +157,7 @@ class ConversationList(object):
 
 
 class Conversation(object):
-    """A conversation between two or more Users.
-
-    TODO: Should receive events so the conversation is always up to date.
-    """
+    """A conversation between two or more Users."""
 
     def __init__(self, id_, users, last_modified):
         self._id = id_ # ConversationID
@@ -170,22 +166,27 @@ class Conversation(object):
 
     @property
     def id_(self):
+        """Return the Conversation's ID."""
         return self._id
 
     @property
     def users(self):
+        """Return the list of Users participating in the Conversation."""
         return list(self._users)
 
     def get_user(self, user_id):
+        """Return a participating use by UserID."""
         # TODO: make self._users a dict instead?
         return [user for user in self._users if user.id_ == user_id][0]
 
     @property
     def last_modified(self):
+        """Return the timestamp of when the conversation was last modified."""
         return self._last_modified
 
     @gen.coroutine
     def send_message(self, content):
+        """Send a message to the conversation."""
         pass # TODO: implement this
 
     @event
@@ -259,7 +260,7 @@ class UserList(object):
         """Return a dummy User and add it to the list."""
         logger.info('Creating dummy user for {}'.format(user_id))
         user = User(id_=user_id, full_name='UNKNOWN', first_name='UNKNOWN',
-                    is_self=user_id==self._self_user_id)
+                    is_self=(user_id == self._self_user_id))
         self._users[user_id] = user
         return user
 
@@ -280,7 +281,7 @@ class UserList(object):
                 self._users[user_id] = User(
                     id_=user_id, full_name=user['full_name'],
                     first_name=user['first_name'],
-                    is_self=user_id==self._self_user_id
+                    is_self=(user_id == self._self_user_id)
                 )
 
 
