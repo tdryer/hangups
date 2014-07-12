@@ -160,7 +160,7 @@ class Conversation(object):
     def __init__(self, client, id_, users, last_modified):
         self._client = client
         self._id = id_ # ConversationID
-        self._users = users # [User]
+        self._users = {user.id_: user for user in users} # {UserID: User}
         self._last_modified = last_modified # datetime
 
     @property
@@ -171,12 +171,14 @@ class Conversation(object):
     @property
     def users(self):
         """Return the list of Users participating in the Conversation."""
-        return list(self._users)
+        return list(self._users.values())
 
     def get_user(self, user_id):
-        """Return a participating use by UserID."""
-        # TODO: make self._users a dict instead?
-        return [user for user in self._users if user.id_ == user_id][0]
+        """Return a participating use by UserID.
+
+        Raises KeyError if the user ID is not a participant.
+        """
+        return self._users[user_id]
 
     @property
     def last_modified(self):
