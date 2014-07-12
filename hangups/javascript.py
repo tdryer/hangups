@@ -30,7 +30,7 @@ _ESCAPES = {
     'u': '', # unicode escapes are a special case
 }
 _STRING_RE = ('(\'(([^\\\\\'])|(\\\\[{0}]))*?\')|("(([^\\\\"])|(\\\\[{0}]))*?")'
-             .format(''.join(_ESCAPES.keys()).replace('\\', '\\\\')))
+              .format(''.join(_ESCAPES.keys()).replace('\\', '\\\\')))
 
 
 def _unescape_string(s):
@@ -93,6 +93,7 @@ class JavaScriptParser(purplex.Parser):
 
     # pylint: disable=C0111,R0201,W0613,R0913
     LEXER = JavaScriptLexer
+    START = 'e'
     PRECEDENCE = ()
 
     @purplex.attach('listitems : e')
@@ -162,9 +163,6 @@ class JavaScriptParser(purplex.Parser):
     @purplex.attach('e : STRING')
     def string(self, s):
         return _unescape_string(s[1:-1])
-
-    def on_error(self, p):
-        raise ValueError('Failed to load JavaScript: parse failed')
 
 
 # instantiate the parser at module-load time for better performance
