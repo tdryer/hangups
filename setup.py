@@ -40,6 +40,7 @@ setup(
         'tornado==3.2.1',
         'requests==2.2.1',
         'urwid==1.2.1',
+        'obsub==0.2',
     ],
     tests_require=[
         'pytest==2.5.2',
