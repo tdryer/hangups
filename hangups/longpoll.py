@@ -77,7 +77,11 @@ class PushDataParser(object):
             logger.debug('Received message of type {}:\n{}'
                          .format(msg_type, PP.pformat(msg)))
             if msg_type in MESSAGE_PARSERS:
-                yield MESSAGE_PARSERS[msg_type](msg)
+                event_tuple = MESSAGE_PARSERS[msg_type](msg)
+                # Message parsers may fail by returning None, so don't yield
+                # their result in this case.
+                if event_tuple:
+                    yield event_tuple
 
 
 def _get_submission_payloads(submission):
