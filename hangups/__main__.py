@@ -10,6 +10,7 @@ import sys
 import urwid
 
 import hangups
+from hangups.notify import Notifier
 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -36,6 +37,7 @@ class ChatUI(object):
         self._tabbed_window = None # TabbedWindowWidget
         self._conv_list = None # hangups.ConversationList
         self._user_list = None # hangups.UserList
+        self._notifier = None # hangups.notify.Notifier
 
         # TODO Add urwid widget for getting auth.
         try:
@@ -102,6 +104,7 @@ class ChatUI(object):
         """Handle connecting for the first time."""
         self._conv_list = hangups.ConversationList(self._client)
         self._user_list = hangups.UserList(self._client)
+        self._notifier = Notifier(self._client, self._conv_list)
         # show the conversation menu
         self._tabbed_window = TabbedWindowWidget([
             ConversationPickerWidget(
