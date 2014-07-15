@@ -94,7 +94,6 @@ class ChatUI(object):
         if switch:
             self._tabbed_window.change_tab(index)
 
-    @gen.coroutine
     def on_select_conversation(self, conv_id):
         """Called when the user selects a new conversation to listen to."""
         # switch to new or existing tab for the conversation
@@ -154,25 +153,19 @@ class LoadingWidget(urwid.WidgetWrap):
 class ConversationPickerWidget(urwid.WidgetWrap):
     """Widget for picking a conversation."""
 
-    def __init__(self, conversation_list, select_coroutine):
+    def __init__(self, conversation_list, on_select):
         self.tab_title = 'Conversations'
-        self._select_coroutine = select_coroutine
-
         # Build buttons for selecting conversations ordered by most recently
         # modified first.
         convs = sorted(conversation_list.get_all(), reverse=True,
                        key=lambda c: c.last_modified)
-        buttons = [urwid.Button(get_conv_name(conv),
-                                on_press=self._on_press, user_data=conv.id_)
+        on_press = lambda button, conv_id: on_select(conv_id)
+        buttons = [urwid.Button(get_conv_name(conv), on_press=on_press,
+                                user_data=conv.id_)
                    for conv in convs]
         listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
         widget = urwid.Padding(listbox, left=2, right=2)
         super().__init__(widget)
-
-    def _on_press(self, button, conv_id):
-        """Called when a conversation button is pressed."""
-        future = self._select_coroutine(conv_id)
-        ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
 
 
 class ReturnableEdit(urwid.Edit):
