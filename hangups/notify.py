@@ -1,7 +1,9 @@
 """Graphical notifications for the hangups UI.
 
 TODO:
-    - Support other notification systems.
+    - Support other notification systems (like terminal bell).
+    - Support notify-osd's merged notifications. It appears this would require
+    using a dbus library so that each notification comes from the same process.
     - Create notifications for other events like (dis)connection
 """
 
