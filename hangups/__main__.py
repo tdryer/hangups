@@ -6,6 +6,7 @@
 from math import floor, ceil
 from tornado import ioloop
 import appdirs
+import argparse
 import logging
 import os
 import sys
@@ -373,24 +374,37 @@ class TabbedWindowWidget(urwid.WidgetWrap):
 
 def main():
     """Main entry point."""
-    # Create all necessary directories.
+    # Build default paths for files.
     dirs = appdirs.AppDirs('hangups', 'hangups')
-    for d in [dirs.user_log_dir, dirs.user_cache_dir]:
-        if not os.path.isdir(d):
+    default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
+    default_cookies_path = os.path.join(dirs.user_cache_dir, 'cookies.json')
+
+    parser = argparse.ArgumentParser(
+        prog='hangups', formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    dirs = appdirs.AppDirs('hangups', 'hangups')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='log detailed debugging messages')
+    parser.add_argument('--log', default=default_log_path,
+                        help='log file path')
+    parser.add_argument('--cookies', default=default_cookies_path,
+                        help='cookie storage path')
+    args = parser.parse_args()
+
+    # Create all necessary directories.
+    for path in [args.log, args.cookies]:
+        directory = os.path.dirname(path)
+        if directory != '' and not os.path.isdir(directory):
             try:
-                os.makedirs(d)
+                os.makedirs(directory)
             except OSError as e:
                 sys.exit('Failed to create directory: {}'.format(e))
 
-    # Build paths for files.
-    log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
-    cookies_path = os.path.join(dirs.user_cache_dir, 'cookies.json')
-
-    logging.basicConfig(filename=log_path, level=logging.DEBUG,
-                        format=LOG_FORMAT)
+    log_level = logging.DEBUG if args.debug else logging.WARNING
+    logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
 
     try:
-        ChatUI(cookies_path)
+        ChatUI(args.cookies)
     except KeyboardInterrupt:
         pass
     except:
