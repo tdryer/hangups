@@ -581,10 +581,6 @@ class Client(object):
 
         Raises HTTPError.
         """
-        def streaming_callback(data):
-            """Make the callback run a coroutine with exception handling."""
-            future = self._on_push_data(data)
-            ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
         params = {
             'VER': 8,
             'clid': self._clid,
@@ -599,10 +595,9 @@ class Client(object):
         URL = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
         logger.info('Opening new long-polling request')
         res = yield _fetch(URL, params=params, cookies=self._cookies,
-                           streaming_callback=streaming_callback)
+                           streaming_callback=self._on_push_data)
         return res
 
-    @gen.coroutine
     def _on_push_data(self, data_bytes):
         """Parse push data and trigger event methods."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
