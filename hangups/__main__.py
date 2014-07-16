@@ -17,23 +17,33 @@ from hangups.notify import Notifier
 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-URWID_PALETTE = [
-    # ConversationWidget
-    ('msg_date', 'dark blue', 'default'),
-    ('msg_sender', 'dark blue', 'default'),
-    ('msg_text', '', 'default'),
-    # TabBarWidget
-    ('active_tab', 'light gray', 'light blue'),
-    ('inactive_tab', 'underline', 'light green'),
-    ('tab_background', 'underline', 'black'),
-    ('status_line', '', 'black'),
-]
+COL_SCHEMES = {
+    # Very basic scheme with no colour
+    'default': {
+        ('active_tab', '', ''),
+        ('inactive_tab', 'standout', ''),
+        ('msg_date', '', ''),
+        ('msg_sender', '', ''),
+        ('msg_text', '', ''),
+        ('status_line', 'standout', ''),
+        ('tab_background', 'standout', ''),
+    },
+    'solarized-dark': {
+        ('active_tab', 'light gray', 'light blue'),
+        ('inactive_tab', 'underline', 'light green'),
+        ('msg_date', 'dark cyan', ''),
+        ('msg_sender', 'dark blue', ''),
+        ('msg_text', '', ''),
+        ('status_line', 'standout', ''),
+        ('tab_background', 'underline', 'black'),
+    },
+}
 
 
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, cookies_path, keybindings):
+    def __init__(self, cookies_path, keybindings, palette):
         """Start the user interface."""
         self._keys = keybindings
 
@@ -77,7 +87,7 @@ class ChatUI(object):
 
         # Initialize urwid, starting the IOLoop, and block until the IOLoop
         # exits.
-        self._urwid_loop = urwid.MainLoop(LoadingWidget(), URWID_PALETTE,
+        self._urwid_loop = urwid.MainLoop(LoadingWidget(), palette,
                                           event_loop=MyEventLoop(),
                                           handle_mouse=False)
         self._urwid_loop.run()
@@ -396,6 +406,8 @@ def main():
                         help='keybinding for next tab')
     parser.add_argument('--key-prev-tab', default='ctrl u',
                         help='keybinding for previous tab')
+    parser.add_argument('--col-scheme', choices=COL_SCHEMES.keys(),
+                        default='default', help='colour scheme to use')
     args = parser.parse_args()
 
     # Create all necessary directories.
@@ -414,7 +426,7 @@ def main():
         ChatUI(args.cookies, {
             'next_tab': args.key_next_tab,
             'prev_tab': args.key_prev_tab,
-        })
+        }, COL_SCHEMES[args.col_scheme])
     except KeyboardInterrupt:
         pass
     except:
