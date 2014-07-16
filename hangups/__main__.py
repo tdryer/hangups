@@ -33,8 +33,10 @@ URWID_PALETTE = [
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, cookies_path):
+    def __init__(self, cookies_path, keybindings):
         """Start the user interface."""
+        self._keys = keybindings
+
         # These are populated by on_connect when it's called.
         self._conv_widgets = {} # {conversation_id: ConversationWidget}
         self._tabbed_window = None # TabbedWindowWidget
@@ -112,7 +114,7 @@ class ChatUI(object):
             ConversationPickerWidget(
                 self._conv_list, self.on_select_conversation
             )
-        ])
+        ], self._keys)
         self._urwid_loop.widget = self._tabbed_window
 
     def _on_message(self, client, conv_id, user_id, timestamp, text):
@@ -330,8 +332,9 @@ class TabbedWindowWidget(urwid.WidgetWrap):
     widget's title in the tab bar.
     """
 
-    def __init__(self, widget_list):
+    def __init__(self, widget_list, keybindings):
         self._window_widget_list = widget_list
+        self._keys = keybindings
         self._frame = urwid.Frame(widget_list[0])
         self._tab_widget = TabBarWidget(widget_list)
         self._widget = urwid.Pile([
@@ -344,10 +347,10 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         """Handle keypresses for changing tabs."""
         key = super().keypress(size, key)
         # TODO: add a way to close tabs
-        if key == 'ctrl u':
+        if key == self._keys['prev_tab']:
             self.change_tab((self._tab_widget.get_selected_index() -
                              1) % self._tab_widget.get_num_tabs())
-        elif key == 'ctrl d':
+        elif key == self._keys['next_tab']:
             self.change_tab((self._tab_widget.get_selected_index() +
                              1) % self._tab_widget.get_num_tabs())
         else:
@@ -389,6 +392,10 @@ def main():
                         help='log file path')
     parser.add_argument('--cookies', default=default_cookies_path,
                         help='cookie storage path')
+    parser.add_argument('--key-next-tab', default='ctrl d',
+                        help='keybinding for next tab')
+    parser.add_argument('--key-prev-tab', default='ctrl u',
+                        help='keybinding for previous tab')
     args = parser.parse_args()
 
     # Create all necessary directories.
@@ -404,7 +411,10 @@ def main():
     logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
 
     try:
-        ChatUI(args.cookies)
+        ChatUI(args.cookies, {
+            'next_tab': args.key_next_tab,
+            'prev_tab': args.key_prev_tab,
+        })
     except KeyboardInterrupt:
         pass
     except:
