@@ -5,7 +5,9 @@
 
 from math import floor, ceil
 from tornado import ioloop
+import appdirs
 import logging
+import os
 import sys
 import urwid
 
@@ -30,7 +32,7 @@ URWID_PALETTE = [
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self):
+    def __init__(self, cookies_path):
         """Start the user interface."""
         # These are populated by on_connect when it's called.
         self._conv_widgets = {} # {conversation_id: ConversationWidget}
@@ -41,7 +43,7 @@ class ChatUI(object):
 
         # TODO Add urwid widget for getting auth.
         try:
-            cookies = hangups.auth.get_auth_stdin('cookies.json')
+            cookies = hangups.auth.get_auth_stdin(cookies_path)
         except hangups.GoogleAuthError as e:
             print('Login failed ({})'.format(e))
             sys.exit(1)
@@ -371,10 +373,24 @@ class TabbedWindowWidget(urwid.WidgetWrap):
 
 def main():
     """Main entry point."""
-    logging.basicConfig(filename='hangups.log', level=logging.DEBUG,
+    # Create all necessary directories.
+    dirs = appdirs.AppDirs('hangups', 'hangups')
+    for d in [dirs.user_log_dir, dirs.user_cache_dir]:
+        if not os.path.isdir(d):
+            try:
+                os.makedirs(d)
+            except OSError as e:
+                sys.exit('Failed to create directory: {}'.format(e))
+
+    # Build paths for files.
+    log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
+    cookies_path = os.path.join(dirs.user_cache_dir, 'cookies.json')
+
+    logging.basicConfig(filename=log_path, level=logging.DEBUG,
                         format=LOG_FORMAT)
+
     try:
-        ChatUI()
+        ChatUI(cookies_path)
     except KeyboardInterrupt:
         pass
     except:

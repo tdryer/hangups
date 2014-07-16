@@ -41,6 +41,7 @@ setup(
         'requests==2.2.1',
         'urwid==1.2.1',
         'obsub==0.2',
+        'appdirs==1.3.0',
     ],
     tests_require=[
         'pytest==2.5.2',
