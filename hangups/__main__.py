@@ -4,7 +4,7 @@
 # pylint: disable=W0613
 
 from math import floor, ceil
-from tornado import ioloop, gen
+from tornado import ioloop
 import logging
 import sys
 import urwid
@@ -255,8 +255,8 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
-        future = self._conversation.send_message(text)
-        ioloop.IOLoop.instance().add_future(future, lambda f: f.result())
+        on_sent = lambda f: f.result()
+        self._conversation.send_message(text).add_done_callback(on_sent)
 
     def _on_message(self, conversation, user_id, timestamp, text):
         """Display a new conversation message."""
