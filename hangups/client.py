@@ -14,7 +14,7 @@ import random
 import re
 import time
 
-from hangups import javascript, longpoll
+from hangups import javascript, longpoll, exceptions
 from hangups.longpoll import UserID, User
 
 
@@ -187,7 +187,10 @@ class Conversation(object):
 
     @gen.coroutine
     def send_message(self, text):
-        """Send a message to this conversation."""
+        """Send a message to this conversation.
+
+        Raises hangups.NetworkError if the message can not be sent.
+        """
         yield self._client.sendchatmessage(self._id, text)
 
     @event
@@ -758,9 +761,12 @@ class Client(object):
     def sendchatmessage(self, conversation_id, message, is_bold=False,
                         is_italic=False, is_strikethrough=False,
                         is_underlined=False):
-        """Send a chat message to a conversation."""
+        """Send a chat message to a conversation.
+
+        Raises hangups.NetworkError if the message can not be sent.
+        """
         client_generated_id = random.randint(0, 2**32)
-        res = yield self._request('conversations/sendchatmessage', [
+        body = [
             self._get_request_header(),
             None, None, None, [],
             [
@@ -775,5 +781,18 @@ class Client(object):
                 [conversation_id], client_generated_id, 2
             ],
             None, None, None, []
-        ])
-        return json.loads(res.body.decode())
+        ]
+        try:
+            res = yield self._request('conversations/sendchatmessage', body)
+        except (httpclient.HTTPError, IOError) as e:
+            # In addition to HTTPError, httpclient can raise IOError (which
+            # includes socker.gaierror).
+            logger.warning('Failed to send message: {}'.format(e))
+            raise exceptions.NetworkError(e)
+        # sendchatmessage can return 200 but still contain an error
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            logger.warning('sendchatmessage returned status {}'
+                           .format(res_status))
+            raise exceptions.NetworkError()

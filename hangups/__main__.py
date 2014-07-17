@@ -270,8 +270,21 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
-        on_sent = lambda f: f.result()
-        self._conversation.send_message(text).add_done_callback(on_sent)
+        # XXX: Exception handling here is still a bit broken. Uncaught
+        # exceptions in _on_message_sent will only be logged.
+        self._conversation.send_message(text).add_done_callback(
+            self._on_message_sent
+        )
+
+    def _on_message_sent(self, future):
+        """Handle showing an error if a message fails to send."""
+        try:
+            future.result()
+        except hangups.NetworkError:
+            self._list_walker.append(urwid.Text([
+                ('msg_text', 'Failed to send message.'),
+            ]))
+
 
     def _on_message(self, conversation, user_id, timestamp, text):
         """Display a new conversation message."""
