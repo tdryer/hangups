@@ -189,6 +189,8 @@ class Conversation(object):
     def send_message(self, text):
         """Send a message to this conversation.
 
+        text may not be empty.
+
         Raises hangups.NetworkError if the message can not be sent.
         """
         yield self._client.sendchatmessage(self._id, text)
@@ -762,6 +764,8 @@ class Client(object):
                         is_italic=False, is_strikethrough=False,
                         is_underlined=False):
         """Send a chat message to a conversation.
+
+        message may not be empty.
 
         Raises hangups.NetworkError if the message can not be sent.
         """
