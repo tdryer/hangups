@@ -125,5 +125,6 @@ def longpoll_fetch(url, method='GET', params=None, headers=None, cookies=None,
         else:
             logger.info('Long-polling request timed out')
             error = True
-            raise IOError('timed out')
+            raise IOError('timed out waiting for data')
+    logger.info('Long-polling request finished')
     return future.result()

@@ -16,13 +16,16 @@ from hangups import javascript, longpoll, exceptions, http_utils
 from hangups.longpoll import UserID, User
 
 logger = logging.getLogger(__name__)
-# Set the connection timeout low so we fail fast when there's a network
-# problem.
-CONNECT_TIMEOUT = 10
-# Set the request timeout high enough for long-polling (the requests last ~3-4
-# minutes), but low enough that we find out fast if there's a network problem.
-REQUEST_TIMEOUT = 60*5
 ORIGIN_URL = 'https://talkgadget.google.com'
+# Set the connection and request timeouts low so we fail fast when there's a
+# network problem.
+CONNECT_TIMEOUT = 10
+REQUEST_TIMEOUT = 10
+# Long-polling requests may last ~3-4 minutes.
+LP_REQ_TIMEOUT = 60 * 5
+# Long-polling requests send heartbeats every 15 seconds, so if we miss two in
+# a row, consider the connection dead.
+LP_DATA_TIMEOUT = 30
 
 
 def _parse_sid_response(res):
@@ -490,6 +493,11 @@ class Client(object):
             self._push_parser = longpoll.PushDataParser()
             try:
                 yield self._longpoll_request()
+            except IOError as e:
+                # An error occurred, so decrement the number of retries.
+                retries -= 1
+                logger.error('Long-polling request failed because of '
+                             'IOError: {}'.format(e))
             except httpclient.HTTPError as e:
                 # An error occurred, so decrement the number of retries.
                 retries -= 1
@@ -498,10 +506,6 @@ class Client(object):
                                  'became invalid. Will attempt to recover.')
                     need_new_sid = True
                 elif e.code == 599:
-                    # TODO: Depending on how the connection is lost, it may
-                    # hang for a long time before an exception is raised, so we
-                    # need a another way of determining that the connection is
-                    # alive.
                     logger.error('Long-polling request failed because '
                                  'connection was closed. Will attempt to '
                                  'recover.')
@@ -553,7 +557,7 @@ class Client(object):
     def _longpoll_request(self):
         """Open a long-polling request to receive push events.
 
-        Raises HTTPError.
+        Raises HTTPError or IOError.
         """
         params = {
             'VER': 8,
@@ -568,10 +572,11 @@ class Client(object):
         }
         URL = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
         logger.info('Opening new long-polling request')
-        res = yield http_utils.fetch(
+        res = yield http_utils.longpoll_fetch(
             URL, params=params, cookies=self._cookies,
             streaming_callback=self._on_push_data,
-            connect_timeout=CONNECT_TIMEOUT, request_timeout=REQUEST_TIMEOUT
+            connect_timeout=CONNECT_TIMEOUT, request_timeout=LP_REQ_TIMEOUT,
+            data_timeout=LP_DATA_TIMEOUT
         )
         return res
 
