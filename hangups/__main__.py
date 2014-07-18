@@ -7,6 +7,7 @@ from math import floor, ceil
 from tornado import ioloop
 import appdirs
 import argparse
+import datetime
 import logging
 import os
 import sys
@@ -95,7 +96,8 @@ class ChatUI(object):
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
         if conv_id not in self._conv_widgets:
-            widget = ConversationWidget(self._conv_list.get(conv_id))
+            widget = ConversationWidget(self._client,
+                                        self._conv_list.get(conv_id))
             self._conv_widgets[conv_id] = widget
         return self._conv_widgets[conv_id]
 
@@ -250,7 +252,13 @@ class StatusLineWidget(urwid.WidgetWrap):
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
-    def __init__(self, conversation):
+    def __init__(self, client, conversation):
+        client.on_disconnect += lambda client: self._show_info_message(
+            'Disconnected. Messages will not be received.'
+        )
+        client.on_reconnect += lambda client: self._show_info_message(
+            'Connected.'
+        )
         self._conversation = conversation
         self._conversation.on_message += self._on_message
 
@@ -284,10 +292,15 @@ class ConversationWidget(urwid.WidgetWrap):
         try:
             future.result()
         except hangups.NetworkError:
-            self._list_walker.append(urwid.Text([
-                ('msg_text', 'Failed to send message.'),
-            ]))
+            self._show_info_message('Failed to send message.')
 
+    def _show_info_message(self, text):
+        """Display an informational message with timestamp."""
+        date_str = datetime.datetime.now().strftime('%I:%M:%S %p')
+        self._list_walker.append(urwid.Text([
+            ('msg_date', '(' + date_str + ') '),
+            ('msg_text', text),
+        ]))
 
     def _on_message(self, conversation, user_id, timestamp, text):
         """Display a new conversation message."""

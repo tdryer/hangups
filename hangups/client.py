@@ -270,8 +270,9 @@ class Client(object):
         cookies is a dictionary of authentication cookies.
         """
         self._cookies = cookies
-
         self._push_parser = None
+        self._is_connected = False
+        self._on_connect_called = False
 
         # These are available after ConnectionEvent:
         self.initial_users = None # {UserID: User}
@@ -303,7 +304,6 @@ class Client(object):
     def connect(self):
         """Connect to the server and receive events."""
         yield self._init_talkgadget_1()
-        self.on_connect()
         yield self._run_forever()
 
     ##########################################################################
@@ -313,11 +313,20 @@ class Client(object):
     @event
     def on_connect(self):
         """Event called when the client connects for the first time."""
+        self._on_connect_called = True
+        self._is_connected = True
         logger.info('Triggered event Client.on_connect')
 
     @event
+    def on_reconnect(self):
+        """Event called when the client reconnects after being disconnected."""
+        self._is_connected = True
+        logger.info('Triggered event Client.on_reconnect')
+
+    @event
     def on_disconnect(self):
-        """Event called when the client is disconnected from the server."""
+        """Event called when the client is disconnected."""
+        self._is_connected = False
         logger.info('Triggered event Client.on_disconnect')
 
     @event
@@ -496,11 +505,15 @@ class Client(object):
             except IOError as e:
                 # An error occurred, so decrement the number of retries.
                 retries -= 1
+                if self._is_connected:
+                    self.on_disconnect()
                 logger.error('Long-polling request failed because of '
                              'IOError: {}'.format(e))
             except httpclient.HTTPError as e:
                 # An error occurred, so decrement the number of retries.
                 retries -= 1
+                if self._is_connected:
+                    self.on_disconnect()
                 if e.code == 400 and e.response.reason == 'Unknown SID':
                     logger.error('Long-polling request failed because SID '
                                  'became invalid. Will attempt to recover.')
@@ -521,7 +534,6 @@ class Client(object):
             # TODO: If there was an error, messages could be lost in this time.
 
         logger.error('Ran out of retries for long-polling request')
-        self.on_disconnect()
 
     @gen.coroutine
     def _fetch_channel_sid(self):
@@ -583,6 +595,16 @@ class Client(object):
     def _on_push_data(self, data_bytes):
         """Parse push data and trigger event methods."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
+
+        # This callback is only called when the long-polling request was
+        # successful, so we can use it to trigger connection events if
+        # necessary.
+        if not self._is_connected:
+            if self._on_connect_called:
+                self.on_reconnect()
+            else:
+                self.on_connect()
+
         for event_tuple in self._push_parser.get_events(data_bytes.decode()):
             event_name, args = event_tuple[0], event_tuple[1:]
             logger.debug(
