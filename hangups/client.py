@@ -4,61 +4,25 @@
 # pylint: disable=W0613
 
 from obsub import event
-from tornado import ioloop, gen, httpclient, httputil, concurrent
-import datetime
+from tornado import gen, httpclient
 import hashlib
-import http.cookies
 import json
 import logging
 import random
 import re
 import time
 
-from hangups import javascript, longpoll, exceptions
+from hangups import javascript, longpoll, exceptions, http_utils
 from hangups.longpoll import UserID, User
 
-
 logger = logging.getLogger(__name__)
-
-
 # Set the connection timeout low so we fail fast when there's a network
 # problem.
 CONNECT_TIMEOUT = 10
 # Set the request timeout high enough for long-polling (the requests last ~3-4
 # minutes), but low enough that we find out fast if there's a network problem.
 REQUEST_TIMEOUT = 60*5
-
 ORIGIN_URL = 'https://talkgadget.google.com'
-
-
-@gen.coroutine
-def _fetch(url, method='GET', params=None, headers=None, cookies=None,
-           data=None, streaming_callback=None):
-    """Wrapper for tornado.httpclient.AsyncHTTPClient.fetch."""
-    if headers is None:
-        headers = {}
-    if params is not None:
-        url = httputil.url_concat(url, params)
-    if cookies is not None:
-        # abuse SimpleCookie to escape our cookies for us
-        simple_cookies = http.cookies.SimpleCookie(cookies)
-        headers['cookie'] = '; '.join(val.output(header='')[1:]
-                                      for val in simple_cookies.values())
-    http_client = httpclient.AsyncHTTPClient()
-    res = yield http_client.fetch(httpclient.HTTPRequest(
-        httputil.url_concat(url, params), method=method,
-        headers=httputil.HTTPHeaders(headers), body=data,
-        streaming_callback=streaming_callback, connect_timeout=CONNECT_TIMEOUT,
-        request_timeout=REQUEST_TIMEOUT
-    ))
-    return res
-
-
-@concurrent.return_future
-def _future_sleep(seconds, callback=None):
-    """Return a future that finishes after a given number of seconds."""
-    ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=seconds),
-                                         callback)
 
 
 def _parse_sid_response(res):
@@ -398,8 +362,10 @@ class Client(object):
                 '(KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36'
             ),
         }
-        res = yield _fetch(url, cookies=self._cookies, params=params,
-                           headers=headers)
+        res = yield http_utils.fetch(
+            url, cookies=self._cookies, params=params, headers=headers,
+            connect_timeout=CONNECT_TIMEOUT, request_timeout=REQUEST_TIMEOUT
+        )
         logger.debug('First talkgadget request result:\n{}'.format(res.body))
         if res.code != 200:
             raise ValueError("First talkgadget request failed with {}: {}"
@@ -511,7 +477,7 @@ class Client(object):
                 backoff_seconds = 2 ** (MAX_RETRIES - retries)
                 logger.info('Backing off for {} seconds'
                             .format(backoff_seconds))
-                yield _future_sleep(backoff_seconds)
+                yield http_utils.sleep(backoff_seconds)
 
             # Request a new SID if we don't have one yet, or the previous one
             # became invalid.
@@ -566,8 +532,11 @@ class Client(object):
             # Required if we want our client to be called "AChromeExtension":
             'prop': self._channel_prop_param,
         }
-        res = yield _fetch(url, method='POST', cookies=self._cookies,
-                           params=params, data='count=0')
+        res = yield http_utils.fetch(
+            url, method='POST', cookies=self._cookies, params=params,
+            data='count=0', connect_timeout=CONNECT_TIMEOUT,
+            request_timeout=REQUEST_TIMEOUT
+        )
         logger.debug('Fetch SID response:\n{}'.format(res.body))
         if res.code != 200:
             # TODO use better exception
@@ -599,8 +568,11 @@ class Client(object):
         }
         URL = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
         logger.info('Opening new long-polling request')
-        res = yield _fetch(URL, params=params, cookies=self._cookies,
-                           streaming_callback=self._on_push_data)
+        res = yield http_utils.fetch(
+            URL, params=params, cookies=self._cookies,
+            streaming_callback=self._on_push_data,
+            connect_timeout=CONNECT_TIMEOUT, request_timeout=REQUEST_TIMEOUT
+        )
         return res
 
     def _on_push_data(self, data_bytes):
@@ -656,9 +628,11 @@ class Client(object):
             'key': self._api_key,
             'alt': 'json', # json or protojson
         }
-        res = yield _fetch(url, method='POST', headers=headers,
-                           cookies=cookies, params=params,
-                           data=json.dumps(body_json))
+        res = yield http_utils.fetch(
+            url, method='POST', headers=headers, cookies=cookies,
+            params=params, data=json.dumps(body_json),
+            request_timeout=REQUEST_TIMEOUT, connect_timeout=CONNECT_TIMEOUT
+        )
         logger.debug('Response to request for {} was {}:\n{}'
                      .format(endpoint, res.code, res.body))
         if res.code != 200:
