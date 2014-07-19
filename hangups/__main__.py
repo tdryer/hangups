@@ -310,17 +310,20 @@ class TabBarWidget(urwid.WidgetWrap):
 
     Every item is assumed to have a tab_title property which is used as the
     title for the item's tab.
+
+    TODO: handle overflow better
     """
 
     def __init__(self, items):
         self._widget = urwid.Text('')
         self._items = items
         self._selected_index = 0
-        super().__init__(self._widget)
+        self.change_tab(0)  # Render the tabs for the first time.
+        super().__init__(urwid.AttrWrap(self._widget, 'tab_background'))
 
-    def render(self, size, focus=False):
-        # TODO: handle overflow
-        max_col = size[0]
+    def change_tab(self, index):
+        """Change to the tab at the given index."""
+        self._selected_index = index
         text = []
         for num, item in enumerate(self._items):
             palette = ('active_tab' if num == self._selected_index
@@ -329,15 +332,7 @@ class TabBarWidget(urwid.WidgetWrap):
                 (palette, ' {} '.format(item.tab_title).encode()),
                 ('tab_background', b' '),
             ]
-        text_len = sum(len(t) for a, t in text)
-        text.append(('tab_background', b' ' * (max_col - text_len)))
         self._widget.set_text(text)
-        return super().render(size, focus)
-
-    def change_tab(self, index):
-        """Change to the tab at the given index."""
-        self._selected_index = index
-        self._invalidate()
 
     def get_selected_item(self):
         """Return the selected item."""
