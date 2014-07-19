@@ -205,24 +205,12 @@ class StatusLineWidget(urwid.WidgetWrap):
     """Widget for showing typing status."""
 
     def __init__(self, conversation):
-        self._widget = urwid.Text('')
         self._typing_statuses = {}
         self._conversation = conversation
         self._conversation.on_message += self._on_message
         self._conversation.on_typing += self._on_typing
-        super().__init__(self._widget)
-
-    def render(self, size, focus=False):
-        # custom render function to change background colour
-        msg = self._widget.text
-        msg = msg if isinstance(msg, bytes) else msg.encode()
-        num_padding = (size[0] - len(msg))
-        # center the text by putting padding on each side
-        padding_left = b' ' * floor(num_padding / 2)
-        padding_right = b' ' * ceil(num_padding / 2)
-        text = ('status_line', padding_left + msg + padding_right)
-        self._widget.set_text(text)
-        return super().render(size, focus)
+        self._widget = urwid.Text('', align='center')
+        super().__init__(urwid.AttrWrap(self._widget, 'status_line'))
 
     def _on_message(self, conversation, user_id, timestamp, text):
         """Make users stop typing when they send a message."""
