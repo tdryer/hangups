@@ -380,7 +380,6 @@ class TabbedWindowWidget(urwid.WidgetWrap):
     def add_tab(self, widget):
         """Add a new tab and return its index."""
         self._window_widget_list.append(widget)
-        self._tab_widget._invalidate()
         return self._tab_widget.get_num_tabs() - 1
 
     def change_tab(self, index):
