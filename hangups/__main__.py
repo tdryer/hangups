@@ -320,9 +320,11 @@ class TabBarWidget(urwid.WidgetWrap):
         self.change_tab(0)  # Render the tabs for the first time.
         super().__init__(urwid.AttrWrap(self._widget, 'tab_background'))
 
-    def change_tab(self, index):
-        """Change to the tab at the given index."""
-        self._selected_index = index
+    def update(self):
+        """Update the tab bar.
+
+        TODO: Refactor so this isn't needed.
+        """
         text = []
         for num, item in enumerate(self._items):
             palette = ('active_tab' if num == self._selected_index
@@ -332,6 +334,11 @@ class TabBarWidget(urwid.WidgetWrap):
                 ('tab_background', b' '),
             ]
         self._widget.set_text(text)
+
+    def change_tab(self, index):
+        """Change to the tab at the given index."""
+        self._selected_index = index
+        self.update()
 
     def get_selected_item(self):
         """Return the selected item."""
@@ -380,6 +387,7 @@ class TabbedWindowWidget(urwid.WidgetWrap):
     def add_tab(self, widget):
         """Add a new tab and return its index."""
         self._window_widget_list.append(widget)
+        self._tab_widget.update()
         return self._tab_widget.get_num_tabs() - 1
 
     def change_tab(self, index):
