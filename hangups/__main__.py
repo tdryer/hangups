@@ -3,7 +3,6 @@
 # "unused argument" are unavoidable because of obsub events.
 # pylint: disable=W0613
 
-from math import floor, ceil
 from tornado import ioloop
 import appdirs
 import argparse
