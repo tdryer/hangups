@@ -442,7 +442,8 @@ class Client(object):
                 # found via the other methods.
                 # TODO We should note who these users are and try to request
                 # them.
-                if len(p) > 1:
+                # for some contats, p[1] is None??
+                if len(p) > 1 and p[1]:
                     display_name = p[1]
                     self.initial_users[user_id] = User(
                         id_=user_id, first_name=display_name.split()[0],
