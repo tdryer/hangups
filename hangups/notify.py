@@ -56,7 +56,9 @@ class Notifier(object):
             # should be safe.
             logger.info('Creating notification with command: {}'.format(cmd))
             try:
-                output = subprocess.check_output(cmd).decode()
+                output = subprocess.check_output(
+                    cmd, stderr=subprocess.STDOUT
+                ).decode()
             except (subprocess.CalledProcessError, FileNotFoundError) as e:
                 logger.warning('Notification command failed: {}'.format(e))
                 return
