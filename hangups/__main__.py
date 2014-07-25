@@ -103,12 +103,8 @@ class ChatUI(object):
     def add_conversation_tab(self, conv_id, switch=False):
         """Add conversation tab if not present, and optionally switch to it."""
         conv_widget = self.get_conv_widget(conv_id)
-        try:
-            index = self._tabbed_window.index(conv_widget)
-        except ValueError:
-            index = self._tabbed_window.add_tab(conv_widget)
-        if switch:
-            self._tabbed_window.change_tab(index)
+        self._tabbed_window.set_tab(conv_widget, switch=switch,
+                                    title=conv_widget.tab_title)
 
     def on_select_conversation(self, conv_id):
         """Called when the user selects a new conversation to listen to."""
@@ -121,11 +117,11 @@ class ChatUI(object):
         self._user_list = hangups.UserList(self._client)
         self._notifier = Notifier(self._client, self._conv_list)
         # show the conversation menu
-        self._tabbed_window = TabbedWindowWidget([
-            ConversationPickerWidget(
-                self._conv_list, self.on_select_conversation
-            )
-        ], self._keys)
+        conv_picker = ConversationPickerWidget(self._conv_list,
+                                               self.on_select_conversation)
+        self._tabbed_window = TabbedWindowWidget(self._keys)
+        self._tabbed_window.set_tab(conv_picker, switch=True,
+                                    title=conv_picker.tab_title)
         self._urwid_loop.widget = self._tabbed_window
 
     def _on_message(self, client, conv_id, user_id, timestamp, text):
@@ -304,103 +300,62 @@ class ConversationWidget(urwid.WidgetWrap):
         self._list_box.set_focus(len(self._list_walker) - 1)
 
 
-class TabBarWidget(urwid.WidgetWrap):
-    """A horizontal tab bar for switching between a list of items.
+class TabbedWindowWidget(urwid.WidgetWrap):
 
-    Every item is assumed to have a tab_title property which is used as the
-    title for the item's tab.
+    """A widget that displays a list of widgets via a tab bar."""
 
-    TODO: handle overflow better
-    """
+    def __init__(self, keybindings):
+        self._widgets = [] # [urwid.Widget]
+        self._widget_title = {} # {urwid.Widget: str}
+        self._tab_index = None # int
+        self._keys = keybindings
+        self._tabs = urwid.Text('')
+        self._frame = urwid.Frame(None)
+        super().__init__(urwid.Pile([
+            ('pack', urwid.AttrWrap(self._tabs, 'tab_background')),
+            ('weight', 1, self._frame),
+        ]))
 
-    def __init__(self, items):
-        self._widget = urwid.Text('')
-        self._items = items
-        self._selected_index = 0
-        self.change_tab(0)  # Render the tabs for the first time.
-        super().__init__(urwid.AttrWrap(self._widget, 'tab_background'))
-
-    def update(self):
-        """Update the tab bar.
-
-        TODO: Refactor so this isn't needed.
-        """
+    def _update_tabs(self):
+        """Update tab display."""
         text = []
-        for num, item in enumerate(self._items):
-            palette = ('active_tab' if num == self._selected_index
+        for num, widget in enumerate(self._widgets):
+            palette = ('active_tab' if num == self._tab_index
                        else 'inactive_tab')
             text += [
-                (palette, ' {} '.format(item.tab_title).encode()),
+                (palette, ' {} '.format(self._widget_title[widget]).encode()),
                 ('tab_background', b' '),
             ]
-        self._widget.set_text(text)
-
-    def change_tab(self, index):
-        """Change to the tab at the given index."""
-        self._selected_index = index
-        self.update()
-
-    def get_selected_item(self):
-        """Return the selected item."""
-        return self._items[self._selected_index]
-
-    def get_selected_index(self):
-        """Return the index of the selected tab."""
-        return self._selected_index
-
-    def get_num_tabs(self):
-        """Return the number of tabs."""
-        return len(self._items)
-
-
-class TabbedWindowWidget(urwid.WidgetWrap):
-    """A tabbed-window widget for displaying other widgets under a tab bar.
-
-    Every widget is assumed to have a tab_title property which is used as the
-    widget's title in the tab bar.
-    """
-
-    def __init__(self, widget_list, keybindings):
-        self._window_widget_list = widget_list
-        self._keys = keybindings
-        self._frame = urwid.Frame(widget_list[0])
-        self._tab_widget = TabBarWidget(widget_list)
-        self._widget = urwid.Pile([
-            ('pack', self._tab_widget),
-            ('weight', 1, self._frame),
-        ])
-        super().__init__(self._widget)
+        self._tabs.set_text(text)
+        self._frame.contents['body'] = (self._widgets[self._tab_index], None)
 
     def keypress(self, size, key):
         """Handle keypresses for changing tabs."""
         key = super().keypress(size, key)
-        # TODO: add a way to close tabs
+        num_tabs = len(self._widgets)
         if key == self._keys['prev_tab']:
-            self.change_tab((self._tab_widget.get_selected_index() -
-                             1) % self._tab_widget.get_num_tabs())
+            self._tab_index = (self._tab_index - 1) % num_tabs
+            self._update_tabs()
         elif key == self._keys['next_tab']:
-            self.change_tab((self._tab_widget.get_selected_index() +
-                             1) % self._tab_widget.get_num_tabs())
+            self._tab_index = (self._tab_index + 1) % num_tabs
+            self._update_tabs()
         else:
             return key
 
-    def add_tab(self, widget):
-        """Add a new tab and return its index."""
-        self._window_widget_list.append(widget)
-        self._tab_widget.update()
-        return self._tab_widget.get_num_tabs() - 1
+    def set_tab(self, widget, switch=False, title=None):
+        """Add or modify a tab.
 
-    def change_tab(self, index):
-        """Change to the tab at the given index."""
-        self._tab_widget.change_tab(index)
-        self._frame.contents['body'] = (self._tab_widget.get_selected_item(),
-                                        None)
-
-    def index(self, widget):
-        """Return the index of the tab associated with the given widget.
-
-        Raises ValueError if widget is not in the tabbed window."""
-        return self._window_widget_list.index(widget)
+        If widget is not a tab, it will be added. If switch is True, switch to
+        this tab. If title is given, set the tab's title.
+        """
+        if widget not in self._widgets:
+            self._widgets.append(widget)
+            self._widget_title[widget] = str(widget)
+        if switch:
+            self._tab_index = self._widgets.index(widget)
+        if title:
+            self._widget_title[widget] = title
+        self._update_tabs()
 
 
 def main():
