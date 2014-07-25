@@ -246,7 +246,9 @@ class ConversationWidget(urwid.WidgetWrap):
         self._conversation = conversation
         self._conversation.on_message += self._on_message
 
-        set_title_cb(self, get_conv_name(conversation, truncate=True))
+        self._num_unread = 0
+        self._set_title_cb = set_title_cb
+        self._set_title()
 
         self._list_walker = urwid.SimpleFocusListWalker([])
         self._list_box = urwid.ListBox(self._list_walker)
@@ -259,6 +261,19 @@ class ConversationWidget(urwid.WidgetWrap):
         # focus the edit widget by default
         self._widget.focus_position = 2
         super().__init__(self._widget)
+
+    def keypress(self, size, key):
+        """Handle keypresses marking messages as read."""
+        self._num_unread = 0
+        self._set_title()
+        return super().keypress(size, key)
+
+    def _set_title(self):
+        """Update this conversation's tab title."""
+        title = get_conv_name(self._conversation, truncate=True)
+        if self._num_unread > 0:
+            title += ' ({})'.format(self._num_unread)
+        self._set_title_cb(self, title)
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
@@ -299,6 +314,11 @@ class ConversationWidget(urwid.WidgetWrap):
 
         # scroll down to the new message
         self._list_box.set_focus(len(self._list_walker) - 1)
+
+        # Update the count of unread messages.
+        if not self._conversation.get_user(user_id).is_self:
+            self._num_unread += 1
+            self._set_title()
 
 
 class TabbedWindowWidget(urwid.WidgetWrap):
