@@ -95,16 +95,18 @@ class ChatUI(object):
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
         if conv_id not in self._conv_widgets:
+            set_title_cb = (lambda widget, title:
+                            self._tabbed_window.set_tab(widget, title=title))
             widget = ConversationWidget(self._client,
-                                        self._conv_list.get(conv_id))
+                                        self._conv_list.get(conv_id),
+                                        set_title_cb)
             self._conv_widgets[conv_id] = widget
         return self._conv_widgets[conv_id]
 
     def add_conversation_tab(self, conv_id, switch=False):
         """Add conversation tab if not present, and optionally switch to it."""
         conv_widget = self.get_conv_widget(conv_id)
-        self._tabbed_window.set_tab(conv_widget, switch=switch,
-                                    title=conv_widget.tab_title)
+        self._tabbed_window.set_tab(conv_widget, switch=switch)
 
     def on_select_conversation(self, conv_id):
         """Called when the user selects a new conversation to listen to."""
@@ -121,7 +123,7 @@ class ChatUI(object):
                                                self.on_select_conversation)
         self._tabbed_window = TabbedWindowWidget(self._keys)
         self._tabbed_window.set_tab(conv_picker, switch=True,
-                                    title=conv_picker.tab_title)
+                                    title='Conversations')
         self._urwid_loop.widget = self._tabbed_window
 
     def _on_message(self, client, conv_id, user_id, timestamp, text):
@@ -166,7 +168,6 @@ class ConversationPickerWidget(urwid.WidgetWrap):
     """Widget for picking a conversation."""
 
     def __init__(self, conversation_list, on_select):
-        self.tab_title = 'Conversations'
         # Build buttons for selecting conversations ordered by most recently
         # modified first.
         convs = sorted(conversation_list.get_all(), reverse=True,
@@ -235,7 +236,7 @@ class StatusLineWidget(urwid.WidgetWrap):
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
-    def __init__(self, client, conversation):
+    def __init__(self, client, conversation, set_title_cb):
         client.on_disconnect += lambda client: self._show_info_message(
             'Disconnected. Messages will not be received.'
         )
@@ -245,7 +246,7 @@ class ConversationWidget(urwid.WidgetWrap):
         self._conversation = conversation
         self._conversation.on_message += self._on_message
 
-        self.tab_title = get_conv_name(conversation, truncate=True)
+        set_title_cb(self, get_conv_name(conversation, truncate=True))
 
         self._list_walker = urwid.SimpleFocusListWalker([])
         self._list_box = urwid.ListBox(self._list_walker)
@@ -350,7 +351,7 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         """
         if widget not in self._widgets:
             self._widgets.append(widget)
-            self._widget_title[widget] = str(widget)
+            self._widget_title[widget] = ''
         if switch:
             self._tab_index = self._widgets.index(widget)
         if title:
