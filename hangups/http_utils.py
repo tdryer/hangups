@@ -75,8 +75,6 @@ def longpoll_fetch(url, method='GET', params=None, headers=None, cookies=None,
 
     Raises HTTPError and IOError.
     """
-    # Pylint doesn't understand nonlocal.
-    # pylint: disable=W0612
     error = False
     new_data = False
     response_code = None  # Persistent state for the header callback
