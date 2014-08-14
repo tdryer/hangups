@@ -11,7 +11,7 @@ aren't available in clients that connect via XMPP.
 
 hangups is still in an early stage of development. It's usable for basic
 chatting, but users should keep another client handy. Bug reports, feature
-requests, and pull requests on this repository are welcome.
+requests, and pull requests are welcome.
 
 .. image:: https://github.com/tdryer/hangups/raw/master/screenshot.png
     :alt: hangups screenshot
