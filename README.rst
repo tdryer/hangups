@@ -1,42 +1,49 @@
 hangups
 =======
 
-hangups is a Python library for writing instant messaging clients that
-interoperate with `Google Hangouts <https://www.google.ca/hangouts/>`_. hangups
-also includes a reference client with a command line user interface.
+hangups is the first third-party instant messaging client for `Google
+Hangouts`_.
 
-In May 2013, Google replaced their "Talk" instant messaging product, based on
-XMPP, with "Hangouts", which adopted a `proprietary, non-interoperable protocol
-<https://www.eff.org/deeplinks/2013/05/google-abandons-open-standards-instant-messaging>`_.
-Because of this, hangouts must be implemented by reverse-engineering. For now
-it's still possible to connect to Hangouts using the standard XMPP protocol,
-but this restricts features like group messaging that hangups allows.
+Unlike its predecessor Google Talk, Hangouts uses a `proprietary,
+non-interoperable protocol`_. hangups is implemented by reverse-engineering
+this protocol, which allows it to support features like group messaging that
+aren't available in clients that connect via XMPP.
 
-hangups is working, but is pre-alpha quality. The API will change, and it
-shouldn't be relied on for serious work.
+hangups is still in an early stage of development. It's usable for basic
+chatting, but users should keep another client handy. Bug reports, feature
+requests, and pull requests on this repository are welcome.
 
 .. image:: https://github.com/tdryer/hangups/raw/master/screenshot.png
     :alt: hangups screenshot
 
-What works
-----------
+.. _Google Hangouts: https://www.google.ca/hangouts/
+.. _proprietary, non-interoperable protocol: https://www.eff.org/deeplinks/2013/05/google-abandons-open-standards-instant-messaging
 
-* logging in (with second factor support)
-* switching between conversations
-* receiving chat messages and other events via push
-* sending chat messages
 
-Running
--------
+Trying it out
+-------------
 
-Python 3.4 is required (Python 3.3 might work but is not tested). To install
-and run (virtualenv recommended): ::
+Python 3.3 or higher is required. To install the latest version of hangups,
+run: ::
 
  pip install hangups
- hangups
 
-Follow the prompts to log into your Google account. In the Conversations tab,
-use arrow keys to scroll through the list of existing conversations, and press
-return to select one. In a conversation, use arrow keys to scroll through
-messages and to select the "Send message" box. Type a message and press return
-to send it. At any time you use use ctrl+d and ctrl+u to switch between tabs.
+Or check out the repository and run: ::
+
+ python setup.py install
+
+Run ``hangups --help`` to see available options. Start hangups by running
+``hangups``.
+
+The first time you start hangups, you will be prompted to log into your Google
+account. Your credentials will only be sent to Google, and only session cookies
+will be stored locally. If you have trouble logging in, try logging in through
+a browser first.
+
+hangups uses a tabbed interface. The first tab is always the conversations list
+tab, which lets you use the up/down arrow keys to select an existing
+conversation and open it in a new tab by pressing enter. Once you have multiple
+tabs open, you can use ctrl+u and ctrl+d and move up and down the list of tabs.
+
+In a conversation tab, type a message and press enter to send it, or use the
+up/down arrows to scroll the list of previous messages.
