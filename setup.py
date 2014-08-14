@@ -18,7 +18,7 @@ with open('README.rst') as f:
 
 setup(
     name='hangups',
-    version='0.1.1',
+    version='0.1.2',
     description=('the first third-party instant messaging client for Google '
                  'Hangouts'),
     long_description=readme,
