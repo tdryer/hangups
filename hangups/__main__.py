@@ -286,6 +286,18 @@ class ConversationWidget(urwid.WidgetWrap):
             self._on_message_sent
         )
 
+    def _append_text(self, text):
+        """Append text as a new line in the ConversationWidget.
+
+        Automatically scroll down to show the new text.
+        """
+        self._list_walker.append(urwid.Text(text))
+        # XXX: ListBox may not scroll enough to completely show the first
+        # widget that goes off-screen. This can be fixed by repeating the
+        # set_focus call, but this workaround causes other issues.
+        self._list_box.set_focus(len(self._list_walker) - 1,
+                                 coming_from='above')
+
     def _on_message_sent(self, future):
         """Handle showing an error if a message fails to send."""
         try:
@@ -293,30 +305,31 @@ class ConversationWidget(urwid.WidgetWrap):
         except hangups.NetworkError:
             self._show_info_message('Failed to send message.')
 
+    @staticmethod
+    def _get_date_str():
+        """Return the current date as a string."""
+        return datetime.datetime.now().strftime('%I:%M:%S %p')
+
     def _show_info_message(self, text):
         """Display an informational message with timestamp."""
-        date_str = datetime.datetime.now().strftime('%I:%M:%S %p')
-        self._list_walker.append(urwid.Text([
-            ('msg_date', '(' + date_str + ') '),
+        self._append_text([
+            ('msg_date', '(' + self._get_date_str() + ') '),
             ('msg_text', text),
-        ]))
+        ])
 
     def _on_message(self, conversation, user_id, timestamp, text):
         """Display a new conversation message."""
-        # format the message and add it to the list box
-        date_str = timestamp.astimezone().strftime('%I:%M:%S %p')
-        name = self._conversation.get_user(user_id).first_name
-        self._list_walker.append(urwid.Text([
-            ('msg_date', '(' + date_str + ') '),
-            ('msg_sender', name + ': '),
-            ('msg_text', text)
-        ]))
+        user = self._conversation.get_user(user_id)
 
-        # scroll down to the new message
-        self._list_box.set_focus(len(self._list_walker) - 1)
+        # Format the message and add it to the list box.
+        self._append_text([
+            ('msg_date', '(' + self._get_date_str() + ') '),
+            ('msg_sender', user.first_name + ': '),
+            ('msg_text', text)
+        ])
 
         # Update the count of unread messages.
-        if not self._conversation.get_user(user_id).is_self:
+        if not user.is_self:
             self._num_unread += 1
             self._set_title()
 
