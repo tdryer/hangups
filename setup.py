@@ -19,8 +19,8 @@ with open('README.rst') as f:
 setup(
     name='hangups',
     version='0.1.1',
-    description=('reverse-engineered library and basic client for using '
-                 'Google\'s Hangouts chat protocol'),
+    description=('the first third-party instant messaging client for Google '
+                 'Hangouts'),
     long_description=readme,
     url='https://github.com/tdryer/hangups',
     author='Tom Dryer',
@@ -32,6 +32,7 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
     packages=['hangups'],
