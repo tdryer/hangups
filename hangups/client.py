@@ -437,19 +437,22 @@ class Client(object):
                 initial_conversations[id_]['participants'].append(
                     user_id
                 )
-                # Add the user to our list of contacts if their name is
-                # present. This is a hack to deal with some contacts not being
-                # found via the other methods.
+                # Add the participant to our list of contacts as a fallback, in
+                # case they can't be found later by other methods.
                 # TODO We should note who these users are and try to request
                 # them.
-                # for some contats, p[1] is None??
-                if len(p) > 1 and p[1]:
+                # p[1] can be a full name, None, or out of range.
+                try:
                     display_name = p[1]
-                    self.initial_users[user_id] = User(
-                        id_=user_id, first_name=display_name.split()[0],
-                        full_name=display_name,
-                        is_self=(user_id == self.self_user_id)
-                    )
+                except IndexError:
+                    display_name = None
+                if display_name is None:
+                    display_name = 'Unknown'
+                self.initial_users[user_id] = User(
+                    id_=user_id, first_name=display_name.split()[0],
+                    full_name=display_name,
+                    is_self=(user_id == self.self_user_id)
+                )
 
         # build dict of contacts and their names (doesn't include users not in
         # contacts)
