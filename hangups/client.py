@@ -124,12 +124,13 @@ class ConversationList(object):
 class Conversation(object):
     """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, client, id_, users, last_modified, chat_name):
+    def __init__(self, client, id_, users, last_modified, chat_name, messages):
         self._client = client
         self._id = id_ # ConversationID
         self._users = {user.id_: user for user in users} # {UserID: User}
         self._last_modified = last_modified # datetime
         self._name = chat_name
+        self._messages = messages
 
     @property
     def id_(self):
@@ -159,6 +160,11 @@ class Conversation(object):
     def last_modified(self):
         """Return the timestamp of when the conversation was last modified."""
         return self._last_modified
+
+    @property
+    def messages(self):
+        """Return a list of messages, sorted oldest to newest."""
+        return list(self._messages)
 
     @gen.coroutine
     def send_message(self, text):
@@ -436,11 +442,22 @@ class Client(object):
             id_ = c[1][0][0]
             participants = c[1][13]
             last_modified = c[1][3][12]
+            # With every converstion, we get a list of up to 20 of the most
+            # recent messages, sorted oldest to newest.
+            messages = []
+            for raw_message in c[2]:
+                message = longpoll._parse_chat_message([raw_message])
+                # A message may parse to None if it's just a conversation name
+                # change.
+                if message is not None:
+                    messages.append(message[1:])
             initial_conversations[id_] = {
                 'participants': [],
                 'last_modified': last_modified,
-                'name': c[1][2]
+                'name': c[1][2],
+                'messages': messages,
             }
+            # Add the participants for this conversation.
             for p in participants:
                 user_id = UserID(chat_id=p[0][0], gaia_id=p[0][1])
                 initial_conversations[id_]['participants'].append(
@@ -481,8 +498,8 @@ class Client(object):
         self.initial_conversations = {conv_id: Conversation(
             self, conv_id, [self.initial_users[user_id] for user_id
                             in conv_info['participants']],
-            conv_info['last_modified'],
-            conv_info['name']
+            conv_info['last_modified'], conv_info['name'],
+            conv_info['messages'],
         ) for conv_id, conv_info in initial_conversations.items()}
 
     @gen.coroutine

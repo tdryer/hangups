@@ -260,6 +260,13 @@ class ConversationWidget(urwid.WidgetWrap):
         ])
         # focus the edit widget by default
         self._widget.focus_position = 2
+
+        # Display any old messages already attached to the conversation.
+        for message in self._conversation.messages:
+            self._on_message(*message)
+        self._num_unread = 0
+        self._set_title()
+
         super().__init__(self._widget)
 
     def keypress(self, size, key):
@@ -306,9 +313,11 @@ class ConversationWidget(urwid.WidgetWrap):
             self._show_info_message('Failed to send message.')
 
     @staticmethod
-    def _get_date_str():
-        """Return the current date as a string."""
-        return datetime.datetime.now().strftime('%I:%M:%S %p')
+    def _get_date_str(timestamp=None):
+        """Convert UTC datetime into user interface string."""
+        if timestamp is None:
+            timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
+        return timestamp.astimezone(tz=None).strftime('%I:%M:%S %p')
 
     def _show_info_message(self, text):
         """Display an informational message with timestamp."""
@@ -323,7 +332,7 @@ class ConversationWidget(urwid.WidgetWrap):
 
         # Format the message and add it to the list box.
         self._append_text([
-            ('msg_date', '(' + self._get_date_str() + ') '),
+            ('msg_date', '(' + self._get_date_str(timestamp) + ') '),
             ('msg_sender', user.first_name + ': '),
             ('msg_text', text)
         ])
