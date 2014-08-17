@@ -162,6 +162,13 @@ def _parse_chat_message(message):
     # type. For now, let's ignore the types and just use the textual
     # representation, appending all the segments into one string.
     message_text = ''
+
+    if not message[0][9] is None:
+        logger.warning("TODO: handle chat renaming from %s to %s", message[0][9][1], message[0][9][0])
+
+    if message[0][6] is None:
+        return None
+
     try:
         message_content = message[0][6][2][0]
     except (TypeError, IndexError):

@@ -765,6 +765,30 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
+    def setchatname(self, conversation_id, name):
+        client_generated_id = random.randint(0, 2 ** 32)
+        body = [
+            self._get_request_header(),
+            None,
+            name,
+            None,
+            [[conversation_id], client_generated_id, 1]
+        ]
+        try:
+            res = yield self._request('conversations/renameconversation', body)
+        except (httpclient.HTTPError, IOError) as e:
+            # In addition to HTTPError, httpclient can raise IOError (which
+            # includes socker.gaierror).
+            logger.warning('Failed to send message: {}'.format(e))
+            raise exceptions.NetworkError(e)
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            logger.warning('renameconversation returned status {}'
+                           .format(res_status))
+            raise exceptions.NetworkError()
+
+    @gen.coroutine
     def sendchatmessage(self, conversation_id, message, is_bold=False,
                         is_italic=False, is_strikethrough=False,
                         is_underlined=False):
