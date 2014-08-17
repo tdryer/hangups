@@ -124,11 +124,12 @@ class ConversationList(object):
 class Conversation(object):
     """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, client, id_, users, last_modified):
+    def __init__(self, client, id_, users, last_modified, chat_name):
         self._client = client
         self._id = id_ # ConversationID
         self._users = {user.id_: user for user in users} # {UserID: User}
         self._last_modified = last_modified # datetime
+        self._name = chat_name
 
     @property
     def id_(self):
@@ -146,6 +147,13 @@ class Conversation(object):
         Raises KeyError if the user ID is not a participant.
         """
         return self._users[user_id]
+
+    @property
+    def name(self):
+        """ Return chat name if it was renamed manually or None
+        :rtype: str
+        """
+        return self._name
 
     @property
     def last_modified(self):
@@ -431,6 +439,7 @@ class Client(object):
             initial_conversations[id_] = {
                 'participants': [],
                 'last_modified': last_modified,
+                'name': c[1][2]
             }
             for p in participants:
                 user_id = UserID(chat_id=p[0][0], gaia_id=p[0][1])
@@ -473,6 +482,7 @@ class Client(object):
             self, conv_id, [self.initial_users[user_id] for user_id
                             in conv_info['participants']],
             conv_info['last_modified'],
+            conv_info['name']
         ) for conv_id, conv_info in initial_conversations.items()}
 
     @gen.coroutine
