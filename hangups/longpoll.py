@@ -211,9 +211,9 @@ def _parse_conversation_status(message):
     return (
         'on_conversation',
         message[0][0],
-        # participant list items sometimes can be length 2 or 3
-        # ids, name, ?
-        {tuple(item[0]): item[1] for item in message[13]}
+        # Participant list: [[id, id], optional_name, optional_???]
+        {tuple(item[0]): item[1] if len(item) > 1 else None
+         for item in message[13]},
     )
 
 
