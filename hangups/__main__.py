@@ -237,10 +237,10 @@ class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
     def __init__(self, client, conversation, set_title_cb):
-        client.on_disconnect += lambda client: self._show_info_message(
+        client.on_disconnect += lambda chan, client: self._show_info_message(
             'Disconnected. Messages will not be received.'
         )
-        client.on_reconnect += lambda client: self._show_info_message(
+        client.on_reconnect += lambda chan, client: self._show_info_message(
             'Connected.'
         )
         self._conversation = conversation
