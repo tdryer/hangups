@@ -1,6 +1,5 @@
 """Parser for long-polling responses from the talkgadget API."""
 
-import pprint
 import logging
 import re
 from collections import namedtuple
@@ -10,7 +9,6 @@ from hangups import javascript
 
 
 logger = logging.getLogger(__name__)
-PP = pprint.PrettyPrinter(indent=4)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 
 
@@ -60,28 +58,13 @@ class PushDataParser(object):
                 self._buf = self._buf[length_length + length:]
 
     def get_messages(self, new_data):
-        """Yield tuples containing message type and message from received data.
-
-        One submission may contain multiple messages.
-        """
+        """Yield (message_type, message) tuples from received data."""
+        # One submission may contain multiple messages.
         for submission in self.get_submissions(new_data):
             # For each submission payload, yield its messages
             for payload in _get_submission_payloads(submission):
                 if payload is not None:
                     yield from _parse_payload(payload)
-
-
-    def get_events(self, new_data):
-        """Yield events generated from received data."""
-        for msg_type, msg in self.get_messages(new_data):
-            logger.debug('Received message of type {}:\n{}'
-                         .format(msg_type, PP.pformat(msg)))
-            if msg_type in MESSAGE_PARSERS:
-                event_tuple = MESSAGE_PARSERS[msg_type](msg)
-                # Message parsers may fail by returning None, so don't yield
-                # their result in this case.
-                if event_tuple:
-                    yield event_tuple
 
 
 def _get_submission_payloads(submission):

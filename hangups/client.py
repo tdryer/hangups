@@ -1,8 +1,5 @@
 """Abstract class for writing chat clients."""
 
-# "unused argument" are unavoidable because of obsub events.
-# pylint: disable=W0613
-
 from obsub import event
 from tornado import gen, httpclient
 import hashlib
@@ -12,8 +9,7 @@ import random
 import re
 import time
 
-from hangups import javascript, longpoll, exceptions, http_utils
-from hangups.longpoll import UserID, User
+from hangups import javascript, parsers, exceptions, http_utils, channel
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -21,36 +17,9 @@ ORIGIN_URL = 'https://talkgadget.google.com'
 # network problem.
 CONNECT_TIMEOUT = 10
 REQUEST_TIMEOUT = 10
-# Long-polling requests may last ~3-4 minutes.
-LP_REQ_TIMEOUT = 60 * 5
 # Long-polling requests send heartbeats every 15 seconds, so if we miss two in
 # a row, consider the connection dead.
 LP_DATA_TIMEOUT = 30
-
-
-def _parse_sid_response(res):
-    """Parse response format for request for new channel SID.
-
-    Returns (SID, header_client, gsessionid).
-    """
-    sid = None
-    header_client = None
-    gsessionid = None
-
-    p = longpoll.PushDataParser()
-    res = javascript.loads(list(p.get_submissions(res.decode()))[0])
-    for segment in res:
-        num, message = segment
-        if num == 0:
-            sid = message[1]
-        elif message[0] == 'c':
-            type_ = message[1][1][0]
-            if type_ == 'cfj':
-                header_client = message[1][1][1].split('/')[1]
-            elif type_ == 'ei':
-                gsessionid = message[1][1][1]
-
-    return(sid, header_client, gsessionid)
 
 
 def _parse_user_entity(entity):
@@ -246,16 +215,17 @@ class UserList(object):
     def _make_dummy_user(self, user_id):
         """Return a dummy User and add it to the list."""
         logger.info('Creating dummy user for {}'.format(user_id))
-        user = User(id_=user_id, full_name='UNKNOWN', first_name='UNKNOWN',
-                    is_self=(user_id == self._self_user_id))
+        user = parsers.User(id_=user_id, full_name='UNKNOWN',
+                            first_name='UNKNOWN',
+                            is_self=(user_id == self._self_user_id))
         self._users[user_id] = user
         return user
 
     @gen.coroutine
     def _request_users(self, user_id_list):
         """Make request for a list of users by ID."""
-        res = yield self._client._getentitybyid([user_id.chat_id for user_id
-                                                 in user_id_list])
+        res = yield self._client.getentitybyid([user_id.chat_id for user_id
+                                                in user_id_list])
         for entity in res['entity']:
             try:
                 user = _parse_user_entity(entity)
@@ -263,9 +233,9 @@ class UserList(object):
                 logger.warning('Failed to parse user entity: {}: {}'
                                .format(e, entity))
             else:
-                user_id = UserID(chat_id=user['chat_id'],
-                                 gaia_id=user['gaia_id'])
-                self._users[user_id] = User(
+                user_id = parsers.UserID(chat_id=user['chat_id'],
+                                         gaia_id=user['gaia_id'])
+                self._users[user_id] = parsers.User(
                     id_=user_id, full_name=user['full_name'],
                     first_name=user['first_name'],
                     is_self=(user_id == self._self_user_id)
@@ -284,31 +254,27 @@ class Client(object):
         cookies is a dictionary of authentication cookies.
         """
         self._cookies = cookies
-        self._push_parser = None
-        self._is_connected = False
-        self._on_connect_called = False
 
-        # These are available after ConnectionEvent:
+        # These are instantiated after ConnectionEvent:
         self.initial_users = None # {UserID: User}
         self.self_user_id = None # UserID
         self.initial_conversations = None # {conv_id: Conversation}
 
-        # discovered automatically:
-
-        # the api key sent with every request
+        # hangups.channel.Channel instantiated in connect()
+        self._channel = None
+        # API key sent with every request:
         self._api_key = None
-        # fields sent in request headers
+        # Parameters sent in request headers:
         self._header_date = None
         self._header_version = None
         self._header_id = None
+        # TODO This one isn't being set anywhere:
         self._header_client = None
-        # parameters related talkgadget channel requests
+        # Parameters needed to create the Channel:
         self._channel_path = None
-        self._gsessionid = None
         self._clid = None
         self._channel_ec_param = None
         self._channel_prop_param = None
-        self._channel_session_id = None
 
     ##########################################################################
     # Public methods
@@ -318,29 +284,32 @@ class Client(object):
     def connect(self):
         """Connect to the server and receive events."""
         yield self._init_talkgadget_1()
-        yield self._run_forever()
+        self._channel = channel.Channel(self._cookies, self._channel_path,
+                                        self._clid, self._channel_ec_param,
+                                        self._channel_prop_param)
+        self._channel.on_connect += self.on_connect
+        self._channel.on_reconnect += self.on_reconnect
+        self._channel.on_disconnect += self.on_disconnect
+        self._channel.on_message += self._on_push_data
+        yield self._channel.listen()
 
     ##########################################################################
-    # Events
+    # Public Events
     ##########################################################################
 
     @event
-    def on_connect(self):
+    def on_connect(self, _channel):
         """Event called when the client connects for the first time."""
-        self._on_connect_called = True
-        self._is_connected = True
         logger.info('Triggered event Client.on_connect')
 
     @event
-    def on_reconnect(self):
+    def on_reconnect(self, _channel):
         """Event called when the client reconnects after being disconnected."""
-        self._is_connected = True
         logger.info('Triggered event Client.on_reconnect')
 
     @event
-    def on_disconnect(self):
+    def on_disconnect(self, _channel):
         """Event called when the client is disconnected."""
-        self._is_connected = False
         logger.info('Triggered event Client.on_disconnect')
 
     @event
@@ -408,6 +377,7 @@ class Client(object):
         for data in regex.findall(res):
             try:
                 data = javascript.loads(data)
+                # pylint: disable=invalid-sequence-index
                 data_dict[data['key']] = data['data']
             except ValueError as e:
                 # not everything will be parsable, but we don't care
@@ -430,9 +400,9 @@ class Client(object):
 
         # add self to the contacts
         self_contact = data_dict['ds:20'][0][2]
-        self.self_user_id = UserID(chat_id=self_contact[8][0],
-                                   gaia_id=self_contact[8][1])
-        self.initial_users[self.self_user_id] = User(
+        self.self_user_id = parsers.UserID(chat_id=self_contact[8][0],
+                                           gaia_id=self_contact[8][1])
+        self.initial_users[self.self_user_id] = parsers.User(
             id_=self.self_user_id, full_name=self_contact[9][1],
             first_name=self_contact[9][2], is_self=True
         )
@@ -446,7 +416,7 @@ class Client(object):
             # recent messages, sorted oldest to newest.
             messages = []
             for raw_message in c[2]:
-                message = longpoll._parse_chat_message([raw_message])
+                message = parsers._parse_chat_message([raw_message])
                 # A message may parse to None if it's just a conversation name
                 # change.
                 if message is not None:
@@ -459,7 +429,7 @@ class Client(object):
             }
             # Add the participants for this conversation.
             for p in participants:
-                user_id = UserID(chat_id=p[0][0], gaia_id=p[0][1])
+                user_id = parsers.UserID(chat_id=p[0][0], gaia_id=p[0][1])
                 initial_conversations[id_]['participants'].append(
                     user_id
                 )
@@ -474,7 +444,7 @@ class Client(object):
                     display_name = None
                 if display_name is None:
                     display_name = 'Unknown'
-                self.initial_users[user_id] = User(
+                self.initial_users[user_id] = parsers.User(
                     id_=user_id, first_name=display_name.split()[0],
                     full_name=display_name,
                     is_self=(user_id == self.self_user_id)
@@ -488,8 +458,8 @@ class Client(object):
                     contacts_main[6][2] + contacts_main[7][2] +
                     contacts_main[8][2])
         for c in contacts:
-            user_id = UserID(chat_id=c[0][8][0], gaia_id=c[0][8][1])
-            self.initial_users[user_id] = User(
+            user_id = parsers.UserID(chat_id=c[0][8][0], gaia_id=c[0][8][1])
+            self.initial_users[user_id] = parsers.User(
                 id_=user_id, full_name=c[0][9][1], first_name=c[0][9][2],
                 is_self=(user_id == self.self_user_id)
             )
@@ -501,148 +471,6 @@ class Client(object):
             conv_info['last_modified'], conv_info['name'],
             conv_info['messages'],
         ) for conv_id, conv_info in initial_conversations.items()}
-
-    @gen.coroutine
-    def _run_forever(self):
-        """Make repeated long-polling requests to receive events.
-
-        This method only returns when the connection has been closed due to an
-        error.
-        """
-        MAX_RETRIES = 5  # maximum number of times to retry after a failure
-        retries = MAX_RETRIES # number of remaining retries
-        need_new_sid = True  # whether a new SID is needed
-
-        while retries >= 0:
-            # After the first failed retry, back off exponentially longer after
-            # each attempt.
-            if retries + 1 < MAX_RETRIES:
-                backoff_seconds = 2 ** (MAX_RETRIES - retries)
-                logger.info('Backing off for {} seconds'
-                            .format(backoff_seconds))
-                yield http_utils.sleep(backoff_seconds)
-
-            # Request a new SID if we don't have one yet, or the previous one
-            # became invalid.
-            if need_new_sid:
-                # TODO: error handling
-                yield self._fetch_channel_sid()
-                need_new_sid = False
-            # Clear any previous push data, since if there was an error it
-            # could contain garbage.
-            self._push_parser = longpoll.PushDataParser()
-            try:
-                yield self._longpoll_request()
-            except IOError as e:
-                # An error occurred, so decrement the number of retries.
-                retries -= 1
-                if self._is_connected:
-                    self.on_disconnect()
-                logger.error('Long-polling request failed because of '
-                             'IOError: {}'.format(e))
-            except httpclient.HTTPError as e:
-                # An error occurred, so decrement the number of retries.
-                retries -= 1
-                if self._is_connected:
-                    self.on_disconnect()
-                if e.code == 400 and e.response.reason == 'Unknown SID':
-                    logger.error('Long-polling request failed because SID '
-                                 'became invalid. Will attempt to recover.')
-                    need_new_sid = True
-                elif e.code == 599:
-                    logger.error('Long-polling request failed because '
-                                 'connection was closed. Will attempt to '
-                                 'recover.')
-                else:
-                    logger.error('Long-polling request failed for unknown '
-                                 'reason: {}'.format(e))
-                    break # Do not retry.
-            else:
-                # The connection closed successfully, so reset the number of
-                # retries.
-                retries = MAX_RETRIES
-
-            # TODO: If there was an error, messages could be lost in this time.
-
-        logger.error('Ran out of retries for long-polling request')
-
-    @gen.coroutine
-    def _fetch_channel_sid(self):
-        """Request a new session ID for the push channel."""
-        logger.info('Requesting new session ID...')
-        url = 'https://talkgadget.google.com{}bind'.format(self._channel_path)
-        params = {
-            'VER': 8,
-            'clid': self._clid,
-            'ec': self._channel_ec_param,
-            'RID': 81187, # TODO: "request ID"? should probably increment
-            # Required if we want our client to be called "AChromeExtension":
-            'prop': self._channel_prop_param,
-        }
-        res = yield http_utils.fetch(
-            url, method='POST', cookies=self._cookies, params=params,
-            data='count=0', connect_timeout=CONNECT_TIMEOUT,
-            request_timeout=REQUEST_TIMEOUT
-        )
-        logger.debug('Fetch SID response:\n{}'.format(res.body))
-        if res.code != 200:
-            # TODO use better exception
-            raise ValueError("SID fetch request failed with {}: {}"
-                             .format(res.code, res.raw.read()))
-        # TODO: handle errors here
-        self._channel_session_id, self._header_client, self._gsessionid = (
-            _parse_sid_response(res.body)
-        )
-        logger.info('Received new session ID: {}'
-                    .format(self._channel_session_id))
-
-    @gen.coroutine
-    def _longpoll_request(self):
-        """Open a long-polling request to receive push events.
-
-        Raises HTTPError or IOError.
-        """
-        params = {
-            'VER': 8,
-            'clid': self._clid,
-            'prop': self._channel_prop_param,
-            'ec': self._channel_ec_param,
-            'gsessionid': self._gsessionid,
-            'RID': 'rpc',
-            't': 1, # trial
-            'SID': self._channel_session_id,
-            'CI': 0,
-        }
-        URL = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
-        logger.info('Opening new long-polling request')
-        res = yield http_utils.longpoll_fetch(
-            URL, params=params, cookies=self._cookies,
-            streaming_callback=self._on_push_data,
-            connect_timeout=CONNECT_TIMEOUT, request_timeout=LP_REQ_TIMEOUT,
-            data_timeout=LP_DATA_TIMEOUT
-        )
-        return res
-
-    def _on_push_data(self, data_bytes):
-        """Parse push data and trigger event methods."""
-        logger.debug('Received push data:\n{}'.format(data_bytes))
-
-        # This callback is only called when the long-polling request was
-        # successful, so we can use it to trigger connection events if
-        # necessary.
-        if not self._is_connected:
-            if self._on_connect_called:
-                self.on_reconnect()
-            else:
-                self.on_connect()
-
-        for event_tuple in self._push_parser.get_events(data_bytes.decode()):
-            event_name, args = event_tuple[0], event_tuple[1:]
-            logger.debug(
-                'Received event: {}({})'
-                .format(event_name, ', '.join(str(arg) for arg in args))
-            )
-            getattr(self, event_name)(*args)
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""
@@ -668,6 +496,20 @@ class Client(object):
             None,
             "en"
         ]
+
+    def _on_push_data(self, _channel, msg_type, msg):
+        """Parse channel messages into events."""
+        if msg_type in parsers.MESSAGE_PARSERS:
+            event_tuple = parsers.MESSAGE_PARSERS[msg_type](msg)
+            # Message parsers may fail by returning None, so don't yield
+            # their result in this case.
+            if event_tuple is not None:
+                event_name, args = event_tuple[0], event_tuple[1:]
+                logger.debug(
+                    'Received event: {}({})'
+                    .format(event_name, ', '.join(str(arg) for arg in args))
+                )
+                getattr(self, event_name)(*args)
 
     @gen.coroutine
     def _request(self, endpoint, body_json):
@@ -699,7 +541,7 @@ class Client(object):
         return res
 
     @gen.coroutine
-    def _getselfinfo(self):
+    def getselfinfo(self):
         """Return information about your account."""
         res = yield self._request('contacts/getselfinfo', [
             self._get_request_header(),
@@ -708,7 +550,7 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def _setfocus(self, conversation_id):
+    def setfocus(self, conversation_id):
         """Set focus (occurs whenever you give focus to a client)."""
         res = yield self._request('conversations/setfocus', [
             self._get_request_header(),
@@ -719,7 +561,7 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def _searchentities(self, search_string, max_results):
+    def searchentities(self, search_string, max_results):
         """Search for people."""
         res = yield self._request('contacts/searchentities', [
             self._get_request_header(),
@@ -730,7 +572,7 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def _querypresence(self, chat_id):
+    def querypresence(self, chat_id):
         """Check someone's presence status."""
         res = yield self._request('presence/querypresence', [
             self._get_request_header(),
@@ -742,7 +584,7 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def _getentitybyid(self, chat_id_list):
+    def getentitybyid(self, chat_id_list):
         """Return information about a list of contacts."""
         res = yield self._request('contacts/getentitybyid', [
             self._get_request_header(),
@@ -752,8 +594,8 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def _getconversation(self, conversation_id, num_events,
-                         storage_continuation_token, event_timestamp):
+    def getconversation(self, conversation_id, num_events,
+                        storage_continuation_token, event_timestamp):
         """Return data about a conversation.
 
         Seems to require both a timestamp and a token from a previous event
@@ -769,7 +611,7 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def _syncallnewevents(self, after_timestamp):
+    def syncallnewevents(self, after_timestamp):
         """List all events occuring at or after timestamp."""
         res = yield self._request('conversations/syncallnewevents', [
             self._get_request_header(),
@@ -780,7 +622,7 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def _syncrecentconversations(self):
+    def syncrecentconversations(self):
         """List the contents of recent conversations, including messages.
 
         Similar to syncallnewevents, but appears to return a limited number of
@@ -793,6 +635,10 @@ class Client(object):
 
     @gen.coroutine
     def setchatname(self, conversation_id, name):
+        """Set the name of a conversation.
+
+        Raises hangups.NetworkError if the request can not be sent.
+        """
         client_generated_id = random.randint(0, 2 ** 32)
         body = [
             self._get_request_header(),

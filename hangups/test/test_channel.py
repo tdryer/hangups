@@ -1,6 +1,6 @@
 import pytest
 
-from hangups import client
+from hangups import channel
 
 
 # [(test, (SID, header_client, gsessionid))]
@@ -21,4 +21,4 @@ from hangups import client
     ),
 ])
 def test_parse_sid_response(input_, expected):
-    assert client._parse_sid_response(input_) == expected
+    assert channel._parse_sid_response(input_) == expected

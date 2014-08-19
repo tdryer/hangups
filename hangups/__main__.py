@@ -113,7 +113,7 @@ class ChatUI(object):
         # switch to new or existing tab for the conversation
         self.add_conversation_tab(conv_id, switch=True)
 
-    def _on_connect(self, client):
+    def _on_connect(self, channel, client):
         """Handle connecting for the first time."""
         self._conv_list = hangups.ConversationList(self._client)
         self._user_list = hangups.UserList(self._client)
@@ -130,7 +130,7 @@ class ChatUI(object):
         """Open conversation tab for new messages when they arrive."""
         self.add_conversation_tab(conv_id)
 
-    def _on_disconnect(self, client):
+    def _on_disconnect(self, channel, client):
         """Handle disconnecting."""
         # TODO: handle this
         print('Connection lost')
