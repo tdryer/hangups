@@ -62,21 +62,23 @@ class ConversationList(object):
         self._client.on_focus += self._on_focus
         self._client.on_conversation += self._on_conversation
 
-    def _on_message(self, client, conv_id, user_id, timestamp, text):
+    def _on_message(self, client, chat_message):
         """Route on_message event to appropriate Conversation."""
-        self.get(conv_id).on_message(user_id, timestamp, text)
+        self.get(chat_message.conv_id).on_message(chat_message)
 
-    def _on_typing(self, client, conv_id, user_id, timestamp, status):
+    def _on_typing(self, client, typing_message):
         """Route on_typing event to appropriate Conversation."""
-        self.get(conv_id).on_typing(user_id, timestamp, status)
+        self.get(typing_message.conv_id).on_typing(typing_message)
 
-    def _on_focus(self, client, conv_id, user_id, timestamp, status, device):
+    def _on_focus(self, client, focus_message):
         """Route on_focus event to appropriate Conversation."""
-        self.get(conv_id).on_focus(user_id, timestamp, status, device)
+        self.get(focus_message.conv_id).on_focus(focus_message)
 
-    def _on_conversation(self, client, conv_id, participants):
+    def _on_conversation(self, client, conversation_message):
         """Route on_conversation event to appropriate Conversation."""
-        self.get(conv_id).on_conversation(participants)
+        self.get(conversation_message.conv_id).on_conversation(
+            conversation_message
+        )
 
     def get_all(self):
         """Return list of all Conversations."""
@@ -93,13 +95,14 @@ class ConversationList(object):
 class Conversation(object):
     """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, client, id_, users, last_modified, chat_name, messages):
+    def __init__(self, client, id_, users, last_modified, chat_name,
+                 chat_messages):
         self._client = client
         self._id = id_ # ConversationID
         self._users = {user.id_: user for user in users} # {UserID: User}
         self._last_modified = last_modified # datetime
-        self._name = chat_name
-        self._messages = messages
+        self._name = chat_name # str
+        self._chat_messages = chat_messages # ChatMessage
 
     @property
     def id_(self):
@@ -131,9 +134,9 @@ class Conversation(object):
         return self._last_modified
 
     @property
-    def messages(self):
-        """Return a list of messages, sorted oldest to newest."""
-        return list(self._messages)
+    def chat_messages(self):
+        """Return a list of ChatMessages, sorted oldest to newest."""
+        return list(self._chat_messages)
 
     @gen.coroutine
     def send_message(self, text):
@@ -146,22 +149,22 @@ class Conversation(object):
         yield self._client.sendchatmessage(self._id, text)
 
     @event
-    def on_message(self, user_id, timestamp, text):
+    def on_message(self, chat_message):
         """Event called when a new message arrives."""
         logger.info('Triggered event Conversation.on_message')
 
     @event
-    def on_typing(self, user_id, timestamp, status):
+    def on_typing(self, typing_message):
         """Event called when a user starts or stops typing."""
         logger.info('Triggered event Conversation.on_typing')
 
     @event
-    def on_focus(self, user_id, timestamp, status, device):
+    def on_focus(self, focus_message):
         """Event called when a user changes focus on a conversation."""
         logger.info('Triggered event Conversation.on_focus')
 
     @event
-    def on_conversation(self, participants):
+    def on_conversation(self, conversation_message):
         """Event called when a conversation updates."""
         logger.info('Triggered event Conversation.on_conversation')
 
@@ -313,22 +316,22 @@ class Client(object):
         logger.info('Triggered event Client.on_disconnect')
 
     @event
-    def on_message(self, conv_id, user_id, timestamp, text):
+    def on_message(self, chat_message):
         """Event called when a new message arrives."""
         logger.info('Triggered event Client.on_message')
 
     @event
-    def on_typing(self, conv_id, user_id, timestamp, status):
+    def on_typing(self, typing_message):
         """Event called when a user starts or stops typing."""
         logger.info('Triggered event Client.on_typing')
 
     @event
-    def on_focus(self, conv_id, user_id, timestamp, status, device):
+    def on_focus(self, focus_message):
         """Event called when a user changes focus on a conversation."""
         logger.info('Triggered event Client.on_focus')
 
     @event
-    def on_conversation(self, conv_id, participants):
+    def on_conversation(self, conversation_message):
         """Event called when a conversation updates."""
         logger.info('Triggered event Client.on_conversation')
 
@@ -416,11 +419,11 @@ class Client(object):
             # recent messages, sorted oldest to newest.
             messages = []
             for raw_message in c[2]:
-                message = parsers._parse_chat_message([raw_message])
-                # A message may parse to None if it's just a conversation name
-                # change.
-                if message is not None:
-                    messages.append(message[1:])
+                try:
+                    chat_message = parsers.parse_chat_message([raw_message])
+                except exceptions.ParseError as e:
+                    logging.warning('Failed to parse message: {}'.format(e))
+                messages.append(chat_message)
             initial_conversations[id_] = {
                 'participants': [],
                 'last_modified': last_modified,
@@ -498,18 +501,18 @@ class Client(object):
         ]
 
     def _on_push_data(self, _channel, msg_type, msg):
-        """Parse channel messages into events."""
-        if msg_type in parsers.MESSAGE_PARSERS:
-            event_tuple = parsers.MESSAGE_PARSERS[msg_type](msg)
-            # Message parsers may fail by returning None, so don't yield
-            # their result in this case.
-            if event_tuple is not None:
-                event_name, args = event_tuple[0], event_tuple[1:]
-                logger.debug(
-                    'Received event: {}({})'
-                    .format(event_name, ', '.join(str(arg) for arg in args))
-                )
-                getattr(self, event_name)(*args)
+        """Parse channel messages and call the appropriate event."""
+        try:
+            parsed_msg = parsers.parse_message(msg_type, msg)
+        except exceptions.ParseError as e:
+            logging.warning('Failed to parse message: {}'.format(e))
+        else:
+            {
+                parsers.ChatMessage: self.on_message,
+                parsers.FocusStatusMessage: self.on_focus,
+                parsers.TypingStatusMessage: self.on_typing,
+                parsers.ConversationStatusMessage: self.on_conversation,
+            }.get(parsed_msg.__class__, lambda m: None)(parsed_msg)
 
     @gen.coroutine
     def _request(self, endpoint, body_json):

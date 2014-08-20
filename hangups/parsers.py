@@ -5,7 +5,7 @@ import re
 from collections import namedtuple
 import datetime
 
-from hangups import javascript
+from hangups import javascript, exceptions
 
 
 logger = logging.getLogger(__name__)
@@ -160,33 +160,69 @@ def _parse_payload(payload):
                 enumerate(payload[1][0][1:]) if msg is not None)
 
 
+def parse_message(message_type, message):
+    """Parse any type of message and return parsed message instance.
+
+    Raises ParseError if the message cannot be parsed.
+    """
+    # message types have been observed to range from 1 to 14
+    MESSAGE_PARSERS = {
+        1: parse_chat_message,
+        2: parse_focus_status_message,
+        3: parse_typing_status_message,
+        11: parse_conversation_status_message,
+    }
+    try:
+        parser = MESSAGE_PARSERS[message_type]
+    except KeyError:
+        raise exceptions.ParseError('No parser available for message type {}'
+                                    .format(message_type))
+    parsed_message = parser(message)  # May raise ParseError
+    logger.debug('Parsed message: {}'.format(parsed_message))
+    return parsed_message
+
+
+##############################################################################
+# Message parsing utils
+##############################################################################
+
+
 def from_timestamp(timestamp):
     """Convert a microsecond timestamp to a UTC datetime instance."""
     return datetime.datetime.fromtimestamp(timestamp / 1000000,
                                            datetime.timezone.utc)
 
 
-def _parse_chat_message(message):
-    """Parse chat message message."""
+##############################################################################
+# Message types and parsers
+##############################################################################
+
+
+ChatMessage = namedtuple(
+    'ChatMessage', ['conv_id', 'user_id', 'timestamp', 'text']
+)
+
+
+def parse_chat_message(message):
+    """Return ChatMessage from parsing raw message.
+
+    Raises ParseError if the message cannot be parsed.
+    """
     # The message content is a list of message segments, which have a
     # type. For now, let's ignore the types and just use the textual
     # representation, appending all the segments into one string.
     message_text = ''
 
     if not message[0][9] is None:
-        logger.warning("TODO: handle chat renaming from %s to %s", message[0][9][1], message[0][9][0])
-
-    if message[0][6] is None:
-        return None
+        logger.warning('TODO: handle chat renaming from {} to {}'
+                       .format(message[0][9][1], message[0][9][0]))
 
     try:
         message_content = message[0][6][2][0]
     except (TypeError, IndexError):
-        # Sometimes there aren't actually chat messages (conversation name
+        # Sometimes they aren't actually chat messages (conversation name
         # changes, and video call initiations).
-        # TODO: handle these cases
-        logger.warning('Failed to parse chat message')
-        return None
+        raise exceptions.ParseError('Ignoring chat message with no content.')
     if len(message_content) > 0:
         for segment in message_content:
             # known types: 0: text, 1: linebreak, 2: link
@@ -204,31 +240,45 @@ def _parse_chat_message(message):
             # set the message text to the image URL
             message_text = list(message[0][6][2][1][0][0][1].values())[0][0][3]
         except (TypeError, IndexError, ValueError) as e:
-            logger.warning('Failed to parse image message: {}'.format(e))
-            return None
-    return (
-        'on_message',
-        message[0][0][0],
-        UserID(chat_id=message[0][1][0], gaia_id=message[0][1][0]),
-        from_timestamp(message[0][2]),
-        message_text
+            raise exceptions.ParseError('Failed to parse image message: {}'
+                                        .format(e))
+    return ChatMessage(
+        conv_id=message[0][0][0],
+        user_id=UserID(chat_id=message[0][1][0], gaia_id=message[0][1][0]),
+        timestamp=from_timestamp(message[0][2]),
+        text=message_text,
     )
 
 
-def _parse_conversation_status(message):
-    """Parse conversation status message."""
-    # TODO: there's a lot more info here
-    return (
-        'on_conversation',
-        message[0][0],
-        # Participant list: [[id, id], optional_name, optional_???]
-        {tuple(item[0]): item[1] if len(item) > 1 else None
-         for item in message[13]},
+ConversationStatusMessage = namedtuple(
+    'ConversationStatusMessage', ['conv_id', 'user_id_list']
+)
+
+
+def parse_conversation_status_message(message):
+    """Return ConversationStatusMessage from parsing raw message.
+
+    Raises ParseError if the message cannot be parsed.
+    """
+    # TODO: This is far from a complete parse.
+    return ConversationStatusMessage(
+        conv_id=message[0][0],
+        user_id_list=[UserID(chat_id=item[0][0], gaia_id=item[0][1])
+                      for item in message[13]],
     )
 
 
-def _parse_focus_status(message):
-    """Parse focus status message."""
+FocusStatusMessage = namedtuple(
+    'FocusStatusMessage',
+    ['conv_id', 'user_id', 'timestamp', 'status', 'device']
+)
+
+
+def parse_focus_status_message(message):
+    """Return FocusStatusMessage from parsing raw message.
+
+    Raises ParseError if the message cannot be parsed.
+    """
     FOCUS_STATUSES = {
         1: 'focused',
         2: 'unfocused',
@@ -236,9 +286,8 @@ def _parse_focus_status(message):
     try:
         focus_status = FOCUS_STATUSES[message[3]]
     except KeyError:
-        # TODO: should probably just discard the event in this case
-        focus_status = None
-        logger.warning('Unknown focus status: {}'.format(message[3]))
+        raise exceptions.ParseError('Unknown focus status: {}'
+                                    .format(message[3]))
 
     FOCUS_DEVICES = {
         20: 'desktop',
@@ -249,24 +298,31 @@ def _parse_focus_status(message):
         # sometimes the device is unspecified so the message is shorter
         focus_device = FOCUS_DEVICES[message[4] if len(message) > 4 else None]
     except KeyError:
-        focus_device = None
-        logger.warning('Unknown focus device: {}'.format(message[4]))
+        raise exceptions.ParseError('Unknown focus device: {}'
+                                    .format(message[4]))
 
-    return (
-        'on_focus',
-        message[0][0],
-        UserID(chat_id=message[1][0], gaia_id=message[1][1]),
-        from_timestamp(message[2]),
-        focus_status,
-        focus_device,
+    return FocusStatusMessage(
+        conv_id=message[0][0],
+        user_id=UserID(chat_id=message[1][0], gaia_id=message[1][1]),
+        timestamp=from_timestamp(message[2]),
+        status=focus_status,
+        device=focus_device,
     )
 
 
-def _parse_typing_status(message):
-    """Parse typing status message."""
-    # Note that the same status may be sent multiple times
-    # consecutively, and that when a message is sent the typing status
-    # will not change to stopped.
+TypingStatusMessage = namedtuple(
+    'TypingStatusMessage', ['conv_id', 'user_id', 'timestamp', 'status']
+)
+
+
+def parse_typing_status_message(message):
+    """Return TypingStatusMessage from parsing raw message.
+
+    The same status may be sent multiple times consecutively, and when a
+    message is sent the typing status will not change to stopped.
+
+    Raises ParseError if the message cannot be parsed.
+    """
     TYPING_STATUSES = {
         1: 'typing', # the user is typing
         2: 'paused', # the user stopped typing with inputted text
@@ -275,21 +331,11 @@ def _parse_typing_status(message):
     try:
         typing_status = TYPING_STATUSES[message[3]]
     except KeyError:
-        typing_status = None # TODO should probably discard event in this case
-        logger.warning('Unknown typing status: {}'.format(message[3]))
-
-    return (
-        'on_typing',
-        message[0][0],
-        UserID(chat_id=message[1][0], gaia_id=message[1][1]),
-        from_timestamp(message[2]),
-        typing_status,
+        raise exceptions.ParseError('Unknown typing status: {}'
+                                    .format(message[3]))
+    return TypingStatusMessage(
+        conv_id=message[0][0],
+        user_id=UserID(chat_id=message[1][0], gaia_id=message[1][1]),
+        timestamp=from_timestamp(message[2]),
+        status=typing_status,
     )
-
-# message types have been observed to range from 1 to 14
-MESSAGE_PARSERS = {
-    1: _parse_chat_message,
-    2: _parse_focus_status,
-    3: _parse_typing_status,
-    11: _parse_conversation_status,
-}

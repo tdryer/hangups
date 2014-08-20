@@ -126,9 +126,9 @@ class ChatUI(object):
                                     title='Conversations')
         self._urwid_loop.widget = self._tabbed_window
 
-    def _on_message(self, client, conv_id, user_id, timestamp, text):
+    def _on_message(self, client, chat_message):
         """Open conversation tab for new messages when they arrive."""
-        self.add_conversation_tab(conv_id)
+        self.add_conversation_tab(chat_message.conv_id)
 
     def _on_disconnect(self, channel, client):
         """Handle disconnecting."""
@@ -208,14 +208,14 @@ class StatusLineWidget(urwid.WidgetWrap):
         self._widget = urwid.Text('', align='center')
         super().__init__(urwid.AttrWrap(self._widget, 'status_line'))
 
-    def _on_message(self, conversation, user_id, timestamp, text):
+    def _on_message(self, conversation, chat_message):
         """Make users stop typing when they send a message."""
-        self._typing_statuses[user_id] = 'stopped'
+        self._typing_statuses[chat_message.user_id] = 'stopped'
         self._update()
 
-    def _on_typing(self, conversation, user_id, timestamp, status):
+    def _on_typing(self, conversation, typing_message):
         """Handle typing updates."""
-        self._typing_statuses[user_id] = status
+        self._typing_statuses[typing_message.user_id] = typing_message.status
         self._update()
 
     def _update(self):
@@ -262,8 +262,8 @@ class ConversationWidget(urwid.WidgetWrap):
         self._widget.focus_position = 2
 
         # Display any old messages already attached to the conversation.
-        for message in self._conversation.messages:
-            self._on_message(*message)
+        for chat_message in self._conversation.chat_messages:
+            self._on_message(self._conversation, chat_message)
         self._num_unread = 0
         self._set_title()
 
@@ -326,15 +326,16 @@ class ConversationWidget(urwid.WidgetWrap):
             ('msg_text', text),
         ])
 
-    def _on_message(self, conversation, user_id, timestamp, text):
+    def _on_message(self, conversation, chat_message):
         """Display a new conversation message."""
-        user = self._conversation.get_user(user_id)
+        user = self._conversation.get_user(chat_message.user_id)
 
         # Format the message and add it to the list box.
         self._append_text([
-            ('msg_date', '(' + self._get_date_str(timestamp) + ') '),
+            ('msg_date',
+             '(' + self._get_date_str(chat_message.timestamp) + ') '),
             ('msg_sender', user.first_name + ': '),
-            ('msg_text', text)
+            ('msg_text', chat_message.text)
         ])
 
         # Update the count of unread messages.

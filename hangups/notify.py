@@ -37,17 +37,17 @@ class Notifier(object):
         self._client.on_message += self._on_message
         self._replaces_id = 0
 
-    def _on_message(self, client, conv_id, user_id, timestamp, text):
+    def _on_message(self, _client, chat_message):
         """Create notification for new messages."""
-        conv = self._conv_list.get(conv_id)
-        user = conv.get_user(user_id)
+        conv = self._conv_list.get(chat_message.conv_id)
+        user = conv.get_user(chat_message.user_id)
         # Ignore messages sent by yourself.
         if not user.is_self:
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
             cmd = [arg.format(
                 sender_name=html.escape(user.full_name, quote=False),
-                msg_text=html.escape(text, quote=False),
+                msg_text=html.escape(chat_message.text, quote=False),
                 replaces_id=self._replaces_id,
             ) for arg in NOTIFY_CMD]
 

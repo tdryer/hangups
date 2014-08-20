@@ -8,3 +8,7 @@ class HangupsError(Exception):
 class NetworkError(HangupsError):
     """hangups network operation failed."""
     pass
+
+class ParseError(HangupsError):
+    """hangups failed to parse a message."""
+    pass
