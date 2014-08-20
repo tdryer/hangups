@@ -18,17 +18,36 @@ User = namedtuple('User', ['id_', 'full_name', 'first_name', 'is_self'])
 UserID = namedtuple('UserID', ['chat_id', 'gaia_id'])
 
 
+def _best_effort_decode(data_bytes):
+    """Decode data_bytes into a string using UTF-8.
+
+    If data_bytes cannot be decoded, pop the last byte until it can be or
+    return an empty string.
+    """
+    for end in reversed(range(1, len(data_bytes) + 1)):
+        try:
+            return data_bytes[0:end].decode()
+        except UnicodeDecodeError:
+            pass
+    return ''
+
+
 class PushDataParser(object):
     """Parse data from the long-polling endpoint."""
 
     def __init__(self):
-        self._buf = b'' # utf-16 encoded text
+        # Buffer for bytes containing utf-8 text:
+        self._buf = b''
 
-    def get_submissions(self, new_data):
+    def get_submissions(self, new_data_bytes):
         """Yield submissions generated from received data.
 
         Responses from the push endpoint consist of a sequence of submissions.
         Each submission is prefixed with its length followed by a newline.
+
+        The buffer may not be decodable as UTF-8 if there's a split multi-byte
+        character at the end. To handle this, do a "best effort" decode of the
+        buffer to decode as much of it as possible.
 
         The length is actually the length of the string as reported by
         JavaScript. JavaScript's string length function returns the number of
@@ -38,29 +57,37 @@ class PushDataParser(object):
         Note that when encoding a string in UTF-16, Python will prepend a
         byte-order character, so we need to remove the first two bytes.
         """
-        # append any new data to the buffer
-        self._buf += new_data.encode('utf-16')[2:]
+        self._buf += new_data_bytes
 
         while True:
-            lengths = LEN_REGEX.findall(self._buf.decode('utf-16'))
+
+            buf_decoded = _best_effort_decode(self._buf)
+            buf_utf16 = buf_decoded.encode('utf-16')[2:]
+
+            lengths = LEN_REGEX.findall(buf_decoded)
             if len(lengths) == 0:
                 break
             else:
-                # both lengths are in number of bytes in UTF-16 encoding
-                # the length of the submission
+                # Both lengths are in number of bytes in UTF-16 encoding.
+                # The length of the submission:
                 length = int(lengths[0]) * 2
-                # the length of the submission length and newline
+                # The length of the submission length and newline:
                 length_length = len((lengths[0] + '\n').encode('utf-16')[2:])
-                if len(self._buf) - length_length < length:
+                if len(buf_utf16) - length_length < length:
                     break
-                submission = self._buf[length_length:length_length + length]
-                yield submission.decode('utf-16')
-                self._buf = self._buf[length_length + length:]
 
-    def get_messages(self, new_data):
+                submission = buf_utf16[length_length:length_length + length]
+                yield submission.decode('utf-16')
+                # Drop the length and the submission itself from the beginning
+                # of the buffer.
+                drop_length = (len((lengths[0] + '\n').encode()) +
+                               len(submission.decode('utf-16').encode()))
+                self._buf = self._buf[drop_length:]
+
+    def get_messages(self, new_data_bytes):
         """Yield (message_type, message) tuples from received data."""
         # One submission may contain multiple messages.
-        for submission in self.get_submissions(new_data):
+        for submission in self.get_submissions(new_data_bytes):
             # For each submission payload, yield its messages
             for payload in _get_submission_payloads(submission):
                 if payload is not None:

@@ -32,7 +32,7 @@ def _parse_sid_response(res):
     gsessionid = None
 
     p = parsers.PushDataParser()
-    res = javascript.loads(list(p.get_submissions(res.decode()))[0])
+    res = javascript.loads(list(p.get_submissions(res))[0])
     for segment in res:
         num, message = segment
         if num == 0:
@@ -241,7 +241,7 @@ class Channel(object):
             else:
                 self.on_connect()
 
-        messages = self._push_parser.get_messages(data_bytes.decode())
+        messages = self._push_parser.get_messages(data_bytes)
         for msg_type, msg in messages:
             logger.debug('Received channel message of type {}: {}'
                          .format(msg_type, msg))
