@@ -1,8 +1,5 @@
 """Demo chat client using Hangups."""
 
-# "unused argument" are unavoidable because of obsub events.
-# pylint: disable=W0613
-
 from tornado import ioloop
 import appdirs
 import argparse
@@ -62,9 +59,9 @@ class ChatUI(object):
             sys.exit(1)
 
         self._client = hangups.Client(cookies)
-        self._client.on_connect += self._on_connect
-        self._client.on_disconnect += self._on_disconnect
-        self._client.on_message += self._on_message
+        self._client.on_connect.add_observer(self._on_connect)
+        self._client.on_disconnect.add_observer(self._on_disconnect)
+        self._client.on_message.add_observer(self._on_message)
 
         class MyEventLoop(urwid.TornadoEventLoop):
             """Patched Tornado event loop for urwid.
@@ -113,7 +110,7 @@ class ChatUI(object):
         # switch to new or existing tab for the conversation
         self.add_conversation_tab(conv_id, switch=True)
 
-    def _on_connect(self, channel, client):
+    def _on_connect(self):
         """Handle connecting for the first time."""
         self._conv_list = hangups.ConversationList(self._client)
         self._user_list = hangups.UserList(self._client)
@@ -126,11 +123,11 @@ class ChatUI(object):
                                     title='Conversations')
         self._urwid_loop.widget = self._tabbed_window
 
-    def _on_message(self, client, chat_message):
+    def _on_message(self, chat_message):
         """Open conversation tab for new messages when they arrive."""
         self.add_conversation_tab(chat_message.conv_id)
 
-    def _on_disconnect(self, channel, client):
+    def _on_disconnect(self):
         """Handle disconnecting."""
         # TODO: handle this
         print('Connection lost')
@@ -203,17 +200,17 @@ class StatusLineWidget(urwid.WidgetWrap):
     def __init__(self, conversation):
         self._typing_statuses = {}
         self._conversation = conversation
-        self._conversation.on_message += self._on_message
-        self._conversation.on_typing += self._on_typing
+        self._conversation.on_message.add_observer(self._on_message)
+        self._conversation.on_typing.add_observer(self._on_typing)
         self._widget = urwid.Text('', align='center')
         super().__init__(urwid.AttrWrap(self._widget, 'status_line'))
 
-    def _on_message(self, conversation, chat_message):
+    def _on_message(self, chat_message):
         """Make users stop typing when they send a message."""
         self._typing_statuses[chat_message.user_id] = 'stopped'
         self._update()
 
-    def _on_typing(self, conversation, typing_message):
+    def _on_typing(self, typing_message):
         """Handle typing updates."""
         self._typing_statuses[typing_message.user_id] = typing_message.status
         self._update()
@@ -237,14 +234,14 @@ class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
     def __init__(self, client, conversation, set_title_cb):
-        client.on_disconnect += lambda chan, client: self._show_info_message(
+        client.on_disconnect.add_observer(lambda: self._show_info_message(
             'Disconnected. Messages will not be received.'
-        )
-        client.on_reconnect += lambda chan, client: self._show_info_message(
+        ))
+        client.on_reconnect.add_observer(lambda: self._show_info_message(
             'Connected.'
-        )
+        ))
         self._conversation = conversation
-        self._conversation.on_message += self._on_message
+        self._conversation.on_message.add_observer(self._on_message)
 
         self._num_unread = 0
         self._set_title_cb = set_title_cb
@@ -263,7 +260,7 @@ class ConversationWidget(urwid.WidgetWrap):
 
         # Display any old messages already attached to the conversation.
         for chat_message in self._conversation.chat_messages:
-            self._on_message(self._conversation, chat_message)
+            self._on_message(chat_message)
         self._num_unread = 0
         self._set_title()
 
@@ -326,7 +323,7 @@ class ConversationWidget(urwid.WidgetWrap):
             ('msg_text', text),
         ])
 
-    def _on_message(self, conversation, chat_message):
+    def _on_message(self, chat_message):
         """Display a new conversation message."""
         user = self._conversation.get_user(chat_message.user_id)
 

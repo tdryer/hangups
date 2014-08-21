@@ -4,11 +4,10 @@ Hangouts receives events using a system that appears very close to an App
 Engine Channel.
 """
 
-from obsub import event
 from tornado import gen, httpclient
 import logging
 
-from hangups import javascript, parsers, http_utils
+from hangups import javascript, parsers, http_utils, event
 
 logger = logging.getLogger(__name__)
 # Set the connection and request timeouts low so we fail fast when there's a
@@ -57,6 +56,17 @@ class Channel(object):
 
     def __init__(self, cookies, path, clid, ec, prop):
         """Create a new channel."""
+
+        # Event fired when channel connects with arguments ():
+        self.on_connect = event.Event('Channel.on_connect')
+        # Event fired when channel reconnects with arguments ():
+        self.on_reconnect = event.Event('Channel.on_reconnect')
+        # Event fired when channel disconnects with arguments ():
+        self.on_disconnect = event.Event('Channel.on_disconnect')
+        # Event fired when a channel message is received with arguments
+        # (message_type, message):
+        self.on_message = event.Event('Channel.on_message')
+
         # True if the channel is currently connected:
         self._is_connected = False
         # True if the on_connect event has been called at least once:
@@ -115,14 +125,16 @@ class Channel(object):
                 # An error occurred, so decrement the number of retries.
                 retries -= 1
                 if self._is_connected:
-                    self.on_disconnect()
+                    self._is_connected = False
+                    self.on_disconnect.fire()
                 logger.error('Long-polling request failed because of '
                              'IOError: {}'.format(e))
             except httpclient.HTTPError as e:
                 # An error occurred, so decrement the number of retries.
                 retries -= 1
                 if self._is_connected:
-                    self.on_disconnect()
+                    self._is_connected = False
+                    self.on_disconnect.fire()
                 if e.code == 400 and e.response.reason == 'Unknown SID':
                     logger.error('Long-polling request failed because SID '
                                  'became invalid. Will attempt to recover.')
@@ -143,30 +155,6 @@ class Channel(object):
             # TODO: If there was an error, messages could be lost in this time.
 
         logger.error('Ran out of retries for long-polling request')
-
-    @event
-    def on_message(self, message_type, message):
-        """Event called when a channel message is received."""
-        logger.info('Triggered event Channel.on_message')
-
-    @event
-    def on_connect(self):
-        """Event called when channel connects."""
-        self._on_connect_called = True
-        self._is_connected = True
-        logger.info('Triggered event Channel.on_connect')
-
-    @event
-    def on_reconnect(self):
-        """Event called when channel reconnects."""
-        self._is_connected = True
-        logger.info('Triggered event Channel.on_reconnect')
-
-    @event
-    def on_disconnect(self):
-        """Event called when channel disconnects."""
-        self._is_connected = False
-        logger.info('Triggered event Channel.on_disconnect')
 
     ##########################################################################
     # Private methods
@@ -237,12 +225,15 @@ class Channel(object):
         # successful, so use it to trigger connection events if necessary.
         if not self._is_connected:
             if self._on_connect_called:
-                self.on_reconnect()
+                self._is_connected = True
+                self.on_reconnect.fire()
             else:
-                self.on_connect()
+                self._on_connect_called = True
+                self._is_connected = True
+                self.on_connect.fire()
 
         messages = self._push_parser.get_messages(data_bytes)
         for msg_type, msg in messages:
             logger.debug('Received channel message of type {}: {}'
                          .format(msg_type, msg))
-            self.on_message(msg_type, msg)
+            self.on_message.fire(msg_type, msg)

@@ -1,6 +1,5 @@
 """Abstract class for writing chat clients."""
 
-from obsub import event
 from tornado import gen, httpclient
 import hashlib
 import json
@@ -9,7 +8,7 @@ import random
 import re
 import time
 
-from hangups import javascript, parsers, exceptions, http_utils, channel
+from hangups import javascript, parsers, exceptions, http_utils, channel, event
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -17,9 +16,6 @@ ORIGIN_URL = 'https://talkgadget.google.com'
 # network problem.
 CONNECT_TIMEOUT = 10
 REQUEST_TIMEOUT = 10
-# Long-polling requests send heartbeats every 15 seconds, so if we miss two in
-# a row, consider the connection dead.
-LP_DATA_TIMEOUT = 30
 
 
 def _parse_user_entity(entity):
@@ -57,26 +53,26 @@ class ConversationList(object):
         logger.info('ConversationList initialized with {} conversation(s)'
                     .format(len(self._conv_dict)))
         # Register event handlers:
-        self._client.on_message += self._on_message
-        self._client.on_typing += self._on_typing
-        self._client.on_focus += self._on_focus
-        self._client.on_conversation += self._on_conversation
+        self._client.on_message.add_observer(self._on_message)
+        self._client.on_typing.add_observer(self._on_typing)
+        self._client.on_focus.add_observer(self._on_focus)
+        self._client.on_conversation.add_observer(self._on_conversation)
 
-    def _on_message(self, client, chat_message):
+    def _on_message(self, chat_message):
         """Route on_message event to appropriate Conversation."""
-        self.get(chat_message.conv_id).on_message(chat_message)
+        self.get(chat_message.conv_id).on_message.fire(chat_message)
 
-    def _on_typing(self, client, typing_message):
+    def _on_typing(self, typing_message):
         """Route on_typing event to appropriate Conversation."""
-        self.get(typing_message.conv_id).on_typing(typing_message)
+        self.get(typing_message.conv_id).on_typing.fire(typing_message)
 
-    def _on_focus(self, client, focus_message):
+    def _on_focus(self, focus_message):
         """Route on_focus event to appropriate Conversation."""
-        self.get(focus_message.conv_id).on_focus(focus_message)
+        self.get(focus_message.conv_id).on_focus.fire(focus_message)
 
-    def _on_conversation(self, client, conversation_message):
+    def _on_conversation(self, conversation_message):
         """Route on_conversation event to appropriate Conversation."""
-        self.get(conversation_message.conv_id).on_conversation(
+        self.get(conversation_message.conv_id).on_conversation.fire(
             conversation_message
         )
 
@@ -103,6 +99,19 @@ class Conversation(object):
         self._last_modified = last_modified # datetime
         self._name = chat_name # str
         self._chat_messages = chat_messages # ChatMessage
+
+        # Event fired when a new message arrives with arguments (chat_message).
+        self.on_message = event.Event('Conversation.on_message')
+        # Event fired when a users starts or stops typing with arguments
+        # (typing_message).
+        self.on_typing = event.Event('Conversation.on_typing')
+        # Event fired when a user changes focus on a conversation with
+        # arguments (focus_message).
+        self.on_focus = event.Event('Conversation.on_focus')
+        # Event fired when a conversation updates with arguments
+        # (conversation_message).
+        self.on_conversation = event.Event('Conversation.on_conversation')
+
 
     @property
     def id_(self):
@@ -147,26 +156,6 @@ class Conversation(object):
         Raises hangups.NetworkError if the message can not be sent.
         """
         yield self._client.sendchatmessage(self._id, text)
-
-    @event
-    def on_message(self, chat_message):
-        """Event called when a new message arrives."""
-        logger.info('Triggered event Conversation.on_message')
-
-    @event
-    def on_typing(self, typing_message):
-        """Event called when a user starts or stops typing."""
-        logger.info('Triggered event Conversation.on_typing')
-
-    @event
-    def on_focus(self, focus_message):
-        """Event called when a user changes focus on a conversation."""
-        logger.info('Triggered event Conversation.on_focus')
-
-    @event
-    def on_conversation(self, conversation_message):
-        """Event called when a conversation updates."""
-        logger.info('Triggered event Conversation.on_conversation')
 
 
 # TODO: This class isn't really being used yet.
@@ -256,6 +245,27 @@ class Client(object):
 
         cookies is a dictionary of authentication cookies.
         """
+
+        # Event fired when the client connects for the first time with
+        # arguments ().
+        self.on_connect = event.Event('Client.on_connect')
+        # Event fired when the client reconnects after being disconnected with
+        # arguments ().
+        self.on_reconnect = event.Event('Client.on_reconnect')
+        # Event fired when the client is disconnected with arguments ().
+        self.on_disconnect = event.Event('Client.on_disconnect')
+        # Event fired when a new message arrives with arguments (chat_message).
+        self.on_message = event.Event('Client.on_message')
+        # Event fired when a user starts or stops typing with arguments
+        # (typing_message).
+        self.on_typing = event.Event('Client.on_typing')
+        # Event fired when a user changes focus on a conversation with
+        # arguments (focus_message).
+        self.on_focus = event.Event('Client.on_focus')
+        # Event fired when a conversation updates with arguments
+        # (conversation_message).
+        self.on_conversation = event.Event('Client.on_conversation')
+
         self._cookies = cookies
 
         # These are instantiated after ConnectionEvent:
@@ -290,50 +300,11 @@ class Client(object):
         self._channel = channel.Channel(self._cookies, self._channel_path,
                                         self._clid, self._channel_ec_param,
                                         self._channel_prop_param)
-        self._channel.on_connect += self.on_connect
-        self._channel.on_reconnect += self.on_reconnect
-        self._channel.on_disconnect += self.on_disconnect
-        self._channel.on_message += self._on_push_data
+        self._channel.on_connect.add_observer(self.on_connect.fire)
+        self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
+        self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
+        self._channel.on_message.add_observer(self._on_push_data)
         yield self._channel.listen()
-
-    ##########################################################################
-    # Public Events
-    ##########################################################################
-
-    @event
-    def on_connect(self, _channel):
-        """Event called when the client connects for the first time."""
-        logger.info('Triggered event Client.on_connect')
-
-    @event
-    def on_reconnect(self, _channel):
-        """Event called when the client reconnects after being disconnected."""
-        logger.info('Triggered event Client.on_reconnect')
-
-    @event
-    def on_disconnect(self, _channel):
-        """Event called when the client is disconnected."""
-        logger.info('Triggered event Client.on_disconnect')
-
-    @event
-    def on_message(self, chat_message):
-        """Event called when a new message arrives."""
-        logger.info('Triggered event Client.on_message')
-
-    @event
-    def on_typing(self, typing_message):
-        """Event called when a user starts or stops typing."""
-        logger.info('Triggered event Client.on_typing')
-
-    @event
-    def on_focus(self, focus_message):
-        """Event called when a user changes focus on a conversation."""
-        logger.info('Triggered event Client.on_focus')
-
-    @event
-    def on_conversation(self, conversation_message):
-        """Event called when a conversation updates."""
-        logger.info('Triggered event Client.on_conversation')
 
     ##########################################################################
     # Private methods
@@ -500,19 +471,21 @@ class Client(object):
             "en"
         ]
 
-    def _on_push_data(self, _channel, msg_type, msg):
+    def _on_push_data(self, msg_type, msg):
         """Parse channel messages and call the appropriate event."""
         try:
             parsed_msg = parsers.parse_message(msg_type, msg)
         except exceptions.ParseError as e:
             logging.warning('Failed to parse message: {}'.format(e))
         else:
-            {
+            handler = {
                 parsers.ChatMessage: self.on_message,
                 parsers.FocusStatusMessage: self.on_focus,
                 parsers.TypingStatusMessage: self.on_typing,
                 parsers.ConversationStatusMessage: self.on_conversation,
-            }.get(parsed_msg.__class__, lambda m: None)(parsed_msg)
+            }.get(parsed_msg.__class__, None)
+            if handler is not None:
+                handler.fire(parsed_msg)
 
     @gen.coroutine
     def _request(self, endpoint, body_json):

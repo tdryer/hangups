@@ -34,10 +34,10 @@ class Notifier(object):
     def __init__(self, client, conv_list):
         self._conv_list = conv_list  # hangups.ConversationList
         self._client = client  # hangups.Client
-        self._client.on_message += self._on_message
+        self._client.on_message.add_observer(self._on_message)
         self._replaces_id = 0
 
-    def _on_message(self, _client, chat_message):
+    def _on_message(self, chat_message):
         """Create notification for new messages."""
         conv = self._conv_list.get(chat_message.conv_id)
         user = conv.get_user(chat_message.user_id)
