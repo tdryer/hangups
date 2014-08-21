@@ -293,14 +293,22 @@ class ConversationWidget(urwid.WidgetWrap):
     def _append_text(self, text):
         """Append text as a new line in the ConversationWidget.
 
-        Automatically scroll down to show the new text.
+        Automatically scroll down to show the new text if the bottom is showing
+        (the last widget is focused). This allows the user to scroll up to read
+        previous messages while new messages are arriving.
         """
+        try:
+            bottom_visible = (self._list_box.focus_position ==
+                              len(self._list_walker) - 1)
+        except IndexError:
+            bottom_visible = True  # ListBox is empty
         self._list_walker.append(urwid.Text(text))
-        # XXX: ListBox may not scroll enough to completely show the first
-        # widget that goes off-screen. This can be fixed by repeating the
-        # set_focus call, but this workaround causes other issues.
-        self._list_box.set_focus(len(self._list_walker) - 1,
-                                 coming_from='above')
+        if bottom_visible:
+            # XXX: ListBox may not scroll enough to completely show the first
+            # widget that goes off-screen. This can be fixed by repeating the
+            # set_focus call, but this workaround causes other issues.
+            self._list_box.set_focus(len(self._list_walker) - 1,
+                                     coming_from='above')
 
     def _on_message_sent(self, future):
         """Handle showing an error if a message fails to send."""
