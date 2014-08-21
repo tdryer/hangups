@@ -1,6 +1,6 @@
 """Abstract class for writing chat clients."""
 
-from tornado import gen, httpclient
+from tornado import gen, httpclient, ioloop
 import hashlib
 import json
 import logging
@@ -267,6 +267,7 @@ class Client(object):
         self.on_conversation = event.Event('Client.on_conversation')
 
         self._cookies = cookies
+        self._sync_timestamp = None  # datetime.datetime
 
         # These are instantiated after ConnectionEvent:
         self.initial_users = None # {UserID: User}
@@ -300,7 +301,12 @@ class Client(object):
         self._channel = channel.Channel(self._cookies, self._channel_path,
                                         self._clid, self._channel_ec_param,
                                         self._channel_prop_param)
+        sync_f = lambda: ioloop.IOLoop.instance().add_future(
+            self._sync_messages(), lambda f: f.result()
+        )
+        self._channel.on_connect.add_observer(sync_f)
         self._channel.on_connect.add_observer(self.on_connect.fire)
+        self._channel.on_reconnect.add_observer(sync_f)
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
         self._channel.on_message.add_observer(self._on_push_data)
@@ -309,6 +315,16 @@ class Client(object):
     ##########################################################################
     # Private methods
     ##########################################################################
+
+    @gen.coroutine
+    def _sync_messages(self):
+        """Sync messages since self._sync_timestamp."""
+        logger.info('Syncing messages since {}'.format(self._sync_timestamp))
+        res = yield self.syncallnewevents(self._sync_timestamp)
+        # TODO: Parse the response.
+        self._sync_timestamp = parsers.from_timestamp(
+            int(res['response_header']['current_server_time'])
+        )
 
     @gen.coroutine
     def _init_talkgadget_1(self):
@@ -367,6 +383,9 @@ class Client(object):
         self._clid = data_dict['ds:4'][0][7]
         self._channel_ec_param = data_dict['ds:4'][0][4]
         self._channel_prop_param = data_dict['ds:4'][0][5]
+        self._sync_timestamp = parsers.from_timestamp(
+            data_dict['ds:21'][0][1][4]
+        )
 
         # build dict of conversations and their participants
         initial_conversations = {}
@@ -478,6 +497,10 @@ class Client(object):
         except exceptions.ParseError as e:
             logging.warning('Failed to parse message: {}'.format(e))
         else:
+            # Update the sync timestamp:
+            if isinstance(parsed_msg, parsers.ChatMessage):
+                self._sync_timestamp = parsed_msg.timestamp
+            # Fire the appropriate event:
             handler = {
                 parsers.ChatMessage: self.on_message,
                 parsers.FocusStatusMessage: self.on_focus,
@@ -587,15 +610,32 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @gen.coroutine
-    def syncallnewevents(self, after_timestamp):
-        """List all events occuring at or after timestamp."""
-        res = yield self._request('conversations/syncallnewevents', [
-            self._get_request_header(),
-            after_timestamp,
-            [], None, [], False, [],
-            1048576
-        ])
-        return json.loads(res.body.decode())
+    def syncallnewevents(self, timestamp):
+        """List all events occuring at or after timestamp.
+
+        timestamp: datetime.datetime instance specifying the time after
+        which to return all events occuring in.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        try:
+            res = yield self._request('conversations/syncallnewevents', [
+                self._get_request_header(),
+                int(timestamp.timestamp()) * 1000000,
+                [], None, [], False, [],
+                1048576 # max response size? (number of bytes in a MB)
+            ])
+        except (httpclient.HTTPError, IOError) as e:
+            # In addition to HTTPError, httpclient can raise IOError (which
+            # includes socker.gaierror).
+            raise exceptions.NetworkError(e)
+        # can return 200 but still contain an error
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Response status is \'{}\''
+                                          .format(res_status))
+        return res
 
     @gen.coroutine
     def syncrecentconversations(self):
