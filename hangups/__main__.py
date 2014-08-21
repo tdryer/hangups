@@ -304,11 +304,10 @@ class ConversationWidget(urwid.WidgetWrap):
             bottom_visible = True  # ListBox is empty
         self._list_walker.append(urwid.Text(text))
         if bottom_visible:
-            # XXX: ListBox may not scroll enough to completely show the first
-            # widget that goes off-screen. This can be fixed by repeating the
-            # set_focus call, but this workaround causes other issues.
-            self._list_box.set_focus(len(self._list_walker) - 1,
-                                     coming_from='above')
+            # set_focus_valign is necessary so the last message is always shown
+            # completely.
+            self._list_box.set_focus(len(self._list_walker) - 1)
+            self._list_box.set_focus_valign('bottom')
 
     def _on_message_sent(self, future):
         """Handle showing an error if a message fails to send."""
