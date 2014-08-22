@@ -330,7 +330,9 @@ class Client(object):
                     chat_message = parsers.parse_chat_message_json(msg)
                 except exceptions.ParseError as e:
                     logging.warning('Failed to parse message: {}'.format(e))
-                self.on_message.fire(chat_message)
+                # Workaround for syncallnewevents timestamp being inclusive:
+                if chat_message.timestamp > self._sync_timestamp:
+                    self.on_message.fire(chat_message)
 
         self._sync_timestamp = parsers.from_timestamp(
             int(res['response_header']['current_server_time'])
