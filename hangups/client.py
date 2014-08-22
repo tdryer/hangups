@@ -427,7 +427,8 @@ class Client(object):
                     chat_message = parsers.parse_chat_message([raw_message])
                 except exceptions.ParseError as e:
                     logger.warning('Failed to parse message: {}'.format(e))
-                messages.append(chat_message)
+                else:
+                    messages.append(chat_message)
             initial_conversations[id_] = {
                 'participants': [],
                 'last_modified': last_modified,
