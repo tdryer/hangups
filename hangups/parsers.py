@@ -213,16 +213,31 @@ def parse_chat_message(message):
     # representation, appending all the segments into one string.
     message_text = ''
 
-    if not message[0][9] is None:
-        logger.warning('TODO: handle chat renaming from {} to {}'
-                       .format(message[0][9][1], message[0][9][0]))
-
+    # Find the message type:
+    type_int = message[0][22]
     try:
-        message_content = message[0][6][2][0]
-    except (TypeError, IndexError):
-        # Sometimes they aren't actually chat messages (conversation name
-        # changes, and video call initiations).
-        raise exceptions.ParseError('Ignoring chat message with no content.')
+        type_ = {
+            # message[0][6] will contain message content.
+            1: 'REGULAR_CHAT_MESSAGE',
+            # message[0][8] will contain ???.
+            4: 'UNKNOWN_4',
+            # message[0][8] will contain ???.
+            5: 'UNKNOWN_5',
+            # message[0][9] will contain conversation rename.
+            6: 'RENAME_CONVERSATION',
+            # message[0][10] will contain hangout event.
+            7: 'HANGOUT_EVENT',
+        }[type_int]
+    except KeyError:
+        logger.debug(message)
+        raise exceptions.ParseError('Unknown chat message type: {}'
+                                    .format(type_int))
+
+    if type_ != 'REGULAR_CHAT_MESSAGE':
+        raise exceptions.ParseError('Unimplemented chat message type: {}'
+                                    .format(type_))
+
+    message_content = message[0][6][2][0]
     if len(message_content) > 0:
         for segment in message_content:
             # known types: 0: text, 1: linebreak, 2: link
@@ -254,8 +269,10 @@ def parse_chat_message_json(message):
     """Variant of parse_chat_message where raw message is in JSON format."""
     # Only try to parse REGULAR_CHAT_MESSAGE messages
     type_ = message['event_type']
+    # Known event types: 'REGULAR_CHAT_MESSAGE', 'HANGOUT_EVENT',
+    # 'RENAME_CONVERSATION'
     if type_ != 'REGULAR_CHAT_MESSAGE':
-        raise exceptions.ParseError('Ignoring chat message type {}.'
+        raise exceptions.ParseError('Unimplemented chat message type: {}'
                                     .format(type_))
 
     message_text = ''
