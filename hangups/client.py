@@ -302,7 +302,7 @@ class Client(object):
                                         self._clid, self._channel_ec_param,
                                         self._channel_prop_param)
         sync_f = lambda: ioloop.IOLoop.instance().add_future(
-            self._sync_messages(), lambda f: f.result()
+            self._sync_chat_messages(), lambda f: f.result()
         )
         self._channel.on_connect.add_observer(sync_f)
         self._channel.on_connect.add_observer(self.on_connect.fire)
@@ -317,11 +317,21 @@ class Client(object):
     ##########################################################################
 
     @gen.coroutine
-    def _sync_messages(self):
-        """Sync messages since self._sync_timestamp."""
+    def _sync_chat_messages(self):
+        """Sync chat messages since self._sync_timestamp."""
         logger.info('Syncing messages since {}'.format(self._sync_timestamp))
         res = yield self.syncallnewevents(self._sync_timestamp)
-        # TODO: Parse the response.
+
+        # Parse chat message from response and fire on_message event for each
+        # new chat message.
+        for conversation in res.get('conversation_state', []):
+            for msg in conversation.get('event', []):
+                try:
+                    chat_message = parsers.parse_chat_message_json(msg)
+                except exceptions.ParseError as e:
+                    logging.warning('Failed to parse message: {}'.format(e))
+                self.on_message.fire(chat_message)
+
         self._sync_timestamp = parsers.from_timestamp(
             int(res['response_header']['current_server_time'])
         )
