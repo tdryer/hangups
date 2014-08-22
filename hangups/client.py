@@ -426,7 +426,7 @@ class Client(object):
                 try:
                     chat_message = parsers.parse_chat_message([raw_message])
                 except exceptions.ParseError as e:
-                    logging.warning('Failed to parse message: {}'.format(e))
+                    logger.warning('Failed to parse message: {}'.format(e))
                 messages.append(chat_message)
             initial_conversations[id_] = {
                 'participants': [],
@@ -509,7 +509,7 @@ class Client(object):
         try:
             parsed_msg = parsers.parse_message(msg_type, msg)
         except exceptions.ParseError as e:
-            logging.warning('Failed to parse message: {}'.format(e))
+            logger.warning('Failed to parse message: {}'.format(e))
         else:
             # Update the sync timestamp:
             if isinstance(parsed_msg, parsers.ChatMessage):
