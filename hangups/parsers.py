@@ -296,47 +296,6 @@ def parse_chat_message(message):
     )
 
 
-def parse_chat_message_json(message):
-    """Variant of parse_chat_message where raw message is in JSON format."""
-    # Only try to parse REGULAR_CHAT_MESSAGE messages
-    type_ = message['event_type']
-    # Known event types: 'REGULAR_CHAT_MESSAGE', 'HANGOUT_EVENT',
-    # 'RENAME_CONVERSATION'
-    if type_ != 'REGULAR_CHAT_MESSAGE':
-        raise exceptions.ParseNotImplementedError(
-            'Unimplemented chat message type: {}'.format(type_)
-        )
-
-    message_text = ''
-
-    message_content = message['chat_message'].get('message_content', {})
-
-    for segment in message_content.get('segment', []):
-        seg_type = segment['type']
-        # Known segment types: 'TEXT', 'LINK', 'LINE_BREAK'
-        if seg_type == 'LINE_BREAK':
-            message_text += '\n'
-        else:
-            message_text += segment['text']
-
-    for attachment in message_content.get('attachment', []):
-        attach_type_ = ','.join(attachment['embed_item']['type'])
-        # It appears an attachment can have multiple types.
-        # Known attachment types: 'PLUS_PHOTO'
-        if attach_type_ == 'PLUS_PHOTO':
-            message_text += attachment['embed_item'][
-                'embeds.PlusPhoto.plus_photo'
-            ]['url']
-
-    return ChatMessage(
-        conv_id=message['conversation_id']['id'],
-        user_id=UserID(chat_id=message['sender_id']['chat_id'],
-                       gaia_id=message['sender_id']['gaia_id']),
-        timestamp=from_timestamp(int(message['timestamp'])),
-        text=message_text,
-    )
-
-
 ConversationStatusMessage = namedtuple(
     'ConversationStatusMessage', ['conv_id', 'user_id_list']
 )

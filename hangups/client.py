@@ -324,10 +324,12 @@ class Client(object):
 
         # Parse chat message from response and fire on_message event for each
         # new chat message.
-        for conversation in res.get('conversation_state', []):
-            for msg in conversation.get('event', []):
+        conversation_state = res[3]
+        for conversation in conversation_state:
+            events = conversation[2]
+            for msg in events:
                 try:
-                    chat_message = parsers.parse_chat_message_json(msg)
+                    chat_message = parsers.parse_chat_message([msg])
                 except exceptions.ParseError as e:
                     logger.warning('Failed to parse message: {}'.format(e))
                 except exceptions.ParseNotImplementedError as e:
@@ -338,9 +340,7 @@ class Client(object):
                     if chat_message.timestamp > self._sync_timestamp:
                         self.on_message.fire(chat_message)
 
-        self._sync_timestamp = parsers.from_timestamp(
-            int(res['response_header']['current_server_time'])
-        )
+        self._sync_timestamp = parsers.from_timestamp(int(res[1][4]))
 
     @gen.coroutine
     def _init_talkgadget_1(self):
@@ -526,7 +526,7 @@ class Client(object):
             handler.fire(parsed_msg)
 
     @gen.coroutine
-    def _request(self, endpoint, body_json):
+    def _request(self, endpoint, body_json, use_json=True):
         """Make chat API request."""
         url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
         headers = {
@@ -540,7 +540,7 @@ class Client(object):
                    for cookie in required_cookies}
         params = {
             'key': self._api_key,
-            'alt': 'json', # json or protojson
+            'alt': 'json' if use_json else 'protojson',
         }
         res = yield http_utils.fetch(
             url, method='POST', headers=headers, cookies=cookies,
@@ -628,6 +628,9 @@ class Client(object):
     def syncallnewevents(self, timestamp):
         """List all events occuring at or after timestamp.
 
+        This method requests protojson rather than json so we have one chat
+        message parser rather than two.
+
         timestamp: datetime.datetime instance specifying the time after
         which to return all events occuring in.
 
@@ -639,15 +642,15 @@ class Client(object):
                 int(timestamp.timestamp()) * 1000000,
                 [], None, [], False, [],
                 1048576 # max response size? (number of bytes in a MB)
-            ])
+            ], use_json=False)
         except (httpclient.HTTPError, IOError) as e:
             # In addition to HTTPError, httpclient can raise IOError (which
             # includes socker.gaierror).
             raise exceptions.NetworkError(e)
         # can return 200 but still contain an error
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
+        res = javascript.loads(res.body.decode())
+        res_status = res[1][0]
+        if res_status != 1:
             raise exceptions.NetworkError('Response status is \'{}\''
                                           .format(res_status))
         return res
