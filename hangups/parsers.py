@@ -131,6 +131,9 @@ def _get_submission_payloads(submission):
                 # Not sure what this is for, might be something to do with
                 # XMPP.
                 pass
+            elif payload_type == 'ho:hin':
+                # Sent when a video call starts/stops.
+                pass
             else:
                 logger.warning(
                     'Got submission with unknown payload type {}:\n{}'
@@ -170,6 +173,7 @@ def parse_message(message_type, message):
         1: parse_chat_message,
         2: parse_focus_status_message,
         3: parse_typing_status_message,
+        # TODO: 6 is a read state change
         11: parse_conversation_status_message,
     }
     try:
@@ -227,6 +231,8 @@ def parse_chat_message(message):
             6: 'RENAME_CONVERSATION',
             # message[0][10] will contain hangout event.
             7: 'HANGOUT_EVENT',
+            # message[0][13] will contain OTR modification.
+            9: 'OTR_MODIFICATION',
         }[type_int]
     except KeyError:
         logger.debug(message)
