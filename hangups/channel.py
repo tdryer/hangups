@@ -127,8 +127,8 @@ class Channel(object):
                 if self._is_connected:
                     self._is_connected = False
                     self.on_disconnect.fire()
-                logger.error('Long-polling request failed because of '
-                             'IOError: {}'.format(e))
+                logger.warning('Long-polling request failed because of '
+                               'IOError: {}'.format(e))
             except httpclient.HTTPError as e:
                 # An error occurred, so decrement the number of retries.
                 retries -= 1
@@ -136,16 +136,16 @@ class Channel(object):
                     self._is_connected = False
                     self.on_disconnect.fire()
                 if e.code == 400 and e.response.reason == 'Unknown SID':
-                    logger.error('Long-polling request failed because SID '
-                                 'became invalid. Will attempt to recover.')
+                    logger.warning('Long-polling request failed because SID '
+                                   'became invalid. Will attempt to recover.')
                     need_new_sid = True
                 elif e.code == 599:
-                    logger.error('Long-polling request failed because '
-                                 'connection was closed. Will attempt to '
-                                 'recover.')
+                    logger.warning('Long-polling request failed because '
+                                   'connection was closed. Will attempt to '
+                                   'recover.')
                 else:
-                    logger.error('Long-polling request failed for unknown '
-                                 'reason: {}'.format(e))
+                    logger.warning('Long-polling request failed for unknown '
+                                   'reason: {}'.format(e))
                     break # Do not retry.
             else:
                 # The connection closed successfully, so reset the number of
