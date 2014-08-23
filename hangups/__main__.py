@@ -230,6 +230,31 @@ class StatusLineWidget(urwid.WidgetWrap):
         self._widget.set_text(msg)
 
 
+class MessageWidget(urwid.WidgetWrap):
+
+    """Widget for displaying a single message in a conversation."""
+
+    def __init__(self, timestamp, text, user=None):
+        # Save the timestamp as an attribute for sorting.
+        self.timestamp = timestamp
+        text = [
+            ('msg_date', '(' + self._get_date_str(timestamp) + ') '),
+            ('msg_text', text)
+        ]
+        if user is not None:
+            text.insert(1, ('msg_sender', user.first_name + ': '))
+        self._widget = urwid.Text(text)
+        super().__init__(self._widget)
+
+    @staticmethod
+    def _get_date_str(timestamp):
+        """Convert UTC datetime into user interface string."""
+        return timestamp.astimezone(tz=None).strftime('%I:%M:%S %p')
+
+    def __lt__(self, other):
+        return self.timestamp < other.timestamp
+
+
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
@@ -290,8 +315,15 @@ class ConversationWidget(urwid.WidgetWrap):
             self._on_message_sent
         )
 
-    def _append_text(self, text):
-        """Append text as a new line in the ConversationWidget.
+    def _on_message_sent(self, future):
+        """Handle showing an error if a message fails to send."""
+        try:
+            future.result()
+        except hangups.NetworkError:
+            self._show_info_message('Failed to send message.')
+
+    def _add_message_widget(self, message_widget):
+        """Add MessageWidget to the ConversationWidget.
 
         Automatically scroll down to show the new text if the bottom is showing
         (the last widget is focused). This allows the user to scroll up to read
@@ -302,45 +334,26 @@ class ConversationWidget(urwid.WidgetWrap):
                               len(self._list_walker) - 1)
         except IndexError:
             bottom_visible = True  # ListBox is empty
-        self._list_walker.append(urwid.Text(text))
+        self._list_walker.append(message_widget)
+        self._list_walker.sort()
         if bottom_visible:
             # set_focus_valign is necessary so the last message is always shown
             # completely.
             self._list_box.set_focus(len(self._list_walker) - 1)
             self._list_box.set_focus_valign('bottom')
 
-    def _on_message_sent(self, future):
-        """Handle showing an error if a message fails to send."""
-        try:
-            future.result()
-        except hangups.NetworkError:
-            self._show_info_message('Failed to send message.')
-
-    @staticmethod
-    def _get_date_str(timestamp=None):
-        """Convert UTC datetime into user interface string."""
-        if timestamp is None:
-            timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
-        return timestamp.astimezone(tz=None).strftime('%I:%M:%S %p')
-
     def _show_info_message(self, text):
         """Display an informational message with timestamp."""
-        self._append_text([
-            ('msg_date', '(' + self._get_date_str() + ') '),
-            ('msg_text', text),
-        ])
+        timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
+        self._add_message_widget(MessageWidget(timestamp, text, None))
 
     def _on_message(self, chat_message):
         """Display a new conversation message."""
         user = self._conversation.get_user(chat_message.user_id)
 
         # Format the message and add it to the list box.
-        self._append_text([
-            ('msg_date',
-             '(' + self._get_date_str(chat_message.timestamp) + ') '),
-            ('msg_sender', user.first_name + ': '),
-            ('msg_text', chat_message.text)
-        ])
+        self._add_message_widget(MessageWidget(chat_message.timestamp,
+                                               chat_message.text, user))
 
         # Update the count of unread messages.
         if not user.is_self:
