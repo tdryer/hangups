@@ -260,7 +260,7 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def __init__(self, client, conversation, set_title_cb):
         client.on_disconnect.add_observer(lambda: self._show_info_message(
-            'Disconnected. Messages will not be received.'
+            'Disconnected.'
         ))
         client.on_reconnect.add_observer(lambda: self._show_info_message(
             'Connected.'
