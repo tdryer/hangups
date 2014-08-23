@@ -164,24 +164,48 @@ def _parse_payload(payload):
 
 
 def parse_message(message_type, message):
-    """Parse any type of message and return parsed message instance.
+    """Parse any type of message.
 
-    Raises ParseError if the message cannot be parsed.
+    Returns message instance, or None if the message could not be parsed.
     """
-    # message types have been observed to range from 1 to 14
+    def parse_not_implemented_message(message_type, message):
+        """Parser for known but not implemented messages."""
+        raise exceptions.ParseNotImplementedError(
+            'Unimplemented message type: {}'.format(message_type)
+        )
+    def parse_unknown_message(message_type, message):
+        """Parser for unknown messages."""
+        raise exceptions.ParseError(
+            'Unknown message type: {}'.format(message_type)
+        )
+
+    # Message types have been observed to range from 1 to 14.
+    # TODO: Implement the unimplemented message parsers.
     MESSAGE_PARSERS = {
         1: parse_chat_message,
         2: parse_focus_status_message,
         3: parse_typing_status_message,
-        # TODO: 6 is a read state change
+        # read state change
+        6: lambda msg: parse_not_implemented_message(6, msg),
         11: parse_conversation_status_message,
+        # notification snooze / set mood
+        12: lambda msg: parse_not_implemented_message(12, msg),
+        # ??? (a user ID and some properties)
+        14: lambda msg: parse_not_implemented_message(14, msg),
     }
+
+    parsed_message = None
+
     try:
-        parser = MESSAGE_PARSERS[message_type]
-    except KeyError:
-        raise exceptions.ParseError('No parser available for message type {}'
-                                    .format(message_type))
-    parsed_message = parser(message)  # May raise ParseError
+        parser = MESSAGE_PARSERS.get(
+            message_type, lambda msg: parse_unknown_message(message_type, msg)
+        )
+        parsed_message = parser(message)
+    except exceptions.ParseError as e:
+        logger.warning('Failed to parse message: {}'.format(e))
+    except exceptions.ParseNotImplementedError as e:
+        logger.info('Failed to parse message: {}'.format(e))
+
     logger.debug('Parsed message: {}'.format(parsed_message))
     return parsed_message
 
@@ -240,8 +264,9 @@ def parse_chat_message(message):
                                     .format(type_int))
 
     if type_ != 'REGULAR_CHAT_MESSAGE':
-        raise exceptions.ParseError('Unimplemented chat message type: {}'
-                                    .format(type_))
+        raise exceptions.ParseNotImplementedError(
+            'Unimplemented chat message type: {}'.format(type_)
+        )
 
     message_content = message[0][6][2][0]
     if len(message_content) > 0:
@@ -278,8 +303,9 @@ def parse_chat_message_json(message):
     # Known event types: 'REGULAR_CHAT_MESSAGE', 'HANGOUT_EVENT',
     # 'RENAME_CONVERSATION'
     if type_ != 'REGULAR_CHAT_MESSAGE':
-        raise exceptions.ParseError('Unimplemented chat message type: {}'
-                                    .format(type_))
+        raise exceptions.ParseNotImplementedError(
+            'Unimplemented chat message type: {}'.format(type_)
+        )
 
     message_text = ''
 

@@ -330,6 +330,8 @@ class Client(object):
                     chat_message = parsers.parse_chat_message_json(msg)
                 except exceptions.ParseError as e:
                     logger.warning('Failed to parse message: {}'.format(e))
+                except exceptions.ParseNotImplementedError as e:
+                    logger.info('Failed to parse message: {}'.format(e))
                 else:
                     # Workaround for syncallnewevents timestamp being
                     # inclusive:
@@ -427,6 +429,8 @@ class Client(object):
                     chat_message = parsers.parse_chat_message([raw_message])
                 except exceptions.ParseError as e:
                     logger.warning('Failed to parse message: {}'.format(e))
+                except exceptions.ParseNotImplementedError as e:
+                    logger.info('Failed to parse message: {}'.format(e))
                 else:
                     messages.append(chat_message)
             initial_conversations[id_] = {
@@ -507,23 +511,19 @@ class Client(object):
 
     def _on_push_data(self, msg_type, msg):
         """Parse channel messages and call the appropriate event."""
-        try:
-            parsed_msg = parsers.parse_message(msg_type, msg)
-        except exceptions.ParseError as e:
-            logger.warning('Failed to parse message: {}'.format(e))
-        else:
-            # Update the sync timestamp:
-            if isinstance(parsed_msg, parsers.ChatMessage):
-                self._sync_timestamp = parsed_msg.timestamp
-            # Fire the appropriate event:
-            handler = {
-                parsers.ChatMessage: self.on_message,
-                parsers.FocusStatusMessage: self.on_focus,
-                parsers.TypingStatusMessage: self.on_typing,
-                parsers.ConversationStatusMessage: self.on_conversation,
-            }.get(parsed_msg.__class__, None)
-            if handler is not None:
-                handler.fire(parsed_msg)
+        parsed_msg = parsers.parse_message(msg_type, msg)
+        # Update the sync timestamp:
+        if isinstance(parsed_msg, parsers.ChatMessage):
+            self._sync_timestamp = parsed_msg.timestamp
+        # Fire the appropriate event:
+        handler = {
+            parsers.ChatMessage: self.on_message,
+            parsers.FocusStatusMessage: self.on_focus,
+            parsers.TypingStatusMessage: self.on_typing,
+            parsers.ConversationStatusMessage: self.on_conversation,
+        }.get(parsed_msg.__class__, None)
+        if handler is not None:
+            handler.fire(parsed_msg)
 
     @gen.coroutine
     def _request(self, endpoint, body_json):
