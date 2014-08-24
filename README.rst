@@ -1,6 +1,10 @@
 hangups
 =======
 
+.. image:: https://travis-ci.org/tdryer/hangups.svg?branch=master
+    :target: https://travis-ci.org/tdryer/hangups
+    :alt: Build Status
+
 hangups is the first third-party instant messaging client for `Google
 Hangouts`_.
 
