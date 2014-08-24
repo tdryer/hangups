@@ -152,7 +152,8 @@ class Channel(object):
                 # retries.
                 retries = MAX_RETRIES
 
-            # TODO: If there was an error, messages could be lost in this time.
+            # If the request ended with an error, the client must account for
+            # messages being dropped during this time.
 
         logger.error('Ran out of retries for long-polling request')
 
