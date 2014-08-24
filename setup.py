@@ -44,7 +44,7 @@ setup(
         'appdirs==1.3.0',
     ],
     tests_require=[
-        'pytest==2.5.2',
+        'pytest',
     ],
     cmdclass={'test': PyTest},
     entry_points={
