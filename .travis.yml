@@ -2,7 +2,6 @@ language: python
 python:
     - '3.3'
     - '3.4'
-    - 'pypy3'
 install:
     - python setup.py install
 script:
