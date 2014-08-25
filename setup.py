@@ -37,7 +37,7 @@ setup(
     ],
     packages=['hangups'],
     install_requires=[
-        'purplex==0.2.2',
+        'purplex==0.2.4',
         'tornado==3.2.1',
         'requests==2.2.1',
         'urwid==1.2.1',
