@@ -207,7 +207,9 @@ class StatusLineWidget(urwid.WidgetWrap):
 
     def _on_message(self, chat_message):
         """Make users stop typing when they send a message."""
-        self._typing_statuses[chat_message.user_id] = 'stopped'
+        self._typing_statuses[chat_message.user_id] = (
+            hangups.TypingStatus.STOPPED
+        )
         self._update()
 
     def _on_typing(self, typing_message):
@@ -219,7 +221,7 @@ class StatusLineWidget(urwid.WidgetWrap):
         """Update list of typers."""
         typers = [self._conversation.get_user(user_id).first_name
                   for user_id, status in self._typing_statuses.items()
-                  if status == 'typing']
+                  if status == hangups.TypingStatus.TYPING]
         if len(typers) > 0:
             msg = '{} {} typing...'.format(
                 ', '.join(sorted(typers)),

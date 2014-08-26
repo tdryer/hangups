@@ -42,6 +42,7 @@ setup(
         'requests==2.2.1',
         'urwid==1.2.1',
         'appdirs==1.3.0',
+        'enum34==1.0',
     ],
     tests_require=[
         'pytest',

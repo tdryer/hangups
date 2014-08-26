@@ -5,7 +5,7 @@ import re
 from collections import namedtuple
 import datetime
 
-from hangups import javascript, exceptions
+from hangups import javascript, exceptions, schemas
 
 
 logger = logging.getLogger(__name__)
@@ -325,34 +325,16 @@ def parse_focus_status_message(message):
 
     Raises ParseError if the message cannot be parsed.
     """
-    FOCUS_STATUSES = {
-        1: 'focused',
-        2: 'unfocused',
-    }
     try:
-        focus_status = FOCUS_STATUSES[message[3]]
-    except KeyError:
-        raise exceptions.ParseError('Unknown focus status: {}'
-                                    .format(message[3]))
-
-    FOCUS_DEVICES = {
-        20: 'desktop',
-        300: 'mobile',
-        None: 'unspecified',
-    }
-    try:
-        # sometimes the device is unspecified so the message is shorter
-        focus_device = FOCUS_DEVICES[message[4] if len(message) > 4 else None]
-    except KeyError:
-        raise exceptions.ParseError('Unknown focus device: {}'
-                                    .format(message[4]))
-
+        p = schemas.FOCUS_STATUS_MSG.parse(message)
+    except ValueError as e:
+        raise exceptions.ParseError(e)
     return FocusStatusMessage(
-        conv_id=message[0][0],
-        user_id=UserID(chat_id=message[1][0], gaia_id=message[1][1]),
-        timestamp=from_timestamp(message[2]),
-        status=focus_status,
-        device=focus_device,
+        conv_id=p.conversation_id.id_,
+        user_id=UserID(chat_id=p.user_id.chat_id, gaia_id=p.user_id.gaia_id),
+        timestamp=from_timestamp(p.timestamp),
+        status=p.status,
+        device=p.device,
     )
 
 
@@ -369,19 +351,13 @@ def parse_typing_status_message(message):
 
     Raises ParseError if the message cannot be parsed.
     """
-    TYPING_STATUSES = {
-        1: 'typing', # the user is typing
-        2: 'paused', # the user stopped typing with inputted text
-        3: 'stopped', # the user stopped typing with no inputted text
-    }
     try:
-        typing_status = TYPING_STATUSES[message[3]]
-    except KeyError:
-        raise exceptions.ParseError('Unknown typing status: {}'
-                                    .format(message[3]))
+        p = schemas.TYPING_STATUS_MSG.parse(message)
+    except ValueError as e:
+        raise exceptions.ParseError(e)
     return TypingStatusMessage(
-        conv_id=message[0][0],
-        user_id=UserID(chat_id=message[1][0], gaia_id=message[1][1]),
-        timestamp=from_timestamp(message[2]),
-        status=typing_status,
+        conv_id=p.conversation_id.id_,
+        user_id=UserID(chat_id=p.user_id.chat_id, gaia_id=p.user_id.gaia_id),
+        timestamp=from_timestamp(p.timestamp),
+        status=p.status,
     )
