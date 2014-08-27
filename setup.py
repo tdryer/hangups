@@ -1,3 +1,4 @@
+import sys
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
@@ -9,7 +10,8 @@ class PyTest(TestCommand):
         self.test_suite = True
     def run_tests(self):
         import pytest
-        pytest.main(self.test_args)
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
 
 
 with open('README.rst') as f:
