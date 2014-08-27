@@ -308,11 +308,17 @@ def parse_conversation_status_message(message):
 
     Raises ParseError if the message cannot be parsed.
     """
-    # TODO: This is far from a complete parse.
+    try:
+        p = schemas.CONVERSATION_STATUS_MSG.parse(message)
+    except ValueError as e:
+        raise exceptions.ParseError(e)
+    # TODO: Parse out more of the useful data.
     return ConversationStatusMessage(
-        conv_id=message[0][0],
-        user_id_list=[UserID(chat_id=item[0][0], gaia_id=item[0][1])
-                      for item in message[13]],
+        conv_id=p.conversation_id.id_,
+        user_id_list=[
+            UserID(chat_id=item.id_.chat_id, gaia_id=item.id_.gaia_id)
+            for item in p.participant_data
+        ],
     )
 
 
