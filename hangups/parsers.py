@@ -185,6 +185,8 @@ def parse_message(message_type, message):
         1: parse_chat_message,
         2: parse_focus_status_message,
         3: parse_typing_status_message,
+        # set conversation notification level
+        4: lambda msg: parse_not_implemented_message(4, msg),
         # read state change
         6: lambda msg: parse_not_implemented_message(6, msg),
         11: parse_conversation_status_message,
