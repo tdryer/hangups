@@ -85,18 +85,18 @@ def test_optional_repeated_field_none():
 
 
 def test_message():
-    assert (message.parse(['rose', None, 1]) ==
-            types.SimpleNamespace(item='rose', count=1))
+    assert (message.parse(['rose', None, 1]).__dict__ ==
+            types.SimpleNamespace(item='rose', count=1).__dict__)
 
 
 def test_message_extra_field():
-    assert (message.parse(['rose', None, 1, 100]) ==
-            types.SimpleNamespace(item='rose', count=1))
+    assert (message.parse(['rose', None, 1, 100]).__dict__ ==
+            types.SimpleNamespace(item='rose', count=1).__dict__)
 
 
 def test_message_missing_optional_field():
-    assert (message.parse(['rose', None]) ==
-            types.SimpleNamespace(item='rose', count=None))
+    assert (message.parse(['rose', None]).__dict__ ==
+            types.SimpleNamespace(item='rose', count=None).__dict__)
 
 
 def test_message_missing_field():
