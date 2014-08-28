@@ -238,64 +238,70 @@ def parse_chat_message(message):
 
     Raises ParseError if the message cannot be parsed.
     """
-    # The message content is a list of message segments, which have a
-    # type. For now, let's ignore the types and just use the textual
-    # representation, appending all the segments into one string.
-    message_text = ''
-
-    # Find the message type:
-    type_int = message[0][22]
     try:
-        type_ = {
-            # message[0][6] will contain message content.
-            1: 'REGULAR_CHAT_MESSAGE',
-            # message[0][8] will contain ???.
-            4: 'UNKNOWN_4',
-            # message[0][8] will contain ???.
-            5: 'UNKNOWN_5',
-            # message[0][9] will contain conversation rename.
-            6: 'RENAME_CONVERSATION',
-            # message[0][10] will contain hangout event.
-            7: 'HANGOUT_EVENT',
-            # message[0][13] will contain OTR modification.
-            9: 'OTR_MODIFICATION',
-        }[type_int]
-    except KeyError:
-        logger.debug(message)
-        raise exceptions.ParseError('Unknown chat message type: {}'
-                                    .format(type_int))
+        p = schemas.CLIENT_EVENT_NOTIFICATION.parse(message)
+    except ValueError as e:
+        raise exceptions.ParseError(e)
 
-    if type_ != 'REGULAR_CHAT_MESSAGE':
-        raise exceptions.ParseNotImplementedError(
-            'Unimplemented chat message type: {}'.format(type_)
-        )
-
-    message_content = message[0][6][2][0]
-    if len(message_content) > 0:
-        for segment in message_content:
-            # known types: 0: text, 1: linebreak, 2: link
-            # Hangouts for Android (unlike the Chrome extension) doesn't set
-            # the message text for linebreaks, so we have to handle that case
-            # separately.
-            if segment[0] == 1:
-                message_text += '\n'
+    # ClientEvent contains any of 5 possible types of events:
+    if p.event.chat_message is not None:
+        text = ''
+        for segment in p.event.chat_message.message_content.segment:
+            if segment.type_ == schemas.SegmentType.TEXT:
+                text += segment.text
+            elif segment.type_ == schemas.SegmentType.LINK:
+                text += segment.text
+            elif segment.type_ == schemas.SegmentType.LINE_BREAK:
+                # Can't use segment.text because Hangouts for Android doesn't
+                # set it for linebreaks.
+                text += '\n'
             else:
-                message_text += segment[1]
-    else:
-        # Try to parse an image message. Image messages contain no message
-        # segments, and thus have no automatic textual fallback.
-        try:
-            # set the message text to the image URL
-            message_text = list(message[0][6][2][1][0][0][1].values())[0][0][3]
-        except (TypeError, IndexError, ValueError) as e:
-            raise exceptions.ParseError('Failed to parse image message: {}'
-                                        .format(e))
-    return ChatMessage(
-        conv_id=message[0][0][0],
-        user_id=UserID(chat_id=message[0][1][0], gaia_id=message[0][1][0]),
-        timestamp=from_timestamp(message[0][2]),
-        text=message_text,
-    )
+                raise exceptions.ParseError('Unknown segment type: {}'
+                                            .format(segment.type_))
+        for attachment in p.event.chat_message.message_content.attachment:
+            if attachment.embed_item.type_ == [249]: # PLUS_PHOTO
+                # Try to parse an image message. Image messages contain no
+                # message segments, and thus have no automatic textual
+                # fallback.
+                try:
+                    text += attachment.embed_item.data['27639957'][0][3]
+                except (KeyError, TypeError, IndexError):
+                    raise exceptions.ParseError(
+                        'Failed to parse PLUS_PHOTO attachment: {}'
+                        .format(attachment)
+                    )
+            elif attachment.embed_item.type_ == [340, 335, 0]:
+                pass # Google Maps URL that's already in the text.
+            else:
+                logger.warning('Ignoring unknown attachment: {}'
+                               .format(attachment))
+        return ChatMessage(
+            conv_id=p.event.conversation_id.id_,
+            user_id=UserID(chat_id=p.event.sender_id.chat_id,
+                           gaia_id=p.event.sender_id.gaia_id),
+            timestamp=from_timestamp(p.event.timestamp),
+            text=text,
+        )
+    if p.event.membership_change is not None:
+        raise exceptions.ParseNotImplementedError(
+            'Unimplemented membership change: {}'
+            .format(p.event.membership_change)
+        )
+    if p.event.conversation_rename is not None:
+        raise exceptions.ParseNotImplementedError(
+            'Unimplemented conversation rename: {}'
+            .format(p.event.conversation_rename)
+        )
+    if p.event.hangout_event is not None:
+        raise exceptions.ParseNotImplementedError(
+            'Unimplemented hangout event: {}'
+            .format(p.event.hangout_event)
+        )
+    if p.event.otr_modification is not None:
+        raise exceptions.ParseNotImplementedError(
+            'Unimplemented OTR modification: {}'
+            .format(p.event.otr_modification)
+        )
 
 
 ConversationStatusMessage = namedtuple(
