@@ -31,10 +31,9 @@ class Notifier(object):
     previous notification is instantly replaced.
     """
 
-    def __init__(self, client, conv_list):
+    def __init__(self, conv_list):
         self._conv_list = conv_list  # hangups.ConversationList
-        self._client = client  # hangups.Client
-        self._client.on_message.add_observer(self._on_message)
+        self._conv_list.on_message.add_observer(self._on_message)
         self._replaces_id = 0
 
     def _on_message(self, chat_message):

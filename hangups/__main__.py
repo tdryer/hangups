@@ -114,7 +114,7 @@ class ChatUI(object):
         """Handle connecting for the first time."""
         self._conv_list = hangups.ConversationList(self._client)
         self._user_list = hangups.UserList(self._client)
-        self._notifier = Notifier(self._client, self._conv_list)
+        self._notifier = Notifier(self._conv_list)
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
                                                self.on_select_conversation)
