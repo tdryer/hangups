@@ -23,7 +23,7 @@ class Conversation(object):
 
         # Event fired when a new message arrives with arguments (chat_message).
         self.on_message = event.Event('Conversation.on_message')
-        # Event fired when a users starts or stops typing with arguments
+        # Event fired when a user starts or stops typing with arguments
         # (typing_message).
         self.on_typing = event.Event('Conversation.on_typing')
 
@@ -71,24 +71,6 @@ class Conversation(object):
         """
         yield self._client.sendchatmessage(self._id, text)
 
-    def handle_chat_message(self, chat_message):
-        """Receive ClientChatMessage and update the conversation."""
-        # TODO: We're actually receiving ClientEventNotification for now
-        # because that's what the parser takes.
-        try:
-            res = parsers.parse_chat_message(chat_message)
-        except exceptions.ParseError as e:
-            logger.warning('Failed to parse message: {}'.format(e))
-        except exceptions.ParseNotImplementedError as e:
-            logger.info('Failed to parse message: {}'.format(e))
-        else:
-            self.on_message.fire(res)
-
-    def handle_set_typing_notification(self, set_typing_notification):
-        """Receive ClientSetTypingNotification and update the conversation."""
-        res = parsers.parse_typing_status_message(set_typing_notification)
-        self.on_typing.fire(res)
-
 
 class ConversationList(object):
     """Wrapper around Client that maintains a list of Conversations."""
@@ -98,6 +80,12 @@ class ConversationList(object):
         # {conv_id: Conversation}
         self._conv_dict = client.initial_conversations
         self._client.on_state_update.add_observer(self._on_state_update)
+
+        # Event fired when a new message arrives with arguments (chat_message).
+        self.on_message = event.Event('ConversationList.on_message')
+        # Event fired when a user starts or stops typing with arguments
+        # (typing_message).
+        self.on_typing = event.Event('ConversationList.on_typing')
 
     def get_all(self):
         """Return list of all Conversations."""
@@ -113,22 +101,43 @@ class ConversationList(object):
     def _on_state_update(self, state_update):
         """Receive a ClientStateUpdate and fan out to Conversations."""
         if state_update.typing_notification is not None:
-            conv_id = state_update.typing_notification.conversation_id.id_
-            if conv_id in self._conv_dict:
-                self.get(conv_id).handle_set_typing_notification(
-                    state_update.typing_notification
-                )
-            else:
-                logger.warning('Received ClientSetTypingNotification for '
-                               'unknown conversation {}'.format(conv_id))
-
+            self._handle_set_typing_notification(
+                state_update.typing_notification
+            )
         if state_update.event_notification is not None:
             ev = state_update.event_notification.event
-            conv_id = ev.conversation_id.id_
-            if conv_id in self._conv_dict:
-                conv = self.get(conv_id)
-                if ev.chat_message is not None:
-                    conv.handle_chat_message(state_update.event_notification)
+            if ev.chat_message is not None:
+                self._handle_chat_message(state_update.event_notification)
+
+    def _handle_chat_message(self, chat_message):
+        """Receive ClientChatMessage and update the conversation."""
+        # TODO: We're actually receiving ClientEventNotification for now
+        # because that's what the parser takes.
+        conv_id = chat_message.event.conversation_id.id_
+        conv = self._conv_dict.get(conv_id, None)
+        if conv is not None:
+            try:
+                res = parsers.parse_chat_message(chat_message)
+            except exceptions.ParseError as e:
+                logger.warning('Failed to parse message: {}'.format(e))
+            except exceptions.ParseNotImplementedError as e:
+                logger.info('Failed to parse message: {}'.format(e))
             else:
-                logger.warning('Received ClientEvent for '
-                               'unknown conversation {}'.format(conv_id))
+                self.on_message.fire(res)
+                conv.on_message.fire(res)
+        else:
+            logger.warning('Received ClientEvent for unknown conversation {}'
+                           .format(conv_id))
+
+
+    def _handle_set_typing_notification(self, set_typing_notification):
+        """Receive ClientSetTypingNotification and update the conversation."""
+        conv_id = set_typing_notification.conversation_id.id_
+        conv = self._conv_dict.get(conv_id, None)
+        if conv is not None:
+            res = parsers.parse_typing_status_message(set_typing_notification)
+            self.on_typing.fire(res)
+            conv.on_typing.fire(res)
+        else:
+            logger.warning('Received ClientSetTypingNotification for '
+                           'unknown conversation {}'.format(conv_id))
