@@ -9,7 +9,7 @@ import re
 import time
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
-                     event, schemas)
+                     event, schemas, conversation)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -43,120 +43,6 @@ def _parse_user_entity(entity):
         'first_name': properties.get('first_name', 'UNKNOWN'),
         'full_name': properties.get('display_name', 'UNKNOWN'),
     }
-
-
-class ConversationList(object):
-    """Wrapper around Client that presents a list of Conversations."""
-
-    def __init__(self, client):
-        self._client = client
-        self._conv_dict = client.initial_conversations
-        logger.info('ConversationList initialized with {} conversation(s)'
-                    .format(len(self._conv_dict)))
-        # Register event handlers:
-        self._client.on_message.add_observer(self._on_message)
-        self._client.on_typing.add_observer(self._on_typing)
-        self._client.on_focus.add_observer(self._on_focus)
-        self._client.on_conversation.add_observer(self._on_conversation)
-
-    def _on_message(self, chat_message):
-        """Route on_message event to appropriate Conversation."""
-        self.get(chat_message.conv_id).on_message.fire(chat_message)
-
-    def _on_typing(self, typing_message):
-        """Route on_typing event to appropriate Conversation."""
-        self.get(typing_message.conv_id).on_typing.fire(typing_message)
-
-    def _on_focus(self, focus_message):
-        """Route on_focus event to appropriate Conversation."""
-        self.get(focus_message.conv_id).on_focus.fire(focus_message)
-
-    def _on_conversation(self, conversation_message):
-        """Route on_conversation event to appropriate Conversation."""
-        self.get(conversation_message.conv_id).on_conversation.fire(
-            conversation_message
-        )
-
-    def get_all(self):
-        """Return list of all Conversations."""
-        return list(self._conv_dict.values())
-
-    def get(self, conv_id):
-        """Return a Conversation from its ID.
-
-        Raises KeyError if the conversation ID is invalid.
-        """
-        return self._conv_dict[conv_id]
-
-
-class Conversation(object):
-    """Wrapper around Client for working with a single chat conversation."""
-
-    def __init__(self, client, id_, users, last_modified, chat_name,
-                 chat_messages):
-        self._client = client
-        self._id = id_ # ConversationID
-        self._users = {user.id_: user for user in users} # {UserID: User}
-        self._last_modified = last_modified # datetime
-        self._name = chat_name # str
-        self._chat_messages = chat_messages # ChatMessage
-
-        # Event fired when a new message arrives with arguments (chat_message).
-        self.on_message = event.Event('Conversation.on_message')
-        # Event fired when a users starts or stops typing with arguments
-        # (typing_message).
-        self.on_typing = event.Event('Conversation.on_typing')
-        # Event fired when a user changes focus on a conversation with
-        # arguments (focus_message).
-        self.on_focus = event.Event('Conversation.on_focus')
-        # Event fired when a conversation updates with arguments
-        # (conversation_message).
-        self.on_conversation = event.Event('Conversation.on_conversation')
-
-
-    @property
-    def id_(self):
-        """Return the Conversation's ID."""
-        return self._id
-
-    @property
-    def users(self):
-        """Return the list of Users participating in the Conversation."""
-        return list(self._users.values())
-
-    def get_user(self, user_id):
-        """Return a participating use by UserID.
-
-        Raises KeyError if the user ID is not a participant.
-        """
-        return self._users[user_id]
-
-    @property
-    def name(self):
-        """ Return chat name if it was renamed manually or None
-        :rtype: str
-        """
-        return self._name
-
-    @property
-    def last_modified(self):
-        """Return the timestamp of when the conversation was last modified."""
-        return self._last_modified
-
-    @property
-    def chat_messages(self):
-        """Return a list of ChatMessages, sorted oldest to newest."""
-        return list(self._chat_messages)
-
-    @gen.coroutine
-    def send_message(self, text):
-        """Send a message to this conversation.
-
-        text may not be empty.
-
-        Raises hangups.NetworkError if the message can not be sent.
-        """
-        yield self._client.sendchatmessage(self._id, text)
 
 
 # TODO: This class isn't really being used yet.
@@ -266,6 +152,9 @@ class Client(object):
         # Event fired when a conversation updates with arguments
         # (conversation_message).
         self.on_conversation = event.Event('Client.on_conversation')
+        # Event fired when a ClientStateUpdate arrives with arguments
+        # (state_update).
+        self.on_state_update = event.Event('Client.on_state_update')
 
         self._cookies = cookies
         self._sync_timestamp = None  # datetime.datetime
@@ -486,7 +375,7 @@ class Client(object):
             )
 
         # Create a dict of the known conversations.
-        self.initial_conversations = {conv_id: Conversation(
+        self.initial_conversations = {conv_id: conversation.Conversation(
             self, conv_id, [self.initial_users[user_id] for user_id
                             in conv_info['participants']],
             conv_info['last_modified'], conv_info['name'],
@@ -521,6 +410,7 @@ class Client(object):
     def _on_push_data(self, submission):
         """Parse ClientStateUpdate and call the appropriate events."""
         for state_update in parsers.parse_submission(submission):
+            self.on_state_update.fire(state_update)
             for parsed_msg in parsers.parse_client_state_update(state_update):
                 # Update the sync timestamp:
                 if isinstance(parsed_msg, parsers.ChatMessage):
