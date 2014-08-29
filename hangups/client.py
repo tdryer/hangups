@@ -518,21 +518,22 @@ class Client(object):
             "en"
         ]
 
-    def _on_push_data(self, state_update):
+    def _on_push_data(self, submission):
         """Parse ClientStateUpdate and call the appropriate events."""
-        for parsed_msg in parsers.parse_client_state_update(state_update):
-            # Update the sync timestamp:
-            if isinstance(parsed_msg, parsers.ChatMessage):
-                self._sync_timestamp = parsed_msg.timestamp
-            # Fire the appropriate event:
-            handler = {
-                parsers.ChatMessage: self.on_message,
-                parsers.FocusStatusMessage: self.on_focus,
-                parsers.TypingStatusMessage: self.on_typing,
-                parsers.ConversationStatusMessage: self.on_conversation,
-            }.get(parsed_msg.__class__, None)
-            if handler is not None:
-                handler.fire(parsed_msg)
+        for state_update in parsers.parse_submission(submission):
+            for parsed_msg in parsers.parse_client_state_update(state_update):
+                # Update the sync timestamp:
+                if isinstance(parsed_msg, parsers.ChatMessage):
+                    self._sync_timestamp = parsed_msg.timestamp
+                # Fire the appropriate event:
+                handler = {
+                    parsers.ChatMessage: self.on_message,
+                    parsers.FocusStatusMessage: self.on_focus,
+                    parsers.TypingStatusMessage: self.on_typing,
+                    parsers.ConversationStatusMessage: self.on_conversation,
+                }.get(parsed_msg.__class__, None)
+                if handler is not None:
+                    handler.fire(parsed_msg)
 
     @gen.coroutine
     def _request(self, endpoint, body_json, use_json=True):

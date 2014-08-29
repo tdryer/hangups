@@ -6,10 +6,12 @@ Engine Channel.
 
 from tornado import gen, httpclient
 import logging
+import re
 
-from hangups import javascript, parsers, http_utils, event
+from hangups import javascript, http_utils, event
 
 logger = logging.getLogger(__name__)
+LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 # Set the connection and request timeouts low so we fail fast when there's a
 # network problem.
 CONNECT_TIMEOUT = 10
@@ -21,6 +23,73 @@ LP_REQ_TIMEOUT = 60 * 5
 LP_DATA_TIMEOUT = 30
 
 
+def _best_effort_decode(data_bytes):
+    """Decode data_bytes into a string using UTF-8.
+
+    If data_bytes cannot be decoded, pop the last byte until it can be or
+    return an empty string.
+    """
+    for end in reversed(range(1, len(data_bytes) + 1)):
+        try:
+            return data_bytes[0:end].decode()
+        except UnicodeDecodeError:
+            pass
+    return ''
+
+
+class PushDataParser(object):
+    """Parse data from the long-polling endpoint."""
+
+    def __init__(self):
+        # Buffer for bytes containing utf-8 text:
+        self._buf = b''
+
+    def get_submissions(self, new_data_bytes):
+        """Yield submissions generated from received data.
+
+        Responses from the push endpoint consist of a sequence of submissions.
+        Each submission is prefixed with its length followed by a newline.
+
+        The buffer may not be decodable as UTF-8 if there's a split multi-byte
+        character at the end. To handle this, do a "best effort" decode of the
+        buffer to decode as much of it as possible.
+
+        The length is actually the length of the string as reported by
+        JavaScript. JavaScript's string length function returns the number of
+        code units in the string, represented in UTF-16. We can emulate this by
+        encoding everything in UTF-16 and multipling the reported length by 2.
+
+        Note that when encoding a string in UTF-16, Python will prepend a
+        byte-order character, so we need to remove the first two bytes.
+        """
+        self._buf += new_data_bytes
+
+        while True:
+
+            buf_decoded = _best_effort_decode(self._buf)
+            buf_utf16 = buf_decoded.encode('utf-16')[2:]
+
+            lengths = LEN_REGEX.findall(buf_decoded)
+            if len(lengths) == 0:
+                break
+            else:
+                # Both lengths are in number of bytes in UTF-16 encoding.
+                # The length of the submission:
+                length = int(lengths[0]) * 2
+                # The length of the submission length and newline:
+                length_length = len((lengths[0] + '\n').encode('utf-16')[2:])
+                if len(buf_utf16) - length_length < length:
+                    break
+
+                submission = buf_utf16[length_length:length_length + length]
+                yield submission.decode('utf-16')
+                # Drop the length and the submission itself from the beginning
+                # of the buffer.
+                drop_length = (len((lengths[0] + '\n').encode()) +
+                               len(submission.decode('utf-16').encode()))
+                self._buf = self._buf[drop_length:]
+
+
 def _parse_sid_response(res):
     """Parse response format for request for new channel SID.
 
@@ -30,7 +99,7 @@ def _parse_sid_response(res):
     header_client = None
     gsessionid = None
 
-    p = parsers.PushDataParser()
+    p = PushDataParser()
     res = javascript.loads(list(p.get_submissions(res))[0])
     for segment in res:
         num, message = segment
@@ -63,8 +132,8 @@ class Channel(object):
         self.on_reconnect = event.Event('Channel.on_reconnect')
         # Event fired when channel disconnects with arguments ():
         self.on_disconnect = event.Event('Channel.on_disconnect')
-        # Event fired when a channel message is received with arguments
-        # (state_update):
+        # Event fired when a channel submission is received with arguments
+        # (submission):
         self.on_message = event.Event('Channel.on_message')
 
         # True if the channel is currently connected:
@@ -118,7 +187,7 @@ class Channel(object):
                 need_new_sid = False
             # Clear any previous push data, since if there was an error it
             # could contain garbage.
-            self._push_parser = parsers.PushDataParser()
+            self._push_parser = PushDataParser()
             try:
                 yield self._longpoll_request()
             except IOError as e:
@@ -233,5 +302,5 @@ class Channel(object):
                 self._is_connected = True
                 self.on_connect.fire()
 
-        for state_update in self._push_parser.get_messages(data_bytes):
-            self.on_message.fire(state_update)
+        for submission in self._push_parser.get_submissions(data_bytes):
+            self.on_message.fire(submission)
