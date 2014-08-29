@@ -85,13 +85,15 @@ class PushDataParser(object):
                 self._buf = self._buf[drop_length:]
 
     def get_messages(self, new_data_bytes):
-        """Yield (message_type, message) tuples from received data."""
+        """Yield ClientStateUpdate instances from received data."""
         # One submission may contain multiple messages.
         for submission in self.get_submissions(new_data_bytes):
             # For each submission payload, yield its messages
             for payload in _get_submission_payloads(submission):
                 if payload is not None:
-                    yield from _parse_payload(payload)
+                    state_update = _parse_payload(payload)
+                    if state_update is not None:
+                        yield state_update
 
 
 def _get_submission_payloads(submission):
@@ -149,67 +151,38 @@ def _get_submission_payloads(submission):
 
 
 def _parse_payload(payload):
-    """Parse the list payload format into messages."""
-    # the payload begins with a constant header
-    if payload[0] != 'cbu':
-        raise ValueError('Invalid list payload header: {}'.format(payload[0]))
+    """Return a ClientStateUpdate from a payload, or None."""
+    state_update = None
+    if payload[0] == 'cbu':
+        try:
+            state_update = schemas.CLIENT_STATE_UPDATE.parse(payload[1][0])
+        except ValueError as e:
+            logger.warning('Failed to parse ClientStateUpdate: {}'.format(e))
+    else:
+        logger.warning('Invalid payload header: {}'.format(payload[0]))
+    logger.info('Parsed ClientStateUpdate: {}'.format(state_update))
+    return state_update
 
-    # The first submessage is always present, so let's treat it like a header.
-    # It doesn't have anything we need so ignore it.
-    # first_submsg = payload[1][0][0]
 
-    # The type of a submessage is determined by its position in the array
-    yield from ((msg_type, msg) for msg_type, msg in
-                enumerate(payload[1][0][1:]) if msg is not None)
+def parse_client_state_update(state_update):
+    """Parse a ClientStateUpdate, yielding specific message instances.
 
-
-def parse_message(message_type, message):
-    """Parse any type of message.
-
-    Returns message instance, or None if the message could not be parsed.
+    TODO: Restore logging for notifications we can't handle yet.
     """
-    def parse_not_implemented_message(message_type, message):
-        """Parser for known but not implemented messages."""
-        raise exceptions.ParseNotImplementedError(
-            'Unimplemented message type: {}'.format(message_type)
-        )
-    def parse_unknown_message(message_type, message):
-        """Parser for unknown messages."""
-        raise exceptions.ParseError(
-            'Unknown message type: {}'.format(message_type)
-        )
-
-    # Message types have been observed to range from 1 to 14.
-    # TODO: Implement the unimplemented message parsers.
-    MESSAGE_PARSERS = {
-        1: parse_chat_message,
-        2: parse_focus_status_message,
-        3: parse_typing_status_message,
-        # set conversation notification level
-        4: lambda msg: parse_not_implemented_message(4, msg),
-        # read state change
-        6: lambda msg: parse_not_implemented_message(6, msg),
-        11: parse_conversation_status_message,
-        # notification snooze / set mood
-        12: lambda msg: parse_not_implemented_message(12, msg),
-        # ??? (a user ID and some properties)
-        14: lambda msg: parse_not_implemented_message(14, msg),
-    }
-
-    parsed_message = None
-
-    try:
-        parser = MESSAGE_PARSERS.get(
-            message_type, lambda msg: parse_unknown_message(message_type, msg)
-        )
-        parsed_message = parser(message)
-    except exceptions.ParseError as e:
-        logger.warning('Failed to parse message: {}'.format(e))
-    except exceptions.ParseNotImplementedError as e:
-        logger.info('Failed to parse message: {}'.format(e))
-
-    logger.debug('Parsed message: {}'.format(parsed_message))
-    return parsed_message
+    HANDLERS = [
+        (state_update.event_notification, parse_chat_message),
+        (state_update.focus_notification, parse_focus_status_message),
+        (state_update.typing_notification, parse_typing_status_message),
+        (state_update.client_conversation, parse_conversation_status_message),
+    ]
+    for notification, handler in HANDLERS:
+        try:
+            if notification is not None:
+                yield handler(notification)
+        except exceptions.ParseError as e:
+            logger.warning('Failed to parse message: {}'.format(e))
+        except exceptions.ParseNotImplementedError as e:
+            logger.info('Failed to parse message: {}'.format(e))
 
 
 ##############################################################################
@@ -233,16 +206,11 @@ ChatMessage = namedtuple(
 )
 
 
-def parse_chat_message(message):
-    """Return ChatMessage from parsing raw message.
+def parse_chat_message(p):
+    """Return ChatMessage from parsing ClientEventNotification.
 
-    Raises ParseError if the message cannot be parsed.
+    Raises ParseError if it cannot be parsed.
     """
-    try:
-        p = schemas.CLIENT_EVENT_NOTIFICATION.parse(message)
-    except ValueError as e:
-        raise exceptions.ParseError(e)
-
     # ClientEvent contains any of 5 possible types of events:
     if p.event.chat_message is not None:
         text = ''
@@ -309,15 +277,11 @@ ConversationStatusMessage = namedtuple(
 )
 
 
-def parse_conversation_status_message(message):
-    """Return ConversationStatusMessage from parsing raw message.
+def parse_conversation_status_message(p):
+    """Return ConversationStatusMessage from ClientConversation
 
-    Raises ParseError if the message cannot be parsed.
+    Raises ParseError if it cannot be parsed.
     """
-    try:
-        p = schemas.CONVERSATION_STATUS_MSG.parse(message)
-    except ValueError as e:
-        raise exceptions.ParseError(e)
     # TODO: Parse out more of the useful data.
     return ConversationStatusMessage(
         conv_id=p.conversation_id.id_,
@@ -334,15 +298,11 @@ FocusStatusMessage = namedtuple(
 )
 
 
-def parse_focus_status_message(message):
-    """Return FocusStatusMessage from parsing raw message.
+def parse_focus_status_message(p):
+    """Return FocusStatusMessage from ClientSetFocusNotification.
 
-    Raises ParseError if the message cannot be parsed.
+    Raises ParseError if it cannot be parsed.
     """
-    try:
-        p = schemas.FOCUS_STATUS_MSG.parse(message)
-    except ValueError as e:
-        raise exceptions.ParseError(e)
     return FocusStatusMessage(
         conv_id=p.conversation_id.id_,
         user_id=UserID(chat_id=p.user_id.chat_id, gaia_id=p.user_id.gaia_id),
@@ -357,18 +317,14 @@ TypingStatusMessage = namedtuple(
 )
 
 
-def parse_typing_status_message(message):
-    """Return TypingStatusMessage from parsing raw message.
+def parse_typing_status_message(p):
+    """Return TypingStatusMessage from ClientSetTypingNotification.
 
     The same status may be sent multiple times consecutively, and when a
     message is sent the typing status will not change to stopped.
 
-    Raises ParseError if the message cannot be parsed.
+    Raises ParseError if it cannot be parsed.
     """
-    try:
-        p = schemas.TYPING_STATUS_MSG.parse(message)
-    except ValueError as e:
-        raise exceptions.ParseError(e)
     return TypingStatusMessage(
         conv_id=p.conversation_id.id_,
         user_id=UserID(chat_id=p.user_id.chat_id, gaia_id=p.user_id.gaia_id),

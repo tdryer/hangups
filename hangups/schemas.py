@@ -120,6 +120,15 @@ class ClientOffTheRecordToggle(enum.Enum):
     DISABLED = 1
 
 
+class ActiveClientState(enum.Enum):
+
+    """Active client state."""
+
+    NO_ACTIVE_CLIENT = 0
+    IS_ACTIVE_CLIENT = 1
+    OTHER_CLIENT_IS_ACTIVE = 2
+
+
 ##############################################################################
 # pblite Messages
 ##############################################################################
@@ -139,22 +148,24 @@ OPTIONAL_USER_ID = Message(
     is_optional=True,
 )
 
-TYPING_STATUS_MSG = Message(
+CLIENT_SET_TYPING_NOTIFICATION = Message(
     ('conversation_id', CONVERSATION_ID),
     ('user_id', USER_ID),
     ('timestamp', Field()),
     ('status', EnumField(TypingStatus)),
+    is_optional=True,
 )
 
-FOCUS_STATUS_MSG = Message(
+CLIENT_SET_FOCUS_NOTIFICATION = Message(
     ('conversation_id', CONVERSATION_ID),
     ('user_id', USER_ID),
     ('timestamp', Field()),
     ('status', EnumField(FocusStatus)),
     ('device', EnumField(FocusDevice)),
+    is_optional=True,
 )
 
-CONVERSATION_STATUS_MSG = Message(
+CLIENT_CONVERSATION = Message(
     ('conversation_id', CONVERSATION_ID),
     ('type_', EnumField(ConversationType)),
     ('name', Field(is_optional=True)),
@@ -209,6 +220,7 @@ CONVERSATION_STATUS_MSG = Message(
     (None, Field(is_optional=True)),
     (None, Field()),
     (None, Field()),
+    is_optional=True,
 )
 
 CLIENT_CHAT_MESSAGE = Message(
@@ -298,6 +310,42 @@ CLIENT_EVENT = Message(
     ('event_otr', EnumField(ClientOffTheRecordStatus)),
     (None, Field()),  # always 1? (advances_sort_timestamp?)
 )
+
 CLIENT_EVENT_NOTIFICATION = Message(
     ('event', CLIENT_EVENT),
+    is_optional=True,
+)
+
+CLIENT_STATE_UPDATE_HEADER = Message(
+    ('active_client_state', EnumField(ActiveClientState)),
+    (None, Field(is_optional=True)),
+    ('request_trace_id', Field()),
+    (None, Field(is_optional=True)),
+    ('current_server_time', Field()),
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    # optional ID of the client causing the update?
+    (None, Field(is_optional=True)),
+)
+
+CLIENT_STATE_UPDATE = Message(
+    ('state_update_header', CLIENT_STATE_UPDATE_HEADER),
+    ('conversation_notification', Field(is_optional=True)),  # always None?
+    ('event_notification', CLIENT_EVENT_NOTIFICATION),
+    ('focus_notification', CLIENT_SET_FOCUS_NOTIFICATION),
+    ('typing_notification', CLIENT_SET_TYPING_NOTIFICATION),
+    ('notification_level_notification', Field(is_optional=True)),
+    ('reply_to_invite_notification', Field(is_optional=True)),
+    ('watermark_notification', Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    ('settings_notification', Field(is_optional=True)),
+    ('view_modification', Field(is_optional=True)),
+    ('easter_egg_notification', Field(is_optional=True)),
+    ('client_conversation', CLIENT_CONVERSATION),
+    ('self_presence_notification', Field(is_optional=True)),
+    ('delete_notification', Field(is_optional=True)),
+    ('presence_notification', Field(is_optional=True)),
+    ('block_notification', Field(is_optional=True)),
+    ('invitation_watermark_notification', Field(is_optional=True)),
+
 )

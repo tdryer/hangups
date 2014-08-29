@@ -64,7 +64,7 @@ class Channel(object):
         # Event fired when channel disconnects with arguments ():
         self.on_disconnect = event.Event('Channel.on_disconnect')
         # Event fired when a channel message is received with arguments
-        # (message_type, message):
+        # (state_update):
         self.on_message = event.Event('Channel.on_message')
 
         # True if the channel is currently connected:
@@ -233,8 +233,5 @@ class Channel(object):
                 self._is_connected = True
                 self.on_connect.fire()
 
-        messages = self._push_parser.get_messages(data_bytes)
-        for msg_type, msg in messages:
-            logger.debug('Received channel message of type {}: {}'
-                         .format(msg_type, msg))
-            self.on_message.fire(msg_type, msg)
+        for state_update in self._push_parser.get_messages(data_bytes):
+            self.on_message.fire(state_update)
