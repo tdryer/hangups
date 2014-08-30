@@ -155,6 +155,11 @@ class Client(object):
         # Event fired when a ClientStateUpdate arrives with arguments
         # (state_update).
         self.on_state_update = event.Event('Client.on_state_update')
+        # Event fired when a ClientEventNotification arrives with arguments
+        # (event_notification).
+        self.on_event_notification = event.Event(
+            'Client.on_event_notification'
+        )
 
         self._cookies = cookies
         self._sync_timestamp = None  # datetime.datetime
@@ -219,9 +224,9 @@ class Client(object):
             events = conversation[2]
             for msg in events:
                 try:
-                    chat_message = parsers.parse_chat_message(
-                        schemas.CLIENT_EVENT_NOTIFICATION.parse([msg])
-                    )
+                    event = schemas.CLIENT_EVENT_NOTIFICATION.parse([msg])
+                    self.on_event_notification.fire(event)
+                    chat_message = parsers.parse_chat_message(event)
                 except ValueError as e:
                     logger.warning('Failed to parse ClientEvent: {}'.format(e))
                 except exceptions.ParseError as e:

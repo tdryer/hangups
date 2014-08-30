@@ -80,6 +80,9 @@ class ConversationList(object):
         # {conv_id: Conversation}
         self._conv_dict = client.initial_conversations
         self._client.on_state_update.add_observer(self._on_state_update)
+        self._client.on_event_notification.add_observer(
+            self._on_event_notification
+        )
 
         # Event fired when a new message arrives with arguments (chat_message).
         self.on_message = event.Event('ConversationList.on_message')
@@ -105,9 +108,12 @@ class ConversationList(object):
                 state_update.typing_notification
             )
         if state_update.event_notification is not None:
-            ev = state_update.event_notification.event
-            if ev.chat_message is not None:
-                self._handle_chat_message(state_update.event_notification)
+            self._on_event_notification(state_update.event_notification)
+
+    def _on_event_notification(self, event_notification):
+        """Receive a ClientEventNofication and fan out to Conversations."""
+        if event_notification.event.chat_message is not None:
+            self._handle_chat_message(event_notification)
 
     def _handle_chat_message(self, chat_message):
         """Receive ClientChatMessage and update the conversation."""
