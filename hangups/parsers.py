@@ -181,46 +181,6 @@ def parse_chat_message(p):
         )
 
 
-ConversationStatusMessage = namedtuple(
-    'ConversationStatusMessage', ['conv_id', 'user_id_list']
-)
-
-
-def parse_conversation_status_message(p):
-    """Return ConversationStatusMessage from ClientConversation
-
-    Raises ParseError if it cannot be parsed.
-    """
-    # TODO: Parse out more of the useful data.
-    return ConversationStatusMessage(
-        conv_id=p.conversation_id.id_,
-        user_id_list=[
-            UserID(chat_id=item.id_.chat_id, gaia_id=item.id_.gaia_id)
-            for item in p.participant_data
-        ],
-    )
-
-
-FocusStatusMessage = namedtuple(
-    'FocusStatusMessage',
-    ['conv_id', 'user_id', 'timestamp', 'status', 'device']
-)
-
-
-def parse_focus_status_message(p):
-    """Return FocusStatusMessage from ClientSetFocusNotification.
-
-    Raises ParseError if it cannot be parsed.
-    """
-    return FocusStatusMessage(
-        conv_id=p.conversation_id.id_,
-        user_id=UserID(chat_id=p.user_id.chat_id, gaia_id=p.user_id.gaia_id),
-        timestamp=from_timestamp(p.timestamp),
-        status=p.status,
-        device=p.device,
-    )
-
-
 TypingStatusMessage = namedtuple(
     'TypingStatusMessage', ['conv_id', 'user_id', 'timestamp', 'status']
 )
