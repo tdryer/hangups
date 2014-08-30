@@ -141,17 +141,6 @@ class Client(object):
         self.on_reconnect = event.Event('Client.on_reconnect')
         # Event fired when the client is disconnected with arguments ().
         self.on_disconnect = event.Event('Client.on_disconnect')
-        # Event fired when a new message arrives with arguments (chat_message).
-        self.on_message = event.Event('Client.on_message')
-        # Event fired when a user starts or stops typing with arguments
-        # (typing_message).
-        self.on_typing = event.Event('Client.on_typing')
-        # Event fired when a user changes focus on a conversation with
-        # arguments (focus_message).
-        self.on_focus = event.Event('Client.on_focus')
-        # Event fired when a conversation updates with arguments
-        # (conversation_message).
-        self.on_conversation = event.Event('Client.on_conversation')
         # Event fired when a ClientStateUpdate arrives with arguments
         # (state_update).
         self.on_state_update = event.Event('Client.on_state_update')
@@ -220,24 +209,17 @@ class Client(object):
         # Parse chat message from response and fire on_message event for each
         # new chat message.
         conversation_state = res[3]
-        for conversation in conversation_state:
-            events = conversation[2]
+        for conv in conversation_state:
+            events = conv[2]
             for msg in events:
                 try:
-                    event = schemas.CLIENT_EVENT_NOTIFICATION.parse([msg])
-                    self.on_event_notification.fire(event)
-                    chat_message = parsers.parse_chat_message(event)
+                    ev_notif = schemas.CLIENT_EVENT_NOTIFICATION.parse([msg])
                 except ValueError as e:
                     logger.warning('Failed to parse ClientEvent: {}'.format(e))
-                except exceptions.ParseError as e:
-                    logger.warning('Failed to parse message: {}'.format(e))
-                except exceptions.ParseNotImplementedError as e:
-                    logger.info('Failed to parse message: {}'.format(e))
                 else:
-                    # Workaround for syncallnewevents timestamp being
-                    # inclusive:
-                    if chat_message.timestamp > self._sync_timestamp:
-                        self.on_message.fire(chat_message)
+                    # TODO: Workaround for syncallnewevents timestamp being
+                    # inclusive.
+                    self.on_event_notification.fire(ev_notif)
 
         self._sync_timestamp = parsers.from_timestamp(int(res[1][4]))
 
@@ -415,20 +397,10 @@ class Client(object):
     def _on_push_data(self, submission):
         """Parse ClientStateUpdate and call the appropriate events."""
         for state_update in parsers.parse_submission(submission):
+            self._sync_timestamp = (
+                state_update.state_update_header.current_server_time
+            )
             self.on_state_update.fire(state_update)
-            for parsed_msg in parsers.parse_client_state_update(state_update):
-                # Update the sync timestamp:
-                if isinstance(parsed_msg, parsers.ChatMessage):
-                    self._sync_timestamp = parsed_msg.timestamp
-                # Fire the appropriate event:
-                handler = {
-                    parsers.ChatMessage: self.on_message,
-                    parsers.FocusStatusMessage: self.on_focus,
-                    parsers.TypingStatusMessage: self.on_typing,
-                    parsers.ConversationStatusMessage: self.on_conversation,
-                }.get(parsed_msg.__class__, None)
-                if handler is not None:
-                    handler.fire(parsed_msg)
 
     @gen.coroutine
     def _request(self, endpoint, body_json, use_json=True):

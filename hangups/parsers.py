@@ -94,27 +94,6 @@ def _parse_payload(payload):
     return state_update
 
 
-def parse_client_state_update(state_update):
-    """Parse a ClientStateUpdate, yielding specific message instances.
-
-    TODO: Restore logging for notifications we can't handle yet.
-    """
-    HANDLERS = [
-        (state_update.event_notification, parse_chat_message),
-        (state_update.focus_notification, parse_focus_status_message),
-        (state_update.typing_notification, parse_typing_status_message),
-        (state_update.client_conversation, parse_conversation_status_message),
-    ]
-    for notification, handler in HANDLERS:
-        try:
-            if notification is not None:
-                yield handler(notification)
-        except exceptions.ParseError as e:
-            logger.warning('Failed to parse message: {}'.format(e))
-        except exceptions.ParseNotImplementedError as e:
-            logger.info('Failed to parse message: {}'.format(e))
-
-
 ##############################################################################
 # Message parsing utils
 ##############################################################################
