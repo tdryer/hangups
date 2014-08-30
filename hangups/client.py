@@ -115,9 +115,11 @@ class Client(object):
                 except ValueError as e:
                     logger.warning('Failed to parse ClientEvent: {}'.format(e))
                 else:
-                    # TODO: Workaround for syncallnewevents timestamp being
-                    # inclusive.
-                    self.on_event_notification.fire(ev_notif)
+                    # Workaround for syncallnewevents timestamp being
+                    # inclusive:
+                    timestamp = parsers.from_timestamp(ev_notif.event.timestamp)
+                    if timestamp > self._sync_timestamp:
+                        self.on_event_notification.fire(ev_notif)
 
         self._sync_timestamp = parsers.from_timestamp(int(res[1][4]))
 
@@ -295,9 +297,10 @@ class Client(object):
     def _on_push_data(self, submission):
         """Parse ClientStateUpdate and call the appropriate events."""
         for state_update in parsers.parse_submission(submission):
-            self._sync_timestamp = (
-                state_update.state_update_header.current_server_time
-            )
+            if state_update.event_notification is not None:
+                self._sync_timestamp = parsers.from_timestamp(
+                    state_update.event_notification.event.timestamp
+                )
             self.on_state_update.fire(state_update)
 
     @gen.coroutine
