@@ -4,16 +4,10 @@ import logging
 from collections import namedtuple
 import datetime
 
-from hangups import javascript, exceptions, schemas
+from hangups import javascript, exceptions, schemas, user
 
 
 logger = logging.getLogger(__name__)
-
-
-User = namedtuple('User', ['id_', 'full_name', 'first_name', 'is_self'])
-
-
-UserID = namedtuple('UserID', ['chat_id', 'gaia_id'])
 
 
 def parse_submission(submission):
@@ -154,8 +148,8 @@ def parse_chat_message(p):
                                .format(attachment))
         return ChatMessage(
             conv_id=p.event.conversation_id.id_,
-            user_id=UserID(chat_id=p.event.sender_id.chat_id,
-                           gaia_id=p.event.sender_id.gaia_id),
+            user_id=user.UserID(chat_id=p.event.sender_id.chat_id,
+                                gaia_id=p.event.sender_id.gaia_id),
             timestamp=from_timestamp(p.event.timestamp),
             text=text,
         )
@@ -196,7 +190,8 @@ def parse_typing_status_message(p):
     """
     return TypingStatusMessage(
         conv_id=p.conversation_id.id_,
-        user_id=UserID(chat_id=p.user_id.chat_id, gaia_id=p.user_id.gaia_id),
+        user_id=user.UserID(chat_id=p.user_id.chat_id,
+                            gaia_id=p.user_id.gaia_id),
         timestamp=from_timestamp(p.timestamp),
         status=p.status,
     )
