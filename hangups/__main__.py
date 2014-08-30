@@ -61,7 +61,6 @@ class ChatUI(object):
         self._client = hangups.Client(cookies)
         self._client.on_connect.add_observer(self._on_connect)
         self._client.on_disconnect.add_observer(self._on_disconnect)
-        self._client.on_message.add_observer(self._on_message)
 
         class MyEventLoop(urwid.TornadoEventLoop):
             """Patched Tornado event loop for urwid.
@@ -114,6 +113,7 @@ class ChatUI(object):
         """Handle connecting for the first time."""
         self._conv_list = hangups.ConversationList(self._client)
         self._user_list = hangups.UserList(self._client)
+        self._conv_list.on_message.add_observer(self._on_message)
         self._notifier = Notifier(self._conv_list)
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
