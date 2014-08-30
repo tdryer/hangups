@@ -54,7 +54,7 @@ class Client(object):
         # These are instantiated after ConnectionEvent:
         self.initial_users = None # {UserID: User}
         self.self_user_id = None # UserID
-        self.initial_conversations = None # {conv_id: Conversation}
+        self.initial_conv_states = None # [ClientConversationState]
 
         # hangups.channel.Channel instantiated in connect()
         self._channel = None
@@ -184,64 +184,33 @@ class Client(object):
             data_dict['ds:21'][0][1][4]
         )
 
-        # build dict of conversations and their participants
-        initial_conversations = {}
-        self.initial_users = {} # {UserID: User}
-
         # add self to the contacts
         self_contact = data_dict['ds:20'][0][2]
         self.self_user_id = user.UserID(chat_id=self_contact[8][0],
                                         gaia_id=self_contact[8][1])
-        self.initial_users[self.self_user_id] = user.User(
-            id_=self.self_user_id, full_name=self_contact[9][1],
-            first_name=self_contact[9][2], is_self=True
-        )
+        self.initial_users = {
+            self.self_user_id: user.User(
+                id_=self.self_user_id, full_name=self_contact[9][1],
+                first_name=self_contact[9][2], is_self=True
+            )
+        }
 
-        conversations = data_dict['ds:19'][0][3]
-        for c in conversations:
-            id_ = c[1][0][0]
-            participants = c[1][13]
-            last_modified = c[1][3][12]
-            # With every converstion, we get a list of up to 20 of the most
-            # recent messages, sorted oldest to newest.
-            messages = []
-            for raw_message in c[2]:
-                try:
-                    chat_message = parsers.parse_chat_message(
-                        schemas.CLIENT_EVENT_NOTIFICATION.parse([raw_message])
-                    )
-                except ValueError as e:
-                    logger.warning('Failed to parse ClientEvent: {}'.format(e))
-                except exceptions.ParseError as e:
-                    logger.warning('Failed to parse message: {}'.format(e))
-                except exceptions.ParseNotImplementedError as e:
-                    logger.info('Failed to parse message: {}'.format(e))
-                else:
-                    messages.append(chat_message)
-            initial_conversations[id_] = {
-                'participants': [],
-                'last_modified': last_modified,
-                'name': c[1][2],
-                'messages': messages,
-            }
-            # Add the participants for this conversation.
-            for p in participants:
-                user_id = user.UserID(chat_id=p[0][0], gaia_id=p[0][1])
-                initial_conversations[id_]['participants'].append(
-                    user_id
-                )
-                # Add the participant to our list of contacts as a fallback, in
-                # case they can't be found later by other methods.
-                # TODO We should note who these users are and try to request
-                # them.
-                # p[1] can be a full name, None, or out of range.
-                try:
-                    display_name = p[1]
-                except IndexError:
-                    display_name = None
-                if display_name is None:
-                    display_name = 'Unknown'
-                self.initial_users[user_id] = user.User(
+        # We get every conversation's 20 most recent events.
+        self.initial_conv_states = schemas.CLIENT_CONVERSATION_STATE_LIST.parse(
+            data_dict['ds:19'][0][3]
+        )
+        # Add the participant to our list of contacts as a fallback, in
+        # case they can't be found later by other methods.
+        fallback_users = {}
+        for conv_state in self.initial_conv_states:
+            for participant in conv_state.conversation.participant_data:
+                user_id = user.UserID(chat_id=participant.id_.chat_id,
+                                      gaia_id=participant.id_.gaia_id)
+                # fallback_name can be None, so default to "Unknown"
+                display_name = (participant.fallback_name
+                                if participant.fallback_name is not None
+                                else "Unknown")
+                fallback_users[user_id] = user.User(
                     id_=user_id, first_name=display_name.split()[0],
                     full_name=display_name,
                     is_self=(user_id == self.self_user_id)
@@ -260,14 +229,10 @@ class Client(object):
                 id_=user_id, full_name=c[0][9][1], first_name=c[0][9][2],
                 is_self=(user_id == self.self_user_id)
             )
-
-        # Create a dict of the known conversations.
-        self.initial_conversations = {conv_id: conversation.Conversation(
-            self, conv_id, [self.initial_users[user_id] for user_id
-                            in conv_info['participants']],
-            conv_info['last_modified'], conv_info['name'],
-            conv_info['messages'],
-        ) for conv_id, conv_info in initial_conversations.items()}
+        for user_id, user_ in fallback_users.items():
+            if user_id not in self.initial_users:
+                logging.warning('Using fallback user: {}'.format(user_))
+                self.initial_users[user_id] = user_
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""

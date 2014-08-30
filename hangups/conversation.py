@@ -2,8 +2,9 @@
 
 import logging
 from tornado import gen
+from types import SimpleNamespace
 
-from hangups import parsers, exceptions, event
+from hangups import parsers, exceptions, event, user
 
 logger = logging.getLogger(__name__)
 
@@ -11,15 +12,36 @@ logger = logging.getLogger(__name__)
 class Conversation(object):
     """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, client, id_, users, last_modified, chat_name,
-                 chat_messages):
-        # TODO: initialize directly from ClientConversationState
+    def __init__(self, client, conv_state):
+        """Initialize a new Conversation from a ClientConversationState."""
         self._client = client
-        self._id = id_ # ConversationID
-        self._users = {user.id_: user for user in users} # {UserID: User}
-        self._last_modified = last_modified # datetime
-        self._name = chat_name # str
-        self._chat_messages = chat_messages # ChatMessage
+        self._id = conv_state.conversation_id.id_
+        self._users = {
+            user.UserID(chat_id=participant.id_.chat_id,
+                        gaia_id=participant.id_.gaia_id):
+            self._client.initial_users[
+                user.UserID(chat_id=participant.id_.chat_id,
+                            gaia_id=participant.id_.gaia_id)
+            ] for participant in conv_state.conversation.participant_data
+        }  # {UserID: User}
+        self._last_modified = parsers.from_timestamp(
+            conv_state.conversation.self_conversation_state.sort_timestamp
+        )
+        self._name = conv_state.conversation.name # str or None
+        self._chat_messages = [] # ChatMessage
+        for ev in conv_state.event:
+            try:
+                # TODO: Remove this hack by making parse_chat_message take the
+                # right type.
+                self._chat_messages.append(parsers.parse_chat_message(
+                    SimpleNamespace(event=ev)
+                ))
+            except ValueError as e:
+                logger.warning('Failed to parse ClientEvent: {}'.format(e))
+            except exceptions.ParseError as e:
+                logger.warning('Failed to parse message: {}'.format(e))
+            except exceptions.ParseNotImplementedError as e:
+                logger.info('Failed to parse message: {}'.format(e))
 
         # Event fired when a new message arrives with arguments (chat_message).
         self.on_message = event.Event('Conversation.on_message')
@@ -77,8 +99,14 @@ class ConversationList(object):
 
     def __init__(self, client):
         self._client = client
-        # {conv_id: Conversation}
-        self._conv_dict = client.initial_conversations
+        self._conv_dict = {}  # {conv_id: Conversation}
+
+        # Initialize the list of conversation from Client's list of
+        # ClientConversationStates.
+        for conv_state in self._client.initial_conv_states:
+            conv_id = conv_state.conversation_id.id_
+            self._conv_dict[conv_id] = Conversation(self._client, conv_state)
+
         self._client.on_state_update.add_observer(self._on_state_update)
         self._client.on_event_notification.add_observer(
             self._on_event_notification

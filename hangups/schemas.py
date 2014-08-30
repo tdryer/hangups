@@ -211,7 +211,7 @@ CLIENT_CONVERSATION = Message(
     ('participant_data', RepeatedField(
         Message(
             ('id_', USER_ID),
-            ('fallback_name', Field()),
+            ('fallback_name', Field(is_optional=True)),
             (None, Field(is_optional=True)),
         )
     )),
@@ -347,5 +347,23 @@ CLIENT_STATE_UPDATE = Message(
     ('presence_notification', Field(is_optional=True)),
     ('block_notification', Field(is_optional=True)),
     ('invitation_watermark_notification', Field(is_optional=True)),
-
 )
+
+CLIENT_EVENT_CONTINUATION_TOKEN = Message(
+    ('event_id', Field(is_optional=True)),
+    ('storage_continuation_token', Field()),
+    ('event_timestamp', Field()),
+    is_optional=True,
+)
+
+CLIENT_CONVERSATION_STATE = Message(
+    ('conversation_id', CONVERSATION_ID),
+    ('conversation', CLIENT_CONVERSATION),
+    ('event', RepeatedField(CLIENT_EVENT)),
+    (None, Field(is_optional=True)),
+    ('event_continuation_token', CLIENT_EVENT_CONTINUATION_TOKEN),
+    (None, Field(is_optional=True)),
+    (None, RepeatedField(Field())),
+)
+
+CLIENT_CONVERSATION_STATE_LIST = RepeatedField(CLIENT_CONVERSATION_STATE)
