@@ -408,3 +408,9 @@ INITIAL_CLIENT_ENTITIES = Message(
     ('group5', ENTITY_GROUP),
 
 )
+
+CLIENT_GET_SELF_INFO_RESPONSE = Message(
+    (None, Field()),  # 'cgsirp'
+    (None, Field()),  # response header
+    ('self_entity', CLIENT_ENTITY),
+)

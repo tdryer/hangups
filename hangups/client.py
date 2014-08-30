@@ -185,14 +185,17 @@ class Client(object):
             data_dict['ds:21'][0][1][4]
         )
 
-        # add self to the contacts
-        self_contact = data_dict['ds:20'][0][2]
-        self.self_user_id = user.UserID(chat_id=self_contact[8][0],
-                                        gaia_id=self_contact[8][1])
+        # Add self to the contacts.
+        self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
+            data_dict['ds:20'][0]
+        ).self_entity
+        self.self_user_id = user.UserID(chat_id=self_entity.id_.chat_id,
+                                        gaia_id=self_entity.id_.gaia_id)
         self.initial_users = {
             self.self_user_id: user.User(
-                id_=self.self_user_id, full_name=self_contact[9][1],
-                first_name=self_contact[9][2], is_self=True
+                id_=self.self_user_id,
+                full_name=self_entity.properties.display_name,
+                first_name=self_entity.properties.first_name, is_self=True
             )
         }
 
