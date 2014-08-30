@@ -367,3 +367,44 @@ CLIENT_CONVERSATION_STATE = Message(
 )
 
 CLIENT_CONVERSATION_STATE_LIST = RepeatedField(CLIENT_CONVERSATION_STATE)
+
+CLIENT_ENTITY = Message(
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    ('id_', USER_ID),
+    ('properties', Message(
+        ('type_', Field(is_optional=True)),  # 0, 1, or None
+        ('display_name', Field(is_optional=True)),
+        ('first_name', Field(is_optional=True)),
+        ('photo_url', Field(is_optional=True)),
+        ('email', Field(is_optional=True)),
+    )),
+)
+
+ENTITY_GROUP = Message(
+    (None, Field()), # always 0?
+    (None, Field()), # some sort of ID
+    ('entity', RepeatedField(Message(
+        ('entity', CLIENT_ENTITY),
+        (None, Field()),  # always 0?
+    ))),
+)
+
+INITIAL_CLIENT_ENTITIES = Message(
+    (None, Field()),  # 'cgserp'
+    (None, Field()),  # a header
+    ('entities', RepeatedField(CLIENT_ENTITY)),
+    (None, Field(is_optional=True)),  # always None?
+    ('group1', ENTITY_GROUP),
+    ('group2', ENTITY_GROUP),
+    ('group3', ENTITY_GROUP),
+    ('group4', ENTITY_GROUP),
+    ('group5', ENTITY_GROUP),
+
+)

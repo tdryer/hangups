@@ -2,6 +2,7 @@
 
 from tornado import gen, httpclient, ioloop
 import hashlib
+import itertools
 import json
 import logging
 import random
@@ -9,7 +10,7 @@ import re
 import time
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
-                     event, schemas, conversation, user)
+                     event, schemas, user)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -216,19 +217,38 @@ class Client(object):
                     is_self=(user_id == self.self_user_id)
                 )
 
-        # build dict of contacts and their names (doesn't include users not in
-        # contacts)
-        contacts_main = data_dict['ds:21'][0]
-        # contacts_main[2] has some, but the format is slightly different
-        contacts = (contacts_main[4][2] + contacts_main[5][2] +
-                    contacts_main[6][2] + contacts_main[7][2] +
-                    contacts_main[8][2])
-        for c in contacts:
-            user_id = user.UserID(chat_id=c[0][8][0], gaia_id=c[0][8][1])
-            self.initial_users[user_id] = user.User(
-                id_=user_id, full_name=c[0][9][1], first_name=c[0][9][2],
-                is_self=(user_id == self.self_user_id)
+        # We get ClientEntity instances for some of the contacts we'll need
+        # (doesn't include users not in contacts).
+        try:
+            entities = schemas.INITIAL_CLIENT_ENTITIES.parse(
+                data_dict['ds:21'][0]
             )
+        except ValueError as e:
+            # Log a warning, but continue using the fallback users.
+            logger.warning('Failed to parse initial client entities: {}'
+                           .format(e))
+        else:
+            # The entites are divided into a few groups, for unclear reasons.
+            all_entities = itertools.chain(
+                entities.entities, entities.group1.entity,
+                entities.group2.entity, entities.group3.entity,
+                entities.group4.entity, entities.group5.entity
+            )
+            for entity in all_entities:
+                if hasattr(entity, 'entity'):
+                    entity = entity.entity
+                user_id = user.UserID(chat_id=entity.id_.chat_id,
+                                      gaia_id=entity.id_.gaia_id)
+
+                display_name = (entity.properties.display_name
+                                if entity.properties.display_name
+                                is not None else "Unknown")
+                self.initial_users[user_id] = user.User(
+                    id_=user_id, first_name=display_name.split()[0],
+                    full_name=display_name,
+                    is_self=(user_id == self.self_user_id)
+                )
+        # Add in the fallback users.
         for user_id, user_ in fallback_users.items():
             if user_id not in self.initial_users:
                 logging.warning('Using fallback user: {}'.format(user_))
