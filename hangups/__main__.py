@@ -141,7 +141,8 @@ def get_conv_name(conv, truncate=False):
 
     If truncate is true, only show up to two names in a group conversation.
     """
-    participants = sorted(user for user in conv.users if not user.is_self)
+    participants = sorted((user for user in conv.users if not user.is_self),
+                          key=lambda user: user.id_)
     names = [user.first_name for user in participants]
     if len(participants) == 1:
         return participants[0].full_name

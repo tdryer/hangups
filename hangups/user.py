@@ -5,13 +5,54 @@ from tornado import gen
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
+DEFAULT_NAME = 'Unknown'
 
-User = namedtuple('User', ['id_', 'full_name', 'first_name', 'is_self'])
 UserID = namedtuple('UserID', ['chat_id', 'gaia_id'])
+
+
+class User(object):
+
+    """A chat user.
+
+    Handles full_name or first_name being None by creating an approximate
+    first_name from the full_name, or setting both to DEFAULT_NAME.
+    """
+
+    def __init__(self, chat_id, full_name, first_name, is_self):
+        """Initialize a User."""
+        self.id_ = chat_id
+        self.full_name = full_name if full_name is not None else DEFAULT_NAME
+        self.first_name = (first_name if first_name is not None
+                           else self.full_name.split()[0])
+        self.is_self = is_self
+
+    @staticmethod
+    def from_entity(entity, self_user_id):
+        """Initialize from a ClientEntity.
+
+        If self_user_id is None, assume this is the self user.
+        """
+        user_id = UserID(chat_id=entity.id_.chat_id,
+                         gaia_id=entity.id_.gaia_id)
+        return User(user_id, entity.properties.display_name,
+                    entity.properties.first_name,
+                    (self_user_id == user_id) or (self_user_id is None))
+
+    @staticmethod
+    def from_conv_part_data(conv_part_data, self_user_id):
+        """Initialize from ClientConversationParticipantData.
+
+        If self_user_id is None, assume this is the self user.
+        """
+        user_id = UserID(chat_id=conv_part_data.id_.chat_id,
+                         gaia_id=conv_part_data.id_.gaia_id)
+        return User(user_id, conv_part_data.fallback_name, None,
+                    (self_user_id == user_id) or (self_user_id is None))
 
 
 # TODO: This class isn't really being used yet.
 class UserList(object):
+
     """Allows querying known chat users."""
 
     def __init__(self, client):
@@ -59,8 +100,8 @@ class UserList(object):
     def _make_dummy_user(self, user_id):
         """Return a dummy User and add it to the list."""
         logger.info('Creating dummy user for {}'.format(user_id))
-        user = User(id_=user_id, full_name='UNKNOWN', first_name='UNKNOWN',
-                    is_self=(user_id == self._self_user_id))
+        user = User(user_id, 'UNKNOWN', 'UNKNOWN',
+                    (user_id == self._self_user_id))
         self._users[user_id] = user
         return user
 
@@ -78,11 +119,9 @@ class UserList(object):
             else:
                 user_id = UserID(chat_id=user['chat_id'],
                                  gaia_id=user['gaia_id'])
-                self._users[user_id] = User(
-                    id_=user_id, full_name=user['full_name'],
-                    first_name=user['first_name'],
-                    is_self=(user_id == self._self_user_id)
-                )
+                self._users[user_id] = User(user_id, user['full_name'],
+                                            user['first_name'],
+                                            (user_id == self._self_user_id))
 
 
 def _parse_user_entity(entity):

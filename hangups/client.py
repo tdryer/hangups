@@ -185,19 +185,13 @@ class Client(object):
             data_dict['ds:21'][0][1][4]
         )
 
-        # Add self to the contacts.
+        # Parse the User for ourselves.
         self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
             data_dict['ds:20'][0]
         ).self_entity
-        self.self_user_id = user.UserID(chat_id=self_entity.id_.chat_id,
-                                        gaia_id=self_entity.id_.gaia_id)
-        self.initial_users = {
-            self.self_user_id: user.User(
-                id_=self.self_user_id,
-                full_name=self_entity.properties.display_name,
-                first_name=self_entity.properties.first_name, is_self=True
-            )
-        }
+        self_user = user.User.from_entity(self_entity, None)
+        self.self_user_id = self_user.id_
+        self.initial_users = {self_user.id_: self_user}
 
         # We get every conversation's 20 most recent events.
         self.initial_conv_states = schemas.CLIENT_CONVERSATION_STATE_LIST.parse(
@@ -208,17 +202,9 @@ class Client(object):
         fallback_users = {}
         for conv_state in self.initial_conv_states:
             for participant in conv_state.conversation.participant_data:
-                user_id = user.UserID(chat_id=participant.id_.chat_id,
-                                      gaia_id=participant.id_.gaia_id)
-                # fallback_name can be None, so default to "Unknown"
-                display_name = (participant.fallback_name
-                                if participant.fallback_name is not None
-                                else "Unknown")
-                fallback_users[user_id] = user.User(
-                    id_=user_id, first_name=display_name.split()[0],
-                    full_name=display_name,
-                    is_self=(user_id == self.self_user_id)
-                )
+                user_ = user.User.from_conv_part_data(participant,
+                                                      self.self_user_id)
+                fallback_users[user_.id_] = user_
 
         # We get ClientEntity instances for some of the contacts we'll need
         # (doesn't include users not in contacts).
@@ -240,21 +226,12 @@ class Client(object):
             for entity in all_entities:
                 if hasattr(entity, 'entity'):
                     entity = entity.entity
-                user_id = user.UserID(chat_id=entity.id_.chat_id,
-                                      gaia_id=entity.id_.gaia_id)
-
-                display_name = (entity.properties.display_name
-                                if entity.properties.display_name
-                                is not None else "Unknown")
-                self.initial_users[user_id] = user.User(
-                    id_=user_id, first_name=display_name.split()[0],
-                    full_name=display_name,
-                    is_self=(user_id == self.self_user_id)
-                )
+                user_ = user.User.from_entity(entity, self.self_user_id)
+                self.initial_users[user_.id_] = user_
         # Add in the fallback users.
         for user_id, user_ in fallback_users.items():
             if user_id not in self.initial_users:
-                logging.warning('Using fallback user: {}'.format(user_))
+                logging.warning('Adding fallback User: {}'.format(user_))
                 self.initial_users[user_id] = user_
 
     def _get_authorization_header(self):
