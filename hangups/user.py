@@ -54,22 +54,23 @@ class UserList(object):
 
     """Collection of User instances."""
 
-    def __init__(self, self_user_id, entities, conv_parts):
+    def __init__(self, self_entity, entities, conv_parts):
         """Initialize the list of Users.
 
         Creates users from the given ClientEntity and
         ClientConversationParticipantData instances. The latter is used only as
         a fallback, because it doesn't include a real first_name.
         """
-        self._user_dict = {} # {UserID: User}
+        self_user = User.from_entity(self_entity, None)
+        self._user_dict = {self_user.id_: self_user} # {UserID: User}
         # Add each entity as a new User.
         for entity in entities:
-            user_ = User.from_entity(entity, self_user_id)
+            user_ = User.from_entity(entity, self_user.id_)
             self._user_dict[user_.id_] = user_
         # Add each conversation participant as a new User if we didn't already
         # add them from an entity.
         for participant in conv_parts:
-            user_ = User.from_conv_part_data(participant, self_user_id)
+            user_ = User.from_conv_part_data(participant, self_user.id_)
             if user_.id_ not in self._user_dict:
                 logging.warning('Adding fallback User: {}'.format(user_))
                 self._user_dict[user_.id_] = user_

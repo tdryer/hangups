@@ -10,7 +10,7 @@ import re
 import time
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
-                     event, schemas, user)
+                     event, schemas)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -53,8 +53,8 @@ class Client(object):
         self._sync_timestamp = None  # datetime.datetime
 
         # These are instantiated after ConnectionEvent:
-        self.self_user_id = None # UserID
         self.initial_conv_states = None # [ClientConversationState]
+        self.self_entity = None # ClientEntity
         self.initial_entities = None # [ClientEntity]
         self.initial_conv_parts = None # [ClientConversationParticipantData]
 
@@ -187,11 +187,9 @@ class Client(object):
         )
 
         # Parse the entity representing the current user.
-        self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
+        self.self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
             data_dict['ds:20'][0]
         ).self_entity
-        self.self_user_id = user.User.from_entity(self_entity, None).id_
-        self.initial_entities = [self_entity]
 
         # Parse every existing conversation's state, including participants.
         self.initial_conv_states = schemas.CLIENT_CONVERSATION_STATE_LIST.parse(
@@ -206,6 +204,7 @@ class Client(object):
         # Parse the entities for the user's contacts (doesn't include users not
         # in contacts). If this fails, continue without the rest of the
         # entities.
+        self.initial_entities = []
         try:
             entities = schemas.INITIAL_CLIENT_ENTITIES.parse(
                 data_dict['ds:21'][0]
