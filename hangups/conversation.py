@@ -12,18 +12,14 @@ logger = logging.getLogger(__name__)
 class Conversation(object):
     """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, client, conv_state):
+    def __init__(self, client, conv_state, user_list):
         """Initialize a new Conversation from a ClientConversationState."""
         self._client = client
         self._id = conv_state.conversation_id.id_
-        self._users = {
-            user.UserID(chat_id=participant.id_.chat_id,
-                        gaia_id=participant.id_.gaia_id):
-            self._client.initial_users[
-                user.UserID(chat_id=participant.id_.chat_id,
-                            gaia_id=participant.id_.gaia_id)
-            ] for participant in conv_state.conversation.participant_data
-        }  # {UserID: User}
+        user_list = [user_list.get_user(user.UserID(chat_id=part.id_.chat_id,
+                                                    gaia_id=part.id_.gaia_id))
+                     for part in conv_state.conversation.participant_data]
+        self._users = {user_.id_: user_ for user_ in user_list}
         self._last_modified = parsers.from_timestamp(
             conv_state.conversation.self_conversation_state.sort_timestamp
         )
@@ -97,7 +93,7 @@ class Conversation(object):
 class ConversationList(object):
     """Wrapper around Client that maintains a list of Conversations."""
 
-    def __init__(self, client):
+    def __init__(self, client, user_list):
         self._client = client
         self._conv_dict = {}  # {conv_id: Conversation}
 
@@ -105,7 +101,8 @@ class ConversationList(object):
         # ClientConversationStates.
         for conv_state in self._client.initial_conv_states:
             conv_id = conv_state.conversation_id.id_
-            self._conv_dict[conv_id] = Conversation(self._client, conv_state)
+            self._conv_dict[conv_id] = Conversation(self._client, conv_state,
+                                                    user_list)
 
         self._client.on_state_update.add_observer(self._on_state_update)
         self._client.on_event_notification.add_observer(

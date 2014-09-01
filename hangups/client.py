@@ -53,9 +53,10 @@ class Client(object):
         self._sync_timestamp = None  # datetime.datetime
 
         # These are instantiated after ConnectionEvent:
-        self.initial_users = None # {UserID: User}
         self.self_user_id = None # UserID
         self.initial_conv_states = None # [ClientConversationState]
+        self.initial_entities = None # [ClientEntity]
+        self.initial_conv_parts = None # [ClientConversationParticipantData]
 
         # hangups.channel.Channel instantiated in connect()
         self._channel = None
@@ -185,54 +186,40 @@ class Client(object):
             data_dict['ds:21'][0][1][4]
         )
 
-        # Parse the User for ourselves.
+        # Parse the entity representing the current user.
         self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
             data_dict['ds:20'][0]
         ).self_entity
-        self_user = user.User.from_entity(self_entity, None)
-        self.self_user_id = self_user.id_
-        self.initial_users = {self_user.id_: self_user}
+        self.self_user_id = user.User.from_entity(self_entity, None).id_
+        self.initial_entities = [self_entity]
 
-        # We get every conversation's 20 most recent events.
+        # Parse every existing conversation's state, including participants.
         self.initial_conv_states = schemas.CLIENT_CONVERSATION_STATE_LIST.parse(
             data_dict['ds:19'][0][3]
         )
-        # Add the participant to our list of contacts as a fallback, in
-        # case they can't be found later by other methods.
-        fallback_users = {}
+        self.initial_conv_parts = []
         for conv_state in self.initial_conv_states:
-            for participant in conv_state.conversation.participant_data:
-                user_ = user.User.from_conv_part_data(participant,
-                                                      self.self_user_id)
-                fallback_users[user_.id_] = user_
+            self.initial_conv_parts.extend(
+                conv_state.conversation.participant_data
+            )
 
-        # We get ClientEntity instances for some of the contacts we'll need
-        # (doesn't include users not in contacts).
+        # Parse the entities for the user's contacts (doesn't include users not
+        # in contacts). If this fails, continue without the rest of the
+        # entities.
         try:
             entities = schemas.INITIAL_CLIENT_ENTITIES.parse(
                 data_dict['ds:21'][0]
             )
         except ValueError as e:
-            # Log a warning, but continue using the fallback users.
             logger.warning('Failed to parse initial client entities: {}'
                            .format(e))
         else:
-            # The entites are divided into a few groups, for unclear reasons.
-            all_entities = itertools.chain(
-                entities.entities, entities.group1.entity,
-                entities.group2.entity, entities.group3.entity,
-                entities.group4.entity, entities.group5.entity
-            )
-            for entity in all_entities:
-                if hasattr(entity, 'entity'):
-                    entity = entity.entity
-                user_ = user.User.from_entity(entity, self.self_user_id)
-                self.initial_users[user_.id_] = user_
-        # Add in the fallback users.
-        for user_id, user_ in fallback_users.items():
-            if user_id not in self.initial_users:
-                logging.warning('Adding fallback User: {}'.format(user_))
-                self.initial_users[user_id] = user_
+            self.initial_entities.extend(entities.entities)
+            self.initial_entities.extend(e.entity for e in itertools.chain(
+                entities.group1.entity, entities.group2.entity,
+                entities.group3.entity, entities.group4.entity,
+                entities.group5.entity
+            ))
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""
