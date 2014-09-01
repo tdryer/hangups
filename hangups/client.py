@@ -1,6 +1,7 @@
 """Abstract class for writing chat clients."""
 
 from tornado import gen, httpclient, ioloop
+import collections
 import hashlib
 import itertools
 import json
@@ -20,6 +21,15 @@ CONNECT_TIMEOUT = 10
 REQUEST_TIMEOUT = 10
 
 
+# Initial account data received after the client is first connected:
+InitialData = collections.namedtuple('InitialData', [
+    'conversation_states',  # [ClientConversationState]
+    'self_entity',  # ClientEntity
+    'entities',  # [ClientEntity]
+    'conversation_participants',  # [ClientConversationParticipantData]
+])
+
+
 class Client(object):
     """Instant messaging client for Hangouts.
 
@@ -33,7 +43,7 @@ class Client(object):
         """
 
         # Event fired when the client connects for the first time with
-        # arguments ().
+        # arguments (initial_data).
         self.on_connect = event.Event('Client.on_connect')
         # Event fired when the client reconnects after being disconnected with
         # arguments ().
@@ -51,12 +61,6 @@ class Client(object):
 
         self._cookies = cookies
         self._sync_timestamp = None  # datetime.datetime
-
-        # These are instantiated after ConnectionEvent:
-        self.initial_conv_states = None # [ClientConversationState]
-        self.self_entity = None # ClientEntity
-        self.initial_entities = None # [ClientEntity]
-        self.initial_conv_parts = None # [ClientConversationParticipantData]
 
         # hangups.channel.Channel instantiated in connect()
         self._channel = None
@@ -81,7 +85,7 @@ class Client(object):
     @gen.coroutine
     def connect(self):
         """Connect to the server and receive events."""
-        yield self._init_talkgadget_1()
+        initial_data = yield self._initialize_chat()
         self._channel = channel.Channel(self._cookies, self._channel_path,
                                         self._clid, self._channel_ec_param,
                                         self._channel_prop_param)
@@ -89,7 +93,9 @@ class Client(object):
             self._sync_chat_messages(), lambda f: f.result()
         )
         self._channel.on_connect.add_observer(sync_f)
-        self._channel.on_connect.add_observer(self.on_connect.fire)
+        self._channel.on_connect.add_observer(
+            lambda: self.on_connect.fire(initial_data)
+        )
         self._channel.on_reconnect.add_observer(sync_f)
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
@@ -126,12 +132,14 @@ class Client(object):
         self._sync_timestamp = parsers.from_timestamp(int(res[1][4]))
 
     @gen.coroutine
-    def _init_talkgadget_1(self):
-        """Make first talkgadget request and parse response.
+    def _initialize_chat(self):
+        """Request push channel creation and initial chat data.
+
+        Returns instance of InitialData.
 
         The response body is a HTML document containing a series of script tags
-        containing JavaScript object. We need to parse the object to get at the
-        data.
+        containing JavaScript objects. We need to parse the objects to get at
+        the data.
         """
         url = 'https://talkgadget.google.com/u/0/talkgadget/_/chat'
         params = {
@@ -187,24 +195,22 @@ class Client(object):
         )
 
         # Parse the entity representing the current user.
-        self.self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
+        self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
             data_dict['ds:20'][0]
         ).self_entity
 
         # Parse every existing conversation's state, including participants.
-        self.initial_conv_states = schemas.CLIENT_CONVERSATION_STATE_LIST.parse(
+        initial_conv_states = schemas.CLIENT_CONVERSATION_STATE_LIST.parse(
             data_dict['ds:19'][0][3]
         )
-        self.initial_conv_parts = []
-        for conv_state in self.initial_conv_states:
-            self.initial_conv_parts.extend(
-                conv_state.conversation.participant_data
-            )
+        initial_conv_parts = []
+        for conv_state in initial_conv_states:
+            initial_conv_parts.extend(conv_state.conversation.participant_data)
 
         # Parse the entities for the user's contacts (doesn't include users not
         # in contacts). If this fails, continue without the rest of the
         # entities.
-        self.initial_entities = []
+        initial_entities = []
         try:
             entities = schemas.INITIAL_CLIENT_ENTITIES.parse(
                 data_dict['ds:21'][0]
@@ -213,12 +219,15 @@ class Client(object):
             logger.warning('Failed to parse initial client entities: {}'
                            .format(e))
         else:
-            self.initial_entities.extend(entities.entities)
-            self.initial_entities.extend(e.entity for e in itertools.chain(
+            initial_entities.extend(entities.entities)
+            initial_entities.extend(e.entity for e in itertools.chain(
                 entities.group1.entity, entities.group2.entity,
                 entities.group3.entity, entities.group4.entity,
                 entities.group5.entity
             ))
+
+        return InitialData(initial_conv_states, self_entity, initial_entities,
+                           initial_conv_parts)
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""

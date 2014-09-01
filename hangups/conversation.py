@@ -93,13 +93,13 @@ class Conversation(object):
 class ConversationList(object):
     """Wrapper around Client that maintains a list of Conversations."""
 
-    def __init__(self, client, user_list):
+    def __init__(self, client, conv_states, user_list):
         self._client = client
         self._conv_dict = {}  # {conv_id: Conversation}
 
         # Initialize the list of conversation from Client's list of
         # ClientConversationStates.
-        for conv_state in self._client.initial_conv_states:
+        for conv_state in conv_states:
             conv_id = conv_state.conversation_id.id_
             self._conv_dict[conv_id] = Conversation(self._client, conv_state,
                                                     user_list)

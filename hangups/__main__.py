@@ -109,13 +109,15 @@ class ChatUI(object):
         # switch to new or existing tab for the conversation
         self.add_conversation_tab(conv_id, switch=True)
 
-    def _on_connect(self):
+    def _on_connect(self, initial_data):
         """Handle connecting for the first time."""
-        self._user_list = hangups.UserList(self._client.self_entity,
-                                           self._client.initial_entities,
-                                           self._client.initial_conv_parts)
-        self._conv_list = hangups.ConversationList(self._client,
-                                                   self._user_list)
+        self._user_list = hangups.UserList(
+            initial_data.self_entity, initial_data.entities,
+            initial_data.conversation_participants
+        )
+        self._conv_list = hangups.ConversationList(
+            self._client, initial_data.conversation_states, self._user_list
+        )
         self._conv_list.on_message.add_observer(self._on_message)
         self._notifier = Notifier(self._conv_list)
         # show the conversation menu
