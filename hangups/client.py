@@ -15,6 +15,15 @@ from hangups import (javascript, parsers, exceptions, http_utils, channel,
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
+CHAT_INIT_URL = 'https://talkgadget.google.com/u/0/talkgadget/_/chat'
+CHAT_INIT_PARAMS = {
+    'prop': 'aChromeExtension',
+    'fid': 'gtn-roster-iframe-id',
+    'ec': '["ci:ec",true,true,false]',
+}
+CHAT_INIT_REGEX = re.compile(
+    r"(?:<script>AF_initDataCallback\((.*?)\);</script>)", re.DOTALL
+)
 # Set the connection and request timeouts low so we fail fast when there's a
 # network problem.
 CONNECT_TIMEOUT = 10
@@ -141,58 +150,44 @@ class Client(object):
         containing JavaScript objects. We need to parse the objects to get at
         the data.
         """
-        url = 'https://talkgadget.google.com/u/0/talkgadget/_/chat'
-        params = {
-            'prop': 'aChromeExtension',
-            'fid': 'gtn-roster-iframe-id',
-            'ec': '["ci:ec",true,true,false]',
-        }
-        headers = {
-            # appears to require a browser user agent
-            'user-agent': (
-                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
-                '(KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36'
-            ),
-        }
-        res = yield http_utils.fetch(
-            url, cookies=self._cookies, params=params, headers=headers,
-            connect_timeout=CONNECT_TIMEOUT, request_timeout=REQUEST_TIMEOUT
-        )
-        logger.debug('First talkgadget request result:\n{}'.format(res.body))
-        if res.code != 200:
-            raise ValueError("First talkgadget request failed with {}: {}"
-                             .format(res.code, res.body))
-        res = res.body.decode()
+        try:
+            res = yield http_utils.fetch(
+                CHAT_INIT_URL, cookies=self._cookies, params=CHAT_INIT_PARAMS,
+                connect_timeout=CONNECT_TIMEOUT, request_timeout=REQUEST_TIMEOUT
+            )
+        except httpclient.HTTPError as e:
+            raise exceptions.HangupsError('Initialize chat request failed: {}'
+                                          .format(e))
 
         # Parse the response by using a regex to find all the JS objects, and
-        # parsing them.
-        res = res.replace('\n', '')
-        regex = re.compile(
-            r"(?:<script>AF_initDataCallback\((.*?)\);</script>)"
-        )
+        # parsing them. Not everything will be parsable, but we don't care if
+        # an object we don't need can't be parsed.
         data_dict = {}
-        for data in regex.findall(res):
+        for data in CHAT_INIT_REGEX.findall(res.body.decode()):
             try:
                 data = javascript.loads(data)
                 # pylint: disable=invalid-sequence-index
                 data_dict[data['key']] = data['data']
             except ValueError as e:
-                # not everything will be parsable, but we don't care
-                logger.debug('Failed to parse JavaScript: {}\n{}'
+                logger.debug('Failed to parse initialize chat object: {}\n{}'
                              .format(e, data))
 
-        # TODO: handle errors here
-        self._api_key = data_dict['ds:7'][0][2]
-        self._header_date = data_dict['ds:2'][0][4]
-        self._header_version = data_dict['ds:2'][0][6]
-        self._header_id = data_dict['ds:4'][0][7]
-        self._channel_path = data_dict['ds:4'][0][1]
-        self._clid = data_dict['ds:4'][0][7]
-        self._channel_ec_param = data_dict['ds:4'][0][4]
-        self._channel_prop_param = data_dict['ds:4'][0][5]
-        self._sync_timestamp = parsers.from_timestamp(
-            data_dict['ds:21'][0][1][4]
-        )
+        # Extract various values that we will need.
+        try:
+            self._api_key = data_dict['ds:7'][0][2]
+            self._header_date = data_dict['ds:2'][0][4]
+            self._header_version = data_dict['ds:2'][0][6]
+            self._header_id = data_dict['ds:4'][0][7]
+            self._channel_path = data_dict['ds:4'][0][1]
+            self._clid = data_dict['ds:4'][0][7]
+            self._channel_ec_param = data_dict['ds:4'][0][4]
+            self._channel_prop_param = data_dict['ds:4'][0][5]
+            self._sync_timestamp = parsers.from_timestamp(
+                data_dict['ds:21'][0][1][4]
+            )
+        except KeyError as e:
+            raise exceptions.HangupsError('Failed to get initialize chat '
+                                          'value: {}'.format(e))
 
         # Parse the entity representing the current user.
         self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
