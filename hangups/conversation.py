@@ -27,18 +27,10 @@ class Conversation(object):
         self._chat_messages = [] # ChatMessage
         for ev in conv_state.event:
             try:
-                # TODO: Remove this hack by making parse_chat_message take the
-                # right type.
-                self._chat_messages.append(parsers.parse_chat_message(
-                    SimpleNamespace(event=ev)
-                ))
-            except ValueError as e:
-                logger.warning('Failed to parse ClientEvent: {}'.format(e))
+                if ev.chat_message is not None:
+                    self._chat_messages.append(parsers.parse_chat_message(ev))
             except exceptions.ParseError as e:
-                logger.warning('Failed to parse message: {}'.format(e))
-            except exceptions.ParseNotImplementedError as e:
-                logger.info('Failed to parse message: {}'.format(e))
-
+                logger.warning('Failed to parse chat message: {}'.format(e))
         # Event fired when a new message arrives with arguments (chat_message).
         self.on_message = event.Event('Conversation.on_message')
         # Event fired when a user starts or stops typing with arguments
@@ -138,24 +130,24 @@ class ConversationList(object):
     def _on_event_notification(self, event_notification):
         """Receive a ClientEventNofication and fan out to Conversations."""
         if event_notification.event.chat_message is not None:
-            self._handle_chat_message(event_notification)
+            self._handle_chat_message(event_notification.event)
 
-    def _handle_chat_message(self, chat_message):
-        """Receive ClientChatMessage and update the conversation."""
-        # TODO: We're actually receiving ClientEventNotification for now
-        # because that's what the parser takes.
-        conv_id = chat_message.event.conversation_id.id_
+    def _handle_chat_message(self, event_):
+        """Receive ClientEvent and update the conversation with messages."""
+        conv_id = event_.conversation_id.id_
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
             try:
-                res = parsers.parse_chat_message(chat_message)
+                if event_.chat_message is not None:
+                    res = parsers.parse_chat_message(event_)
+                else:
+                    res = None
             except exceptions.ParseError as e:
-                logger.warning('Failed to parse message: {}'.format(e))
-            except exceptions.ParseNotImplementedError as e:
-                logger.info('Failed to parse message: {}'.format(e))
+                logger.warning('Failed to parse chat message: {}'.format(e))
             else:
-                self.on_message.fire(res)
-                conv.on_message.fire(res)
+                if res is not None:
+                    self.on_message.fire(res)
+                    conv.on_message.fire(res)
         else:
             logger.warning('Received ClientEvent for unknown conversation {}'
                            .format(conv_id))
