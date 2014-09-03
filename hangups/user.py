@@ -18,9 +18,9 @@ class User(object):
     first_name from the full_name, or setting both to DEFAULT_NAME.
     """
 
-    def __init__(self, chat_id, full_name, first_name, is_self):
+    def __init__(self, user_id, full_name, first_name, is_self):
         """Initialize a User."""
-        self.id_ = chat_id
+        self.id_ = user_id
         self.full_name = full_name if full_name is not None else DEFAULT_NAME
         self.first_name = (first_name if first_name is not None
                            else self.full_name.split()[0])
