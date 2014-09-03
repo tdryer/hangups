@@ -1,7 +1,6 @@
 """User objects."""
 
 import logging
-from tornado import gen
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
@@ -82,4 +81,11 @@ class UserList(object):
 
         Raises KeyError if the User is not available.
         """
-        return self._user_dict[user_id]
+        # TODO: While there are still ways we could request a user that hangups
+        # is not aware of, return a default user rather than raising KeyError.
+        try:
+            return self._user_dict[user_id]
+        except KeyError:
+            logger.warning('UserList returning unknown User for UserID {}'
+                           .format(user_id))
+            return User(user_id, DEFAULT_NAME, None, False)

@@ -2,7 +2,6 @@
 
 import logging
 from tornado import gen
-from types import SimpleNamespace
 
 from hangups import parsers, exceptions, event, user
 
@@ -14,23 +13,25 @@ class Conversation(object):
 
     def __init__(self, client, conv_state, user_list):
         """Initialize a new Conversation from a ClientConversationState."""
-        self._client = client
-        self._id = conv_state.conversation_id.id_
-        user_list = [user_list.get_user(user.UserID(chat_id=part.id_.chat_id,
-                                                    gaia_id=part.id_.gaia_id))
-                     for part in conv_state.conversation.participant_data]
-        self._users = {user_.id_: user_ for user_ in user_list}
+        self._client = client  # Client
+        self._user_list = user_list  # UserList
+        self._id = conv_state.conversation_id.id_  # str
+        self._active_participant_ids = [
+            user.UserID(chat_id=part.id_.chat_id, gaia_id=part.id_.gaia_id)
+            for part in conv_state.conversation.participant_data
+        ]  # [UserID]
         self._last_modified = parsers.from_timestamp(
             conv_state.conversation.self_conversation_state.sort_timestamp
-        )
+        )  # datetime
         self._name = conv_state.conversation.name # str or None
-        self._chat_messages = [] # ChatMessage
+        self._chat_messages = []  # [ChatMessage]
         for ev in conv_state.event:
             try:
                 if ev.chat_message is not None:
                     self._chat_messages.append(parsers.parse_chat_message(ev))
             except exceptions.ParseError as e:
                 logger.warning('Failed to parse chat message: {}'.format(e))
+
         # Event fired when a new message arrives with arguments (chat_message).
         self.on_message = event.Event('Conversation.on_message')
         # Event fired when a user starts or stops typing with arguments
@@ -44,26 +45,17 @@ class Conversation(object):
 
     @property
     def users(self):
-        """Return the list of Users participating in the Conversation."""
-        return list(self._users.values())
+        """Return the list of Users currently participating."""
+        return [self._user_list.get_user(id_)
+                for id_ in self._active_participant_ids]
 
     def get_user(self, user_id):
-        """Return a participating use by UserID.
-
-        Raises KeyError if the user ID is not a participant.
-        """
-        # TODO: Remove this temporary fix. Conversations don't (can't?) know
-        # what users participated in the past and later left the conversation.
-        try:
-            return self._users[user_id]
-        except KeyError:
-            return user.User(user_id, "Unknown", None, False)
+        """Return the User instance with the given UserID."""
+        return self._user_list.get_user(user_id)
 
     @property
     def name(self):
-        """ Return chat name if it was renamed manually or None
-        :rtype: str
-        """
+        """Return conversation's custom name, or None if it was not renamed."""
         return self._name
 
     @property
