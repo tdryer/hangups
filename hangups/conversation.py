@@ -52,7 +52,12 @@ class Conversation(object):
 
         Raises KeyError if the user ID is not a participant.
         """
-        return self._users[user_id]
+        # TODO: Remove this temporary fix. Conversations don't (can't?) know
+        # what users participated in the past and later left the conversation.
+        try:
+            return self._users[user_id]
+        except KeyError:
+            return user.User(user_id, "Unknown", None, False)
 
     @property
     def name(self):
