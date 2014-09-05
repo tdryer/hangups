@@ -12,6 +12,8 @@ import logging
 import re
 import subprocess
 
+import hangups
+
 logger = logging.getLogger(__name__)
 NOTIFY_CMD = [
     'gdbus', 'call', '--session', '--dest', 'org.freedesktop.Notifications',
@@ -33,20 +35,21 @@ class Notifier(object):
 
     def __init__(self, conv_list):
         self._conv_list = conv_list  # hangups.ConversationList
-        self._conv_list.on_message.add_observer(self._on_message)
+        self._conv_list.on_event.add_observer(self._on_event)
         self._replaces_id = 0
 
-    def _on_message(self, chat_message):
+    def _on_event(self, conv_event):
         """Create notification for new messages."""
-        conv = self._conv_list.get(chat_message.conv_id)
-        user = conv.get_user(chat_message.user_id)
-        # Ignore messages sent by yourself.
-        if not user.is_self:
+        conv = self._conv_list.get(conv_event.conversation_id)
+        user = conv.get_user(conv_event.user_id)
+        # Ignore non-messages or messages sent by yourself.
+        if (not user.is_self and
+                isinstance(conv_event, hangups.ChatMessageEvent)):
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
             cmd = [arg.format(
                 sender_name=html.escape(user.full_name, quote=False),
-                msg_text=html.escape(chat_message.text, quote=False),
+                msg_text=html.escape(conv_event.text, quote=False),
                 replaces_id=self._replaces_id,
             ) for arg in NOTIFY_CMD]
 

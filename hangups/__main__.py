@@ -118,7 +118,7 @@ class ChatUI(object):
         self._conv_list = hangups.ConversationList(
             self._client, initial_data.conversation_states, self._user_list
         )
-        self._conv_list.on_message.add_observer(self._on_message)
+        self._conv_list.on_event.add_observer(self._on_event)
         self._notifier = Notifier(self._conv_list)
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
@@ -128,9 +128,10 @@ class ChatUI(object):
                                     title='Conversations')
         self._urwid_loop.widget = self._tabbed_window
 
-    def _on_message(self, chat_message):
+    def _on_event(self, conv_event):
         """Open conversation tab for new messages when they arrive."""
-        self.add_conversation_tab(chat_message.conv_id)
+        if isinstance(conv_event, hangups.ChatMessageEvent):
+            self.add_conversation_tab(conv_event.conversation_id)
 
     def _on_disconnect(self):
         """Handle disconnecting."""
@@ -206,17 +207,18 @@ class StatusLineWidget(urwid.WidgetWrap):
     def __init__(self, conversation):
         self._typing_statuses = {}
         self._conversation = conversation
-        self._conversation.on_message.add_observer(self._on_message)
+        self._conversation.on_event.add_observer(self._on_event)
         self._conversation.on_typing.add_observer(self._on_typing)
         self._widget = urwid.Text('', align='center')
         super().__init__(urwid.AttrWrap(self._widget, 'status_line'))
 
-    def _on_message(self, chat_message):
+    def _on_event(self, conv_event):
         """Make users stop typing when they send a message."""
-        self._typing_statuses[chat_message.user_id] = (
-            hangups.TypingStatus.STOPPED
-        )
-        self._update()
+        if isinstance(conv_event, hangups.ChatMessageEvent):
+            self._typing_statuses[conv_event.user_id] = (
+                hangups.TypingStatus.STOPPED
+            )
+            self._update()
 
     def _on_typing(self, typing_message):
         """Handle typing updates."""
@@ -274,7 +276,7 @@ class ConversationWidget(urwid.WidgetWrap):
             'Connected.'
         ))
         self._conversation = conversation
-        self._conversation.on_message.add_observer(self._on_message)
+        self._conversation.on_event.add_observer(self._on_event)
 
         self._num_unread = 0
         self._set_title_cb = set_title_cb
@@ -291,9 +293,10 @@ class ConversationWidget(urwid.WidgetWrap):
         # focus the edit widget by default
         self._widget.focus_position = 2
 
-        # Display any old messages already attached to the conversation.
-        for chat_message in self._conversation.chat_messages:
-            self._on_message(chat_message)
+        # Display any old ConversationEvents already attached to the
+        # conversation.
+        for event in self._conversation.events:
+            self._on_event(event)
         self._num_unread = 0
         self._set_title()
 
@@ -355,18 +358,24 @@ class ConversationWidget(urwid.WidgetWrap):
         timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
         self._add_message_widget(MessageWidget(timestamp, text, None))
 
-    def _on_message(self, chat_message):
+    def _on_event(self, conv_event):
         """Display a new conversation message."""
-        user = self._conversation.get_user(chat_message.user_id)
+        user = self._conversation.get_user(conv_event.user_id)
 
-        # Format the message and add it to the list box.
-        self._add_message_widget(MessageWidget(chat_message.timestamp,
-                                               chat_message.text, user))
+        # XXX: If the ConversationWidget is created by a ConversationEvent, the
+        # ConversationEvent will be duplicated in the list of messages.
 
-        # Update the count of unread messages.
-        if not user.is_self:
-            self._num_unread += 1
-            self._set_title()
+        if isinstance(conv_event, hangups.ChatMessageEvent):
+
+            # Format the message and add it to the list box.
+            self._add_message_widget(MessageWidget(
+                conv_event.timestamp, conv_event.text, user
+            ))
+
+            # Update the count of unread messages.
+            if not user.is_self:
+                self._num_unread += 1
+                self._set_title()
 
 
 class TabbedWindowWidget(urwid.WidgetWrap):

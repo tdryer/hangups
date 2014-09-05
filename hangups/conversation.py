@@ -3,7 +3,7 @@
 import logging
 from tornado import gen
 
-from hangups import parsers, exceptions, event, user
+from hangups import parsers, event, user, conversation_event
 
 logger = logging.getLogger(__name__)
 
@@ -24,19 +24,31 @@ class Conversation(object):
             conv_state.conversation.self_conversation_state.sort_timestamp
         )  # datetime
         self._name = conv_state.conversation.name # str or None
-        self._chat_messages = []  # [ChatMessage]
-        for ev in conv_state.event:
-            try:
-                if ev.chat_message is not None:
-                    self._chat_messages.append(parsers.parse_chat_message(ev))
-            except exceptions.ParseError as e:
-                logger.warning('Failed to parse chat message: {}'.format(e))
+        self._events = []  # [ConversationEvent]
 
-        # Event fired when a new message arrives with arguments (chat_message).
-        self.on_message = event.Event('Conversation.on_message')
+        for event_ in conv_state.event:
+            self.add_event(event_)
+
         # Event fired when a user starts or stops typing with arguments
         # (typing_message).
         self.on_typing = event.Event('Conversation.on_typing')
+        # Event fired when a new ConversationEvent arrives with arguments
+        # (ConversationEvent).
+        self.on_event = event.Event('Conversation.on_event')
+
+    def add_event(self, event_):
+        """Add a ClientEvent to the Conversation.
+
+        Returns an instance of ConversationEvent or subclass.
+        """
+        if event_.chat_message is not None:
+            conv_event = conversation_event.ChatMessageEvent(event_)
+        elif event_.conversation_rename is not None:
+            conv_event = conversation_event.RenameEvent(event_)
+        else:
+            conv_event = conversation_event.ConversationEvent(event_)
+        self._events.append(conv_event)
+        return conv_event
 
     @property
     def id_(self):
@@ -64,9 +76,9 @@ class Conversation(object):
         return self._last_modified
 
     @property
-    def chat_messages(self):
-        """Return a list of ChatMessages, sorted oldest to newest."""
-        return list(self._chat_messages)
+    def events(self):
+        """Return a list of ConversationEvents, sorted oldest to newest."""
+        return list(self._events)
 
     @gen.coroutine
     def send_message(self, text):
@@ -98,8 +110,9 @@ class ConversationList(object):
             self._on_event_notification
         )
 
-        # Event fired when a new message arrives with arguments (chat_message).
-        self.on_message = event.Event('ConversationList.on_message')
+        # Event fired when a new ConversationEvent arrives with arguments
+        # (ConversationEvent).
+        self.on_event = event.Event('ConversationList.on_event')
         # Event fired when a user starts or stops typing with arguments
         # (typing_message).
         self.on_typing = event.Event('ConversationList.on_typing')
@@ -126,29 +139,16 @@ class ConversationList(object):
 
     def _on_event_notification(self, event_notification):
         """Receive a ClientEventNofication and fan out to Conversations."""
-        if event_notification.event.chat_message is not None:
-            self._handle_chat_message(event_notification.event)
-
-    def _handle_chat_message(self, event_):
-        """Receive ClientEvent and update the conversation with messages."""
-        conv_id = event_.conversation_id.id_
-        conv = self._conv_dict.get(conv_id, None)
-        if conv is not None:
-            try:
-                if event_.chat_message is not None:
-                    res = parsers.parse_chat_message(event_)
-                else:
-                    res = None
-            except exceptions.ParseError as e:
-                logger.warning('Failed to parse chat message: {}'.format(e))
-            else:
-                if res is not None:
-                    self.on_message.fire(res)
-                    conv.on_message.fire(res)
-        else:
+        event_ = event_notification.event
+        try:
+            conv = self._conv_dict[event_.conversation_id.id_]
+        except KeyError:
             logger.warning('Received ClientEvent for unknown conversation {}'
-                           .format(conv_id))
-
+                           .format(event_.conversation_id.id_))
+        else:
+            conv_event = conv.add_event(event_)
+            self.on_event.fire(conv_event)
+            conv.on_event.fire(conv_event)
 
     def _handle_set_typing_notification(self, set_typing_notification):
         """Receive ClientSetTypingNotification and update the conversation."""

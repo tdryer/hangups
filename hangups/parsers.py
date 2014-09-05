@@ -104,57 +104,6 @@ def from_timestamp(timestamp):
 ##############################################################################
 
 
-ChatMessage = namedtuple(
-    'ChatMessage', ['conv_id', 'user_id', 'timestamp', 'text']
-)
-
-
-def parse_chat_message(event):
-    """Return ChatMessage from parsing a ClientEvent.
-
-    Assumes the ClientEventNotification contains a ClientChatMessage.
-
-    Raises ParseError if it cannot be parsed.
-    """
-    text = ''
-    for segment in event.chat_message.message_content.segment:
-        if segment.type_ == schemas.SegmentType.TEXT:
-            text += segment.text
-        elif segment.type_ == schemas.SegmentType.LINK:
-            text += segment.text
-        elif segment.type_ == schemas.SegmentType.LINE_BREAK:
-            # Can't use segment.text because Hangouts for Android doesn't
-            # set it for linebreaks.
-            text += '\n'
-        else:
-            raise exceptions.ParseError('Unknown segment type: {}'
-                                        .format(segment.type_))
-    for attachment in event.chat_message.message_content.attachment:
-        if attachment.embed_item.type_ == [249]: # PLUS_PHOTO
-            # Try to parse an image message. Image messages contain no
-            # message segments, and thus have no automatic textual
-            # fallback.
-            try:
-                text += attachment.embed_item.data['27639957'][0][3]
-            except (KeyError, TypeError, IndexError):
-                raise exceptions.ParseError(
-                    'Failed to parse PLUS_PHOTO attachment: {}'
-                    .format(attachment)
-                )
-        elif attachment.embed_item.type_ == [340, 335, 0]:
-            pass # Google Maps URL that's already in the text.
-        else:
-            logger.warning('Ignoring unknown attachment: {}'
-                           .format(attachment))
-    return ChatMessage(
-        conv_id=event.conversation_id.id_,
-        user_id=user.UserID(chat_id=event.sender_id.chat_id,
-                            gaia_id=event.sender_id.gaia_id),
-        timestamp=from_timestamp(event.timestamp),
-        text=text,
-    )
-
-
 TypingStatusMessage = namedtuple(
     'TypingStatusMessage', ['conv_id', 'user_id', 'timestamp', 'status']
 )
@@ -165,8 +114,6 @@ def parse_typing_status_message(p):
 
     The same status may be sent multiple times consecutively, and when a
     message is sent the typing status will not change to stopped.
-
-    Raises ParseError if it cannot be parsed.
     """
     return TypingStatusMessage(
         conv_id=p.conversation_id.id_,
