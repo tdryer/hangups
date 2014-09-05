@@ -7,20 +7,32 @@ TODO:
     - Create notifications for other events like (dis)connection
 """
 
+import functools
 import html
 import logging
 import re
 import subprocess
+import sys
 
 import hangups
 
 logger = logging.getLogger(__name__)
-NOTIFY_CMD = [
-    'gdbus', 'call', '--session', '--dest', 'org.freedesktop.Notifications',
-    '--object-path', '/org/freedesktop/Notifications', '--method',
-    'org.freedesktop.Notifications.Notify', 'hangups', '{replaces_id}', '',
-    '{sender_name}', '{msg_text}', '[]', '{{}}', ' -1'
-]
+if sys.platform == 'darwin':
+    NOTIFY_CMD = [
+        'osascript', '-e',
+        ('display notification "{sender_name}: {msg_text}" '
+         'with title "{convo_name}"'),
+    ]
+    NOTIFY_ESCAPER = lambda s: s.replace('"', '\\"')
+else:
+    NOTIFY_CMD = [
+        'gdbus', 'call', '--session', '--dest',
+        'org.freedesktop.Notifications', '--object-path',
+        '/org/freedesktop/Notifications', '--method',
+        'org.freedesktop.Notifications.Notify', 'hangups', '{replaces_id}', '',
+        '{sender_name}', '{msg_text}', '[]', '{{}}', ' -1'
+    ]
+    NOTIFY_ESCAPER = functools.partial(html.escape, quote=False)
 RESULT_RE = re.compile(r'\(uint32 ([\d]+),\)')
 
 
@@ -48,9 +60,10 @@ class Notifier(object):
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
             cmd = [arg.format(
-                sender_name=html.escape(user.full_name, quote=False),
-                msg_text=html.escape(conv_event.text, quote=False),
+                sender_name=NOTIFY_ESCAPER(user.full_name),
+                msg_text=NOTIFY_ESCAPER(conv_event.text),
                 replaces_id=self._replaces_id,
+                convo_name=NOTIFY_ESCAPER(conv.name),
             ) for arg in NOTIFY_CMD]
 
             # Run the notification and parse out the replaces_id. Since the
