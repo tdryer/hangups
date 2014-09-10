@@ -15,13 +15,15 @@ import subprocess
 import sys
 
 import hangups
+from hangups.utils import get_conv_name
 
 logger = logging.getLogger(__name__)
 if sys.platform == 'darwin':
     NOTIFY_CMD = [
         'osascript', '-e',
-        ('display notification "{sender_name}: {msg_text}" '
-         'with title "{convo_name}"'),
+        ('display notification "{msg_text}" with '
+         'title "{convo_name}" '
+         'subtitle "{sender_name}"'),
     ]
     NOTIFY_ESCAPER = lambda s: s.replace('"', '\\"')
 else:
