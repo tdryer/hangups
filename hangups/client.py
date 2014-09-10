@@ -428,6 +428,34 @@ class Client(object):
                            .format(res_status))
             raise exceptions.NetworkError()
 
+    @gen.coroutine
+    def sendeasteregg(self, conversation_id, easteregg):
+        """Send a easteregg to a conversation.
+
+        easteregg may not be empty.
+
+        Raises hangups.NetworkError if the easteregg can not be sent.
+        """
+        client_generated_id = random.randint(0, 2**32)
+        body = [
+            self._get_request_header(),
+            [conversation_id],
+            [easteregg, None, 1]
+        ]
+        try:
+            res = yield self._request('conversations/easteregg', body)
+        except (httpclient.HTTPError, IOError) as e:
+            # In addition to HTTPError, httpclient can raise IOError (which
+            # includes socker.gaierror).
+            logger.warning('Failed to send easteregg: {}'.format(e))
+            raise exceptions.NetworkError(e)
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            logger.warning('easteregg returned status {}'
+                           .format(res_status))
+            raise exceptions.NetworkError()
+
     @staticmethod
     def create_segment(message, is_link=False, is_bold=False, is_italic=False,
                        is_strikethrough=False, is_underlined=False):
