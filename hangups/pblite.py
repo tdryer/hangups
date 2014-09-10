@@ -34,6 +34,12 @@ class Field(object):
         else:
             return input_
 
+    def serialize(self, input_):
+        """Serialize the field.
+
+        Raises ValueError if the input is None and the Field is not optional.
+        """
+        return self.parse(input_)
 
 class EnumField(object):
 
@@ -53,6 +59,12 @@ class EnumField(object):
         """
         return self._enum(input_)
 
+    def serialize(self, input_):
+        """Serialize the field.
+
+        Raises ValueError if the input is not an option in the enum.
+        """
+        return self.parse(input_).value
 
 class RepeatedField(object):
 
@@ -65,7 +77,7 @@ class RepeatedField(object):
         self._field = field
         self._is_optional = is_optional
 
-    def parse(self, input_):
+    def parse(self, input_, serialize=False):
         """Parse the message.
 
         Raises ValueError if the input is None and the RepeatedField is not
@@ -83,11 +95,21 @@ class RepeatedField(object):
         res = []
         for field_input in input_:
             try:
-                res.append(self._field.parse(field_input))
+                if serialize:
+                    res.append(self._field.serialize(field_input))
+                else:
+                    res.append(self._field.parse(field_input))
             except ValueError as e:
                 raise ValueError('RepeatedField item: {}'.format(e))
         return res
 
+    def serialize(self, input_):
+        """Serialize the message.
+
+        Raises ValueError if the input is None and the RepeatedField is not
+        optional, or if the input is not a list.
+        """
+        return self.parse(input_, serialize=True)
 
 class Message(object):
 
@@ -132,4 +154,28 @@ class Message(object):
                     raise ValueError('Message field \'{}\': {}'.
                                      format(name, e))
                 setattr(res, name, p)
+        return res
+
+    def serialize(self, input_):
+        """Serialize the message.
+
+        Raises ValueError if the input is None and the Message is not optional,
+        or if any of the contained Fields fail to parse.
+        """
+        # Validate input:
+        if input_ is None and not self._is_optional:
+            raise ValueError('Message is not optional')
+        elif input_ is None and self._is_optional:
+            return None
+        elif not isinstance(input_, types.SimpleNamespace):
+            raise ValueError('Message expected types.SimpleNamespace but got {}'
+                             .format(type(input_)))
+
+        res = []
+        for name, field in self._name_field_pairs:
+            if name is not None:
+                field_input = getattr(input_, name)
+                res.append(field.serialize(field_input))
+            else:
+                res.append(None)
         return res

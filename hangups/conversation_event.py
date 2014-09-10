@@ -52,7 +52,7 @@ class ChatMessageEvent(ConversationEvent):
     def text(self):
         """A textual representation of the message."""
         lines = ['']
-        for segment in self._event.chat_message.message_content.segment:
+        for segment in self.segments:
             if segment.type_ == schemas.SegmentType.TEXT:
                 lines[-1] += segment.text
             elif segment.type_ == schemas.SegmentType.LINK:
@@ -62,13 +62,25 @@ class ChatMessageEvent(ConversationEvent):
             else:
                 logger.warning('Ignoring unknown chat message segment type: {}'
                                .format(segment.type_))
+        lines.extend(self.attachments)
+        return '\n'.join(lines)
+
+    @property
+    def segments(self):
+        """Segments of the message"""
+        return list(self._event.chat_message.message_content.segment)
+
+    @property
+    def attachments(self):
+        """Attachments of the message (only links to attachments)"""
+        attachments = []
         for attachment in self._event.chat_message.message_content.attachment:
             if attachment.embed_item.type_ == [249]:  # PLUS_PHOTO
                 # Try to parse an image message. Image messages contain no
                 # message segments, and thus have no automatic textual
                 # fallback.
                 try:
-                    lines.append(attachment.embed_item.data['27639957'][0][3])
+                    attachments.append(attachment.embed_item.data['27639957'][0][3])
                 except (KeyError, TypeError, IndexError):
                     logger.warning(
                         'Failed to parse PLUS_PHOTO attachment: {}'
@@ -79,7 +91,7 @@ class ChatMessageEvent(ConversationEvent):
             else:
                 logger.warning('Ignoring unknown chat message attachment: {}'
                                .format(attachment))
-        return '\n'.join(lines)
+        return attachments
 
 
 class RenameEvent(ConversationEvent):
