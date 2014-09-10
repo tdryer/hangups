@@ -61,7 +61,6 @@ class ChatUI(object):
 
         self._client = hangups.Client(cookies)
         self._client.on_connect.add_observer(self._on_connect)
-        self._client.on_disconnect.add_observer(self._on_disconnect)
 
         class MyEventLoop(urwid.TornadoEventLoop):
             """Patched Tornado event loop for urwid.
@@ -133,11 +132,6 @@ class ChatUI(object):
         """Open conversation tab for new messages when they arrive."""
         if isinstance(conv_event, hangups.ChatMessageEvent):
             self.add_conversation_tab(conv_event.conversation_id)
-
-    def _on_disconnect(self):
-        """Handle disconnecting."""
-        # TODO: handle this
-        print('Connection lost')
 
 
 class LoadingWidget(urwid.WidgetWrap):
