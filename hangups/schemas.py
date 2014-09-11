@@ -223,32 +223,36 @@ CLIENT_CONVERSATION = Message(
     is_optional=True,
 )
 
+MESSAGE_SEGMENT = Message(
+    ('type_', EnumField(SegmentType)),
+    ('text', Field()),
+    ('formatting', Message(
+        ('bold', Field(is_optional=True)),
+        ('italic', Field(is_optional=True)),
+        ('strikethrough', Field(is_optional=True)),
+        ('underline', Field(is_optional=True)),
+        is_optional=True,
+    )),
+    ('link_data', Message(
+        ('link_target', Field()),
+        is_optional=True,
+    )),
+)
+
+MESSAGE_ATTACHMENT = Message(
+    ('embed_item', Message(
+        # 249 (PLUS_PHOTO), 340, 335, 0
+        ('type_', RepeatedField(Field())),
+        ('data', Field()),  # can be a dict
+    )),
+)
+
 CLIENT_CHAT_MESSAGE = Message(
     (None, Field(is_optional=True)),  # always None?
     ('annotation', RepeatedField(Field())),  # always []?
     ('message_content', Message(
-        ('segment', RepeatedField(Message(
-            ('type_', EnumField(SegmentType)),
-            ('text', Field()),
-            ('formatting', Message(
-                ('bold', Field(is_optional=True)),
-                ('italic', Field(is_optional=True)),
-                ('strikethrough', Field(is_optional=True)),
-                ('underline', Field(is_optional=True)),
-                is_optional=True,
-            )),
-            ('link_data', Message(
-                ('link_target', Field()),
-                is_optional=True,
-            )),
-        ))),
-        ('attachment', RepeatedField(Message(
-            ('embed_item', Message(
-                # 249 (PLUS_PHOTO), 340, 335, 0
-                ('type_', RepeatedField(Field())),
-                ('data', Field()),  # can be a dict
-            )),
-        ))),
+        ('segment', RepeatedField(MESSAGE_SEGMENT)),
+        ('attachment', RepeatedField(MESSAGE_ATTACHMENT)),
     )),
     is_optional=True,
 )

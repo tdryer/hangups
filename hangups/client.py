@@ -429,24 +429,61 @@ class Client(object):
             raise exceptions.NetworkError()
 
     @gen.coroutine
-    def sendchatmessage(self, conversation_id, message, is_bold=False,
-                        is_italic=False, is_strikethrough=False,
-                        is_underlined=False):
-        """Send a chat message to a conversation.
+    def sendeasteregg(self, conversation_id, easteregg):
+        """Send a easteregg to a conversation.
 
-        message may not be empty.
+        easteregg may not be empty.
+
+        Raises hangups.NetworkError if the easteregg can not be sent.
+        """
+        client_generated_id = random.randint(0, 2**32)
+        body = [
+            self._get_request_header(),
+            [conversation_id],
+            [easteregg, None, 1]
+        ]
+        try:
+            res = yield self._request('conversations/easteregg', body)
+        except (httpclient.HTTPError, IOError) as e:
+            # In addition to HTTPError, httpclient can raise IOError (which
+            # includes socker.gaierror).
+            logger.warning('Failed to send easteregg: {}'.format(e))
+            raise exceptions.NetworkError(e)
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            logger.warning('easteregg returned status {}'
+                           .format(res_status))
+            raise exceptions.NetworkError()
+
+    @staticmethod
+    def create_segment(message, is_link=False, is_linebreak=False, is_bold=False,
+                       is_italic=False, is_strikethrough=False, is_underlined=False):
+        if is_link:
+            segment = [2, message, [is_bold, is_italic, is_strikethrough,
+                                    is_underlined], [message]]
+        elif is_linebreak:
+            segment = [1, message]
+        else:
+            segment = [0, message, [is_bold, is_italic, is_strikethrough,
+                                    is_underlined]]
+        return schemas.MESSAGE_SEGMENT.parse(segment)
+
+    @gen.coroutine
+    def sendchatmessage_segments(self, conversation_id, segments):
+        """Send a chat message segments to a conversation.
+
+        message_segments may not be empty.
 
         Raises hangups.NetworkError if the message can not be sent.
         """
+        print("sendchatmessage_segments:", segments)
         client_generated_id = random.randint(0, 2**32)
         body = [
             self._get_request_header(),
             None, None, None, [],
             [
-                [
-                    [0, message, [is_bold, is_italic, is_strikethrough,
-                                  is_underlined]]
-                ],
+                [schemas.MESSAGE_SEGMENT.serialize(segment) for segment in segments],
                 []
             ],
             None,
@@ -469,3 +506,19 @@ class Client(object):
             logger.warning('sendchatmessage returned status {}'
                            .format(res_status))
             raise exceptions.NetworkError()
+
+    @gen.coroutine
+    def sendchatmessage(self, conversation_id, message, is_link=False, is_linebreak=False,
+                        is_bold=False, is_italic=False, is_strikethrough=False,
+                        is_underlined=False):
+        """Send a chat message to a conversation.
+
+        message may not be empty.
+
+        Raises hangups.NetworkError if the message can not be sent.
+        """
+        segment = Client.create_segment(message, is_link=is_link, is_linebreak=is_linebreak,
+                                        is_bold=is_bold, is_italic=is_italic,
+                                        is_strikethrough=is_strikethrough, is_underlined=is_underlined)
+        print("sendchatmessage:", segment)
+        self.sendchatmessage_segments(conversation_id, [segment])
