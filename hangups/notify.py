@@ -7,7 +7,6 @@ TODO:
     - Create notifications for other events like (dis)connection
 """
 
-import functools
 import html
 import logging
 import re
@@ -34,7 +33,15 @@ else:
         'org.freedesktop.Notifications.Notify', 'hangups', '{replaces_id}', '',
         '{sender_name}', '{msg_text}', '[]', '{{}}', ' -1'
     ]
-    NOTIFY_ESCAPER = functools.partial(html.escape, quote=False)
+    def NOTIFY_ESCAPER(text):
+        """Escape text for passing into gdbus."""
+        # Prevent the notifier from interpreting markup:
+        res = html.escape(text, quote=False)
+        # Prevent issues with how gdbus parses gvariants:
+        res = res.replace('\\', '\\\\')
+        res = res.replace('"', '\\u0022')
+        res = res.replace('\'', '\\u0027')
+        return res
 RESULT_RE = re.compile(r'\(uint32 ([\d]+),\)')
 
 
