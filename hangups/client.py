@@ -457,11 +457,13 @@ class Client(object):
             raise exceptions.NetworkError()
 
     @staticmethod
-    def create_segment(message, is_link=False, is_bold=False, is_italic=False,
-                       is_strikethrough=False, is_underlined=False):
+    def create_segment(message, is_link=False, is_linebreak=False, is_bold=False,
+                       is_italic=False, is_strikethrough=False, is_underlined=False):
         if is_link:
             segment = [2, message, [is_bold, is_italic, is_strikethrough,
                                     is_underlined], [message]]
+        elif is_linebreak:
+            segment = [1, message]
         else:
             segment = [0, message, [is_bold, is_italic, is_strikethrough,
                                     is_underlined]]
@@ -506,7 +508,7 @@ class Client(object):
             raise exceptions.NetworkError()
 
     @gen.coroutine
-    def sendchatmessage(self, conversation_id, message, is_link=False,
+    def sendchatmessage(self, conversation_id, message, is_link=False, is_linebreak=False,
                         is_bold=False, is_italic=False, is_strikethrough=False,
                         is_underlined=False):
         """Send a chat message to a conversation.
@@ -515,8 +517,8 @@ class Client(object):
 
         Raises hangups.NetworkError if the message can not be sent.
         """
-        segment = Client.create_segment(message, is_link=is_link, is_bold=is_bold,
-                                        is_italic=is_italic, is_strikethrough=is_strikethrough,
-                                        is_underlined=is_underlined)
+        segment = Client.create_segment(message, is_link=is_link, is_linebreak=is_linebreak,
+                                        is_bold=is_bold, is_italic=is_italic,
+                                        is_strikethrough=is_strikethrough, is_underlined=is_underlined)
         print("sendchatmessage:", segment)
         self.sendchatmessage_segments(conversation_id, [segment])
