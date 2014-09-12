@@ -11,6 +11,8 @@ lists can be done using hangups.javascript.
 See:
 https://code.google.com/p/google-protorpc/source/browse/python/protorpc/
 protojson.py
+
+TODO: Serialization code is currently unused and doesn't have any tests.
 """
 
 import itertools

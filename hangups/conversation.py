@@ -81,24 +81,16 @@ class Conversation(object):
         return list(self._events)
 
     @gen.coroutine
-    def send_message_segments(self, segments):
-        """Send a message segments to this conversation.
-
-        segments may not be empty.
-
-        Raises hangups.NetworkError if the message can not be sent.
-        """
-        yield self._client.sendchatmessage_segments(self._id, segments)
-
-    @gen.coroutine
-    def send_message(self, text):
+    def send_message(self, segments):
         """Send a message to this conversation.
 
-        text may not be empty.
+        segments must be a list of ChatMessageSegments to include in the
+        message.
 
         Raises hangups.NetworkError if the message can not be sent.
         """
-        yield self._client.sendchatmessage(self._id, text)
+        yield self._client.sendchatmessage(self._id, [seg.serialize()
+                                                      for seg in segments])
 
 
 class ConversationList(object):

@@ -41,6 +41,52 @@ class ConversationEvent(object):
         return self._event.conversation_id.id_
 
 
+class ChatMessageSegment(object):
+
+    """A segment of a chat message."""
+
+    def __init__(self, text, segment_type=schemas.SegmentType.TEXT,
+                 is_bold=False, is_italic=False, is_strikethrough=False,
+                 is_underline=False, link_target=None):
+        """Create a new chat message segment."""
+        self.type_ = segment_type
+        self.text = text
+        self.is_bold = is_bold
+        self.is_italic = is_italic
+        self.is_strikethrough = is_strikethrough
+        self.is_underline = is_underline
+        self.link_target = link_target
+
+    @staticmethod
+    def deserialize(segment):
+        """Create a chat message segment from a parsed MESSAGE_SEGMENT."""
+        # The formatting options are optional.
+        if segment.formatting is None:
+            is_bold = False
+            is_italic = False
+            is_strikethrough = False
+            is_underline = False
+        else:
+            is_bold = segment.formatting.bold == 0
+            is_italic = segment.formatting.italic == 0
+            is_strikethrough = segment.formatting.strikethrough == 0
+            is_underline = segment.formatting.underline == 0
+        return ChatMessageSegment(
+            segment.text, segment_type=segment.type_,
+            is_bold=is_bold, is_italic=is_italic,
+            is_strikethrough=is_strikethrough, is_underline=is_underline,
+        )
+
+    def serialize(self):
+        """Serialize the segment to pblite."""
+        return [self.type_.value, self.text, [
+            1 if self.is_bold else 0,
+            1 if self.is_italic else 0,
+            1 if self.is_strikethrough else 0,
+            1 if self.is_underline else 0,
+        ], [self.link_target]]
+
+
 class ChatMessageEvent(ConversationEvent):
 
     """An event containing a chat message.
@@ -67,12 +113,13 @@ class ChatMessageEvent(ConversationEvent):
 
     @property
     def segments(self):
-        """Segments of the message"""
-        return list(self._event.chat_message.message_content.segment)
+        """List of ChatMessageSegments in the message."""
+        return [ChatMessageSegment.deserialize(seg) for seg in
+                self._event.chat_message.message_content.segment]
 
     @property
     def attachments(self):
-        """Attachments of the message (only links to attachments)"""
+        """Attachments in the message."""
         attachments = []
         for attachment in self._event.chat_message.message_content.attachment:
             if attachment.embed_item.type_ == [249]:  # PLUS_PHOTO
@@ -80,7 +127,9 @@ class ChatMessageEvent(ConversationEvent):
                 # message segments, and thus have no automatic textual
                 # fallback.
                 try:
-                    attachments.append(attachment.embed_item.data['27639957'][0][3])
+                    attachments.append(
+                        attachment.embed_item.data['27639957'][0][3]
+                    )
                 except (KeyError, TypeError, IndexError):
                     logger.warning(
                         'Failed to parse PLUS_PHOTO attachment: {}'

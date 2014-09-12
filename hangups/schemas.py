@@ -234,7 +234,7 @@ MESSAGE_SEGMENT = Message(
         is_optional=True,
     )),
     ('link_data', Message(
-        ('link_target', Field()),
+        ('link_target', Field(is_optional=True)),
         is_optional=True,
     )),
 )
