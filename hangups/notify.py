@@ -72,7 +72,7 @@ class Notifier(object):
                 sender_name=NOTIFY_ESCAPER(user.full_name),
                 msg_text=NOTIFY_ESCAPER(conv_event.text),
                 replaces_id=self._replaces_id,
-                convo_name=NOTIFY_ESCAPER(conv.name or get_conv_name(conv)),
+                convo_name=NOTIFY_ESCAPER(get_conv_name(conv)),
             ) for arg in NOTIFY_CMD]
 
             # Run the notification and parse out the replaces_id. Since the
