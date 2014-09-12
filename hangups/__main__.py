@@ -349,7 +349,6 @@ class ConversationWidget(urwid.WidgetWrap):
             # Update the count of unread messages.
             if not user.is_self:
                 self._num_unread += 1
-                self._set_title()
 
         elif isinstance(conv_event, hangups.RenameEvent):
             if conv_event.new_name == '':
@@ -359,6 +358,9 @@ class ConversationWidget(urwid.WidgetWrap):
                 text = ('{} renamed the conversation to {}'
                         .format(user.first_name, conv_event.new_name))
             self._add_message_widget(MessageWidget(conv_event.timestamp, text))
+
+        # Update the title in case unread count or conversation name changed.
+        self._set_title()
 
 
 class TabbedWindowWidget(urwid.WidgetWrap):

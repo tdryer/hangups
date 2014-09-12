@@ -45,6 +45,8 @@ class Conversation(object):
             conv_event = conversation_event.ChatMessageEvent(event_)
         elif event_.conversation_rename is not None:
             conv_event = conversation_event.RenameEvent(event_)
+            self._name = (conv_event.new_name if conv_event.new_name != ''
+                          else None)
         else:
             conv_event = conversation_event.ConversationEvent(event_)
         self._events.append(conv_event)
