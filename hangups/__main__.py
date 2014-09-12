@@ -343,16 +343,22 @@ class ConversationWidget(urwid.WidgetWrap):
         # ConversationEvent will be duplicated in the list of messages.
 
         if isinstance(conv_event, hangups.ChatMessageEvent):
-
-            # Format the message and add it to the list box.
             self._add_message_widget(MessageWidget(
                 conv_event.timestamp, conv_event.text, user
             ))
-
             # Update the count of unread messages.
             if not user.is_self:
                 self._num_unread += 1
                 self._set_title()
+
+        elif isinstance(conv_event, hangups.RenameEvent):
+            if conv_event.new_name == '':
+                text = ('{} cleared the conversation name'
+                        .format(user.first_name))
+            else:
+                text = ('{} renamed the conversation to {}'
+                        .format(user.first_name, conv_event.new_name))
+            self._add_message_widget(MessageWidget(conv_event.timestamp, text))
 
 
 class TabbedWindowWidget(urwid.WidgetWrap):

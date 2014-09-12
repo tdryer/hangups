@@ -152,10 +152,16 @@ class RenameEvent(ConversationEvent):
 
     @property
     def new_name(self):
-        """The conversation's new name."""
+        """The conversation's new name.
+
+        An empty string if the conversation's name was cleared.
+        """
         return self._event.conversation_rename.new_name
 
     @property
     def old_name(self):
-        """The conversation's old name."""
+        """The conversation's old name.
+
+        An empty string if the conversation had no previous name.
+        """
         return self._event.conversation_rename.old_name
