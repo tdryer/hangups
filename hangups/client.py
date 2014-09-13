@@ -9,6 +9,7 @@ import logging
 import random
 import re
 import time
+import types
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
                      event, schemas)
@@ -118,29 +119,22 @@ class Client(object):
     @gen.coroutine
     def _sync_chat_messages(self):
         """Sync chat messages since self._sync_timestamp."""
+        # TODO: Move this method into ConversationList?
         logger.info('Syncing messages since {}'.format(self._sync_timestamp))
         res = yield self.syncallnewevents(self._sync_timestamp)
-
-        # Parse chat message from response and fire on_message event for each
-        # new chat message.
+        # Parse chat message from response and fire on_event_notification for
+        # each new ClientEvent.
         # TODO: By only parsing the ClientEvents, we're missing the
         # ClientConversation data.
-        conversation_state = res[3]
-        for conv in conversation_state:
-            events = conv[2]
-            for msg in events:
-                try:
-                    ev_notif = schemas.CLIENT_EVENT_NOTIFICATION.parse([msg])
-                except ValueError as e:
-                    logger.warning('Failed to parse ClientEvent: {}'.format(e))
-                else:
-                    # Workaround for syncallnewevents timestamp being
-                    # inclusive:
-                    timestamp = parsers.from_timestamp(ev_notif.event.timestamp)
-                    if timestamp > self._sync_timestamp:
-                        self.on_event_notification.fire(ev_notif)
-
-        self._sync_timestamp = parsers.from_timestamp(int(res[1][4]))
+        for conv_state in res.conversation_state:
+            for event_ in conv_state.event:
+                ev_notif = types.SimpleNamespace(event=event_)
+                # Workaround for syncallnewevents timestamp being
+                # inclusive:
+                timestamp = parsers.from_timestamp(ev_notif.event.timestamp)
+                if timestamp > self._sync_timestamp:
+                    self.on_event_notification.fire(ev_notif)
+        self._sync_timestamp = parsers.from_timestamp(res.sync_timestamp)
 
     @gen.coroutine
     def _initialize_chat(self):
@@ -370,24 +364,33 @@ class Client(object):
         which to return all events occuring in.
 
         Raises hangups.NetworkError if the request fails.
+
+        Returns a ClientSyncAllNewEventsResponse.
         """
         try:
             res = yield self._request('conversations/syncallnewevents', [
                 self._get_request_header(),
+                # last_sync_timestamp
                 int(timestamp.timestamp()) * 1000000,
                 [], None, [], False, [],
-                1048576 # max response size? (number of bytes in a MB)
+                1048576 # max_response_size_bytes
             ], use_json=False)
         except (httpclient.HTTPError, IOError) as e:
             # In addition to HTTPError, httpclient can raise IOError (which
             # includes socker.gaierror).
             raise exceptions.NetworkError(e)
+        try:
+            res = schemas.CLIENT_SYNC_ALL_NEW_EVENTS_RESPONSE.parse(
+                javascript.loads(res.body.decode())
+            )
+        except ValueError as e:
+            raise exceptions.NetworkError('Response failed to parse: {}'
+                                          .format(e))
         # can return 200 but still contain an error
-        res = javascript.loads(res.body.decode())
-        res_status = res[1][0]
-        if res_status != 1:
+        status = res.response_header.status
+        if status != 1:
             raise exceptions.NetworkError('Response status is \'{}\''
-                                          .format(res_status))
+                                          .format(status))
         return res
 
     @gen.coroutine

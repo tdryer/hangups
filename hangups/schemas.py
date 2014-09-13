@@ -418,3 +418,18 @@ CLIENT_GET_SELF_INFO_RESPONSE = Message(
     (None, Field()),  # response header
     ('self_entity', CLIENT_ENTITY),
 )
+
+CLIENT_RESPONSE_HEADER = Message(
+    ('status', Field()),  # 1 => success
+    (None, Field(is_optional=True)),
+    (None, Field(is_optional=True)),
+    ('request_trace_id', Field()),
+    ('current_server_time', Field()),
+)
+
+CLIENT_SYNC_ALL_NEW_EVENTS_RESPONSE = Message(
+    (None, Field()),  # 'csanerp'
+    ('response_header', CLIENT_RESPONSE_HEADER),
+    ('sync_timestamp', Field()),
+    ('conversation_state', RepeatedField(CLIENT_CONVERSATION_STATE)),
+)
