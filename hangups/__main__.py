@@ -359,6 +359,17 @@ class ConversationWidget(urwid.WidgetWrap):
                         .format(user.first_name, conv_event.new_name))
             self._add_message_widget(MessageWidget(conv_event.timestamp, text))
 
+        elif isinstance(conv_event, hangups.MembershipChangeEvent):
+            event_users = [self._conversation.get_user(user_id) for user_id
+                           in conv_event.participant_ids]
+            names = ', '.join([user.full_name for user in event_users])
+            if conv_event.type_ == hangups.MembershipChangeType.JOIN:
+                text = ('{} added {} to the conversation'
+                        .format(user.first_name, names))
+            else:  # LEAVE
+                text = ('{} left the conversation'.format(names))
+            self._add_message_widget(MessageWidget(conv_event.timestamp, text))
+
         # Update the title in case unread count or conversation name changed.
         self._set_title()
 

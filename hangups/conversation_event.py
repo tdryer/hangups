@@ -165,3 +165,25 @@ class RenameEvent(ConversationEvent):
         An empty string if the conversation had no previous name.
         """
         return self._event.conversation_rename.old_name
+
+
+class MembershipChangeEvent(ConversationEvent):
+
+    """An event that adds or removes a conversation participant.
+
+    Corresponds to ClientMembershipChange in the API.
+    """
+
+    @property
+    def type_(self):
+        """The membership change type (MembershipChangeType)."""
+        return self._event.membership_change.type_
+
+    @property
+    def participant_ids(self):
+        """Return the UserIDs involved in the membership change.
+
+        Multiple users may be added to a conversation at the same time.
+        """
+        return [user.UserID(chat_id=id_.chat_id, gaia_id=id_.gaia_id)
+                for id_ in self._event.membership_change.participant_ids]

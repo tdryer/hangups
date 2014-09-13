@@ -83,7 +83,7 @@ class SegmentType(enum.Enum):
     LINK = 2
 
 
-class ClientMembershipChangeType(enum.Enum):
+class MembershipChangeType(enum.Enum):
 
     """Conversation membership change type."""
 
@@ -283,7 +283,7 @@ CLIENT_OTR_MODIFICATION = Message(
 )
 
 CLIENT_MEMBERSHIP_CHANGE = Message(
-    ('type_', EnumField(ClientMembershipChangeType)),
+    ('type_', EnumField(MembershipChangeType)),
     (None, RepeatedField(Field())),
     ('participant_ids', RepeatedField(USER_ID)),
     (None, Field()),

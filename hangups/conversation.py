@@ -41,12 +41,16 @@ class Conversation(object):
 
         Returns an instance of ConversationEvent or subclass.
         """
+        # TODO: Instead of applying name/membership changes here, we should
+        # receive a ClientConversation instance.
         if event_.chat_message is not None:
             conv_event = conversation_event.ChatMessageEvent(event_)
         elif event_.conversation_rename is not None:
             conv_event = conversation_event.RenameEvent(event_)
             self._name = (conv_event.new_name if conv_event.new_name != ''
                           else None)
+        elif event_.membership_change is not None:
+            conv_event = conversation_event.MembershipChangeEvent(event_)
         else:
             conv_event = conversation_event.ConversationEvent(event_)
         self._events.append(conv_event)
