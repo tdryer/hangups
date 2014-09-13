@@ -67,10 +67,10 @@ class ChatMessageSegment(object):
             is_strikethrough = False
             is_underline = False
         else:
-            is_bold = segment.formatting.bold == 0
-            is_italic = segment.formatting.italic == 0
-            is_strikethrough = segment.formatting.strikethrough == 0
-            is_underline = segment.formatting.underline == 0
+            is_bold = bool(segment.formatting.bold)
+            is_italic = bool(segment.formatting.italic)
+            is_strikethrough = bool(segment.formatting.strikethrough)
+            is_underline = bool(segment.formatting.underline)
         return ChatMessageSegment(
             segment.text, segment_type=segment.type_,
             is_bold=is_bold, is_italic=is_italic,
