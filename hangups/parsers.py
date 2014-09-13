@@ -15,9 +15,7 @@ def parse_submission(submission):
     # For each submission payload, yield its messages
     for payload in _get_submission_payloads(submission):
         if payload is not None:
-            state_update = _parse_payload(payload)
-            if state_update is not None:
-                yield state_update
+            yield from _parse_payload(payload)
 
 
 def _get_submission_payloads(submission):
@@ -75,17 +73,19 @@ def _get_submission_payloads(submission):
 
 
 def _parse_payload(payload):
-    """Return a ClientStateUpdate from a payload, or None."""
-    state_update = None
+    """Yield a list of ClientStateUpdates."""
     if payload[0] == 'cbu':
-        try:
-            state_update = schemas.CLIENT_STATE_UPDATE.parse(payload[1][0])
-        except ValueError as e:
-            logger.warning('Failed to parse ClientStateUpdate: {}'.format(e))
+        # payload[1] is a list of state updates.
+        for raw_update in payload[1]:
+            try:
+                state_update = schemas.CLIENT_STATE_UPDATE.parse(raw_update)
+                logger.info('Parsed ClientStateUpdate: {}'.format(state_update))
+                yield state_update
+            except ValueError as e:
+                logger.warning('Failed to parse ClientStateUpdate: {}'
+                               .format(e))
     else:
         logger.warning('Invalid payload header: {}'.format(payload[0]))
-    logger.info('Parsed ClientStateUpdate: {}'.format(state_update))
-    return state_update
 
 
 ##############################################################################
