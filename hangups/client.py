@@ -123,6 +123,8 @@ class Client(object):
 
         # Parse chat message from response and fire on_message event for each
         # new chat message.
+        # TODO: By only parsing the ClientEvents, we're missing the
+        # ClientConversation data.
         conversation_state = res[3]
         for conv in conversation_state:
             events = conv[2]
