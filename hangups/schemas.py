@@ -225,7 +225,7 @@ CLIENT_CONVERSATION = Message(
 
 MESSAGE_SEGMENT = Message(
     ('type_', EnumField(SegmentType)),
-    ('text', Field()),
+    ('text', Field(is_optional=True)),  # Can be None for linebreaks
     ('formatting', Message(
         ('bold', Field(is_optional=True)),
         ('italic', Field(is_optional=True)),
