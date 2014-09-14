@@ -1,9 +1,9 @@
 """Conversation objects."""
 
 import logging
-from tornado import gen
+from tornado import gen, ioloop
 
-from hangups import parsers, event, user, conversation_event
+from hangups import parsers, event, user, conversation_event, exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -97,9 +97,10 @@ class Conversation(object):
 class ConversationList(object):
     """Wrapper around Client that maintains a list of Conversations."""
 
-    def __init__(self, client, conv_states, user_list):
-        self._client = client
+    def __init__(self, client, conv_states, user_list, sync_timestamp):
+        self._client = client  # Client
         self._conv_dict = {}  # {conv_id: Conversation}
+        self._sync_timestamp = sync_timestamp  # datetime
 
         # Initialize the list of conversations from Client's list of
         # ClientConversationStates.
@@ -111,9 +112,11 @@ class ConversationList(object):
             )
 
         self._client.on_state_update.add_observer(self._on_state_update)
-        self._client.on_event_notification.add_observer(
-            self._on_event_notification
+        sync_f = lambda initial_data=None: ioloop.IOLoop.instance().add_future(
+            self._sync(), lambda f: f.result()
         )
+        self._client.on_connect.add_observer(sync_f)
+        self._client.on_reconnect.add_observer(sync_f)
 
         # Event fired when a new ConversationEvent arrives with arguments
         # (ConversationEvent).
@@ -142,11 +145,11 @@ class ConversationList(object):
                 state_update.typing_notification
             )
         if state_update.event_notification is not None:
-            self._on_event_notification(state_update.event_notification)
+            self._on_client_event(state_update.event_notification.event)
 
-    def _on_event_notification(self, event_notification):
-        """Receive a ClientEventNofication and fan out to Conversations."""
-        event_ = event_notification.event
+    def _on_client_event(self, event_):
+        """Receive a ClientEvent and fan out to Conversations."""
+        self._sync_timestamp = parsers.from_timestamp(event_.timestamp)
         try:
             conv = self._conv_dict[event_.conversation_id.id_]
         except KeyError:
@@ -178,3 +181,25 @@ class ConversationList(object):
         else:
             logger.warning('Received ClientSetTypingNotification for '
                            'unknown conversation {}'.format(conv_id))
+
+    @gen.coroutine
+    def _sync(self):
+        """Sync conversation state and events that could have been missed."""
+        logger.info('Syncing events since {}'.format(self._sync_timestamp))
+        try:
+            res = yield self._client.syncallnewevents(self._sync_timestamp)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to sync events, some events may be lost: {}'
+                           .format(e))
+        else:
+            for conv_state in res.conversation_state:
+                conv_id = conv_state.conversation_id.id_
+                conv = self._conv_dict.get(conv_id, None)
+                if conv is not None:
+                    conv.update_conversation(conv_state.conversation)
+                    for event_ in conv_state.event:
+                        timestamp = parsers.from_timestamp(event_.timestamp)
+                        if timestamp > self._sync_timestamp:
+                            # This updates the sync_timestamp for us, as well
+                            # as triggering events.
+                            self._on_client_event(event_)

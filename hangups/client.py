@@ -1,6 +1,6 @@
 """Abstract class for writing chat clients."""
 
-from tornado import gen, httpclient, ioloop
+from tornado import gen, httpclient
 import collections
 import hashlib
 import itertools
@@ -9,7 +9,6 @@ import logging
 import random
 import re
 import time
-import types
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
                      event, schemas)
@@ -37,6 +36,7 @@ InitialData = collections.namedtuple('InitialData', [
     'self_entity',  # ClientEntity
     'entities',  # [ClientEntity]
     'conversation_participants',  # [ClientConversationParticipantData]
+    'sync_timestamp'  # datetime
 ])
 
 
@@ -63,14 +63,8 @@ class Client(object):
         # Event fired when a ClientStateUpdate arrives with arguments
         # (state_update).
         self.on_state_update = event.Event('Client.on_state_update')
-        # Event fired when a ClientEventNotification arrives with arguments
-        # (event_notification).
-        self.on_event_notification = event.Event(
-            'Client.on_event_notification'
-        )
 
         self._cookies = cookies
-        self._sync_timestamp = None  # datetime.datetime
 
         # hangups.channel.Channel instantiated in connect()
         self._channel = None
@@ -99,14 +93,9 @@ class Client(object):
         self._channel = channel.Channel(self._cookies, self._channel_path,
                                         self._clid, self._channel_ec_param,
                                         self._channel_prop_param)
-        sync_f = lambda: ioloop.IOLoop.instance().add_future(
-            self._sync_chat_messages(), lambda f: f.result()
-        )
-        self._channel.on_connect.add_observer(sync_f)
         self._channel.on_connect.add_observer(
             lambda: self.on_connect.fire(initial_data)
         )
-        self._channel.on_reconnect.add_observer(sync_f)
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
         self._channel.on_message.add_observer(self._on_push_data)
@@ -115,26 +104,6 @@ class Client(object):
     ##########################################################################
     # Private methods
     ##########################################################################
-
-    @gen.coroutine
-    def _sync_chat_messages(self):
-        """Sync chat messages since self._sync_timestamp."""
-        # TODO: Move this method into ConversationList?
-        logger.info('Syncing messages since {}'.format(self._sync_timestamp))
-        res = yield self.syncallnewevents(self._sync_timestamp)
-        # Parse chat message from response and fire on_event_notification for
-        # each new ClientEvent.
-        # TODO: By only parsing the ClientEvents, we're missing the
-        # ClientConversation data.
-        for conv_state in res.conversation_state:
-            for event_ in conv_state.event:
-                ev_notif = types.SimpleNamespace(event=event_)
-                # Workaround for syncallnewevents timestamp being
-                # inclusive:
-                timestamp = parsers.from_timestamp(ev_notif.event.timestamp)
-                if timestamp > self._sync_timestamp:
-                    self.on_event_notification.fire(ev_notif)
-        self._sync_timestamp = parsers.from_timestamp(res.sync_timestamp)
 
     @gen.coroutine
     def _initialize_chat(self):
@@ -178,7 +147,7 @@ class Client(object):
             self._clid = data_dict['ds:4'][0][7]
             self._channel_ec_param = data_dict['ds:4'][0][4]
             self._channel_prop_param = data_dict['ds:4'][0][5]
-            self._sync_timestamp = parsers.from_timestamp(
+            _sync_timestamp = parsers.from_timestamp(
                 data_dict['ds:21'][0][1][4]
             )
         except KeyError as e:
@@ -218,7 +187,7 @@ class Client(object):
             ))
 
         return InitialData(initial_conv_states, self_entity, initial_entities,
-                           initial_conv_parts)
+                           initial_conv_parts, _sync_timestamp)
 
     def _get_authorization_header(self):
         """Return autorization header for chat API request."""
@@ -248,10 +217,6 @@ class Client(object):
     def _on_push_data(self, submission):
         """Parse ClientStateUpdate and call the appropriate events."""
         for state_update in parsers.parse_submission(submission):
-            if state_update.event_notification is not None:
-                self._sync_timestamp = parsers.from_timestamp(
-                    state_update.event_notification.event.timestamp
-                )
             self.on_state_update.fire(state_update)
 
     @gen.coroutine

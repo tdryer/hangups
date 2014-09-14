@@ -116,7 +116,8 @@ class ChatUI(object):
             initial_data.conversation_participants
         )
         self._conv_list = hangups.ConversationList(
-            self._client, initial_data.conversation_states, self._user_list
+            self._client, initial_data.conversation_states, self._user_list,
+            initial_data.sync_timestamp
         )
         self._conv_list.on_event.add_observer(self._on_event)
         self._notifier = Notifier(self._conv_list)
