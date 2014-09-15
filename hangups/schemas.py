@@ -387,7 +387,7 @@ CLIENT_ENTITY = Message(
         ('display_name', Field(is_optional=True)),
         ('first_name', Field(is_optional=True)),
         ('photo_url', Field(is_optional=True)),
-        ('email', Field(is_optional=True)),
+        ('emails', RepeatedField(Field())),
     )),
 )
 

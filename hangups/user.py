@@ -17,14 +17,14 @@ class User(object):
     first_name from the full_name, or setting both to DEFAULT_NAME.
     """
 
-    def __init__(self, user_id, full_name, first_name, photo_url, email, is_self):
+    def __init__(self, user_id, full_name, first_name, photo_url, emails, is_self):
         """Initialize a User."""
         self.id_ = user_id
         self.full_name = full_name if full_name is not None else DEFAULT_NAME
         self.first_name = (first_name if first_name is not None
                            else self.full_name.split()[0])
         self.photo_url = photo_url
-        self.email = email
+        self.emails = emails
         self.is_self = is_self
 
     @staticmethod
@@ -38,7 +38,7 @@ class User(object):
         return User(user_id, entity.properties.display_name,
                     entity.properties.first_name,
                     entity.properties.photo_url,
-                    entity.properties.email,
+                    entity.properties.emails,
                     (self_user_id == user_id) or (self_user_id is None))
 
     @staticmethod
@@ -49,7 +49,7 @@ class User(object):
         """
         user_id = UserID(chat_id=conv_part_data.id_.chat_id,
                          gaia_id=conv_part_data.id_.gaia_id)
-        return User(user_id, conv_part_data.fallback_name, None, None, None,
+        return User(user_id, conv_part_data.fallback_name, None, None, [],
                     (self_user_id == user_id) or (self_user_id is None))
 
 
@@ -92,4 +92,4 @@ class UserList(object):
         except KeyError:
             logger.warning('UserList returning unknown User for UserID {}'
                            .format(user_id))
-            return User(user_id, DEFAULT_NAME, None, None, None, False)
+            return User(user_id, DEFAULT_NAME, None, None, [], False)
