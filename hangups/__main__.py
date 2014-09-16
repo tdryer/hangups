@@ -1,8 +1,8 @@
 """Demo chat client using Hangups."""
 
-from tornado import ioloop
 import appdirs
 import argparse
+import asyncio
 import datetime
 import logging
 import os
@@ -62,31 +62,18 @@ class ChatUI(object):
         self._client = hangups.Client(cookies)
         self._client.on_connect.add_observer(self._on_connect)
 
-        class MyEventLoop(urwid.TornadoEventLoop):
-            """Patched Tornado event loop for urwid.
+        loop = asyncio.get_event_loop()
+        self._urwid_loop = urwid.MainLoop(
+            LoadingWidget(), palette, handle_mouse=False,
+            event_loop=urwid.AsyncioEventLoop(loop=loop)
+        )
 
-            Patch urwid's TornadoEventLoop to run_sync() our connection
-            coroutine rather than calling start(). This "fixes" exception
-            handling, causing all uncaught exceptions to be fatal.
-            """
-            _client = self._client
-            def run(self):
-                try:
-                    ioloop.IOLoop.instance().run_sync(self._client.connect)
-                except ioloop.TimeoutError:
-                    # Ignore spurious timeout when there's another exception.
-                    pass
-                # Raise exception if there was one.
-                if self._exception:
-                    exc, self._exception = self._exception, None
-                    raise exc # pylint: disable=E0702
-
-        # Initialize urwid, starting the IOLoop, and block until the IOLoop
-        # exits.
-        self._urwid_loop = urwid.MainLoop(LoadingWidget(), palette,
-                                          event_loop=MyEventLoop(),
-                                          handle_mouse=False)
-        self._urwid_loop.run()
+        self._urwid_loop.start()
+        try:
+            loop.run_until_complete(self._client.connect())
+        finally:
+            # Ensure urwid cleans up properly and doesn't wreck the terminal.
+            self._urwid_loop.stop()
 
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
@@ -300,9 +287,9 @@ class ConversationWidget(urwid.WidgetWrap):
         # XXX: Exception handling here is still a bit broken. Uncaught
         # exceptions in _on_message_sent will only be logged.
         segments = [hangups.ChatMessageSegment(text)]
-        self._conversation.send_message(segments).add_done_callback(
-            self._on_message_sent
-        )
+        asyncio.async(
+            self._conversation.send_message(segments)
+        ).add_done_callback(self._on_message_sent)
 
     def _on_message_sent(self, future):
         """Handle showing an error if a message fails to send."""
@@ -469,6 +456,8 @@ def main():
 
     log_level = logging.DEBUG if args.debug else logging.WARNING
     logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
+    # urwid makes asyncio's debugging logs VERY noisy, so adjust the log level:
+    logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     try:
         ChatUI(args.cookies, {

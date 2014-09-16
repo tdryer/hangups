@@ -1,6 +1,7 @@
 """Abstract class for writing chat clients."""
 
-from tornado import gen, httpclient
+import aiohttp
+import asyncio
 import collections
 import hashlib
 import itertools
@@ -24,10 +25,6 @@ CHAT_INIT_PARAMS = {
 CHAT_INIT_REGEX = re.compile(
     r"(?:<script>AF_initDataCallback\((.*?)\);</script>)", re.DOTALL
 )
-# Set the connection and request timeouts low so we fail fast when there's a
-# network problem.
-CONNECT_TIMEOUT = 10
-REQUEST_TIMEOUT = 10
 
 
 # Initial account data received after the client is first connected:
@@ -65,6 +62,7 @@ class Client(object):
         self.on_state_update = event.Event('Client.on_state_update')
 
         self._cookies = cookies
+        self._connector = aiohttp.TCPConnector()
 
         # hangups.channel.Channel instantiated in connect()
         self._channel = None
@@ -86,26 +84,27 @@ class Client(object):
     # Public methods
     ##########################################################################
 
-    @gen.coroutine
+    @asyncio.coroutine
     def connect(self):
         """Connect to the server and receive events."""
-        initial_data = yield self._initialize_chat()
-        self._channel = channel.Channel(self._cookies, self._channel_path,
-                                        self._clid, self._channel_ec_param,
-                                        self._channel_prop_param)
+        initial_data = yield from self._initialize_chat()
+        self._channel = channel.Channel(
+            self._cookies, self._channel_path, self._clid,
+            self._channel_ec_param, self._channel_prop_param, self._connector
+        )
         self._channel.on_connect.add_observer(
             lambda: self.on_connect.fire(initial_data)
         )
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
         self._channel.on_message.add_observer(self._on_push_data)
-        yield self._channel.listen()
+        yield from self._channel.listen()
 
     ##########################################################################
     # Private methods
     ##########################################################################
 
-    @gen.coroutine
+    @asyncio.coroutine
     def _initialize_chat(self):
         """Request push channel creation and initial chat data.
 
@@ -116,11 +115,11 @@ class Client(object):
         the data.
         """
         try:
-            res = yield http_utils.fetch(
-                CHAT_INIT_URL, cookies=self._cookies, params=CHAT_INIT_PARAMS,
-                connect_timeout=CONNECT_TIMEOUT, request_timeout=REQUEST_TIMEOUT
+            res = yield from http_utils.fetch(
+                'get', CHAT_INIT_URL, cookies=self._cookies,
+                params=CHAT_INIT_PARAMS, connector=self._connector
             )
-        except httpclient.HTTPError as e:
+        except exceptions.NetworkError as e:
             raise exceptions.HangupsError('Initialize chat request failed: {}'
                                           .format(e))
 
@@ -219,9 +218,12 @@ class Client(object):
         for state_update in parsers.parse_submission(submission):
             self.on_state_update.fire(state_update)
 
-    @gen.coroutine
+    @asyncio.coroutine
     def _request(self, endpoint, body_json, use_json=True):
-        """Make chat API request."""
+        """Make chat API request.
+
+        Raises hangups.NetworkError if the request fails.
+        """
         url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
         headers = {
             'authorization': self._get_authorization_header(),
@@ -236,89 +238,19 @@ class Client(object):
             'key': self._api_key,
             'alt': 'json' if use_json else 'protojson',
         }
-        res = yield http_utils.fetch(
-            url, method='POST', headers=headers, cookies=cookies,
-            params=params, data=json.dumps(body_json),
-            request_timeout=REQUEST_TIMEOUT, connect_timeout=CONNECT_TIMEOUT
+        res = yield from http_utils.fetch(
+            'post', url, headers=headers, cookies=cookies, params=params,
+            data=json.dumps(body_json), connector=self._connector
         )
         logger.debug('Response to request for {} was {}:\n{}'
                      .format(endpoint, res.code, res.body))
-        if res.code != 200:
-            raise ValueError('Request to {} endpoint failed with {}: {}'
-                             .format(endpoint, res.code, res.body.decode()))
         return res
 
-    @gen.coroutine
-    def getselfinfo(self):
-        """Return information about your account."""
-        res = yield self._request('contacts/getselfinfo', [
-            self._get_request_header(),
-            [], []
-        ])
-        return json.loads(res.body.decode())
+    ###########################################################################
+    # Raw API request methods
+    ###########################################################################
 
-    @gen.coroutine
-    def setfocus(self, conversation_id):
-        """Set focus (occurs whenever you give focus to a client)."""
-        res = yield self._request('conversations/setfocus', [
-            self._get_request_header(),
-            [conversation_id],
-            1,
-            20
-        ])
-        return json.loads(res.body.decode())
-
-    @gen.coroutine
-    def searchentities(self, search_string, max_results):
-        """Search for people."""
-        res = yield self._request('contacts/searchentities', [
-            self._get_request_header(),
-            [],
-            search_string,
-            max_results
-        ])
-        return json.loads(res.body.decode())
-
-    @gen.coroutine
-    def querypresence(self, chat_id):
-        """Check someone's presence status."""
-        res = yield self._request('presence/querypresence', [
-            self._get_request_header(),
-            [
-                [chat_id]
-            ],
-            [1, 2, 5, 7, 8]
-        ])
-        return json.loads(res.body.decode())
-
-    @gen.coroutine
-    def getentitybyid(self, chat_id_list):
-        """Return information about a list of contacts."""
-        res = yield self._request('contacts/getentitybyid', [
-            self._get_request_header(),
-            None,
-            [[str(chat_id)] for chat_id in chat_id_list],
-        ])
-        return json.loads(res.body.decode())
-
-    @gen.coroutine
-    def getconversation(self, conversation_id, num_events,
-                        storage_continuation_token, event_timestamp):
-        """Return data about a conversation.
-
-        Seems to require both a timestamp and a token from a previous event
-        """
-        res = yield self._request('conversations/getconversation', [
-            self._get_request_header(),
-            [
-                [conversation_id], [], []
-            ],
-            True, True, None, num_events,
-            [None, storage_continuation_token, event_timestamp]
-        ])
-        return json.loads(res.body.decode())
-
-    @gen.coroutine
+    @asyncio.coroutine
     def syncallnewevents(self, timestamp):
         """List all events occuring at or after timestamp.
 
@@ -332,18 +264,13 @@ class Client(object):
 
         Returns a ClientSyncAllNewEventsResponse.
         """
-        try:
-            res = yield self._request('conversations/syncallnewevents', [
-                self._get_request_header(),
-                # last_sync_timestamp
-                int(timestamp.timestamp()) * 1000000,
-                [], None, [], False, [],
-                1048576 # max_response_size_bytes
-            ], use_json=False)
-        except (httpclient.HTTPError, IOError) as e:
-            # In addition to HTTPError, httpclient can raise IOError (which
-            # includes socker.gaierror).
-            raise exceptions.NetworkError(e)
+        res = yield from self._request('conversations/syncallnewevents', [
+            self._get_request_header(),
+            # last_sync_timestamp
+            int(timestamp.timestamp()) * 1000000,
+            [], None, [], False, [],
+            1048576 # max_response_size_bytes
+        ], use_json=False)
         try:
             res = schemas.CLIENT_SYNC_ALL_NEW_EVENTS_RESPONSE.parse(
                 javascript.loads(res.body.decode())
@@ -358,81 +285,14 @@ class Client(object):
                                           .format(status))
         return res
 
-    @gen.coroutine
-    def syncrecentconversations(self):
-        """List the contents of recent conversations, including messages.
-
-        Similar to syncallnewevents, but appears to return a limited number of
-        conversations (20) rather than all conversations in a given date range.
-        """
-        res = yield self._request('conversations/syncrecentconversations', [
-            self._get_request_header(),
-        ])
-        return json.loads(res.body.decode())
-
-    @gen.coroutine
-    def setchatname(self, conversation_id, name):
-        """Set the name of a conversation.
-
-        Raises hangups.NetworkError if the request can not be sent.
-        """
-        client_generated_id = random.randint(0, 2 ** 32)
-        body = [
-            self._get_request_header(),
-            None,
-            name,
-            None,
-            [[conversation_id], client_generated_id, 1]
-        ]
-        try:
-            res = yield self._request('conversations/renameconversation', body)
-        except (httpclient.HTTPError, IOError) as e:
-            # In addition to HTTPError, httpclient can raise IOError (which
-            # includes socker.gaierror).
-            logger.warning('Failed to send message: {}'.format(e))
-            raise exceptions.NetworkError(e)
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            logger.warning('renameconversation returned status {}'
-                           .format(res_status))
-            raise exceptions.NetworkError()
-
-    @gen.coroutine
-    def sendeasteregg(self, conversation_id, easteregg):
-        """Send a easteregg to a conversation.
-
-        easteregg may not be empty.
-
-        Raises hangups.NetworkError if the easteregg can not be sent.
-        """
-        body = [
-            self._get_request_header(),
-            [conversation_id],
-            [easteregg, None, 1]
-        ]
-        try:
-            res = yield self._request('conversations/easteregg', body)
-        except (httpclient.HTTPError, IOError) as e:
-            # In addition to HTTPError, httpclient can raise IOError (which
-            # includes socker.gaierror).
-            logger.warning('Failed to send easteregg: {}'.format(e))
-            raise exceptions.NetworkError(e)
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            logger.warning('easteregg returned status {}'
-                           .format(res_status))
-            raise exceptions.NetworkError()
-
-    @gen.coroutine
+    @asyncio.coroutine
     def sendchatmessage(self, conversation_id, segments):
         """Send a chat message to a conversation.
 
         conversation_id must be a valid conversation ID. segments must be a
         list of message segments to send, in pblite format.
 
-        Raises hangups.NetworkError if the message can not be sent.
+        Raises hangups.NetworkError if the request fails.
         """
         client_generated_id = random.randint(0, 2**32)
         body = [
@@ -447,13 +307,7 @@ class Client(object):
             ],
             None, None, None, []
         ]
-        try:
-            res = yield self._request('conversations/sendchatmessage', body)
-        except (httpclient.HTTPError, IOError) as e:
-            # In addition to HTTPError, httpclient can raise IOError (which
-            # includes socker.gaierror).
-            logger.warning('Failed to send message: {}'.format(e))
-            raise exceptions.NetworkError(e)
+        res = yield from self._request('conversations/sendchatmessage', body)
         # sendchatmessage can return 200 but still contain an error
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
@@ -461,3 +315,151 @@ class Client(object):
             logger.warning('sendchatmessage returned status {}'
                            .format(res_status))
             raise exceptions.NetworkError()
+
+    ###########################################################################
+    # UNUSED raw API request methods (by hangups itself) for reference
+    ###########################################################################
+
+    @asyncio.coroutine
+    def getselfinfo(self):
+        """Return information about your account.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('contacts/getselfinfo', [
+            self._get_request_header(),
+            [], []
+        ])
+        return json.loads(res.body.decode())
+
+    @asyncio.coroutine
+    def setfocus(self, conversation_id):
+        """Set focus (occurs whenever you give focus to a client).
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('conversations/setfocus', [
+            self._get_request_header(),
+            [conversation_id],
+            1,
+            20
+        ])
+        return json.loads(res.body.decode())
+
+    @asyncio.coroutine
+    def searchentities(self, search_string, max_results):
+        """Search for people.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('contacts/searchentities', [
+            self._get_request_header(),
+            [],
+            search_string,
+            max_results
+        ])
+        return json.loads(res.body.decode())
+
+    @asyncio.coroutine
+    def querypresence(self, chat_id):
+        """Check someone's presence status.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('presence/querypresence', [
+            self._get_request_header(),
+            [
+                [chat_id]
+            ],
+            [1, 2, 5, 7, 8]
+        ])
+        return json.loads(res.body.decode())
+
+    @asyncio.coroutine
+    def getentitybyid(self, chat_id_list):
+        """Return information about a list of contacts.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('contacts/getentitybyid', [
+            self._get_request_header(),
+            None,
+            [[str(chat_id)] for chat_id in chat_id_list],
+        ])
+        return json.loads(res.body.decode())
+
+    @asyncio.coroutine
+    def getconversation(self, conversation_id, num_events,
+                        storage_continuation_token, event_timestamp):
+        """Return data about a conversation.
+
+        Seems to require both a timestamp and a token from a previous event
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('conversations/getconversation', [
+            self._get_request_header(),
+            [
+                [conversation_id], [], []
+            ],
+            True, True, None, num_events,
+            [None, storage_continuation_token, event_timestamp]
+        ])
+        return json.loads(res.body.decode())
+
+    @asyncio.coroutine
+    def syncrecentconversations(self):
+        """List the contents of recent conversations, including messages.
+
+        Similar to syncallnewevents, but appears to return a limited number of
+        conversations (20) rather than all conversations in a given date range.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('conversations/syncrecentconversations',
+                                       [self._get_request_header()])
+        return json.loads(res.body.decode())
+
+    @asyncio.coroutine
+    def setchatname(self, conversation_id, name):
+        """Set the name of a conversation.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        client_generated_id = random.randint(0, 2 ** 32)
+        body = [
+            self._get_request_header(),
+            None,
+            name,
+            None,
+            [[conversation_id], client_generated_id, 1]
+        ]
+        res = yield from self._request('conversations/renameconversation', body)
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            logger.warning('renameconversation returned status {}'
+                           .format(res_status))
+            raise exceptions.NetworkError()
+
+    @asyncio.coroutine
+    def sendeasteregg(self, conversation_id, easteregg):
+        """Send a easteregg to a conversation.
+
+        easteregg may not be empty.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        body = [
+            self._get_request_header(),
+            [conversation_id],
+            [easteregg, None, 1]
+        ]
+        res = yield from self._request('conversations/easteregg', body)
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            logger.warning('easteregg returned status {}'
+                           .format(res_status))
+            raise exceptions.NetworkError()
+

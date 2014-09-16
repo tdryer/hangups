@@ -1,7 +1,7 @@
 """Conversation objects."""
 
+import asyncio
 import logging
-from tornado import gen, ioloop
 
 from hangups import parsers, event, user, conversation_event, exceptions
 
@@ -12,7 +12,8 @@ class Conversation(object):
 
     """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, client, user_list, client_conversation, client_events=[]):
+    def __init__(self, client, user_list, client_conversation,
+                 client_events=[]):
         """Initialize a new Conversation."""
         self._client = client  # Client
         self._user_list = user_list  # UserList
@@ -52,7 +53,7 @@ class Conversation(object):
         """Return the User instance with the given UserID."""
         return self._user_list.get_user(user_id)
 
-    @gen.coroutine
+    @asyncio.coroutine
     def send_message(self, segments):
         """Send a message to this conversation.
 
@@ -61,8 +62,9 @@ class Conversation(object):
 
         Raises hangups.NetworkError if the message can not be sent.
         """
-        yield self._client.sendchatmessage(self.id_, [seg.serialize()
-                                                      for seg in segments])
+        yield from self._client.sendchatmessage(
+            self.id_, [seg.serialize() for seg in segments]
+        )
 
     @property
     def id_(self):
@@ -109,9 +111,9 @@ class ConversationList(object):
             self.add_conversation(conv_state.conversation, conv_state.event)
 
         self._client.on_state_update.add_observer(self._on_state_update)
-        sync_f = lambda initial_data=None: ioloop.IOLoop.instance().add_future(
-            self._sync(), lambda f: f.result()
-        )
+        # TODO: Make event support coroutines so we don't have to do this:
+        sync_f = lambda initial_data=None: asyncio.async(self._sync()) \
+                .add_done_callback(lambda f: f.result())
         self._client.on_connect.add_observer(sync_f)
         self._client.on_reconnect.add_observer(sync_f)
 
@@ -186,12 +188,12 @@ class ConversationList(object):
             logger.warning('Received ClientSetTypingNotification for '
                            'unknown conversation {}'.format(conv_id))
 
-    @gen.coroutine
+    @asyncio.coroutine
     def _sync(self):
         """Sync conversation state and events that could have been missed."""
         logger.info('Syncing events since {}'.format(self._sync_timestamp))
         try:
-            res = yield self._client.syncallnewevents(self._sync_timestamp)
+            res = yield from self._client.syncallnewevents(self._sync_timestamp)
         except exceptions.NetworkError as e:
             logger.warning('Failed to sync events, some events may be lost: {}'
                            .format(e))
