@@ -188,7 +188,7 @@ CLIENT_CONVERSATION = Message(
         ('inviter_id', USER_ID),
         ('invite_timestamp', Field()),
         ('sort_timestamp', Field(is_optional=True)),
-        ('active_timestamp', Field()),
+        ('active_timestamp', Field(is_optional=True)),
         (None, Field(is_optional=True)),
         (None, Field(is_optional=True)),
         (None, Field()),
