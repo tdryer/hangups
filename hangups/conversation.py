@@ -12,7 +12,7 @@ class Conversation(object):
 
     """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, client, user_list, client_conversation, client_events):
+    def __init__(self, client, user_list, client_conversation, client_events=[]):
         """Initialize a new Conversation."""
         self._client = client  # Client
         self._user_list = user_list  # UserList
@@ -101,15 +101,12 @@ class ConversationList(object):
         self._client = client  # Client
         self._conv_dict = {}  # {conv_id: Conversation}
         self._sync_timestamp = sync_timestamp  # datetime
+        self._user_list = user_list # UserList
 
         # Initialize the list of conversations from Client's list of
         # ClientConversationStates.
         for conv_state in conv_states:
-            conv_id = conv_state.conversation_id.id_
-            self._conv_dict[conv_id] = Conversation(
-                self._client, user_list, conv_state.conversation,
-                conv_state.event
-            )
+            self.add_conversation(conv_state.conversation, conv_state.event)
 
         self._client.on_state_update.add_observer(self._on_state_update)
         sync_f = lambda initial_data=None: ioloop.IOLoop.instance().add_future(
@@ -136,6 +133,13 @@ class ConversationList(object):
         """
         return self._conv_dict[conv_id]
 
+    def add_conversation(self, client_conversation, client_events=[]):
+        conv_id = client_conversation.conversation_id.id_
+        self._conv_dict[conv_id] = Conversation(
+            self._client, self._user_list,
+            client_conversation, client_events
+        )
+
     def _on_state_update(self, state_update):
         """Receive a ClientStateUpdate and fan out to Conversations."""
         if state_update.client_conversation is not None:
@@ -161,14 +165,14 @@ class ConversationList(object):
             conv.on_event.fire(conv_event)
 
     def _handle_client_conversation(self, client_conversation):
-        """Receive ClientConversation and update the conversation."""
+        """Receive ClientConversation and create or update the conversation."""
         conv_id = client_conversation.conversation_id.id_
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
             conv.update_conversation(client_conversation)
         else:
-            logger.warning('Received ClientConversation for '
-                           'unknown conversation {}'.format(conv_id))
+            logger.info('Adding new conversation: {}'.format(conv_id))
+            self.add_conversation(client_conversation)
 
     def _handle_set_typing_notification(self, set_typing_notification):
         """Receive ClientSetTypingNotification and update the conversation."""
@@ -203,3 +207,6 @@ class ConversationList(object):
                             # This updates the sync_timestamp for us, as well
                             # as triggering events.
                             self._on_client_event(event_)
+                else:
+                    logger.info('Adding new conversation: {}'.format(conv_id))
+                    self.add_conversation(conv_state.conversation, conv_state.event)
