@@ -112,7 +112,7 @@ class ChatUI(object):
     def _on_connect(self, initial_data):
         """Handle connecting for the first time."""
         self._user_list = hangups.UserList(
-            initial_data.self_entity, initial_data.entities,
+            self._client, initial_data.self_entity, initial_data.entities,
             initial_data.conversation_participants
         )
         self._conv_list = hangups.ConversationList(

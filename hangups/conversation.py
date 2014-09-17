@@ -134,12 +134,15 @@ class ConversationList(object):
         return self._conv_dict[conv_id]
 
     def add_conversation(self, client_conversation, client_events=[]):
+        """Add new conversation from ClientConversation"""
         conv_id = client_conversation.conversation_id.id_
         logger.info('Adding new conversation: {}'.format(conv_id))
-        self._conv_dict[conv_id] = Conversation(
+        conv = Conversation(
             self._client, self._user_list,
             client_conversation, client_events
         )
+        self._conv_dict[conv_id] = conv
+        return conv
 
     def _on_state_update(self, state_update):
         """Receive a ClientStateUpdate and fan out to Conversations."""
