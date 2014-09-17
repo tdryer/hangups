@@ -135,6 +135,7 @@ class ConversationList(object):
 
     def add_conversation(self, client_conversation, client_events=[]):
         conv_id = client_conversation.conversation_id.id_
+        logger.info('Adding new conversation: {}'.format(conv_id))
         self._conv_dict[conv_id] = Conversation(
             self._client, self._user_list,
             client_conversation, client_events
@@ -171,7 +172,6 @@ class ConversationList(object):
         if conv is not None:
             conv.update_conversation(client_conversation)
         else:
-            logger.info('Adding new conversation: {}'.format(conv_id))
             self.add_conversation(client_conversation)
 
     def _handle_set_typing_notification(self, set_typing_notification):
@@ -208,5 +208,5 @@ class ConversationList(object):
                             # as triggering events.
                             self._on_client_event(event_)
                 else:
-                    logger.info('Adding new conversation: {}'.format(conv_id))
-                    self.add_conversation(conv_state.conversation, conv_state.event)
+                    self.add_conversation(conv_state.conversation,
+                                          conv_state.event)
