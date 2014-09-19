@@ -312,9 +312,8 @@ class Client(object):
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
         if res_status != 'OK':
-            logger.warning('sendchatmessage returned status {}'
-                           .format(res_status))
-            raise exceptions.NetworkError()
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
 
     ###########################################################################
     # UNUSED raw API request methods (by hangups itself) for reference

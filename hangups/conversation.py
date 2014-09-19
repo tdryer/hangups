@@ -62,9 +62,13 @@ class Conversation(object):
 
         Raises hangups.NetworkError if the message can not be sent.
         """
-        yield from self._client.sendchatmessage(
-            self.id_, [seg.serialize() for seg in segments]
-        )
+        try:
+            yield from self._client.sendchatmessage(
+                self.id_, [seg.serialize() for seg in segments]
+            )
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to send message: {}'.format(e))
+            raise
 
     @property
     def id_(self):
