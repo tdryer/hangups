@@ -10,6 +10,7 @@ from hangups import exceptions
 logger = logging.getLogger(__name__)
 CONNECT_TIMEOUT = 10
 REQUEST_TIMEOUT = 30
+MAX_RETRIES = 3
 
 FetchResponse = collections.namedtuple('FetchResponse', ['code', 'body'])
 
@@ -19,21 +20,36 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
           connector=None):
     """Make an HTTP request.
 
-    Raises hanups.NetworkError if the request fails.
+    If the request times out or a encounters a connection issue, it will be
+    retried MAX_RETRIES times before finally raising hangups.NetworkError.
 
-    TODO: Add automatic retry on failure
+    Returns FetchResponse.
     """
-    try:
-        res = yield from asyncio.wait_for(aiohttp.request(
-            method, url, params=params, headers=headers, cookies=cookies,
-            data=data, connector=connector
-        ), CONNECT_TIMEOUT)
-        body = yield from asyncio.wait_for(res.read(), REQUEST_TIMEOUT)
-    except asyncio.TimeoutError:
-        raise exceptions.NetworkError('Request timed out')
-    except aiohttp.errors.ConnectionError as e:
-        raise exceptions.NetworkError('Request connection error: {}'.format(e))
+    logger.info('Request {} {}'.format(method.upper(), url))
+    error_msg = None
+    for retry_num in range(MAX_RETRIES):
+        try:
+            res = yield from asyncio.wait_for(aiohttp.request(
+                method, url, params=params, headers=headers, cookies=cookies,
+                data=data, connector=connector
+            ), CONNECT_TIMEOUT)
+            body = yield from asyncio.wait_for(res.read(), REQUEST_TIMEOUT)
+        except asyncio.TimeoutError:
+            error_msg = 'Request timed out'
+        except aiohttp.errors.ConnectionError as e:
+            error_msg = 'Request connection error: {}'.format(e)
+        else:
+            error_msg = None
+            break
+        logger.info('Request attempt {} failed: {}'
+                    .format(retry_num, error_msg))
+    if error_msg:
+        logger.info('Request failed after {} attempts'.format(MAX_RETRIES))
+        raise exceptions.NetworkError(error_msg)
     if res.status > 200 or res.status < 200:
+        logger.info('Request returned unexpected status: {} {}'
+                    .format(res.status, res.reason))
         raise exceptions.NetworkError('Request return unexpected status: {}: {}'
                                       .format(res.status, res.reason))
+    logger.info('Request successful')
     return FetchResponse(res.status, body)
