@@ -13,7 +13,7 @@ from hangups import javascript, http_utils, event, exceptions
 
 logger = logging.getLogger(__name__)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
-CONNECT_TIMEOUT = 10
+CONNECT_TIMEOUT = 30
 # Long-polling requests send heartbeats every 15 seconds, so if we miss two in
 # a row, consider the connection dead.
 PUSH_TIMEOUT = 30
