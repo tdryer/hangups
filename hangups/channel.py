@@ -4,23 +4,27 @@ Hangouts receives events using a system that appears very close to an App
 Engine Channel.
 """
 
-from tornado import gen, httpclient
+import aiohttp
+import asyncio
 import logging
 import re
 
-from hangups import javascript, http_utils, event
+from hangups import javascript, http_utils, event, exceptions
 
 logger = logging.getLogger(__name__)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
-# Set the connection and request timeouts low so we fail fast when there's a
-# network problem.
 CONNECT_TIMEOUT = 10
-REQUEST_TIMEOUT = 10
-# Long-polling requests may last ~3-4 minutes.
-LP_REQ_TIMEOUT = 60 * 5
 # Long-polling requests send heartbeats every 15 seconds, so if we miss two in
 # a row, consider the connection dead.
-LP_DATA_TIMEOUT = 30
+PUSH_TIMEOUT = 30
+MAX_READ_BYTES = 1024 * 1024
+
+
+class UnknownSIDError(exceptions.HangupsError):
+
+    """hangups channel session expired."""
+
+    pass
 
 
 def _best_effort_decode(data_bytes):
@@ -123,7 +127,7 @@ class Channel(object):
     # Public methods
     ##########################################################################
 
-    def __init__(self, cookies, path, clid, ec, prop):
+    def __init__(self, cookies, path, clid, ec, prop, connector):
         """Create a new channel."""
 
         # Event fired when channel connects with arguments ():
@@ -144,6 +148,8 @@ class Channel(object):
         self._cookies = cookies
         # Parser for assembling messages:
         self._push_parser = None
+        # aiohttp connector for keep-alive:
+        self._connector = connector
 
         # Static channel parameters:
         # '/u/0/talkgadget/_/channel/'
@@ -159,7 +165,7 @@ class Channel(object):
         self._sid_param = None
         self._gsessionid_param = None
 
-    @gen.coroutine
+    @asyncio.coroutine
     def listen(self):
         """Listen for messages on the channel.
 
@@ -177,45 +183,27 @@ class Channel(object):
                 backoff_seconds = 2 ** (MAX_RETRIES - retries)
                 logger.info('Backing off for {} seconds'
                             .format(backoff_seconds))
-                yield http_utils.sleep(backoff_seconds)
+                yield from asyncio.sleep(backoff_seconds)
 
             # Request a new SID if we don't have one yet, or the previous one
             # became invalid.
             if need_new_sid:
                 # TODO: error handling
-                yield self._fetch_channel_sid()
+                yield from self._fetch_channel_sid()
                 need_new_sid = False
             # Clear any previous push data, since if there was an error it
             # could contain garbage.
             self._push_parser = PushDataParser()
             try:
-                yield self._longpoll_request()
-            except IOError as e:
-                # An error occurred, so decrement the number of retries.
+                yield from self._longpoll_request()
+            except (UnknownSIDError, exceptions.NetworkError) as e:
+                logger.warning('Long-polling request failed: {}'.format(e))
                 retries -= 1
                 if self._is_connected:
                     self._is_connected = False
                     self.on_disconnect.fire()
-                logger.warning('Long-polling request failed because of '
-                               'IOError: {}'.format(e))
-            except httpclient.HTTPError as e:
-                # An error occurred, so decrement the number of retries.
-                retries -= 1
-                if self._is_connected:
-                    self._is_connected = False
-                    self.on_disconnect.fire()
-                if e.code == 400 and e.response.reason == 'Unknown SID':
-                    logger.warning('Long-polling request failed because SID '
-                                   'became invalid. Will attempt to recover.')
+                if isinstance(e, UnknownSIDError):
                     need_new_sid = True
-                elif e.code == 599:
-                    logger.warning('Long-polling request failed because '
-                                   'connection was closed. Will attempt to '
-                                   'recover.')
-                else:
-                    logger.warning('Long-polling request failed for unknown '
-                                   'reason: {}'.format(e))
-                    break # Do not retry.
             else:
                 # The connection closed successfully, so reset the number of
                 # retries.
@@ -230,7 +218,7 @@ class Channel(object):
     # Private methods
     ##########################################################################
 
-    @gen.coroutine
+    @asyncio.coroutine
     def _fetch_channel_sid(self):
         """Request a new session ID for the push channel."""
         logger.info('Requesting new session...')
@@ -243,16 +231,13 @@ class Channel(object):
             # Required if we want our client to be called "AChromeExtension":
             'prop': self._prop_param,
         }
-        res = yield http_utils.fetch(
-            url, method='POST', cookies=self._cookies, params=params,
-            data='count=0', connect_timeout=CONNECT_TIMEOUT,
-            request_timeout=REQUEST_TIMEOUT
-        )
-        logger.debug('Fetch SID response:\n{}'.format(res.body))
-        if res.code != 200:
-            # TODO use better exception
-            raise ValueError("SID fetch request failed with {}: {}"
-                             .format(res.code, res.raw.read()))
+        try:
+            res = yield from http_utils.fetch(
+                'post', url, cookies=self._cookies, params=params,
+                data='count=0', connector=self._connector
+            )
+        except exceptions.NetworkError as e:
+            raise exceptions.HangupsError('Failed to request SID: {}'.format(e))
         # TODO: handle errors here
         self._sid_param, _, self._gsessionid_param = (
             _parse_sid_response(res.body)
@@ -260,11 +245,16 @@ class Channel(object):
         logger.info('New SID: {}'.format(self._sid_param))
         logger.info('New gsessionid: {}'.format(self._gsessionid_param))
 
-    @gen.coroutine
+    @asyncio.coroutine
     def _longpoll_request(self):
-        """Open a long-polling request to receive push events.
+        """Open a long-polling request and receive push data.
 
-        Raises HTTPError or IOError.
+        It's important to use keep-alive so a connection is maintained to the
+        specific server that holds the session (likely because of load
+        balancing). Without keep-alive, long polling requests will frequently
+        fail with 400 "Unknown SID".
+
+        Raises hangups.NetworkError or UnknownSIDError.
         """
         params = {
             'VER': 8,
@@ -279,13 +269,40 @@ class Channel(object):
         }
         URL = 'https://talkgadget.google.com/u/0/talkgadget/_/channel/bind'
         logger.info('Opening new long-polling request')
-        res = yield http_utils.longpoll_fetch(
-            URL, params=params, cookies=self._cookies,
-            streaming_callback=self._on_push_data,
-            connect_timeout=CONNECT_TIMEOUT, request_timeout=LP_REQ_TIMEOUT,
-            data_timeout=LP_DATA_TIMEOUT
-        )
-        return res
+        try:
+            res = yield from asyncio.wait_for(aiohttp.request(
+                'get', URL, params=params, cookies=self._cookies,
+                connector=self._connector
+            ), CONNECT_TIMEOUT)
+        except asyncio.TimeoutError:
+            raise exceptions.NetworkError('Request timed out')
+        except aiohttp.errors.ConnectionError as e:
+            raise exceptions.NetworkError('Request connection error: {}'
+                                          .format(e))
+        if res.status == 400 and res.reason == 'Unknown SID':
+            raise UnknownSIDError('SID became invalid')
+        elif res.status != 200:
+            raise exceptions.NetworkError(
+                'Request return unexpected status: {}: {}'
+                .format(res.status, res.reason)
+            )
+        while True:
+            try:
+                chunk = yield from asyncio.wait_for(
+                    res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT
+                )
+            except asyncio.TimeoutError:
+                raise exceptions.NetworkError('Request timed out')
+            except aiohttp.errors.ConnectionError as e:
+                raise exceptions.NetworkError('Request connection error: {}'
+                                              .format(e))
+            if chunk:
+                self._on_push_data(chunk)
+            else:
+                # Close the response to allow the connection to be reused for
+                # the next request.
+                res.close()
+                break
 
     def _on_push_data(self, data_bytes):
         """Parse push data and trigger event methods."""
