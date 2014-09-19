@@ -8,7 +8,7 @@ import logging
 from hangups import exceptions
 
 logger = logging.getLogger(__name__)
-CONNECT_TIMEOUT = 10
+CONNECT_TIMEOUT = 30
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
 
