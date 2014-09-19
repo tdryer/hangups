@@ -220,14 +220,17 @@ class Channel(object):
 
     @asyncio.coroutine
     def _fetch_channel_sid(self):
-        """Request a new session ID for the push channel."""
+        """Request a new session ID for the push channel.
+
+        Raises hangups.NetworkError.
+        """
         logger.info('Requesting new session...')
         url = 'https://talkgadget.google.com{}bind'.format(self._channel_path)
         params = {
             'VER': 8,
             'clid': self._clid_param,
             'ec': self._ec_param,
-            'RID': 81187, # TODO: "request ID"? should probably increment
+            'RID': 81187,
             # Required if we want our client to be called "AChromeExtension":
             'prop': self._prop_param,
         }
@@ -238,7 +241,8 @@ class Channel(object):
             )
         except exceptions.NetworkError as e:
             raise exceptions.HangupsError('Failed to request SID: {}'.format(e))
-        # TODO: handle errors here
+        # TODO: Re-write the function we're calling here to use a schema so we
+        # can easily catch its failure.
         self._sid_param, _, self._gsessionid_param = (
             _parse_sid_response(res.body)
         )
