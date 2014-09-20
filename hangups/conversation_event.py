@@ -45,11 +45,16 @@ class ChatMessageSegment(object):
 
     """A segment of a chat message."""
 
-    def __init__(self, text, segment_type=schemas.SegmentType.TEXT,
+    def __init__(self, text, segment_type=None,
                  is_bold=False, is_italic=False, is_strikethrough=False,
                  is_underline=False, link_target=None):
         """Create a new chat message segment."""
-        self.type_ = segment_type
+        if segment_type is not None:
+            self.type_ = segment_type
+        elif link_target is not None:
+            self.type_ = schemas.SegmentType.LINK
+        else:
+            self.type_ = schemas.SegmentType.TEXT
         self.text = text
         self.is_bold = is_bold
         self.is_italic = is_italic
