@@ -97,7 +97,7 @@ class PushDataParser(object):
 def _parse_sid_response(res):
     """Parse response format for request for new channel SID.
 
-    Returns (SID, header_client, gsessionid).
+    Returns (SID, email, header_client, gsessionid).
     """
     sid = None
     header_client = None
@@ -112,11 +112,11 @@ def _parse_sid_response(res):
         elif message[0] == 'c':
             type_ = message[1][1][0]
             if type_ == 'cfj':
-                header_client = message[1][1][1].split('/')[1]
+                email, header_client = message[1][1][1].split('/')
             elif type_ == 'ei':
                 gsessionid = message[1][1][1]
 
-    return(sid, header_client, gsessionid)
+    return(sid, email, header_client, gsessionid)
 
 
 class Channel(object):
@@ -164,6 +164,17 @@ class Channel(object):
         # Discovered parameters:
         self._sid_param = None
         self._gsessionid_param = None
+
+        self._email = None
+        self._header_client = None
+
+    @property
+    def header_client(self):
+        return self._header_client
+
+    @property
+    def email(self):
+        return self._email
 
     @asyncio.coroutine
     def listen(self):
@@ -243,10 +254,12 @@ class Channel(object):
             raise exceptions.HangupsError('Failed to request SID: {}'.format(e))
         # TODO: Re-write the function we're calling here to use a schema so we
         # can easily catch its failure.
-        self._sid_param, _, self._gsessionid_param = (
+        self._sid_param, self._email, self._header_client, self._gsessionid_param = (
             _parse_sid_response(res.body)
         )
         logger.info('New SID: {}'.format(self._sid_param))
+        logger.info('New email: {}'.format(self._email))
+        logger.info('New client: {}'.format(self._header_client))
         logger.info('New gsessionid: {}'.format(self._gsessionid_param))
 
     @asyncio.coroutine
