@@ -88,6 +88,13 @@ class Client(object):
     # Public methods
     ##########################################################################
 
+    def disconnect(self):
+        """Disconnect from the server and stop loop."""
+        if self._channel and self._channel.is_connected:
+            asyncio.async(self.setpresence(False)).add_done_callback(
+                lambda res: asyncio.async(self.setactiveclient(False)).add_done_callback(
+                    lambda res: asyncio.get_event_loop().stop()))
+
     @asyncio.coroutine
     def connect(self):
         """Connect to the server and receive events."""
@@ -115,8 +122,8 @@ class Client(object):
 
         """
         logger.debug("_on_pre_connect")
-        asyncio.async(self.setactiveclient(True)).add_done_callback(
-              lambda res: asyncio.async(self.setpresence(True)).add_done_callback(
+        asyncio.async(self.setpresence(True)).add_done_callback(
+              lambda res: asyncio.async(self.setactiveclient(True)).add_done_callback(
               lambda res: self.on_connect.fire(initial_data)))
 
     @asyncio.coroutine
@@ -397,6 +404,26 @@ class Client(object):
         res = yield from self._request('presence/setpresence', [
             self._get_request_header(),
             [720, 1 if online else 40 ]
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
+    @asyncio.coroutine
+    def setmood(self, mood=None):
+        """Set the presence of the client and also the mood
+
+           mood is a utf-8 smiley like 0x1f603
+        """
+        res = yield from self._request('presence/setpresence', [
+            self._get_request_header(),
+            None,
+            None,
+            None,
+            None,
+            [mood]
         ])
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']

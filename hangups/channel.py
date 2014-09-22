@@ -176,6 +176,10 @@ class Channel(object):
     def email(self):
         return self._email
 
+    @property
+    def is_connected(self):
+       return self._is_connected
+
     @asyncio.coroutine
     def listen(self):
         """Listen for messages on the channel.
