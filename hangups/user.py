@@ -52,10 +52,6 @@ class User(object):
         return User(user_id, conv_part_data.fallback_name, None, None, [],
                     (self_user_id == user_id) or (self_user_id is None))
 
-    def is_online(self):
-        """Ask if the user is online.
-        """
-        pass
 
 class UserList(object):
 
@@ -83,11 +79,6 @@ class UserList(object):
                     .format(len(self._user_dict)))
 
         self._client.on_state_update.add_observer(self._on_state_update)
-
-    def get_online_users(self):
-        """Return a list of users currently online.
-        """
-        pass
 
     def get_user(self, user_id):
         """Return a User by their UserID.
