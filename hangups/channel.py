@@ -164,7 +164,6 @@ class Channel(object):
         # Discovered parameters:
         self._sid_param = None
         self._gsessionid_param = None
-
         self._email = None
         self._header_client = None
 
