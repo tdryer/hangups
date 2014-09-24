@@ -52,6 +52,9 @@ class Client(object):
         # Event fired when the client connects for the first time with
         # arguments (initial_data).
         self.on_connect = event.Event('Client.on_connect')
+        self.__on_pre_connect = event.Event('Client.on_pre_connect')
+        self.__on_pre_connect.add_observer(self._on_pre_connect)
+
         # Event fired when the client reconnects after being disconnected with
         # arguments ().
         self.on_reconnect = event.Event('Client.on_reconnect')
@@ -72,8 +75,9 @@ class Client(object):
         self._header_date = None
         self._header_version = None
         self._header_id = None
-        # TODO This one isn't being set anywhere:
+        # Like the jabber client ID
         self._header_client = None
+        self._email = None
         # Parameters needed to create the Channel:
         self._channel_path = None
         self._clid = None
@@ -84,6 +88,13 @@ class Client(object):
     # Public methods
     ##########################################################################
 
+    def disconnect(self):
+        """Disconnect from the server and stop loop."""
+        if self._channel and self._channel.is_connected:
+            asyncio.async(self.setpresence(False)).add_done_callback(
+                lambda res: asyncio.async(self.setactiveclient(False)).add_done_callback(
+                    lambda res: asyncio.get_event_loop().stop()))
+
     @asyncio.coroutine
     def connect(self):
         """Connect to the server and receive events."""
@@ -92,17 +103,28 @@ class Client(object):
             self._cookies, self._channel_path, self._clid,
             self._channel_ec_param, self._channel_prop_param, self._connector
         )
+
         self._channel.on_connect.add_observer(
-            lambda: self.on_connect.fire(initial_data)
+            lambda: self.__on_pre_connect.fire(initial_data)
         )
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
         self._channel.on_message.add_observer(self._on_push_data)
         yield from self._channel.listen()
 
+
     ##########################################################################
     # Private methods
     ##########################################################################
+
+    def _on_pre_connect(self, initial_data):
+        """Called before on_connect to setup presence/client
+
+        """
+        logger.debug("_on_pre_connect")
+        asyncio.async(self.setpresence(True)).add_done_callback(
+              lambda res: asyncio.async(self.setactiveclient(True)).add_done_callback(
+              lambda res: self.on_connect.fire(initial_data)))
 
     @asyncio.coroutine
     def _initialize_chat(self):
@@ -208,7 +230,7 @@ class Client(object):
         """Return request header for chat API request."""
         return [
             [3, 3, self._header_version, self._header_date],
-            [self._header_client, self._header_id],
+            [self._channel.header_client, self._header_id],
             None,
             "en"
         ]
@@ -238,6 +260,9 @@ class Client(object):
             'key': self._api_key,
             'alt': 'json' if use_json else 'protojson',
         }
+
+        logger.debug("Fetching '{}' with '{}'".format(url, body_json))
+
         res = yield from http_utils.fetch(
             'post', url, headers=headers, cookies=cookies, params=params,
             data=json.dumps(body_json), connector=self._connector
@@ -359,6 +384,69 @@ class Client(object):
         ])
         return json.loads(res.body.decode())
 
+    @asyncio.coroutine
+    def setpresence(self, online):
+        """Set the presence of the client and also the mood
+
+        """
+        res = yield from self._request('presence/setpresence', [
+            self._get_request_header(),
+            None,
+            None,
+            None,
+            [not online]
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+        res = yield from self._request('presence/setpresence', [
+            self._get_request_header(),
+            [720, 1 if online else 40 ]
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
+    @asyncio.coroutine
+    def setmood(self, mood=None):
+        """Set the presence of the client and also the mood
+
+           mood is a utf-8 smiley like 0x1f603
+        """
+        res = yield from self._request('presence/setpresence', [
+            self._get_request_header(),
+            None,
+            None,
+            None,
+            None,
+            [mood]
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
+    @asyncio.coroutine
+    def setactiveclient(self, online):
+        """Set the active client.
+
+        """
+        res = yield from self._request('clients/setactiveclient', [
+            self._get_request_header(),
+            online,
+            "{}/{}".format(self._channel.email, self._channel.header_client),
+            120,
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
     @asyncio.coroutine
     def querypresence(self, chat_id):
         """Check someone's presence status.
