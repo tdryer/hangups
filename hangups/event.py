@@ -1,8 +1,9 @@
-"""A very simple implementation of the observer design pattern.
+"""Simple event observer system supporting asyncio.
 
 Observers must be removed to avoid memory leaks.
 """
 
+import asyncio
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,8 @@ class Event(object):
 
     def add_observer(self, callback):
         """Add an event observer callback.
+
+        callback may be a coroutine or function.
 
         Raises ValueError if the callback has already been added.
         """
@@ -37,11 +40,14 @@ class Event(object):
                              .format(callback, self))
         self._observers.remove(callback)
 
+    @asyncio.coroutine
     def fire(self, *args, **kwargs):
         """Call all observer callbacks with the same arguments."""
         logger.debug('Fired {}'.format(self))
         for observer in self._observers:
-            observer(*args, **kwargs)
+            gen = observer(*args, **kwargs)
+            if asyncio.iscoroutinefunction(observer):
+                yield from gen
 
     def __repr__(self):
         return 'Event(\'{}\')'.format(self._name)

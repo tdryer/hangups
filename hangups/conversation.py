@@ -115,11 +115,8 @@ class ConversationList(object):
             self.add_conversation(conv_state.conversation, conv_state.event)
 
         self._client.on_state_update.add_observer(self._on_state_update)
-        # TODO: Make event support coroutines so we don't have to do this:
-        sync_f = lambda initial_data=None: asyncio.async(self._sync()) \
-                .add_done_callback(lambda f: f.result())
-        self._client.on_connect.add_observer(sync_f)
-        self._client.on_reconnect.add_observer(sync_f)
+        self._client.on_connect.add_observer(self._sync)
+        self._client.on_reconnect.add_observer(self._sync)
 
         # Event fired when a new ConversationEvent arrives with arguments
         # (ConversationEvent).
@@ -150,17 +147,21 @@ class ConversationList(object):
         self._conv_dict[conv_id] = conv
         return conv
 
+    @asyncio.coroutine
     def _on_state_update(self, state_update):
         """Receive a ClientStateUpdate and fan out to Conversations."""
         if state_update.client_conversation is not None:
             self._handle_client_conversation(state_update.client_conversation)
         if state_update.typing_notification is not None:
-            self._handle_set_typing_notification(
+            yield from self._handle_set_typing_notification(
                 state_update.typing_notification
             )
         if state_update.event_notification is not None:
-            self._on_client_event(state_update.event_notification.event)
+            yield from self._on_client_event(
+                state_update.event_notification.event
+            )
 
+    @asyncio.coroutine
     def _on_client_event(self, event_):
         """Receive a ClientEvent and fan out to Conversations."""
         self._sync_timestamp = parsers.from_timestamp(event_.timestamp)
@@ -171,8 +172,8 @@ class ConversationList(object):
                            .format(event_.conversation_id.id_))
         else:
             conv_event = conv.add_event(event_)
-            self.on_event.fire(conv_event)
-            conv.on_event.fire(conv_event)
+            yield from self.on_event.fire(conv_event)
+            yield from conv.on_event.fire(conv_event)
 
     def _handle_client_conversation(self, client_conversation):
         """Receive ClientConversation and create or update the conversation."""
@@ -183,20 +184,21 @@ class ConversationList(object):
         else:
             self.add_conversation(client_conversation)
 
+    @asyncio.coroutine
     def _handle_set_typing_notification(self, set_typing_notification):
         """Receive ClientSetTypingNotification and update the conversation."""
         conv_id = set_typing_notification.conversation_id.id_
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
             res = parsers.parse_typing_status_message(set_typing_notification)
-            self.on_typing.fire(res)
-            conv.on_typing.fire(res)
+            yield from self.on_typing.fire(res)
+            yield from conv.on_typing.fire(res)
         else:
             logger.warning('Received ClientSetTypingNotification for '
                            'unknown conversation {}'.format(conv_id))
 
     @asyncio.coroutine
-    def _sync(self):
+    def _sync(self, initial_data=None):
         """Sync conversation state and events that could have been missed."""
         logger.info('Syncing events since {}'.format(self._sync_timestamp))
         try:
@@ -215,7 +217,7 @@ class ConversationList(object):
                         if timestamp > self._sync_timestamp:
                             # This updates the sync_timestamp for us, as well
                             # as triggering events.
-                            self._on_client_event(event_)
+                            yield from self._on_client_event(event_)
                 else:
                     self.add_conversation(conv_state.conversation,
                                           conv_state.event)

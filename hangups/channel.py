@@ -215,7 +215,7 @@ class Channel(object):
                 retries -= 1
                 if self._is_connected:
                     self._is_connected = False
-                    self.on_disconnect.fire()
+                    yield from self.on_disconnect.fire()
                 if isinstance(e, UnknownSIDError):
                     need_new_sid = True
             else:
@@ -317,13 +317,14 @@ class Channel(object):
                 raise exceptions.NetworkError('Request connection error: {}'
                                               .format(e))
             if chunk:
-                self._on_push_data(chunk)
+                yield from self._on_push_data(chunk)
             else:
                 # Close the response to allow the connection to be reused for
                 # the next request.
                 res.close()
                 break
 
+    @asyncio.coroutine
     def _on_push_data(self, data_bytes):
         """Parse push data and trigger event methods."""
         logger.debug('Received push data:\n{}'.format(data_bytes))
@@ -333,11 +334,11 @@ class Channel(object):
         if not self._is_connected:
             if self._on_connect_called:
                 self._is_connected = True
-                self.on_reconnect.fire()
+                yield from self.on_reconnect.fire()
             else:
                 self._on_connect_called = True
                 self._is_connected = True
-                self.on_connect.fire()
+                yield from self.on_connect.fire()
 
         for submission in self._push_parser.get_submissions(data_bytes):
-            self.on_message.fire(submission)
+            yield from self.on_message.fire(submission)

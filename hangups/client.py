@@ -52,7 +52,6 @@ class Client(object):
         # Event fired when the client connects for the first time with
         # arguments (initial_data).
         self.on_connect = event.Event('Client.on_connect')
-
         # Event fired when the client reconnects after being disconnected with
         # arguments ().
         self.on_reconnect = event.Event('Client.on_reconnect')
@@ -93,9 +92,11 @@ class Client(object):
             self._cookies, self._channel_path, self._clid,
             self._channel_ec_param, self._channel_prop_param, self._connector
         )
-        self._channel.on_connect.add_observer(
-            lambda: self.on_connect.fire(initial_data)
-        )
+        @asyncio.coroutine
+        def _on_connect():
+            """Wrapper to fire on_connect with initial_data."""
+            yield from self.on_connect.fire(initial_data)
+        self._channel.on_connect.add_observer(_on_connect)
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
         self._channel.on_message.add_observer(self._on_push_data)
@@ -214,10 +215,11 @@ class Client(object):
             "en"
         ]
 
+    @asyncio.coroutine
     def _on_push_data(self, submission):
         """Parse ClientStateUpdate and call the appropriate events."""
         for state_update in parsers.parse_submission(submission):
-            self.on_state_update.fire(state_update)
+            yield from self.on_state_update.fire(state_update)
 
     @asyncio.coroutine
     def _request(self, endpoint, body_json, use_json=True):
