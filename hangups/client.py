@@ -25,6 +25,10 @@ CHAT_INIT_PARAMS = {
 CHAT_INIT_REGEX = re.compile(
     r"(?:<script>AF_initDataCallback\((.*?)\);</script>)", re.DOTALL
 )
+# Timeout to send for setactiveclient requests:
+ACTIVE_TIMEOUT_SECS = 120
+# Minimum timeout between subsequent setactiveclient requests:
+SETACTIVECLIENT_LIMIT_SECS = 60
 
 
 # Initial account data received after the client is first connected:
@@ -79,6 +83,10 @@ class Client(object):
         self._clid = None
         self._channel_ec_param = None
         self._channel_prop_param = None
+        # Time in seconds that the client as last set as active:
+        self._last_active_secs = 0.0
+        # ActiveClientState enum value or None:
+        self._active_client_state = None
 
     ##########################################################################
     # Public methods
@@ -101,6 +109,34 @@ class Client(object):
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
         self._channel.on_message.add_observer(self._on_push_data)
         yield from self._channel.listen()
+
+    @asyncio.coroutine
+    def set_active(self):
+        """Set this client as active.
+
+        While a client is active, no other clients will raise notifications.
+        Call this method whenever there is an indication the user is
+        interacting with this client. This method may be called very
+        frequently, and it will only make a request when necessary.
+        """
+        is_active = (self._active_client_state ==
+                     schemas.ActiveClientState.IS_ACTIVE_CLIENT)
+        timed_out = (time.time() - self._last_active_secs >
+                     SETACTIVECLIENT_LIMIT_SECS)
+        if not is_active or timed_out:
+            # Update these immediately so if the function is called again
+            # before the API request finishes, we don't start extra requests.
+            self._active_client_state = (
+                schemas.ActiveClientState.IS_ACTIVE_CLIENT
+            )
+            self._last_active_secs = time.time()
+            try:
+                yield from self.setactiveclient(True, ACTIVE_TIMEOUT_SECS)
+            except exceptions.NetworkError as e:
+                logger.warning('Failed to set active client: {}'.format(e))
+            else:
+                logger.info('Set active client for {} seconds'
+                            .format(ACTIVE_TIMEOUT_SECS))
 
     ##########################################################################
     # Private methods
@@ -219,6 +255,9 @@ class Client(object):
     def _on_push_data(self, submission):
         """Parse ClientStateUpdate and call the appropriate events."""
         for state_update in parsers.parse_submission(submission):
+            self._active_client_state = (
+                state_update.state_update_header.active_client_state
+            )
             yield from self.on_state_update.fire(state_update)
 
     @asyncio.coroutine
@@ -383,16 +422,19 @@ class Client(object):
                                           .format(res_status))
 
     @asyncio.coroutine
-    def setactiveclient(self, online):
+    def setactiveclient(self, is_active, timeout_secs):
         """Set the active client.
 
         Raises hangups.NetworkError if the request fails.
         """
         res = yield from self._request('clients/setactiveclient', [
             self._get_request_header(),
-            online,
+            # is_active: whether the client is active or not
+            is_active,
+            # full_jid: user@domain/resource
             "{}/{}".format(self._channel.email, self._channel.header_client),
-            120,
+            # timeout_secs: timeout in seconds for this client to be active
+            timeout_secs
         ])
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']

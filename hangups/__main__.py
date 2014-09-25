@@ -239,6 +239,7 @@ class ConversationWidget(urwid.WidgetWrap):
         client.on_reconnect.add_observer(lambda: self._show_info_message(
             'Connected.'
         ))
+        self._client = client
         self._conversation = conversation
         self._conversation.on_event.add_observer(self._on_event)
 
@@ -267,7 +268,12 @@ class ConversationWidget(urwid.WidgetWrap):
         super().__init__(self._widget)
 
     def keypress(self, size, key):
-        """Handle keypresses marking messages as read."""
+        """Handle marking messages as read and keeping client active."""
+        # Set the client as active.
+        future = asyncio.async(self._client.set_active())
+        future.add_done_callback(lambda future: future.result())
+
+        # Mark messages as read.
         self._num_unread = 0
         self._set_title()
         return super().keypress(size, key)
