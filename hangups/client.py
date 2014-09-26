@@ -424,17 +424,27 @@ class Client(object):
 
     @asyncio.coroutine
     def setpresence(self, online, mood=None):
-        """Set the presence or mood of the client.
+        """Set the presence or mood of this client.
 
         Raises hangups.NetworkError if the request fails.
         """
         res = yield from self._request('presence/setpresence', [
             self._get_request_header(),
-            [720, 1 if online else 40],
+            [
+                # timeout_secs timeout in seconds for this presence
+                720,
+                # client_presence_state:
+                # 40 => DESKTOP_ACTIVE
+                # 30 => DESKTOP_IDLE
+                # 1 => NONE
+                1 if online else 40,
+            ],
             None,
             None,
+            # True if going offline, False if coming online
             [not online],
-            [mood],  # UTF-8 smiley like 0x1f603
+            # UTF-8 smiley like 0x1f603
+            [mood],
         ])
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
