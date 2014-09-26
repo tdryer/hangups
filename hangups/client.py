@@ -357,6 +357,27 @@ class Client(object):
             raise exceptions.NetworkError('Unexpected status: {}'
                                           .format(res_status))
 
+    @asyncio.coroutine
+    def setactiveclient(self, is_active, timeout_secs):
+        """Set the active client.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('clients/setactiveclient', [
+            self._get_request_header(),
+            # is_active: whether the client is active or not
+            is_active,
+            # full_jid: user@domain/resource
+            "{}/{}".format(self._channel.email, self._channel.header_client),
+            # timeout_secs: timeout in seconds for this client to be active
+            timeout_secs
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
     ###########################################################################
     # UNUSED raw API request methods (by hangups itself) for reference
     ###########################################################################
@@ -414,27 +435,6 @@ class Client(object):
             None,
             [not online],
             [mood],  # UTF-8 smiley like 0x1f603
-        ])
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
-
-    @asyncio.coroutine
-    def setactiveclient(self, is_active, timeout_secs):
-        """Set the active client.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        res = yield from self._request('clients/setactiveclient', [
-            self._get_request_header(),
-            # is_active: whether the client is active or not
-            is_active,
-            # full_jid: user@domain/resource
-            "{}/{}".format(self._channel.email, self._channel.header_client),
-            # timeout_secs: timeout in seconds for this client to be active
-            timeout_secs
         ])
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
