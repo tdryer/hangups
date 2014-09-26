@@ -58,7 +58,7 @@ setup(
     cmdclass={'test': PyTest},
     entry_points={
         'console_scripts': [
-            'hangups=hangups.__main__:main',
+            'hangups=hangups.ui.__main__:main',
         ],
     },
 )

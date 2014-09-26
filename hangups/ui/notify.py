@@ -14,7 +14,7 @@ import subprocess
 import sys
 
 import hangups
-from hangups.utils import get_conv_name
+from hangups.ui.utils import get_conv_name
 
 logger = logging.getLogger(__name__)
 if sys.platform == 'darwin':

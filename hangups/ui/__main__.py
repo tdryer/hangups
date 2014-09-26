@@ -1,4 +1,4 @@
-"""Demo chat client using Hangups."""
+"""Reference chat client for hangups."""
 
 import appdirs
 import argparse
@@ -10,8 +10,8 @@ import sys
 import urwid
 
 import hangups
-from hangups.notify import Notifier
-from hangups.utils import get_conv_name
+from hangups.ui.notify import Notifier
+from hangups.ui.utils import get_conv_name
 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
