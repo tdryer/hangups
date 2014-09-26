@@ -6,16 +6,17 @@ hangups
     :alt: Build Status
 
 hangups is the first third-party instant messaging client for `Google
-Hangouts`_.
+Hangouts`_. It includes both a Python library and a reference client with a
+text-based user interface.
 
 Unlike its predecessor Google Talk, Hangouts uses a `proprietary,
 non-interoperable protocol`_. hangups is implemented by reverse-engineering
 this protocol, which allows it to support features like group messaging that
 aren't available in clients that connect via XMPP.
 
-hangups is still in an early stage of development. It's usable for basic
-chatting, but users should keep another client handy. Bug reports, feature
-requests, and pull requests are welcome.
+hangups is still in an early stage of development. The reference client is
+usable for basic chatting, but the API is undocumented and subject to change.
+Bug reports and pull requests are welcome!
 
 .. image:: https://github.com/tdryer/hangups/raw/master/screenshot.png
     :alt: hangups screenshot
