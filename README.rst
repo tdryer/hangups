@@ -23,6 +23,14 @@ requests, and pull requests are welcome.
 .. _Google Hangouts: https://www.google.ca/hangouts/
 .. _proprietary, non-interoperable protocol: https://www.eff.org/deeplinks/2013/05/google-abandons-open-standards-instant-messaging
 
+Projects using hangups
+----------------------
+
+- `HangupsBot`_: Bot for Google Hangouts
+- `bastardbot`_: A bot to follow and interact with Google Hangouts conversations
+
+.. _HangupsBot: https://github.com/xmikos/hangupsbot
+.. _bastardbot: https://github.com/elamperti/bastardbot
 
 Trying it out
 -------------
