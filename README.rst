@@ -28,9 +28,11 @@ Projects using hangups
 ----------------------
 
 - `HangupsBot`_: Bot for Google Hangouts
+- `QHangups`_: Alternative client for Google Hangouts written in PyQt
 - `bastardbot`_: A bot to follow and interact with Google Hangouts conversations
 
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
+.. _QHangups: https://github.com/xmikos/qhangups
 .. _bastardbot: https://github.com/elamperti/bastardbot
 
 Trying it out
