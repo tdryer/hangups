@@ -37,7 +37,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
-    packages=['hangups'],
+    packages=['hangups', 'hangups.ui'],
     dependency_links=[
         'https://github.com/wardi/urwid/tarball/59591b8557#egg=urwid-1.2.2_dev'
     ],
