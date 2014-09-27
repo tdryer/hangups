@@ -56,8 +56,7 @@ class ChatUI(object):
         try:
             cookies = hangups.auth.get_auth_stdin(cookies_path)
         except hangups.GoogleAuthError as e:
-            print('Login failed ({})'.format(e))
-            sys.exit(1)
+            sys.exit('Login failed ({})'.format(e))
 
         self._client = hangups.Client(cookies)
         self._client.on_connect.add_observer(self._on_connect)
@@ -70,6 +69,7 @@ class ChatUI(object):
 
         self._urwid_loop.start()
         try:
+            # Returns when the connection is closed.
             loop.run_until_complete(self._client.connect())
         finally:
             # Ensure urwid cleans up properly and doesn't wreck the terminal.
@@ -111,7 +111,7 @@ class ChatUI(object):
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
                                                self.on_select_conversation)
-        self._tabbed_window = TabbedWindowWidget(self._keys)
+        self._tabbed_window = TabbedWindowWidget(self._keys, self._on_quit)
         self._tabbed_window.set_tab(conv_picker, switch=True,
                                     title='Conversations')
         self._urwid_loop.widget = self._tabbed_window
@@ -120,6 +120,11 @@ class ChatUI(object):
         """Open conversation tab for new messages when they arrive."""
         if isinstance(conv_event, hangups.ChatMessageEvent):
             self.add_conversation_tab(conv_event.conversation_id)
+
+    def _on_quit(self):
+        """Handle the user quitting the application."""
+        future = asyncio.async(self._client.disconnect())
+        future.add_done_callback(lambda future: future.result())
 
 
 class LoadingWidget(urwid.WidgetWrap):
@@ -372,10 +377,11 @@ class TabbedWindowWidget(urwid.WidgetWrap):
 
     """A widget that displays a list of widgets via a tab bar."""
 
-    def __init__(self, keybindings):
+    def __init__(self, keybindings, quit_f):
         self._widgets = [] # [urwid.Widget]
         self._widget_title = {} # {urwid.Widget: str}
         self._tab_index = None # int
+        self._quit_f = quit_f
         self._keys = keybindings
         self._tabs = urwid.Text('')
         self._frame = urwid.Frame(None)
@@ -407,6 +413,8 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         elif key == self._keys['next_tab']:
             self._tab_index = (self._tab_index + 1) % num_tabs
             self._update_tabs()
+        elif key == self._keys['quit']:
+            self._quit_f()
         else:
             return key
 
@@ -447,6 +455,8 @@ def main():
                         help='keybinding for next tab')
     parser.add_argument('--key-prev-tab', default='ctrl u',
                         help='keybinding for previous tab')
+    parser.add_argument('--key-quit', default='ctrl e',
+                        help='keybinding for quitting')
     parser.add_argument('--col-scheme', choices=COL_SCHEMES.keys(),
                         default='default', help='colour scheme to use')
     args = parser.parse_args()
@@ -469,9 +479,10 @@ def main():
         ChatUI(args.cookies, {
             'next_tab': args.key_next_tab,
             'prev_tab': args.key_prev_tab,
+            'quit': args.key_quit,
         }, COL_SCHEMES[args.col_scheme])
     except KeyboardInterrupt:
-        pass
+        sys.exit('Caught KeyboardInterrupt, exiting abnormally')
     except:
         # urwid will prevent some exceptions from being printed unless we use
         # print a newline first.

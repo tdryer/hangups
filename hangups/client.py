@@ -87,6 +87,8 @@ class Client(object):
         self._last_active_secs = 0.0
         # ActiveClientState enum value or None:
         self._active_client_state = None
+        # Future for Channel.listen
+        self._listen_future = None
 
     ##########################################################################
     # Public methods
@@ -94,7 +96,11 @@ class Client(object):
 
     @asyncio.coroutine
     def connect(self):
-        """Connect to the server and receive events."""
+        """Establish a connection to the chat server.
+
+        Returns when an error has occurred, or Client.disconnect has been
+        called.
+        """
         initial_data = yield from self._initialize_chat()
         self._channel = channel.Channel(
             self._cookies, self._channel_path, self._clid,
@@ -108,7 +114,21 @@ class Client(object):
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
         self._channel.on_message.add_observer(self._on_push_data)
-        yield from self._channel.listen()
+
+        self._listen_future = asyncio.async(self._channel.listen())
+        try:
+            yield from self._listen_future
+        except asyncio.CancelledError:
+            pass
+        logger.info('disconnecting gracefully')
+
+    @asyncio.coroutine
+    def disconnect(self):
+        """Gracefully disconnect from the server.
+
+        When disconnection is complete, Client.connect will return.
+        """
+        self._listen_future.cancel()
 
     @asyncio.coroutine
     def set_active(self):
