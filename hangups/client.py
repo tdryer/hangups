@@ -403,6 +403,27 @@ class Client(object):
     ###########################################################################
 
     @asyncio.coroutine
+    def updatewatermark(self, conv_id, read_timestamp):
+        """Update the watermark (read timestamp) for a conversation.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('conversations/updatewatermark', [
+            self._get_request_header(),
+            # conversation_id
+            [conv_id],
+            # latest_read_timestamp
+            # XXX: The plus one is a wordaround for datetime losing precision
+            # on these microsecond timestamps.
+            int(read_timestamp.timestamp() * 1000000) + 1,
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
+    @asyncio.coroutine
     def getselfinfo(self):
         """Return information about your account.
 
