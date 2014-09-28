@@ -278,6 +278,10 @@ class ConversationWidget(urwid.WidgetWrap):
         future = asyncio.async(self._client.set_active())
         future.add_done_callback(lambda future: future.result())
 
+        # Mark the newest event as read.
+        future = asyncio.async(self._conversation.update_read_timestamp())
+        future.add_done_callback(lambda future: future.result())
+
         # Mark messages as read.
         self._num_unread = 0
         self._set_title()

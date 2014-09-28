@@ -178,7 +178,7 @@ CLIENT_CONVERSATION = Message(
         (None, Field(is_optional=True)),
         ('self_read_state', Message(
             ('participant_id', USER_ID),
-            ('last_read_timestamp', Field()),
+            ('latest_read_timestamp', Field()),
         )),
         ('status', EnumField(ClientConversationStatus)),
         ('notification_level', EnumField(ClientNotificationLevel)),
@@ -320,6 +320,13 @@ CLIENT_EVENT_NOTIFICATION = Message(
     is_optional=True,
 )
 
+CLIENT_WATERMARK_NOTIFICATION = Message(
+    ('participant_id', USER_ID),
+    ('conversation_id', CONVERSATION_ID),
+    ('latest_read_timestamp', Field()),
+    is_optional=True,
+)
+
 CLIENT_STATE_UPDATE_HEADER = Message(
     ('active_client_state', EnumField(ActiveClientState)),
     (None, Field(is_optional=True)),
@@ -340,7 +347,7 @@ CLIENT_STATE_UPDATE = Message(
     ('typing_notification', CLIENT_SET_TYPING_NOTIFICATION),
     ('notification_level_notification', Field(is_optional=True)),
     ('reply_to_invite_notification', Field(is_optional=True)),
-    ('watermark_notification', Field(is_optional=True)),
+    ('watermark_notification', CLIENT_WATERMARK_NOTIFICATION),
     (None, Field(is_optional=True)),
     ('settings_notification', Field(is_optional=True)),
     ('view_modification', Field(is_optional=True)),

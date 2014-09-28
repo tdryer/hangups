@@ -1,6 +1,7 @@
 """Conversation objects."""
 
 import asyncio
+import datetime
 import logging
 
 from hangups import parsers, event, user, conversation_event, exceptions
@@ -28,6 +29,24 @@ class Conversation(object):
         # Event fired when a new ConversationEvent arrives with arguments
         # (ConversationEvent).
         self.on_event = event.Event('Conversation.on_event')
+        # Event fired when a watermark (read timestamp) is updated with
+        # arguments (WatermarkNotification).
+        self.on_watermark_notification = event.Event(
+            'Conversation.on_watermark_notification'
+        )
+        self.on_watermark_notification.add_observer(
+            self._on_watermark_notification
+        )
+
+    def _on_watermark_notification(self, notif):
+        """Update the conversations latest_read_timestamp."""
+        logger.info('Updating latest_read_timestamp to {}'
+                    .format(notif.read_timestamp))
+        if self.get_user(notif.user_id).is_self:
+            self_conversation_state = self._conversation.self_conversation_state
+            self_conversation_state.self_read_state.latest_read_timestamp = (
+                int(notif.read_timestamp.timestamp() * 1000000)
+            )
 
     def update_conversation(self, client_conversation):
         """Update the internal ClientConversation."""
@@ -70,6 +89,38 @@ class Conversation(object):
             logger.warning('Failed to send message: {}'.format(e))
             raise
 
+    @asyncio.coroutine
+    def update_read_timestamp(self, read_timestamp=None):
+        """Update the timestamp of the latest event which has been read.
+
+        By default, the timestamp of the newest event is used.
+
+        This method will avoid making an API request if it will have no effect.
+
+        Raises hangups.NetworkError if the timestamp can not be updated.
+        """
+        if read_timestamp is None:
+            read_timestamp = self.events[-1].timestamp
+        # XXX: The > 1 microsecond comparison is a wordaround for datetime
+        # losing precision on these microsecond timestamps.
+        if (read_timestamp - self.latest_read_timestamp >
+                datetime.timedelta(microseconds=1)):
+            logger.info(
+                'Updating read timestamp for conversation {} from {} to {}'
+                .format(self.id_, self.latest_read_timestamp, read_timestamp)
+            )
+            # Prevent duplicate requests by updating the conversation now.
+            state = self._conversation.self_conversation_state
+            state.self_read_state.latest_read_timestamp = (
+                int(read_timestamp.timestamp() * 1000000)
+            )
+            try:
+                yield from self._client.updatewatermark(self.id_,
+                                                        read_timestamp)
+            except exceptions.NetworkError as e:
+                logger.warning('Failed to update read timestamp: {}'.format(e))
+                raise
+
     @property
     def id_(self):
         """The conversation's ID."""
@@ -92,6 +143,16 @@ class Conversation(object):
         """datetime timestamp of when the conversation was last modified."""
         return parsers.from_timestamp(
             self._conversation.self_conversation_state.sort_timestamp
+        )
+
+    @property
+    def latest_read_timestamp(self):
+        """datetime timestamp of the last read ConversationEvent."""
+        # XXX: For some reason, Hangouts sets this to 0 when a new message
+        # arrives.
+        self_conversation_state = self._conversation.self_conversation_state
+        return parsers.from_timestamp(
+            self_conversation_state.self_read_state.latest_read_timestamp
         )
 
     @property
@@ -124,6 +185,11 @@ class ConversationList(object):
         # Event fired when a user starts or stops typing with arguments
         # (typing_message).
         self.on_typing = event.Event('ConversationList.on_typing')
+        # Event fired when a watermark (read timestamp) is updated with
+        # arguments (WatermarkNotification).
+        self.on_watermark_notification = event.Event(
+            'ConversationList.on_watermark_notification'
+        )
 
     def get_all(self):
         """Return list of all Conversations."""
@@ -155,6 +221,10 @@ class ConversationList(object):
         if state_update.typing_notification is not None:
             yield from self._handle_set_typing_notification(
                 state_update.typing_notification
+            )
+        if state_update.watermark_notification is not None:
+            yield from self._handle_watermark_notification(
+                state_update.watermark_notification
             )
         if state_update.event_notification is not None:
             yield from self._on_client_event(
@@ -195,6 +265,19 @@ class ConversationList(object):
             yield from conv.on_typing.fire(res)
         else:
             logger.warning('Received ClientSetTypingNotification for '
+                           'unknown conversation {}'.format(conv_id))
+
+    @asyncio.coroutine
+    def _handle_watermark_notification(self, watermark_notification):
+        """Receive ClientWatermarkNotification and update the conversation."""
+        conv_id = watermark_notification.conversation_id.id_
+        conv = self._conv_dict.get(conv_id, None)
+        if conv is not None:
+            res = parsers.parse_watermark_notification(watermark_notification)
+            yield from self.on_watermark_notification.fire(res)
+            yield from conv.on_watermark_notification.fire(res)
+        else:
+            logger.warning('Received ClientWatermarkNotification for '
                            'unknown conversation {}'.format(conv_id))
 
     @asyncio.coroutine

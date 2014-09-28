@@ -122,3 +122,22 @@ def parse_typing_status_message(p):
         timestamp=from_timestamp(p.timestamp),
         status=p.status,
     )
+
+
+WatermarkNotification = namedtuple(
+    'WatermarkNotification', ['conv_id', 'user_id', 'read_timestamp']
+)
+
+
+def parse_watermark_notification(client_watermark_notification):
+    """Return WatermarkNotification from ClientWatermarkNotification."""
+    return WatermarkNotification(
+        conv_id=client_watermark_notification.conversation_id.id_,
+        user_id=user.UserID(
+            chat_id=client_watermark_notification.participant_id.chat_id,
+            gaia_id=client_watermark_notification.participant_id.gaia_id,
+        ),
+        read_timestamp=from_timestamp(
+            client_watermark_notification.latest_read_timestamp
+        ),
+    )
