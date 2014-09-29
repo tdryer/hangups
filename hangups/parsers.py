@@ -4,7 +4,7 @@ import logging
 from collections import namedtuple
 import datetime
 
-from hangups import javascript, exceptions, schemas, user
+from hangups import javascript, schemas, user
 
 
 logger = logging.getLogger(__name__)
@@ -93,10 +93,18 @@ def _parse_payload(payload):
 ##############################################################################
 
 
-def from_timestamp(timestamp):
+def from_timestamp(microsecond_timestamp):
     """Convert a microsecond timestamp to a UTC datetime instance."""
-    return datetime.datetime.fromtimestamp(timestamp / 1000000,
-                                           datetime.timezone.utc)
+    # Create datetime without losing precision from floating point (yes, this
+    # is actually needed):
+    return datetime.datetime.fromtimestamp(
+        microsecond_timestamp // 1000000, datetime.timezone.utc
+    ).replace(microsecond=(microsecond_timestamp % 1000000))
+
+
+def to_timestamp(datetime_timestamp):
+    """Convert UTC datetime to microsecond timestamp used by Hangouts."""
+    return int(datetime_timestamp.timestamp() * 1000000)
 
 
 ##############################################################################

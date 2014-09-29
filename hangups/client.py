@@ -329,7 +329,7 @@ class Client(object):
         res = yield from self._request('conversations/syncallnewevents', [
             self._get_request_header(),
             # last_sync_timestamp
-            int(timestamp.timestamp()) * 1000000,
+            parsers.to_timestamp(timestamp),
             [], None, [], False, [],
             1048576 # max_response_size_bytes
         ], use_json=False)
@@ -413,9 +413,7 @@ class Client(object):
             # conversation_id
             [conv_id],
             # latest_read_timestamp
-            # XXX: The plus one is a wordaround for datetime losing precision
-            # on these microsecond timestamps.
-            int(read_timestamp.timestamp() * 1000000) + 1,
+            parsers.to_timestamp(read_timestamp),
         ])
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']

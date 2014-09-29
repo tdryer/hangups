@@ -1,7 +1,6 @@
 """Conversation objects."""
 
 import asyncio
-import datetime
 import logging
 
 from hangups import parsers, event, user, conversation_event, exceptions
@@ -45,7 +44,7 @@ class Conversation(object):
         if self.get_user(notif.user_id).is_self:
             self_conversation_state = self._conversation.self_conversation_state
             self_conversation_state.self_read_state.latest_read_timestamp = (
-                int(notif.read_timestamp.timestamp() * 1000000)
+                parsers.to_timestamp(notif.read_timestamp)
             )
 
     def update_conversation(self, client_conversation):
@@ -101,10 +100,7 @@ class Conversation(object):
         """
         if read_timestamp is None:
             read_timestamp = self.events[-1].timestamp
-        # XXX: The > 1 microsecond comparison is a wordaround for datetime
-        # losing precision on these microsecond timestamps.
-        if (read_timestamp - self.latest_read_timestamp >
-                datetime.timedelta(microseconds=1)):
+        if read_timestamp > self.latest_read_timestamp:
             logger.info(
                 'Updating read timestamp for conversation {} from {} to {}'
                 .format(self.id_, self.latest_read_timestamp, read_timestamp)
@@ -112,7 +108,7 @@ class Conversation(object):
             # Prevent duplicate requests by updating the conversation now.
             state = self._conversation.self_conversation_state
             state.self_read_state.latest_read_timestamp = (
-                int(read_timestamp.timestamp() * 1000000)
+                parsers.to_timestamp(read_timestamp)
             )
             try:
                 yield from self._client.updatewatermark(self.id_,
