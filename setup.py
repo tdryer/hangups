@@ -38,16 +38,13 @@ setup(
         'Programming Language :: Python :: 3.4',
     ],
     packages=['hangups', 'hangups.ui'],
-    dependency_links=[
-        'https://github.com/wardi/urwid/tarball/59591b8557#egg=urwid-1.2.2_dev'
-    ],
     install_requires=[
         'purplex==0.2.4',
         'requests==2.2.1',
         'appdirs==1.3.0',
         'aiohttp==0.9.1',
-        # git urwid is required for asyncio (see dependency link above):
-        'urwid==1.2.2-dev',
+        # use forked urwid to allow easy installation of version with asyncio
+        'hangups-urwid==1.2.2-dev',
         # Backports for py3.3:
         'enum34==1.0',
         'asyncio==3.4.1',
