@@ -1,6 +1,12 @@
-import sys
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
+import os
+import sys
+
+# Find __version__ without import that requires dependencies to be installed:
+exec(open(os.path.join(
+    os.path.dirname(__file__), 'hangups/version.py'
+)).read())
 
 
 class PyTest(TestCommand):
@@ -20,7 +26,7 @@ with open('README.rst') as f:
 
 setup(
     name='hangups',
-    version='0.2.1',
+    version=__version__,
     description=('the first third-party instant messaging client for Google '
                  'Hangouts'),
     long_description=readme,

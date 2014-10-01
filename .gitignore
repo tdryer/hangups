@@ -1,5 +1,6 @@
 *.py[cod]
 build/
 dist/
+docs/_build/
 *.egg-info/
 cookies.txt
