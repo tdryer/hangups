@@ -1,2 +1,5 @@
 *.py[cod]
+build/
+dist/
+*.egg-info/
 cookies.txt
