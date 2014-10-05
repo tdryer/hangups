@@ -89,7 +89,8 @@ class ChatUI(object):
     def add_conversation_tab(self, conv_id, switch=False):
         """Add conversation tab if not present, and optionally switch to it."""
         conv_widget = self.get_conv_widget(conv_id)
-        self._tabbed_window.set_tab(conv_widget, switch=switch)
+        self._tabbed_window.set_tab(conv_widget, switch=switch,
+                                    title=conv_widget.title)
 
     def on_select_conversation(self, conv_id):
         """Called when the user selects a new conversation to listen to."""
@@ -248,6 +249,7 @@ class ConversationWidget(urwid.WidgetWrap):
         self._conversation = conversation
         self._conversation.on_event.add_observer(self._on_event)
 
+        self.title = ''
         self._num_unread = 0
         self._set_title_cb = set_title_cb
         self._set_title()
@@ -289,10 +291,10 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def _set_title(self):
         """Update this conversation's tab title."""
-        title = get_conv_name(self._conversation, truncate=True)
+        self.title = get_conv_name(self._conversation, truncate=True)
         if self._num_unread > 0:
-            title += ' ({})'.format(self._num_unread)
-        self._set_title_cb(self, title)
+            self.title += ' ({})'.format(self._num_unread)
+        self._set_title_cb(self, self.title)
 
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
@@ -417,6 +419,14 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         elif key == self._keys['next_tab']:
             self._tab_index = (self._tab_index + 1) % num_tabs
             self._update_tabs()
+        elif key == self._keys['close_tab']:
+            # Don't allow closing the Conversations tab
+            if self._tab_index > 0:
+                curr_tab = self._widgets[self._tab_index]
+                self._widgets.remove(curr_tab)
+                del self._widget_title[curr_tab]
+                self._tab_index -= 1
+                self._update_tabs()
         elif key == self._keys['quit']:
             self._quit_f()
         else:
@@ -459,6 +469,8 @@ def main():
                         help='keybinding for next tab')
     parser.add_argument('--key-prev-tab', default='ctrl u',
                         help='keybinding for previous tab')
+    parser.add_argument('--key-close-tab', default='ctrl w',
+                        help='keybinding for close tab')
     parser.add_argument('--key-quit', default='ctrl e',
                         help='keybinding for quitting')
     parser.add_argument('--col-scheme', choices=COL_SCHEMES.keys(),
@@ -483,6 +495,7 @@ def main():
         ChatUI(args.cookies, {
             'next_tab': args.key_next_tab,
             'prev_tab': args.key_prev_tab,
+            'close_tab': args.key_close_tab,
             'quit': args.key_quit,
         }, COL_SCHEMES[args.col_scheme])
     except KeyboardInterrupt:
