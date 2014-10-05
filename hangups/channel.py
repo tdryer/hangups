@@ -236,6 +236,10 @@ class Channel(object):
     def _fetch_channel_sid(self):
         """Request a new session ID for the push channel.
 
+        The response may set the "S" cookies, which is necessary for a
+        persistent connection through the load balancer. Without it, we'll get
+        "Unknown SID" errors.
+
         Raises hangups.NetworkError.
         """
         logger.info('Requesting new session...')
@@ -260,6 +264,7 @@ class Channel(object):
         self._sid_param, self._email, self._header_client, self._gsessionid_param = (
             _parse_sid_response(res.body)
         )
+        self._cookies.update(res.cookies)
         logger.info('New SID: {}'.format(self._sid_param))
         logger.info('New email: {}'.format(self._email))
         logger.info('New client: {}'.format(self._header_client))
@@ -269,10 +274,8 @@ class Channel(object):
     def _longpoll_request(self):
         """Open a long-polling request and receive push data.
 
-        It's important to use keep-alive so a connection is maintained to the
-        specific server that holds the session (likely because of load
-        balancing). Without keep-alive, long polling requests will frequently
-        fail with 400 "Unknown SID".
+        This method uses keep-alive to make re-opening the request faster, but
+        the remote server will set the "Connection: close" header once an hour.
 
         Raises hangups.NetworkError or UnknownSIDError.
         """
