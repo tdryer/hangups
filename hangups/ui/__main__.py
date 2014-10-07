@@ -147,8 +147,8 @@ class ConversationPickerWidget(urwid.WidgetWrap):
         convs = sorted(conversation_list.get_all(), reverse=True,
                        key=lambda c: c.last_modified)
         on_press = lambda button, conv_id: on_select(conv_id)
-        buttons = [urwid.Button(get_conv_name(conv), on_press=on_press,
-                                user_data=conv.id_)
+        buttons = [urwid.Button(get_conv_name(conv, show_unread=True),
+                                on_press=on_press, user_data=conv.id_)
                    for conv in convs]
         listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
         widget = urwid.Padding(listbox, left=2, right=2)
