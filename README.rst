@@ -5,6 +5,10 @@ hangups
     :target: https://travis-ci.org/tdryer/hangups
     :alt: Build Status
 
+.. image:: https://readthedocs.org/projects/hangups/badge/?version=latest
+    :target: https://readthedocs.org/projects/hangups/?badge=latest
+    :alt: Documentation Status
+
 hangups is the first third-party instant messaging client for `Google
 Hangouts`_. It includes both a Python library and a reference client with a
 text-based user interface.
@@ -24,6 +28,13 @@ Bug reports and pull requests are welcome!
 .. _Google Hangouts: https://www.google.ca/hangouts/
 .. _proprietary, non-interoperable protocol: https://www.eff.org/deeplinks/2013/05/google-abandons-open-standards-instant-messaging
 
+Documentation
+-------------
+
+See the documentation for `installation and usage instructions`_.
+
+.. _installation and usage instructions: http://hangups.readthedocs.org/
+
 Projects using hangups
 ----------------------
 
@@ -34,31 +45,3 @@ Projects using hangups
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
 .. _QHangups: https://github.com/xmikos/qhangups
 .. _bastardbot: https://github.com/elamperti/bastardbot
-
-Trying it out
--------------
-
-Python 3.3 or higher is required. To install the latest version of hangups,
-run: ::
-
- pip install hangups
-
-Or check out the repository and run: ::
-
- python setup.py install
-
-Run ``hangups --help`` to see available options. Start hangups by running
-``hangups``.
-
-The first time you start hangups, you will be prompted to log into your Google
-account. Your credentials will only be sent to Google, and only session cookies
-will be stored locally. If you have trouble logging in, try logging in through
-a browser first.
-
-hangups uses a tabbed interface. The first tab is always the conversations list
-tab, which lets you use the up/down arrow keys to select an existing
-conversation and open it in a new tab by pressing enter. Once you have multiple
-tabs open, you can use ctrl+u and ctrl+d and move up and down the list of tabs.
-
-In a conversation tab, type a message and press enter to send it, or use the
-up/down arrows to scroll the list of previous messages.
