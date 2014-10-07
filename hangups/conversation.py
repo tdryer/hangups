@@ -144,8 +144,7 @@ class Conversation(object):
     @property
     def latest_read_timestamp(self):
         """datetime timestamp of the last read ConversationEvent."""
-        # XXX: For some reason, Hangouts sets this to 0 when a new message
-        # arrives.
+        # XXX: For some reason, this can sometimes be 0.
         self_conversation_state = self._conversation.self_conversation_state
         return parsers.from_timestamp(
             self_conversation_state.self_read_state.latest_read_timestamp
@@ -155,6 +154,19 @@ class Conversation(object):
     def events(self):
         """The list of ConversationEvents, sorted oldest to newest."""
         return list(self._events)
+
+    @property
+    def unread_events(self):
+        """List of ConversationEvents that are unread.
+
+        Events are sorted oldest to newest.
+
+        Note that some Hangouts clients don't update the read timestamp for
+        certain event types, such as membership changes, so this method may
+        return more unread events than these clients will show.
+        """
+        return [conv_event for conv_event in self._events
+                if conv_event.timestamp > self.latest_read_timestamp]
 
 
 class ConversationList(object):
