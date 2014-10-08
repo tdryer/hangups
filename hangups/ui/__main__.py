@@ -299,7 +299,7 @@ class ConversationWidget(urwid.WidgetWrap):
             return
         # XXX: Exception handling here is still a bit broken. Uncaught
         # exceptions in _on_message_sent will only be logged.
-        segments = [hangups.ChatMessageSegment(text)]
+        segments = hangups.ChatMessageSegment.from_str(text)
         asyncio.async(
             self._conversation.send_message(segments)
         ).add_done_callback(self._on_message_sent)
