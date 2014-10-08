@@ -39,9 +39,9 @@ class Conversation(object):
 
     def _on_watermark_notification(self, notif):
         """Update the conversations latest_read_timestamp."""
-        logger.info('Updating latest_read_timestamp to {}'
-                    .format(notif.read_timestamp))
         if self.get_user(notif.user_id).is_self:
+            logger.info('latest_read_timestamp for {} updated to {}'
+                        .format(self.id_, notif.read_timestamp))
             self_conversation_state = self._conversation.self_conversation_state
             self_conversation_state.self_read_state.latest_read_timestamp = (
                 parsers.to_timestamp(notif.read_timestamp)
@@ -49,7 +49,18 @@ class Conversation(object):
 
     def update_conversation(self, client_conversation):
         """Update the internal ClientConversation."""
+        # When latest_read_timestamp is 0, this seems to indicate no change
+        # from the previous value. Word around this by saving and restoring the
+        # previous value.
+        old_timestamp = self.latest_read_timestamp
         self._conversation = client_conversation
+        if parsers.to_timestamp(self.latest_read_timestamp) == 0:
+            logger.warning("Using latest_read_timestamp workaround")
+            self_conversation_state = self._conversation.self_conversation_state
+            self_conversation_state.self_read_state.latest_read_timestamp = (
+                parsers.to_timestamp(old_timestamp)
+            )
+
 
     def add_event(self, event_):
         """Add a ClientEvent to the Conversation.
@@ -102,7 +113,7 @@ class Conversation(object):
             read_timestamp = self.events[-1].timestamp
         if read_timestamp > self.latest_read_timestamp:
             logger.info(
-                'Updating read timestamp for conversation {} from {} to {}'
+                'Setting {} latest_read_timestamp from {} to {}'
                 .format(self.id_, self.latest_read_timestamp, read_timestamp)
             )
             # Prevent duplicate requests by updating the conversation now.
@@ -144,11 +155,9 @@ class Conversation(object):
     @property
     def latest_read_timestamp(self):
         """datetime timestamp of the last read ConversationEvent."""
-        # XXX: For some reason, this can sometimes be 0.
-        self_conversation_state = self._conversation.self_conversation_state
-        return parsers.from_timestamp(
-            self_conversation_state.self_read_state.latest_read_timestamp
-        )
+        timestamp = (self._conversation.self_conversation_state.\
+                     self_read_state.latest_read_timestamp)
+        return parsers.from_timestamp(timestamp)
 
     @property
     def events(self):
@@ -163,7 +172,9 @@ class Conversation(object):
 
         Note that some Hangouts clients don't update the read timestamp for
         certain event types, such as membership changes, so this method may
-        return more unread events than these clients will show.
+        return more unread events than these clients will show. There's also a
+        delay between sending a message and the user's own message being
+        considered read.
         """
         return [conv_event for conv_event in self._events
                 if conv_event.timestamp > self.latest_read_timestamp]
