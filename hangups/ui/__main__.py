@@ -248,9 +248,11 @@ class ConversationWidget(urwid.WidgetWrap):
         self._client = client
         self._conversation = conversation
         self._conversation.on_event.add_observer(self._on_event)
+        self._conversation.on_watermark_notification.add_observer(
+            self._on_watermark_notification
+        )
 
         self.title = ''
-        self._num_unread = 0
         self._set_title_cb = set_title_cb
         self._set_title()
 
@@ -269,8 +271,6 @@ class ConversationWidget(urwid.WidgetWrap):
         # conversation.
         for event in self._conversation.events:
             self._on_event(event)
-        self._num_unread = 0
-        self._set_title()
 
         super().__init__(self._widget)
 
@@ -284,16 +284,12 @@ class ConversationWidget(urwid.WidgetWrap):
         future = asyncio.async(self._conversation.update_read_timestamp())
         future.add_done_callback(lambda future: future.result())
 
-        # Mark messages as read.
-        self._num_unread = 0
-        self._set_title()
         return super().keypress(size, key)
 
     def _set_title(self):
         """Update this conversation's tab title."""
-        self.title = get_conv_name(self._conversation, truncate=True)
-        if self._num_unread > 0:
-            self.title += ' ({})'.format(self._num_unread)
+        self.title = get_conv_name(self._conversation, show_unread=True,
+                                   truncate=True)
         self._set_title_cb(self, self.title)
 
     def _on_return(self, text):
@@ -340,6 +336,11 @@ class ConversationWidget(urwid.WidgetWrap):
         timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
         self._add_message_widget(MessageWidget(timestamp, text, None))
 
+    def _on_watermark_notification(self, watermark_notification):
+        """Handle watermark changes for this conversation."""
+        # Update the unread count in the title.
+        self._set_title()
+
     def _on_event(self, conv_event):
         """Display a new conversation message."""
         user = self._conversation.get_user(conv_event.user_id)
@@ -351,9 +352,6 @@ class ConversationWidget(urwid.WidgetWrap):
             self._add_message_widget(MessageWidget(
                 conv_event.timestamp, conv_event.text, user
             ))
-            # Update the count of unread messages.
-            if not user.is_self:
-                self._num_unread += 1
 
         elif isinstance(conv_event, hangups.RenameEvent):
             if conv_event.new_name == '':

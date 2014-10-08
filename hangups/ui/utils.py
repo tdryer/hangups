@@ -14,7 +14,8 @@ def get_conv_name(conv, truncate=False, show_unread=False):
     of unread chat messages in parentheses after the conversation name.
     """
     num_unread = len([conv_event for conv_event in conv.unread_events if
-                      isinstance(conv_event, hangups.ChatMessageEvent)])
+                      isinstance(conv_event, hangups.ChatMessageEvent) and
+                      not conv.get_user(conv_event.user_id).is_self])
     if show_unread and num_unread > 0:
         postfix = ' ({})'.format(num_unread)
     else:
