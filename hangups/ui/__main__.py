@@ -3,7 +3,7 @@
 import appdirs
 import argparse
 import asyncio
-import datetime
+import itertools
 import logging
 import os
 import sys
@@ -172,15 +172,53 @@ class ReturnableEdit(urwid.Edit):
 
 
 class StatusLineWidget(urwid.WidgetWrap):
-    """Widget for showing typing status."""
+    """Widget for showing status messages.
 
-    def __init__(self, conversation):
+    If the client is disconnected, show a reconnecting message. If a temporary
+    message is showing, show the temporary message. If someone is typing, show
+    a typing messages.
+    """
+
+    _MESSAGE_DELAY_SECS = 10
+
+    def __init__(self, client, conversation):
         self._typing_statuses = {}
         self._conversation = conversation
         self._conversation.on_event.add_observer(self._on_event)
         self._conversation.on_typing.add_observer(self._on_typing)
         self._widget = urwid.Text('', align='center')
+        self._is_connected = True
+        self._message = None
+        self._message_handle = None
+        client.on_disconnect.add_observer(self._on_disconnect)
+        client.on_reconnect.add_observer(self._on_reconnect)
         super().__init__(urwid.AttrWrap(self._widget, 'status_line'))
+
+    def show_message(self, message_str):
+        """Show a temporary message."""
+        if self._message_handle is not None:
+            self._message_handle.cancel()
+        self._message_handle = asyncio.get_event_loop().call_later(
+            self._MESSAGE_DELAY_SECS, self._clear_message
+        )
+        self._message = message_str
+        self._update()
+
+    def _clear_message(self):
+        """Clear the temporary message."""
+        self._message = None
+        self._message_handle = None
+        self._update()
+
+    def _on_disconnect(self):
+        """Show reconnecting message when disconnected."""
+        self._is_connected = False
+        self._update()
+
+    def _on_reconnect(self):
+        """Hide reconnecting message when reconnected."""
+        self._is_connected = True
+        self._update()
 
     def _on_event(self, conv_event):
         """Make users stop typing when they send a message."""
@@ -196,18 +234,24 @@ class StatusLineWidget(urwid.WidgetWrap):
         self._update()
 
     def _update(self):
-        """Update list of typers."""
+        """Update status text."""
         typers = [self._conversation.get_user(user_id).first_name
                   for user_id, status in self._typing_statuses.items()
                   if status == hangups.TypingStatus.TYPING]
         if len(typers) > 0:
-            msg = '{} {} typing...'.format(
+            typing_message = '{} {} typing...'.format(
                 ', '.join(sorted(typers)),
                 'is' if len(typers) == 1 else 'are'
             )
         else:
-            msg = ''
-        self._widget.set_text(msg)
+            typing_message = ''
+
+        if not self._is_connected:
+            self._widget.set_text("RECONNECTING...")
+        elif self._message is not None:
+            self._widget.set_text(self._message)
+        else:
+            self._widget.set_text(typing_message)
 
 
 class MessageWidget(urwid.WidgetWrap):
@@ -234,17 +278,129 @@ class MessageWidget(urwid.WidgetWrap):
     def __lt__(self, other):
         return self.timestamp < other.timestamp
 
+    @staticmethod
+    def from_conversation_event(conversation, conv_event):
+        """Return MessageWidget representing a ConversationEvent.
+
+        Returns None if the ConversationEvent does not have a widget
+        representation.
+        """
+        user = conversation.get_user(conv_event.user_id)
+        if isinstance(conv_event, hangups.ChatMessageEvent):
+            return MessageWidget(conv_event.timestamp, conv_event.text, user)
+        elif isinstance(conv_event, hangups.RenameEvent):
+            if conv_event.new_name == '':
+                text = ('{} cleared the conversation name'
+                        .format(user.first_name))
+            else:
+                text = ('{} renamed the conversation to {}'
+                        .format(user.first_name, conv_event.new_name))
+            return MessageWidget(conv_event.timestamp, text)
+        elif isinstance(conv_event, hangups.MembershipChangeEvent):
+            event_users = [conversation.get_user(user_id) for user_id
+                           in conv_event.participant_ids]
+            names = ', '.join([user.full_name for user in event_users])
+            if conv_event.type_ == hangups.MembershipChangeType.JOIN:
+                text = ('{} added {} to the conversation'
+                        .format(user.first_name, names))
+            else:  # LEAVE
+                text = ('{} left the conversation'.format(names))
+            return MessageWidget(conv_event.timestamp, text)
+        else:
+            return None
+
+
+class ConversationEventListWalker(urwid.ListWalker):
+    """ListWalker for ConversationEvents."""
+
+    def __init__(self, conversation):
+        self._conversation = conversation  # Conversation
+        self._focus_position = 0
+        # Track whether the user is trying to scroll up.
+        self._is_scrolling = False
+        # Start scrolled to the bottom.
+        try:
+            while True:
+                self.set_focus(self.next_position(self._focus_position))
+        except IndexError:
+            pass
+        self._conversation.on_event.add_observer(self._handle_event)
+
+    def _handle_event(self, *args):
+        """Handle updating and scrolling when a new event is added.
+
+        Automatically scroll down to show the new text if the bottom is
+        showing. This allows the user to scroll up to read previous messages
+        while new messages are arriving.
+        """
+        if not self._is_scrolling:
+            try:
+                pos = self.next_position(self._focus_position)
+            except IndexError:
+                pass  # New event might not have a widget.
+            else:
+                self.set_focus(pos)
+        else:
+            self._modified()
+
+    def __getitem__(self, position):
+        """Return widget at position or raise IndexError."""
+        widget = MessageWidget.from_conversation_event(
+            self._conversation, self._conversation.events[position]
+        )
+        if not widget:
+            raise IndexError('Invalid position: {}'.format(position))
+        return widget
+
+    def next_position(self, position):
+        """Return the position below position or raise IndexError."""
+        for next_position in itertools.count(position + 1):
+            if next_position == len(self._conversation.events):
+                raise IndexError('Reached last position')
+            try:
+                self[next_position]
+            except IndexError:
+                pass
+            else:
+                return next_position
+
+    def prev_position(self, position):
+        """Return the position above position or raise IndexError."""
+        for prev_position in itertools.count(position - 1, step=-1):
+            if prev_position == -1:
+                raise IndexError('Reached first position')
+            try:
+                self[prev_position]
+            except IndexError:
+                pass
+            else:
+                return prev_position
+
+    def set_focus(self, position):
+        """Set the focus to position or raise IndexError."""
+        self._focus_position = position
+        self._modified()
+        # If we set focus to anywhere but the last position, the user if
+        # scrolling up:
+        try:
+            self.next_position(position)
+        except IndexError:
+            self._is_scrolling = False
+        else:
+            self._is_scrolling = True
+
+    def get_focus(self):
+        """Return (widget, position) tuple or (None, None) if empty."""
+        if len(self._conversation.events) > 0:
+            return (self[self._focus_position], self._focus_position)
+        else:
+            return (None, None)
+
 
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
     def __init__(self, client, conversation, set_title_cb):
-        client.on_disconnect.add_observer(lambda: self._show_info_message(
-            'Disconnected.'
-        ))
-        client.on_reconnect.add_observer(lambda: self._show_info_message(
-            'Connected.'
-        ))
         self._client = client
         self._conversation = conversation
         self._conversation.on_event.add_observer(self._on_event)
@@ -256,9 +412,9 @@ class ConversationWidget(urwid.WidgetWrap):
         self._set_title_cb = set_title_cb
         self._set_title()
 
-        self._list_walker = urwid.SimpleFocusListWalker([])
+        self._list_walker = ConversationEventListWalker(conversation)
         self._list_box = urwid.ListBox(self._list_walker)
-        self._status_widget = StatusLineWidget(conversation)
+        self._status_widget = StatusLineWidget(client, conversation)
         self._widget = urwid.Pile([
             ('weight', 1, self._list_box),
             ('pack', self._status_widget),
@@ -309,32 +465,7 @@ class ConversationWidget(urwid.WidgetWrap):
         try:
             future.result()
         except hangups.NetworkError:
-            self._show_info_message('Failed to send message.')
-
-    def _add_message_widget(self, message_widget):
-        """Add MessageWidget to the ConversationWidget.
-
-        Automatically scroll down to show the new text if the bottom is showing
-        (the last widget is focused). This allows the user to scroll up to read
-        previous messages while new messages are arriving.
-        """
-        try:
-            bottom_visible = (self._list_box.focus_position ==
-                              len(self._list_walker) - 1)
-        except IndexError:
-            bottom_visible = True  # ListBox is empty
-        self._list_walker.append(message_widget)
-        self._list_walker.sort()
-        if bottom_visible:
-            # set_focus_valign is necessary so the last message is always shown
-            # completely.
-            self._list_box.set_focus(len(self._list_walker) - 1)
-            self._list_box.set_focus_valign('bottom')
-
-    def _show_info_message(self, text):
-        """Display an informational message with timestamp."""
-        timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
-        self._add_message_widget(MessageWidget(timestamp, text, None))
+            self._status_widget.show_message('Failed to send message')
 
     def _on_watermark_notification(self, watermark_notification):
         """Handle watermark changes for this conversation."""
@@ -343,36 +474,6 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def _on_event(self, conv_event):
         """Display a new conversation message."""
-        user = self._conversation.get_user(conv_event.user_id)
-
-        # XXX: If the ConversationWidget is created by a ConversationEvent, the
-        # ConversationEvent will be duplicated in the list of messages.
-
-        if isinstance(conv_event, hangups.ChatMessageEvent):
-            self._add_message_widget(MessageWidget(
-                conv_event.timestamp, conv_event.text, user
-            ))
-
-        elif isinstance(conv_event, hangups.RenameEvent):
-            if conv_event.new_name == '':
-                text = ('{} cleared the conversation name'
-                        .format(user.first_name))
-            else:
-                text = ('{} renamed the conversation to {}'
-                        .format(user.first_name, conv_event.new_name))
-            self._add_message_widget(MessageWidget(conv_event.timestamp, text))
-
-        elif isinstance(conv_event, hangups.MembershipChangeEvent):
-            event_users = [self._conversation.get_user(user_id) for user_id
-                           in conv_event.participant_ids]
-            names = ', '.join([user.full_name for user in event_users])
-            if conv_event.type_ == hangups.MembershipChangeType.JOIN:
-                text = ('{} added {} to the conversation'
-                        .format(user.first_name, names))
-            else:  # LEAVE
-                text = ('{} left the conversation'.format(names))
-            self._add_message_widget(MessageWidget(conv_event.timestamp, text))
-
         # Update the title in case unread count or conversation name changed.
         self._set_title()
 
