@@ -12,6 +12,7 @@ import re
 import time
 import datetime
 
+import hangups
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
                      event, schemas)
 
@@ -442,6 +443,26 @@ class Client(object):
                 datetime.datetime.now(tz=datetime.timezone.utc)
             ),
             None, [],
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
+    @asyncio.coroutine
+    def settyping(self, conversation_id, typing=hangups.TypingStatus.TYPING):
+        """Send typing notification.
+
+        conversation_id must be a valid conversation ID.
+        typing must be a hangups.TypingStatus Enum.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('conversations/settyping', [
+            self._get_request_header(),
+            [conversation_id],
+            typing.value
         ])
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
