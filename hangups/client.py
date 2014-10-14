@@ -405,9 +405,7 @@ class Client(object):
 
     @asyncio.coroutine
     def removeuser(self, conversation_id):
-        """Leave conversation with multiple participants
-        (if there are only 2 participants in conversation, you
-         will get ERROR_INVALID_REQUEST)
+        """Leave group conversation.
 
         conversation_id must be a valid conversation ID.
 
@@ -429,7 +427,7 @@ class Client(object):
 
     @asyncio.coroutine
     def deleteconversation(self, conversation_id):
-        """Delete conversation with only 2 participants
+        """Delete one-to-one conversation.
 
         conversation_id must be a valid conversation ID.
 

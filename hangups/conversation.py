@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from hangups import parsers, event, user, conversation_event, exceptions
+from hangups import ConversationType
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +105,7 @@ class Conversation(object):
         Raises hangups.NetworkError if the message can not be sent.
         """
         try:
-            if len(self.users) > 2:
+            if self._conversation.type_ == ConversationType.GROUP:
                 yield from self._client.removeuser(self.id_)
             else:
                 yield from self._client.deleteconversation(self.id_)
