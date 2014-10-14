@@ -10,6 +10,7 @@ import logging
 import random
 import re
 import time
+import datetime
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
                      event, schemas)
