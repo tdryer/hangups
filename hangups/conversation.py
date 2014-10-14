@@ -60,7 +60,6 @@ class Conversation(object):
                 parsers.to_timestamp(old_timestamp)
             )
 
-
     def add_event(self, event_):
         """Add a ClientEvent to the Conversation.
 
@@ -96,6 +95,21 @@ class Conversation(object):
             )
         except exceptions.NetworkError as e:
             logger.warning('Failed to send message: {}'.format(e))
+            raise
+
+    @asyncio.coroutine
+    def leave(self):
+        """Leave conversation.
+
+        Raises hangups.NetworkError if the message can not be sent.
+        """
+        try:
+            if len(self.users) > 2:
+                yield from self._client.removeuser(self.id_)
+            else:
+                yield from self._client.deleteconversation(self.id_)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to leave conversation: {}'.format(e))
             raise
 
     @asyncio.coroutine
@@ -230,6 +244,13 @@ class ConversationList(object):
         )
         self._conv_dict[conv_id] = conv
         return conv
+
+    @asyncio.coroutine
+    def delete_conversation(self, conv_id):
+        """Leave conversation and remove it from ConversationList"""
+        logger.info('Leaving conversation: {}'.format(conv_id))
+        yield from self._conv_dict[conv_id].leave()
+        del self._conv_dict[conv_id]
 
     @asyncio.coroutine
     def _on_state_update(self, state_update):

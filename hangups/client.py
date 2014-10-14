@@ -403,6 +403,54 @@ class Client(object):
     ###########################################################################
 
     @asyncio.coroutine
+    def removeuser(self, conversation_id):
+        """Leave conversation with multiple participants
+        (if there are only 2 participants in conversation, you
+         will get ERROR_INVALID_REQUEST)
+
+        conversation_id must be a valid conversation ID.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        client_generated_id = random.randint(0, 2**32)
+        res = yield from self._request('conversations/removeuser', [
+            self._get_request_header(),
+            None, None, None,
+            [
+                [conversation_id], client_generated_id, 2
+            ],
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
+    @asyncio.coroutine
+    def deleteconversation(self, conversation_id):
+        """Delete conversation with only 2 participants
+
+        conversation_id must be a valid conversation ID.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('conversations/deleteconversation', [
+            self._get_request_header(),
+            [conversation_id],
+            # Not sure what timestamp should be there, last time I have tried it
+            # Hangouts client in GMail sent something like now() - 5 hours
+            parsers.to_timestamp(
+                datetime.datetime.now(tz=datetime.timezone.utc)
+            ),
+            None, [],
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
+    @asyncio.coroutine
     def updatewatermark(self, conv_id, read_timestamp):
         """Update the watermark (read timestamp) for a conversation.
 
