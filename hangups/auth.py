@@ -18,8 +18,8 @@ BROWSER_USER_AGENT = (
 )
 
 
-class GoogleAuthError(Exception): pass
-"""Exception raised when auth fails."""
+class GoogleAuthError(Exception):
+    """Exception raised when auth fails."""
 
 
 def _get_galx_token(session):

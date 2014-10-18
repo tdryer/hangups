@@ -177,7 +177,7 @@ class Channel(object):
 
     @property
     def is_connected(self):
-       return self._is_connected
+        return self._is_connected
 
     @asyncio.coroutine
     def listen(self):
