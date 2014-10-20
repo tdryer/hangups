@@ -3,7 +3,8 @@
 import asyncio
 import logging
 
-from hangups import parsers, event, user, conversation_event, exceptions
+from hangups import (parsers, event, user, conversation_event, exceptions,
+                     schemas)
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +179,12 @@ class Conversation(object):
         return [conv_event for conv_event in self._events
                 if conv_event.timestamp > self.latest_read_timestamp]
 
+    @property
+    def is_archived(self):
+        """True if this conversation has been archived."""
+        return (schemas.ClientConversationView.ARCHIVED_VIEW in
+                self._conversation.self_conversation_state.view)
+
 
 class ConversationList(object):
     """Wrapper around Client that maintains a list of Conversations."""
@@ -209,9 +216,13 @@ class ConversationList(object):
             'ConversationList.on_watermark_notification'
         )
 
-    def get_all(self):
-        """Return list of all Conversations."""
-        return list(self._conv_dict.values())
+    def get_all(self, include_archived=False):
+        """Return list of all Conversations.
+
+        If include_archived is False, do not return any archived conversations.
+        """
+        return [conv for conv in self._conv_dict.values()
+                if not conv.is_archived or include_archived]
 
     def get(self, conv_id):
         """Return a Conversation from its ID.
