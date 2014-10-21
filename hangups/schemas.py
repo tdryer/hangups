@@ -440,3 +440,9 @@ CLIENT_SYNC_ALL_NEW_EVENTS_RESPONSE = Message(
     ('sync_timestamp', Field()),
     ('conversation_state', RepeatedField(CLIENT_CONVERSATION_STATE)),
 )
+
+CLIENT_GET_CONVERSATION_RESPONSE = Message(
+    (None, Field()),  # 'cgcrp'
+    ('response_header', CLIENT_RESPONSE_HEADER),
+    ('conversation_state', CLIENT_CONVERSATION_STATE),
+)
