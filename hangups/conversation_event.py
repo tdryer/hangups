@@ -42,6 +42,11 @@ class ConversationEvent(object):
         """The ID of the conversation the event belongs to."""
         return self._event.conversation_id.id_
 
+    @property
+    def id_(self):
+        """The ID of the ConversationEvent."""
+        return self._event.event_id
+
 
 class ChatMessageSegment(object):
 

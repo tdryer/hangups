@@ -20,6 +20,7 @@ class Conversation(object):
         self._user_list = user_list  # UserList
         self._conversation = client_conversation  # ClientConversation
         self._events = []  # [ConversationEvent]
+        self._events_dict = {}  # {event_id: ConversationEvent}
         for event_ in client_events:
             self.add_event(event_)
 
@@ -61,21 +62,26 @@ class Conversation(object):
                 parsers.to_timestamp(old_timestamp)
             )
 
+    @staticmethod
+    def _wrap_event(event_):
+        """Wrap ClientEvent in ConversationEvent subclass."""
+        if event_.chat_message is not None:
+            return conversation_event.ChatMessageEvent(event_)
+        elif event_.conversation_rename is not None:
+            return conversation_event.RenameEvent(event_)
+        elif event_.membership_change is not None:
+            return conversation_event.MembershipChangeEvent(event_)
+        else:
+            return conversation_event.ConversationEvent(event_)
 
     def add_event(self, event_):
         """Add a ClientEvent to the Conversation.
 
         Returns an instance of ConversationEvent or subclass.
         """
-        if event_.chat_message is not None:
-            conv_event = conversation_event.ChatMessageEvent(event_)
-        elif event_.conversation_rename is not None:
-            conv_event = conversation_event.RenameEvent(event_)
-        elif event_.membership_change is not None:
-            conv_event = conversation_event.MembershipChangeEvent(event_)
-        else:
-            conv_event = conversation_event.ConversationEvent(event_)
+        conv_event = self._wrap_event(event_)
         self._events.append(conv_event)
+        self._events_dict[conv_event.id_] = conv_event
         return conv_event
 
     def get_user(self, user_id):
@@ -127,6 +133,71 @@ class Conversation(object):
             except exceptions.NetworkError as e:
                 logger.warning('Failed to update read timestamp: {}'.format(e))
                 raise
+
+    @asyncio.coroutine
+    def get_events(self, event_id=None, max_events=50):
+        """Return list of ConversationEvents ordered newest-first.
+
+        If event_id is specified, return events preceeding this event.
+
+        This method will make an API request to load historical events if
+        necessary. If the beginning of the conversation is reached, an empty
+        list will be returned.
+
+        Raises KeyError if event_id does not correspond to a known event.
+
+        Raises hangups.NetworkError if the events could not be requested.
+        """
+        if event_id is None:
+            # If no event_id is provided, return the newest events in this
+            # conversation.
+            conv_events = self._events[-1 * max_events:]
+        else:
+            # If event_id is provided, return the events we have that are
+            # older, or request older events if event_id corresponds to the
+            # oldest event we have.
+            conv_event = self.get_event(event_id)
+            if self._events[0].id_ != event_id:
+                conv_events = self._events[self._events.index(conv_event) + 1:]
+            else:
+                logger.info('Loading events for conversation {} before {}'
+                            .format(self.id_, conv_event.timestamp))
+                res = yield from self._client.getconversation(
+                    self.id_, conv_event.timestamp, max_events
+                )
+                conv_events = [self._wrap_event(client_event) for client_event
+                               in res.conversation_state.event]
+                logger.info('Loaded {} events for conversation {}'
+                            .format(len(conv_events), self.id_))
+                for conv_event in reversed(conv_events):
+                    self._events.insert(0, conv_event)
+                    self._events_dict[conv_event.id_] = conv_event
+        return conv_events
+
+    def next_event(self, event_id, prev=False):
+        """Return ConversationEvent following the event with given event_id.
+
+        If prev is True, return the previous event rather than the following
+        one.
+
+        Raises KeyError if no such ConversationEvent is known.
+
+        Return None if there is no following event.
+        """
+        i = self.events.index(self._events_dict[event_id])
+        if prev and i > 0:
+            return self.events[i - 1]
+        elif not prev and i + 1 < len(self.events):
+            return self.events[i + 1]
+        else:
+            return None
+
+    def get_event(self, event_id):
+        """Return ConversationEvent with the given event_id.
+
+        Raises KeyError if no such ConversationEvent is known.
+        """
+        return self._events_dict[event_id]
 
     @property
     def id_(self):

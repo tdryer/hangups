@@ -311,22 +311,24 @@ class MessageWidget(urwid.WidgetWrap):
 
 
 class ConversationEventListWalker(urwid.ListWalker):
-    """ListWalker for ConversationEvents."""
+    """ListWalker for ConversationEvents.
+
+    The position may be an event ID, POSITION_LOADING, or None.
+    """
+
+    POSITION_LOADING = 'loading'
 
     def __init__(self, conversation):
         self._conversation = conversation  # Conversation
-        self._focus_position = 0
-        # Track whether the user is trying to scroll up.
-        self._is_scrolling = False
-        # Start scrolled to the bottom.
-        try:
-            while True:
-                self.set_focus(self.next_position(self._focus_position))
-        except IndexError:
-            pass
+        self._focus_position = None
+        if len(conversation.events) > 0:
+            self._focus_position = conversation.events[-1].id_
+        self._is_scrolling = False  # Whether the user is trying to scroll up
+        self._is_loading = False  # Whether we're currently loading more events
+        self._first_loaded = False  # Whether the first event is loaded
         self._conversation.on_event.add_observer(self._handle_event)
 
-    def _handle_event(self, *args):
+    def _handle_event(self, conv_event):
         """Handle updating and scrolling when a new event is added.
 
         Automatically scroll down to show the new text if the bottom is
@@ -335,7 +337,8 @@ class ConversationEventListWalker(urwid.ListWalker):
         """
         if not self._is_scrolling:
             try:
-                pos = self.next_position(self._focus_position)
+                _ = self[conv_event.id_]  # Check that it has a widget.
+                pos = conv_event.id_
             except IndexError:
                 pass  # New event might not have a widget.
             else:
@@ -343,38 +346,80 @@ class ConversationEventListWalker(urwid.ListWalker):
         else:
             self._modified()
 
+    @asyncio.coroutine
+    def _load(self):
+        """Load more events for this conversation."""
+        # Don't try to load while we're already loading.
+        if not self._is_loading and not self._first_loaded:
+            self._is_loading = True
+            try:
+                conv_events = yield from self._conversation.get_events(
+                    self._conversation.events[0].id_
+                )
+            except (IndexError, hangups.NetworkError):
+                conv_events = []
+            if len(conv_events) == 0:
+                self._first_loaded = True
+            if (self._focus_position == self.POSITION_LOADING
+                    and len(conv_events) > 0):
+                # If the loading indicator is still focused, and we loaded more
+                # events, set focus on the first new event so the loaded
+                # indicator is replaced.
+                self.set_focus(conv_events[-1].id_)
+            else:
+                # Otherwise, still need to invalidate in case the loading
+                # indicator is showing but not focused.
+                self._modified()
+            self._is_loading = False
+
     def __getitem__(self, position):
         """Return widget at position or raise IndexError."""
-        widget = MessageWidget.from_conversation_event(
-            self._conversation, self._conversation.events[position]
-        )
+        if position == self.POSITION_LOADING:
+            if self._first_loaded:
+                return urwid.Text('No more messages', align='center')
+            future = asyncio.async(self._load())
+            future.add_done_callback(lambda future: future.result())
+            return urwid.Text('Loading...', align='center')
+        # May return None if the event doesn't have a widget representation.
+        try:
+            widget = MessageWidget.from_conversation_event(
+                self._conversation, self._conversation.get_event(position)
+            )
+        except KeyError:
+            raise IndexError('Invalid position: {}'.format(position))
         if not widget:
             raise IndexError('Invalid position: {}'.format(position))
         return widget
 
-    def next_position(self, position):
-        """Return the position below position or raise IndexError."""
-        for next_position in itertools.count(position + 1):
-            if next_position == len(self._conversation.events):
+    def _get_position(self, position, prev=False):
+        """Return the next/previous position or raise IndexError."""
+        if position == self.POSITION_LOADING:
+            if prev:
                 raise IndexError('Reached last position')
+            else:
+                return self._conversation.events[0].id_
+        while True:
+            ev = self._conversation.next_event(position, prev=prev)
+            if ev is None:
+                if prev:
+                    return self.POSITION_LOADING
+                else:
+                    raise IndexError('Reached first position')
+            # Skip events that aren't represented by a widget.
             try:
-                self[next_position]
+                self[ev.id_]
             except IndexError:
                 pass
             else:
-                return next_position
+                return ev.id_
+
+    def next_position(self, position):
+        """Return the position below position or raise IndexError."""
+        return self._get_position(position)
 
     def prev_position(self, position):
         """Return the position above position or raise IndexError."""
-        for prev_position in itertools.count(position - 1, step=-1):
-            if prev_position == -1:
-                raise IndexError('Reached first position')
-            try:
-                self[prev_position]
-            except IndexError:
-                pass
-            else:
-                return prev_position
+        return self._get_position(position, prev=True)
 
     def set_focus(self, position):
         """Set the focus to position or raise IndexError."""

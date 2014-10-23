@@ -540,7 +540,7 @@ class Client(object):
             [
                 None,  # eventId
                 None,  # storageContinuationToken
-                event_timestamp,  # eventTimestamp
+                parsers.to_timestamp(event_timestamp),  # eventTimestamp
             ]
         ], use_json=False)
         try:
