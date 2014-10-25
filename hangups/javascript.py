@@ -19,15 +19,18 @@ def loads(string):
         raise ValueError('Failed to load JavaScript: {}'.format(e))
 
 
-# TODO: there are more possible escape sequences
 _ESCAPES = {
-    "'": "'",
-    '"': '"',
-    '\\': '\\',
-    'n': '\n',
+    'b': '\b',
     't': '\t',
+    'n': '\n',
+    'v': '\v',
+    'f': '\f',
     'r': '\r',
-    'u': '', # unicode escapes are a special case
+    '"': '"',
+    "'": "'",
+    '\\': '\\',
+    # Unicode escapes are a special case:
+    'u': '',
 }
 _STRING_RE = ('(\'(([^\\\\\'])|(\\\\[{0}]))*?\')|("(([^\\\\"])|(\\\\[{0}]))*?")'
               .format(''.join(_ESCAPES.keys()).replace('\\', '\\\\')))
