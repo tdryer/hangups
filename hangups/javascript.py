@@ -5,7 +5,10 @@ API responses. This is only as complete as necessary to parse the responses
 we're getting.
 """
 
+import logging
 import purplex
+
+logger = logging.getLogger(__name__)
 
 
 def loads(string):
@@ -32,8 +35,6 @@ _ESCAPES = {
     # Unicode escapes are a special case:
     'u': '',
 }
-_STRING_RE = ('(\'(([^\\\\\'])|(\\\\[{0}]))*?\')|("(([^\\\\"])|(\\\\[{0}]))*?")'
-              .format(''.join(_ESCAPES.keys()).replace('\\', '\\\\')))
 
 
 def _unescape_string(s):
@@ -62,14 +63,17 @@ def _unescape_string(s):
                 try:
                     unescaped_chars.append(_ESCAPES[c])
                 except KeyError:
-                    raise ValueError('String literal contains invalid '
-                                     'escape sequence: {}'.format(s))
+                    # Mimic browser engines by ignoring the backslash if it
+                    # forms an invalid escape sequence.
+                    logger.warning('Ignoring invalid escape sequence: \\{}'
+                                   .format(c))
+                    unescaped_chars.append(c)
     return "".join(unescaped_chars)
 
 
 class JavaScriptLexer(purplex.Lexer):
     """Lexer for a subset of JavaScript."""
-    # TODO negatives? floats?
+    # TODO: Negative integers
     INTEGER = purplex.TokenDef(r'\d+')
     FLOAT = purplex.TokenDef(r'[-+]?\d*[.]\d+')
 
@@ -84,7 +88,9 @@ class JavaScriptLexer(purplex.Lexer):
     COMMA = purplex.TokenDef(r',')
     COLON = purplex.TokenDef(r':')
 
-    STRING = purplex.TokenDef(_STRING_RE)
+    STRING = purplex.TokenDef(
+        '(\'(([^\\\\\'])|(\\\\.))*?\')|("(([^\\\\"])|(\\\\.))*?")'
+    )
     # TODO more unquoted keys are allowed
     KEY = purplex.TokenDef(r'[a-zA-Z0-9_$]+')
 

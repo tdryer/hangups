@@ -46,6 +46,8 @@ from hangups import javascript
     (r'"\\"', '\\'),
     (r'"\""', '"'),
     (r"'\''", "'"),
+    # invalid string escape sequence
+    (r'"\a"', 'a'),
     # objects
     ('{ }', {}),
     ('{"foo": 1}', {'foo': 1}),
