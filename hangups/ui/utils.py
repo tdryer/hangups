@@ -8,7 +8,9 @@ def get_conv_name(conv, truncate=False, show_unread=False):
     If the conversation has a custom name, use the custom name. Otherwise, for
     one-to-one conversations, the name is the full name of the other user. For
     group conversations, the name is a comma-separated list of first names. If
-    truncate is true, only show up to two names in a group conversation.
+    the group conversation is empty, the name is "Empty Conversation".
+
+    If truncate is true, only show up to two names in a group conversation.
 
     If show_unread is True, if there are unread chat messages, show the number
     of unread chat messages in parentheses after the conversation name.
@@ -26,6 +28,8 @@ def get_conv_name(conv, truncate=False, show_unread=False):
         participants = sorted((user for user in conv.users if not user.is_self),
                               key=lambda user: user.id_)
         names = [user.first_name for user in participants]
+        if len(participants) == 0:
+            return "Empty Conversation" + postfix
         if len(participants) == 1:
             return participants[0].full_name + postfix
         elif truncate and len(participants) > 2:
