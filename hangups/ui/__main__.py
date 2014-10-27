@@ -405,11 +405,12 @@ class ConversationEventListWalker(urwid.ListWalker):
                     return self.POSITION_LOADING
                 else:
                     raise IndexError('Reached first position')
-            # Skip events that aren't represented by a widget.
+            # Skip events that aren't represented by a widget and try the next
+            # one.
             try:
                 self[ev.id_]
             except IndexError:
-                pass
+                position = ev.id_
             else:
                 return ev.id_
 
