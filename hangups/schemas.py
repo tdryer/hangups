@@ -249,10 +249,10 @@ MESSAGE_ATTACHMENT = Message(
 
 CLIENT_CHAT_MESSAGE = Message(
     (None, Field(is_optional=True)),  # always None?
-    ('annotation', RepeatedField(Field())),  # always []?
+    ('annotation', RepeatedField(Field(), is_optional=True)),
     ('message_content', Message(
         ('segment', RepeatedField(MESSAGE_SEGMENT)),
-        ('attachment', RepeatedField(MESSAGE_ATTACHMENT)),
+        ('attachment', RepeatedField(MESSAGE_ATTACHMENT, is_optional=True)),
     )),
     is_optional=True,
 )
