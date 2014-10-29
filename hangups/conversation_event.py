@@ -148,8 +148,11 @@ class ChatMessageEvent(ConversationEvent):
     @property
     def attachments(self):
         """Attachments in the message."""
+        raw_attachments = self._event.chat_message.message_content.attachment
+        if raw_attachments is None:
+            raw_attachments = []
         attachments = []
-        for attachment in self._event.chat_message.message_content.attachment:
+        for attachment in raw_attachments:
             if attachment.embed_item.type_ == [249]:  # PLUS_PHOTO
                 # Try to parse an image message. Image messages contain no
                 # message segments, and thus have no automatic textual
