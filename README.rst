@@ -9,9 +9,6 @@ hangups
     :target: https://readthedocs.org/projects/hangups/?badge=latest
     :alt: Documentation Status
 
-**Notice: hangups is currently BROKEN because of a Hangouts API change on
-October 27**
-
 hangups is the first third-party instant messaging client for `Google
 Hangouts`_. It includes both a Python library and a reference client with a
 text-based user interface.
