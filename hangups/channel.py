@@ -246,10 +246,11 @@ class Channel(object):
         logger.info('New SID: {}'.format(self._sid_param))
         logger.info('New gsessionid: {}'.format(self._gsessionid_param))
 
-        logger.info('Setting up channel...')
-        # Tell the channel what kinds of events to subscribe to. Hangouts for
-        # Chrome does with two separate requests, but it's possible to do it
-        # all in one.
+        logger.info('Setting up channel (1/2)...')
+        # Tell the channel what kinds of events to subscribe to. It's possible
+        # to combine this request with the subsequent one, but it doesn't work
+        # reliably.
+        timestamp = str(int(time.time() * 1000))
         res = yield from http_utils.fetch(
             'post', CHANNEL_URL_PREFIX.format('channel/bind'),
             cookies=self._cookies, connector=self._connector,
@@ -262,14 +263,37 @@ class Channel(object):
                 'SID': self._sid_param,
             },
             data={
-                'count': 3,
+                'count': 1,
                 'ofs': 0,
                 'req0_p': ('{"1":{"1":{"1":{"1":3,"2":2}},"2":{"1":{"1":3,"2":'
                            '2},"2":"","3":"JS","4":"lcsclient"},"3":' +
-                           str(int(time.time() * 1000)) +
-                           ',"4":0,"5":"c1"},"2":{}}'),
-                'req1_p': ('{"3":{"1":{"1":"babel"}}}'),
-                'req2_p': ('{"3":{"1":{"1":"hangout_invite"}}}'),
+                           timestamp + ',"4":0,"5":"c1"},"2":{}}'),
+            },
+        )
+
+        logger.info('Setting up channel (2/2)...')
+        res = yield from http_utils.fetch(
+            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
+            cookies=self._cookies, connector=self._connector,
+            headers=get_authorization_headers(self._cookies['SAPISID']),
+            params={
+                'VER': 8,
+                'RID': 81189,
+                'ctype': 'hangouts',  # client type
+                'gsessionid': self._gsessionid_param,
+                'SID': self._sid_param,
+            },
+            data={
+                'count': 2,
+                'ofs': 1,
+                'req0_p': ('{"1":{"1":{"1":{"1":3,"2":2}},"2":{"1":{"1":3,"2":'
+                           '2},"2":"","3":"JS","4":"lcsclient"},"3":' +
+                           timestamp + ',"4":' + timestamp +
+                           ',"5":"c3"},"3":{"1":{"1":"babel"}}}'),
+                'req1_p': ('{"1":{"1":{"1":{"1":3,"2":2}},"2":{"1":{"1":3,"2":'
+                           '2},"2":"","3":"JS","4":"lcsclient"},"3":' +
+                           timestamp + ',"4":' + timestamp +
+                           ',"5":"c4"},"3":{"1":{"1":"hangout_invite"}}}'),
             },
         )
 
