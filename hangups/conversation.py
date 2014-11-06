@@ -124,6 +124,8 @@ class Conversation(object):
     def set_typing(self, typing=schemas.TypingStatus.TYPING):
         """Set typing status.
 
+        TODO: Add rate-limiting to avoid unnecessary requests.
+
         Raises hangups.NetworkError if typing status cannot be set.
         """
         try:
