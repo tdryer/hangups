@@ -12,7 +12,6 @@ import re
 import time
 import datetime
 
-import hangups
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
                      event, schemas)
 
@@ -451,7 +450,7 @@ class Client(object):
                                           .format(res_status))
 
     @asyncio.coroutine
-    def settyping(self, conversation_id, typing=hangups.TypingStatus.TYPING):
+    def settyping(self, conversation_id, typing=schemas.TypingStatus.TYPING):
         """Send typing notification.
 
         conversation_id must be a valid conversation ID.
