@@ -343,7 +343,7 @@ class ConversationList(object):
         return conv
 
     @asyncio.coroutine
-    def delete_conversation(self, conv_id):
+    def leave_conversation(self, conv_id):
         """Leave conversation and remove it from ConversationList"""
         logger.info('Leaving conversation: {}'.format(conv_id))
         yield from self._conv_dict[conv_id].leave()
