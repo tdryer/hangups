@@ -106,6 +106,33 @@ class Conversation(object):
             raise
 
     @asyncio.coroutine
+    def leave(self):
+        """Leave conversation.
+
+        Raises hangups.NetworkError if conversation cannot be left.
+        """
+        try:
+            if self._conversation.type_ == schemas.ConversationType.GROUP:
+                yield from self._client.removeuser(self.id_)
+            else:
+                yield from self._client.deleteconversation(self.id_)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to leave conversation: {}'.format(e))
+            raise
+
+    @asyncio.coroutine
+    def set_typing(self, typing=schemas.TypingStatus.TYPING):
+        """Set typing status.
+
+        Raises hangups.NetworkError if typing status cannot be set.
+        """
+        try:
+            yield from self._client.settyping(self.id_, typing)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to set typing status: {}'.format(e))
+            raise
+
+    @asyncio.coroutine
     def update_read_timestamp(self, read_timestamp=None):
         """Update the timestamp of the latest event which has been read.
 
@@ -312,6 +339,13 @@ class ConversationList(object):
         )
         self._conv_dict[conv_id] = conv
         return conv
+
+    @asyncio.coroutine
+    def delete_conversation(self, conv_id):
+        """Leave conversation and remove it from ConversationList"""
+        logger.info('Leaving conversation: {}'.format(conv_id))
+        yield from self._conv_dict[conv_id].leave()
+        del self._conv_dict[conv_id]
 
     @asyncio.coroutine
     def _on_state_update(self, state_update):
