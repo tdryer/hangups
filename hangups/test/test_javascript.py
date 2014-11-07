@@ -33,7 +33,6 @@ from hangups import javascript
     ('"f"', 'f'),
     ('\'foo\'', 'foo'),
     ('"foo"', 'foo'),
-    (r'"\u003d"', '='),
     ('[["foo","bar"],,,1232]', [['foo', 'bar'], None, None, 1232]),
     ('"😀"', '😀'),
     # string escape sequences
@@ -46,8 +45,14 @@ from hangups import javascript
     (r'"\\"', '\\'),
     (r'"\""', '"'),
     (r"'\''", "'"),
-    # invalid string escape sequence
+    (r'"a\u003db"', 'a=b'),
+    (r'"\ud83d\ude1c"', '😜'),
+    (r'"a\ud83d\ude1cb"', 'a😜b'),
+    (r'"a\ud83d\ude1c\ud83d\ude1cb"', 'a😜😜b'),
+    # invalid string escape sequences
     (r'"\a"', 'a'),
+    (r'"a\uzzzzb"', 'ab'),
+    (r'"\ud83d\uffff"', ''),
     # objects
     ('{ }', {}),
     ('{"foo": 1}', {'foo': 1}),
