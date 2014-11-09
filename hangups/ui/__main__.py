@@ -320,12 +320,18 @@ class ConversationEventListWalker(urwid.ListWalker):
 
     def __init__(self, conversation):
         self._conversation = conversation  # Conversation
-        self._focus_position = None
-        if len(conversation.events) > 0:
-            self._focus_position = conversation.events[-1].id_
         self._is_scrolling = False  # Whether the user is trying to scroll up
         self._is_loading = False  # Whether we're currently loading more events
         self._first_loaded = False  # Whether the first event is loaded
+
+        # Focus position is the first displayable event ID, or None.
+        is_displayable = lambda ev: (
+            MessageWidget.from_conversation_event(conversation, ev) is not None
+        )
+        self._focus_position = next((ev.id_ for ev in
+                                     reversed(conversation.events)
+                                     if is_displayable(ev)), None)
+
         self._conversation.on_event.add_observer(self._handle_event)
 
     def _handle_event(self, conv_event):
