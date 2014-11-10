@@ -3,7 +3,6 @@
 import appdirs
 import argparse
 import asyncio
-import itertools
 import logging
 import os
 import sys
