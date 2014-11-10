@@ -82,7 +82,8 @@ class ChatUI(object):
                             self._tabbed_window.set_tab(widget, title=title))
             widget = ConversationWidget(self._client,
                                         self._conv_list.get(conv_id),
-                                        set_title_cb)
+                                        set_title_cb,
+                                        self._keys)
             self._conv_widgets[conv_id] = widget
         return self._conv_widgets[conv_id]
 
@@ -452,13 +453,14 @@ class ConversationEventListWalker(urwid.ListWalker):
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
-    def __init__(self, client, conversation, set_title_cb):
+    def __init__(self, client, conversation, set_title_cb, keybindings):
         self._client = client
         self._conversation = conversation
         self._conversation.on_event.add_observer(self._on_event)
         self._conversation.on_watermark_notification.add_observer(
             self._on_watermark_notification
         )
+        self._keys = keybindings
 
         self.title = ''
         self._set_title_cb = set_title_cb
@@ -484,13 +486,16 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def keypress(self, size, key):
         """Handle marking messages as read and keeping client active."""
-        # Set the client as active.
-        future = asyncio.async(self._client.set_active())
-        future.add_done_callback(lambda future: future.result())
+        # Ignore the keypress if the user is about to quit.
+        if key != self._keys['quit']:
 
-        # Mark the newest event as read.
-        future = asyncio.async(self._conversation.update_read_timestamp())
-        future.add_done_callback(lambda future: future.result())
+            # Set the client as active.
+            future = asyncio.async(self._client.set_active())
+            future.add_done_callback(lambda future: future.result())
+
+            # Mark the newest event as read.
+            future = asyncio.async(self._conversation.update_read_timestamp())
+            future.add_done_callback(lambda future: future.result())
 
         return super().keypress(size, key)
 
