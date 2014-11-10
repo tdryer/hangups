@@ -19,7 +19,7 @@ Logging in
 ----------
 
 The first time you start hangups, you will be prompted to log into your Google
-account with your email and password. If your account requires 2-step
+account with your username and password. If your account requires 2-step
 verification, you will also be prompted for a PIN. After a successful login,
 hangups will be able to log in automatically after starting.
 
