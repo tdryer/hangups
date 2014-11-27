@@ -9,6 +9,10 @@ hangups
     :target: https://readthedocs.org/projects/hangups/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://coveralls.io/repos/tdryer/hangups/badge.png
+    :target: https://coveralls.io/r/tdryer/hangups
+    :alt: Test Coverage
+
 hangups is the first third-party instant messaging client for `Google
 Hangouts`_. It includes both a Python library and a reference client with a
 text-based user interface.
