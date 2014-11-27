@@ -53,10 +53,11 @@ setup(
         'hangups-urwid==1.2.2-dev',
         # Backports for py3.3:
         'enum34==1.0',
-        'asyncio==3.4.1',
+        'asyncio==3.4.1'
     ],
     tests_require=[
         'pytest',
+        'coveralls==0.4.4'
     ],
     cmdclass={'test': PyTest},
     entry_points={

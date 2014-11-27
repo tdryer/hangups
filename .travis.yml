@@ -4,7 +4,10 @@ python:
     - '3.4'
 install:
     - python setup.py install
+    - python setup.py install test
 script:
-    - python setup.py --quiet test
+    - coverage run --source=hangups setup.py test
     - pip install --quiet docutils
     - python setup.py check --metadata --restructuredtext --strict
+after_success:
+    - coveralls
