@@ -185,13 +185,24 @@ def get_auth_stdin(cookie_filename):
     """Wrapper for get_auth that prompts the user on stdin."""
     def get_credentials_f():
         """Prompt for and return credentials."""
-        email = input('Email: ')
+        email = validate_input_email()
         password = getpass.getpass()
         return (email, password)
     def get_pin_f():
         """Prompt for and return PIN."""
         return input('PIN: ')
     return get_auth(get_credentials_f, get_pin_f, cookie_filename)
+
+
+def validate_input_email():
+    while True:
+        username = input('Username: ')
+        if "gmail.com" in username:
+            print('Invalid Google username.')
+        else:
+            break
+
+    return username
 
 
 if __name__ == '__main__':
