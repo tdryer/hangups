@@ -42,8 +42,10 @@ Projects using hangups
 - `QHangups`_: Alternative client for Google Hangouts written in PyQt
 - `bastardbot`_: A bot to follow and interact with Google Hangouts conversations
 - `pickups`_: IRC gateway for hangups (prototype)
+- `telepathy-hangups`_: Telepathy bindings for Google Chat via hangups library
 
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
 .. _QHangups: https://github.com/xmikos/qhangups
 .. _bastardbot: https://github.com/elamperti/bastardbot
 .. _pickups: https://github.com/mtomwing/pickups
+.. _telepathy-hangups: https://github.com/davidedmundson/telepathy-hangups
