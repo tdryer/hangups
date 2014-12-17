@@ -17,11 +17,13 @@ from hangups import (javascript, parsers, exceptions, http_utils, channel,
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
+PVT_TOKEN_URL = 'https://talkgadget.google.com/talkgadget/_/extension-start'
 CHAT_INIT_URL = 'https://talkgadget.google.com/u/0/talkgadget/_/chat'
 CHAT_INIT_PARAMS = {
     'prop': 'aChromeExtension',
     'fid': 'gtn-roster-iframe-id',
     'ec': '["ci:ec",true,true,false]',
+    'pvt': None,  # Populated later
 }
 CHAT_INIT_REGEX = re.compile(
     r"(?:<script>AF_initDataCallback\((.*?)\);</script>)", re.DOTALL
@@ -173,6 +175,19 @@ class Client(object):
         containing JavaScript objects. We need to parse the objects to get at
         the data.
         """
+        # We first need to fetch the 'pvt' token, which is required for the
+        # initialization request (otherwise it will return 400).
+        try:
+            res = yield from http_utils.fetch(
+                'get', PVT_TOKEN_URL, cookies=self._cookies,
+                connector=self._connector
+            )
+            CHAT_INIT_PARAMS['pvt'] = javascript.loads(res.body.decode())[1]
+            logger.info('Found PVT token: {}'.format(CHAT_INIT_PARAMS['pvt']))
+        except (exceptions.NetworkError, ValueError) as e:
+            raise exceptions.HangupsError('Failed to fetch PVT token: {}'
+                                          .format(e))
+        # Now make the actual initialization request:
         try:
             res = yield from http_utils.fetch(
                 'get', CHAT_INIT_URL, cookies=self._cookies,
