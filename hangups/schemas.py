@@ -251,7 +251,7 @@ CLIENT_CHAT_MESSAGE = Message(
     (None, Field(is_optional=True)),  # always None?
     ('annotation', RepeatedField(Field(), is_optional=True)),
     ('message_content', Message(
-        ('segment', RepeatedField(MESSAGE_SEGMENT)),
+        ('segment', RepeatedField(MESSAGE_SEGMENT, is_optional=True)),
         ('attachment', RepeatedField(MESSAGE_ATTACHMENT, is_optional=True)),
     )),
     is_optional=True,

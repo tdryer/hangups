@@ -142,8 +142,12 @@ class ChatMessageEvent(ConversationEvent):
     @property
     def segments(self):
         """List of ChatMessageSegments in the message."""
-        return [ChatMessageSegment.deserialize(seg) for seg in
-                self._event.chat_message.message_content.segment]
+        seg_list = self._event.chat_message.message_content.segment
+        # seg_list may be None because the field is optional
+        if seg_list is not None:
+            return [ChatMessageSegment.deserialize(seg) for seg in seg_list]
+        else:
+            return []
 
     @property
     def attachments(self):
