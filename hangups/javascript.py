@@ -52,13 +52,27 @@ def _unescape_string(s):
                 raise ValueError('Reached end of string literal '
                                  'prematurely: {}'.format(s))
             if c == 'u':
+                # One character can be formed from multiple contiguous \u
+                # escape sequences.
+                char_hex = ''
+                while True:
+                    try:
+                        char_hex += ''.join([chars.pop(0) for _ in range(4)])
+                    except IndexError:
+                        raise ValueError('Reached end of string literal '
+                                         'prematurely: {}'.format(s))
+                    if len(chars) > 1 and ''.join(chars[0:2]) == r'\u':
+                        chars.pop(0)
+                        chars.pop(0)
+                    else:
+                        break
                 try:
-                    unescaped_chars.append(
-                        chr(int(''.join([chars.pop(0) for _ in range(4)]), 16))
-                    )
-                except IndexError:
-                    raise ValueError('Reached end of string literal '
-                                     'prematurely: {}'.format(s))
+                    char = bytes.fromhex(char_hex).decode('utf-16be')
+                except (ValueError, UnicodeDecodeError) as e:
+                    logger.warning('Failed to decode unicode escape: {}'
+                                   .format(e))
+                    char = ''
+                unescaped_chars.extend(char)
             else:
                 try:
                     unescaped_chars.append(_ESCAPES[c])

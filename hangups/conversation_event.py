@@ -142,14 +142,21 @@ class ChatMessageEvent(ConversationEvent):
     @property
     def segments(self):
         """List of ChatMessageSegments in the message."""
-        return [ChatMessageSegment.deserialize(seg) for seg in
-                self._event.chat_message.message_content.segment]
+        seg_list = self._event.chat_message.message_content.segment
+        # seg_list may be None because the field is optional
+        if seg_list is not None:
+            return [ChatMessageSegment.deserialize(seg) for seg in seg_list]
+        else:
+            return []
 
     @property
     def attachments(self):
         """Attachments in the message."""
+        raw_attachments = self._event.chat_message.message_content.attachment
+        if raw_attachments is None:
+            raw_attachments = []
         attachments = []
-        for attachment in self._event.chat_message.message_content.attachment:
+        for attachment in raw_attachments:
             if attachment.embed_item.type_ == [249]:  # PLUS_PHOTO
                 # Try to parse an image message. Image messages contain no
                 # message segments, and thus have no automatic textual

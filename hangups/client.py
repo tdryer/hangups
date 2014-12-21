@@ -3,7 +3,6 @@
 import aiohttp
 import asyncio
 import collections
-import hashlib
 import itertools
 import json
 import logging
@@ -17,11 +16,13 @@ from hangups import (javascript, parsers, exceptions, http_utils, channel,
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
+PVT_TOKEN_URL = 'https://talkgadget.google.com/talkgadget/_/extension-start'
 CHAT_INIT_URL = 'https://talkgadget.google.com/u/0/talkgadget/_/chat'
 CHAT_INIT_PARAMS = {
     'prop': 'aChromeExtension',
     'fid': 'gtn-roster-iframe-id',
     'ec': '["ci:ec",true,true,false]',
+    'pvt': None,  # Populated later
 }
 CHAT_INIT_REGEX = re.compile(
     r"(?:<script>AF_initDataCallback\((.*?)\);</script>)", re.DOTALL
@@ -77,13 +78,10 @@ class Client(object):
         self._header_date = None
         self._header_version = None
         self._header_id = None
-        # Like the jabber client ID
-        self._header_client = None
-        # Parameters needed to create the Channel:
-        self._channel_path = None
-        self._clid = None
-        self._channel_ec_param = None
-        self._channel_prop_param = None
+        # String identifying this client:
+        self._client_id = None
+        # Account email address:
+        self._email = None
         # Time in seconds that the client as last set as active:
         self._last_active_secs = 0.0
         # ActiveClientState enum value or None:
@@ -103,10 +101,7 @@ class Client(object):
         called.
         """
         initial_data = yield from self._initialize_chat()
-        self._channel = channel.Channel(
-            self._cookies, self._channel_path, self._clid,
-            self._channel_ec_param, self._channel_prop_param, self._connector
-        )
+        self._channel = channel.Channel(self._cookies, self._connector)
         @asyncio.coroutine
         def _on_connect():
             """Wrapper to fire on_connect with initial_data."""
@@ -173,6 +168,19 @@ class Client(object):
         containing JavaScript objects. We need to parse the objects to get at
         the data.
         """
+        # We first need to fetch the 'pvt' token, which is required for the
+        # initialization request (otherwise it will return 400).
+        try:
+            res = yield from http_utils.fetch(
+                'get', PVT_TOKEN_URL, cookies=self._cookies,
+                connector=self._connector
+            )
+            CHAT_INIT_PARAMS['pvt'] = javascript.loads(res.body.decode())[1]
+            logger.info('Found PVT token: {}'.format(CHAT_INIT_PARAMS['pvt']))
+        except (exceptions.NetworkError, ValueError) as e:
+            raise exceptions.HangupsError('Failed to fetch PVT token: {}'
+                                          .format(e))
+        # Now make the actual initialization request:
         try:
             res = yield from http_utils.fetch(
                 'get', CHAT_INIT_URL, cookies=self._cookies,
@@ -198,13 +206,10 @@ class Client(object):
         # Extract various values that we will need.
         try:
             self._api_key = data_dict['ds:7'][0][2]
+            self._email = data_dict['ds:34'][0][2]
             self._header_date = data_dict['ds:2'][0][4]
             self._header_version = data_dict['ds:2'][0][6]
             self._header_id = data_dict['ds:4'][0][7]
-            self._channel_path = data_dict['ds:4'][0][1]
-            self._clid = data_dict['ds:4'][0][7]
-            self._channel_ec_param = data_dict['ds:4'][0][4]
-            self._channel_prop_param = data_dict['ds:4'][0][5]
             _sync_timestamp = parsers.from_timestamp(
                 data_dict['ds:21'][0][1][4]
             )
@@ -247,15 +252,6 @@ class Client(object):
         return InitialData(initial_conv_states, self_entity, initial_entities,
                            initial_conv_parts, _sync_timestamp)
 
-    def _get_authorization_header(self):
-        """Return autorization header for chat API request."""
-        # technically, it doesn't matter what the url and time are
-        time_msec = int(time.time() * 1000)
-        auth_string = '{} {} {}'.format(time_msec, self._get_cookie("SAPISID"),
-                                        ORIGIN_URL)
-        auth_hash = hashlib.sha1(auth_string.encode()).hexdigest()
-        return 'SAPISIDHASH {}_{}'.format(time_msec, auth_hash)
-
     def _get_cookie(self, name):
         """Return a cookie for raise error if that cookie was not provided."""
         try:
@@ -266,8 +262,8 @@ class Client(object):
     def _get_request_header(self):
         """Return request header for chat API request."""
         return [
-            [3, 3, self._header_version, self._header_date],
-            [self._header_client, self._header_id],
+            [6, 3, self._header_version, self._header_date],
+            [self._client_id, self._header_id],
             None,
             "en"
         ]
@@ -276,10 +272,16 @@ class Client(object):
     def _on_push_data(self, submission):
         """Parse ClientStateUpdate and call the appropriate events."""
         for state_update in parsers.parse_submission(submission):
-            self._active_client_state = (
-                state_update.state_update_header.active_client_state
-            )
-            yield from self.on_state_update.fire(state_update)
+            if isinstance(state_update, dict) and 'client_id' in state_update:
+                # Hack to receive client ID:
+                self._client_id = state_update['client_id']
+                logger.info('Received new client_id: {}'
+                            .format(self._client_id))
+            else:
+                self._active_client_state = (
+                    state_update.state_update_header.active_client_state
+                )
+                yield from self.on_state_update.fire(state_update)
 
     @asyncio.coroutine
     def _request(self, endpoint, body_json, use_json=True):
@@ -288,12 +290,8 @@ class Client(object):
         Raises hangups.NetworkError if the request fails.
         """
         url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
-        headers = {
-            'authorization': self._get_authorization_header(),
-            'x-origin': ORIGIN_URL,
-            'x-goog-authuser': '0',
-            'content-type': 'application/json+protobuf',
-        }
+        headers = channel.get_authorization_headers(self._get_cookie('SAPISID'))
+        headers['content-type'] = 'application/json+protobuf'
         required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
         cookies = {cookie: self._get_cookie(cookie)
                    for cookie in required_cookies}
@@ -389,7 +387,7 @@ class Client(object):
             # is_active: whether the client is active or not
             is_active,
             # full_jid: user@domain/resource
-            "{}/{}".format(self._channel.email, self._channel.header_client),
+            "{}/{}".format(self._email, self._client_id),
             # timeout_secs: timeout in seconds for this client to be active
             timeout_secs
         ])
