@@ -46,9 +46,10 @@ setup(
     packages=['hangups', 'hangups.ui'],
     install_requires=[
         'purplex==0.2.4',
-        'requests==2.2.1',
+        'requests==2.3.0',
         'appdirs==1.3.0',
         'aiohttp==0.9.1',
+        'robobrowser==0.5.1',
         # use forked urwid to allow easy installation of version with asyncio
         'hangups-urwid==1.2.2-dev',
         # Backports for py3.3:
