@@ -94,6 +94,10 @@ class UserList(object):
                            .format(user_id))
             return User(user_id, DEFAULT_NAME, None, None, [], False)
 
+    def get_all(self):
+        """Returns all the users known"""
+        return self._user_dict.values()
+
     def add_user_from_conv_part(self, conv_part):
         """Add new User from ClientConversationParticipantData"""
         user_ = User.from_conv_part_data(conv_part, self._self_user.id_)
