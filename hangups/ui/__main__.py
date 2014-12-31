@@ -44,6 +44,8 @@ class ChatUI(object):
         """Start the user interface."""
         self._keys = keybindings
 
+        set_terminal_title('hangups')
+
         # These are populated by on_connect when it's called.
         self._conv_widgets = {} # {conversation_id: ConversationWidget}
         self._tabbed_window = None # TabbedWindowWidget
@@ -601,6 +603,11 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         if title:
             self._widget_title[widget] = title
         self._update_tabs()
+
+
+def set_terminal_title(title):
+    """Use an xterm escape sequence to set the terminal title."""
+    sys.stdout.write("\x1b]2;{}\x07".format(title))
 
 
 def main():
