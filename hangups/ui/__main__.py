@@ -1,8 +1,8 @@
 """Reference chat client for hangups."""
 
 import appdirs
-import argparse
 import asyncio
+import configargparse
 import logging
 import os
 import sys
@@ -616,27 +616,36 @@ def main():
     dirs = appdirs.AppDirs('hangups', 'hangups')
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_cookies_path = os.path.join(dirs.user_cache_dir, 'cookies.json')
+    default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
 
-    parser = argparse.ArgumentParser(
-        prog='hangups', formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    parser = configargparse.ArgumentParser(
+        prog='hangups', default_config_files=[default_config_path],
+        formatter_class=configargparse.ArgumentDefaultsHelpFormatter,
+        add_help=False,  # Disable help so we can add it to the correct group.
     )
-    dirs = appdirs.AppDirs('hangups', 'hangups')
-    parser.add_argument('-d', '--debug', action='store_true',
-                        help='log detailed debugging messages')
-    parser.add_argument('--log', default=default_log_path,
-                        help='log file path')
-    parser.add_argument('--cookies', default=default_cookies_path,
-                        help='cookie storage path')
-    parser.add_argument('--key-next-tab', default='ctrl d',
-                        help='keybinding for next tab')
-    parser.add_argument('--key-prev-tab', default='ctrl u',
-                        help='keybinding for previous tab')
-    parser.add_argument('--key-close-tab', default='ctrl w',
-                        help='keybinding for close tab')
-    parser.add_argument('--key-quit', default='ctrl e',
-                        help='keybinding for quitting')
-    parser.add_argument('--col-scheme', choices=COL_SCHEMES.keys(),
-                        default='default', help='colour scheme to use')
+    general_group = parser.add_argument_group('General')
+    general_group.add('-h', '--help', action='help',
+                      help='show this help message and exit')
+    general_group.add('--cookies', default=default_cookies_path,
+                      help='cookie storage path')
+    general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
+                      default='default', help='colour scheme to use')
+    general_group.add('-c', '--config', help='configuration file path',
+                      is_config_file=True, default=None)
+    general_group.add('-v', '--version', action='version',
+                      version='hangups {}'.format(hangups.__version__))
+    general_group.add('-d', '--debug', action='store_true',
+                      help='log detailed debugging messages')
+    general_group.add('--log', default=default_log_path, help='log file path')
+    key_group = parser.add_argument_group('Keybindings')
+    key_group.add('--key-next-tab', default='ctrl d',
+                  help='keybinding for next tab')
+    key_group.add('--key-prev-tab', default='ctrl u',
+                  help='keybinding for previous tab')
+    key_group.add('--key-close-tab', default='ctrl w',
+                  help='keybinding for close tab')
+    key_group.add('--key-quit', default='ctrl e',
+                  help='keybinding for quitting')
     args = parser.parse_args()
 
     # Create all necessary directories.

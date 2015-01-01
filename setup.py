@@ -45,10 +45,11 @@ setup(
     ],
     packages=['hangups', 'hangups.ui'],
     install_requires=[
+        'ConfigArgParse==0.9.3',
+        'aiohttp==0.9.1',
+        'appdirs==1.3.0',
         'purplex==0.2.4',
         'requests==2.3.0',
-        'appdirs==1.3.0',
-        'aiohttp==0.9.1',
         'robobrowser==0.5.1',
         # use forked urwid to allow easy installation of version with asyncio
         'hangups-urwid==1.2.2-dev',
