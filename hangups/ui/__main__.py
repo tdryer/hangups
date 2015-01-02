@@ -12,7 +12,6 @@ import hangups
 from hangups.ui.notify import Notifier
 from hangups.ui.utils import get_conv_name
 
-
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 COL_SCHEMES = {
     # Very basic scheme with no colour
@@ -75,6 +74,7 @@ class ChatUI(object):
         finally:
             # Ensure urwid cleans up properly and doesn't wreck the terminal.
             self._urwid_loop.stop()
+
 
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
@@ -586,6 +586,24 @@ class TabbedWindowWidget(urwid.WidgetWrap):
                 self._update_tabs()
         elif key == self._keys['quit']:
             self._quit_f()
+        elif key == self._keys['dump']:
+            if self._tab_index > 0:
+                conv_name = get_conv_name(self._widgets[self._tab_index]._conversation)
+            
+                dirs = appdirs.AppDirs('hangups', 'hangups')
+                conv_log_path = os.path.join(dirs.user_log_dir, conv_name + '.log')
+
+                f = open(conv_log_path ,'w')
+                
+                for event in self._widgets[self._tab_index]._conversation.events:
+
+                    if not hasattr(event, 'text'):
+                        event.text = "" #no text
+                    user = self._widgets[self._tab_index]._conversation.get_user(event.user_id)
+                    f.write("(%s) %s: %s\n" % (event.timestamp, user.full_name, event.text)) 
+                f.write("\n%s\n" % len(self._widgets[self._tab_index]._conversation.events))
+                f.close()
+               
         else:
             return key
 
@@ -644,6 +662,8 @@ def main():
                   help='keybinding for previous tab')
     key_group.add('--key-close-tab', default='ctrl w',
                   help='keybinding for close tab')
+    key_group.add('--key-dump-conversation', default='ctrl k',
+                  help='dump conversation to home directory')
     key_group.add('--key-quit', default='ctrl e',
                   help='keybinding for quitting')
     args = parser.parse_args()
@@ -668,7 +688,9 @@ def main():
             'prev_tab': args.key_prev_tab,
             'close_tab': args.key_close_tab,
             'quit': args.key_quit,
-        }, COL_SCHEMES[args.col_scheme])
+            'dump': args.key_dump_conversation
+        }, 
+        COL_SCHEMES[args.col_scheme])
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
     except:
