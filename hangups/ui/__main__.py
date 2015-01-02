@@ -589,21 +589,17 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         elif key == self._keys['dump']:
             if self._tab_index > 0:
                 conv_name = get_conv_name(self._widgets[self._tab_index]._conversation)
-            
                 dirs = appdirs.AppDirs('hangups', 'hangups')
                 conv_log_path = os.path.join(dirs.user_log_dir, conv_name + '.log')
-
                 f = open(conv_log_path ,'w')
-                
                 for event in self._widgets[self._tab_index]._conversation.events:
 
                     if not hasattr(event, 'text'):
                         event.text = "" #no text
                     user = self._widgets[self._tab_index]._conversation.get_user(event.user_id)
                     f.write("(%s) %s: %s\n" % (event.timestamp, user.full_name, event.text)) 
-                f.write("\n%s\n" % len(self._widgets[self._tab_index]._conversation.events))
+                f.write("\nTotal Messages: %d\n" % len(self._widgets[self._tab_index]._conversation.events))
                 f.close()
-               
         else:
             return key
 
