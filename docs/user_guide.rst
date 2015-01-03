@@ -62,6 +62,18 @@ will eventually exit.
 
 To exit hangups, press :code:`ctrl+e`.
 
+Configuration
+-------------
+
+hangups may be configured through both command line arguments and a
+configuration file. See the output of `hangups -h` for details.
+
+Keybindings are specified using `urwid's format`_, for example: `ctrl e` or
+`shift ctrl e`. Some key combinations may be unavailable due to terminal
+limitations or conflicts.
+
+.. _urwid's format: http://urwid.org/manual/userinput.html#keyboard-input
+
 Troubleshooting
 ---------------
 
