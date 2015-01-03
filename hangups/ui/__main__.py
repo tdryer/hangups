@@ -52,7 +52,6 @@ class ChatUI(object):
         self._user_list = None # hangups.UserList
         self._notifier = None # hangups.notify.Notifier
         self._dump_conversation = dump_conv #Conversation to be dumped
-        self._is_loading = False  # Determine if we are loading more events
         
         
         # TODO Add urwid widget for getting auth.
