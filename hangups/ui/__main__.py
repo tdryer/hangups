@@ -11,6 +11,7 @@ import urwid
 import hangups
 from hangups.ui.notify import Notifier
 from hangups.ui.utils import get_conv_name
+from functools import partial 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 COL_SCHEMES = {
@@ -39,7 +40,7 @@ COL_SCHEMES = {
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, cookies_path, keybindings, palette):
+    def __init__(self, cookies_path, keybindings, palette, dump_conv):
         """Start the user interface."""
         self._keys = keybindings
 
@@ -51,7 +52,10 @@ class ChatUI(object):
         self._conv_list = None # hangups.ConversationList
         self._user_list = None # hangups.UserList
         self._notifier = None # hangups.notify.Notifier
-
+        self._dump_conversation = dump_conv #Conversation to be dumped
+        self._is_loading = False  # Determine if we are loading more events
+        
+        
         # TODO Add urwid widget for getting auth.
         try:
             cookies = hangups.auth.get_auth_stdin(cookies_path)
@@ -62,18 +66,21 @@ class ChatUI(object):
         self._client.on_connect.add_observer(self._on_connect)
 
         loop = asyncio.get_event_loop()
-        self._urwid_loop = urwid.MainLoop(
-            LoadingWidget(), palette, handle_mouse=False,
-            event_loop=urwid.AsyncioEventLoop(loop=loop)
-        )
+        
+        if self._dump_conversation is None:
+            self._urwid_loop = urwid.MainLoop(
+                LoadingWidget(), palette, handle_mouse=False,
+                event_loop=urwid.AsyncioEventLoop(loop=loop)
+            )
 
-        self._urwid_loop.start()
+            self._urwid_loop.start()
         try:
             # Returns when the connection is closed.
             loop.run_until_complete(self._client.connect())
         finally:
             # Ensure urwid cleans up properly and doesn't wreck the terminal.
-            self._urwid_loop.stop()
+            if self._dump_conversation is None:
+                self._urwid_loop.stop()
 
 
     def get_conv_widget(self, conv_id):
@@ -108,7 +115,27 @@ class ChatUI(object):
         self._conv_list = hangups.ConversationList(
             self._client, initial_data.conversation_states, self._user_list,
             initial_data.sync_timestamp
-        )
+        )   
+        
+        if self._dump_conversation is not None:
+            for conv in self._conv_list.get_all():
+                conv_name = get_conv_name(conv)
+
+                if conv_name == self._dump_conversation:
+
+                    while True:
+                        #not getting previous conversation events...
+                        previous_id = conv.events[0].id_
+                        conv.get_events(previous_id)
+                        
+                        if conv.events[0].id_ == previous_id:
+                            break
+                            
+                    self.dump_conversation(conv)
+            self._on_quit()
+            return
+            
+            
         self._conv_list.on_event.add_observer(self._on_event)
         self._notifier = Notifier(self._conv_list)
         # show the conversation menu
@@ -118,7 +145,14 @@ class ChatUI(object):
         self._tabbed_window.set_tab(conv_picker, switch=True,
                                     title='Conversations')
         self._urwid_loop.widget = self._tabbed_window
-
+        
+    def dump_conversation(self, conv):
+        for event in conv.events: 
+            if not hasattr(event, 'text'): 
+                event.text = "" #no text
+            user = conv.get_user(event.user_id)
+            print("(%s) %s: %s" % (event.timestamp, user.full_name, event.text)) 
+                            
     def _on_event(self, conv_event):
         """Open conversation tab for new messages when they arrive."""
         if isinstance(conv_event, hangups.ChatMessageEvent):
@@ -592,8 +626,7 @@ class TabbedWindowWidget(urwid.WidgetWrap):
                 dirs = appdirs.AppDirs('hangups', 'hangups')
                 conv_log_path = os.path.join(dirs.user_log_dir, conv_name + '.log')
                 f = open(conv_log_path ,'w')
-                for event in self._widgets[self._tab_index]._conversation.events:
-
+                for event in self._widgets[self._tab_index]._conversation.events: 
                     if not hasattr(event, 'text'):
                         event.text = "" #no text
                     user = self._widgets[self._tab_index]._conversation.get_user(event.user_id)
@@ -642,6 +675,8 @@ def main():
                       help='show this help message and exit')
     general_group.add('--cookies', default=default_cookies_path,
                       help='cookie storage path')
+    general_group.add('--dump-conv', default=None,
+                      help='conversation to dump to stdout')
     general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
                       default='default', help='colour scheme to use')
     general_group.add('-c', '--config', help='configuration file path',
@@ -658,8 +693,6 @@ def main():
                   help='keybinding for previous tab')
     key_group.add('--key-close-tab', default='ctrl w',
                   help='keybinding for close tab')
-    key_group.add('--key-dump-conversation', default='ctrl k',
-                  help='dump conversation to home directory')
     key_group.add('--key-quit', default='ctrl e',
                   help='keybinding for quitting')
     args = parser.parse_args()
@@ -677,16 +710,16 @@ def main():
     logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
     # urwid makes asyncio's debugging logs VERY noisy, so adjust the log level:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
-
+    
     try:
         ChatUI(args.cookies, {
             'next_tab': args.key_next_tab,
             'prev_tab': args.key_prev_tab,
             'close_tab': args.key_close_tab,
-            'quit': args.key_quit,
-            'dump': args.key_dump_conversation
+            'quit': args.key_quit
         }, 
-        COL_SCHEMES[args.col_scheme])
+        COL_SCHEMES[args.col_scheme],
+        args.dump_conv)
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
     except:
