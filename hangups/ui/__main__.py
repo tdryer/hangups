@@ -10,8 +10,7 @@ import urwid
 
 import hangups
 from hangups.ui.notify import Notifier
-from hangups.ui.utils import get_conv_name
-from functools import partial 
+from hangups.ui.utils import get_conv_name 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 COL_SCHEMES = {
@@ -620,19 +619,6 @@ class TabbedWindowWidget(urwid.WidgetWrap):
                 self._update_tabs()
         elif key == self._keys['quit']:
             self._quit_f()
-        elif key == self._keys['dump']:
-            if self._tab_index > 0:
-                conv_name = get_conv_name(self._widgets[self._tab_index]._conversation)
-                dirs = appdirs.AppDirs('hangups', 'hangups')
-                conv_log_path = os.path.join(dirs.user_log_dir, conv_name + '.log')
-                f = open(conv_log_path ,'w')
-                for event in self._widgets[self._tab_index]._conversation.events: 
-                    if not hasattr(event, 'text'):
-                        event.text = "" #no text
-                    user = self._widgets[self._tab_index]._conversation.get_user(event.user_id)
-                    f.write("(%s) %s: %s\n" % (event.timestamp, user.full_name, event.text)) 
-                f.write("\nTotal Messages: %d\n" % len(self._widgets[self._tab_index]._conversation.events))
-                f.close()
         else:
             return key
 
@@ -710,7 +696,7 @@ def main():
     logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
     # urwid makes asyncio's debugging logs VERY noisy, so adjust the log level:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
-    
+
     try:
         ChatUI(args.cookies, {
             'next_tab': args.key_next_tab,
