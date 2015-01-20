@@ -256,6 +256,11 @@ class Channel(object):
         Only needs to be called when a new channel (SID/gsessionid) is opened.
         """
 
+        """ See https://github.com/tdryer/hangups/issues/45 for reason for the time.sleep(1).
+        """
+
+        time.sleep(1)
+
         logger.info('Subscribing channel...')
         timestamp = str(int(time.time() * 1000))
         # Hangouts for Chrome splits this over 2 requests, but it's possible to
