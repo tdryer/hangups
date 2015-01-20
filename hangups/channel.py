@@ -256,9 +256,7 @@ class Channel(object):
         Only needs to be called when a new channel (SID/gsessionid) is opened.
         """
 
-        """ See https://github.com/tdryer/hangups/issues/45 for reason for the time.sleep(1).
-        """
-
+        """ Prevent inconsistencies for 'channel not ready' error """
         time.sleep(1)
 
         logger.info('Subscribing channel...')
