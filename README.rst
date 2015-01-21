@@ -51,3 +51,10 @@ Projects using hangups
 .. _bastardbot: https://github.com/elamperti/bastardbot
 .. _pickups: https://github.com/mtomwing/pickups
 .. _telepathy-hangups: https://github.com/davidedmundson/telepathy-hangups
+
+Related projects
+----------------
+
+- `Hangish`_: A Google Hangouts native client for Sailfish
+
+.. _Hangish: https://github.com/rogora/hangish
