@@ -193,6 +193,7 @@ class Client(object):
         # Parse the response by using a regex to find all the JS objects, and
         # parsing them. Not everything will be parsable, but we don't care if
         # an object we don't need can't be parsed.
+
         data_dict = {}
         for data in CHAT_INIT_REGEX.findall(res.body.decode()):
             try:
@@ -200,8 +201,17 @@ class Client(object):
                 # pylint: disable=invalid-sequence-index
                 data_dict[data['key']] = data['data']
             except ValueError as e:
-                logger.debug('Failed to parse initialize chat object: {}\n{}'
-                             .format(e, data))
+                try:
+                    data = data.replace("data:function(){return", "data:")
+                    data = data.replace("}}", "}")
+                    data = javascript.loads(data)
+                    data_dict[data['key']] = data['data']
+
+                except ValueError as e:
+                    raise
+
+                # logger.debug('Failed to parse initialize chat object: {}\n{}'
+                #              .format(e, data))
 
         # Extract various values that we will need.
         try:
@@ -211,7 +221,8 @@ class Client(object):
             self._header_version = data_dict['ds:2'][0][6]
             self._header_id = data_dict['ds:4'][0][7]
             _sync_timestamp = parsers.from_timestamp(
-                data_dict['ds:21'][0][1][4]
+                # data_dict['ds:21'][0][1][4]
+                data_dict['ds:35'][0][1][4]
             )
         except KeyError as e:
             raise exceptions.HangupsError('Failed to get initialize chat '
@@ -219,12 +230,14 @@ class Client(object):
 
         # Parse the entity representing the current user.
         self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
-            data_dict['ds:20'][0]
+            #data_dict['ds:20'][0]
+            data_dict['ds:35'][0]
         ).self_entity
 
         # Parse every existing conversation's state, including participants.
         initial_conv_states = schemas.CLIENT_CONVERSATION_STATE_LIST.parse(
-            data_dict['ds:19'][0][3]
+            #data_dict['ds:19'][0][3]
+            data_dict['ds:36'][0][3]
         )
         initial_conv_parts = []
         for conv_state in initial_conv_states:
