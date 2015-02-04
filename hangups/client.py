@@ -249,7 +249,8 @@ class Client(object):
         initial_entities = []
         try:
             entities = schemas.INITIAL_CLIENT_ENTITIES.parse(
-                data_dict['ds:21'][0]
+                #data_dict['ds:21'][0]
+                data_dict['ds:37'][0]
             )
         except ValueError as e:
             logger.warning('Failed to parse initial client entities: {}'
