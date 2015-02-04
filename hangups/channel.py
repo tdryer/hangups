@@ -255,6 +255,8 @@ class Channel(object):
 
         Only needs to be called when a new channel (SID/gsessionid) is opened.
         """
+        # XXX: Temporary workaround for #58
+        yield from asyncio.sleep(1)
 
         logger.info('Subscribing channel...')
         timestamp = str(int(time.time() * 1000))
