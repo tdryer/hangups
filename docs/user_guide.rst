@@ -66,7 +66,8 @@ Configuration
 -------------
 
 hangups may be configured through both command line arguments and a
-configuration file. See the output of `hangups -h` for details.
+configuration file. See the output of `hangups -h` for details on using both of
+these methods.
 
 Keybindings are specified using `urwid's format`_, for example: `ctrl e` or
 `shift ctrl e`. Some key combinations may be unavailable due to terminal
