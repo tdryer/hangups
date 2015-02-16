@@ -51,10 +51,14 @@ setup(
         'purplex==0.2.4',
         'requests==2.3.0',
         'robobrowser==0.5.1',
-        # use forked urwid to allow easy installation of version with asyncio
+        # purplex and robobrowser need six, but pip isn't smart enough to
+        # install a version that satisfies both dependencies:
+        'six==1.7.3',
+        # use forked urwid to allow easy installation of version with asyncio:
         'hangups-urwid==1.2.2-dev',
-        # Backports for py3.3:
+        # backport enum for python3.3:
         'enum34==1.0',
+        # backport asyncio for python3.3:
         'asyncio==3.4.1',
     ],
     tests_require=[
