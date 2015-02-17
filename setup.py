@@ -50,7 +50,8 @@ setup(
         'appdirs==1.3.0',
         'purplex==0.2.4',
         'requests==2.3.0',
-        'robobrowser==0.5.1',
+        # use forked robobrowser that will install with pip 6.0+
+        'hangups-robobrowser==0.5.2',
         # purplex and robobrowser need six, but pip isn't smart enough to
         # install a version that satisfies both dependencies:
         'six==1.7.3',
