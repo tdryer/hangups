@@ -2,9 +2,16 @@ language: python
 python:
     - '3.3'
     - '3.4'
+
+# commands to install dependencies
 install:
     - python setup.py install
+
+# commands to run tests
 script:
     - python setup.py --quiet test
     - pip install --quiet docutils
     - python setup.py check --metadata --restructuredtext --strict
+
+# allow container-based infrastructure
+sudo: false
