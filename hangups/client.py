@@ -10,6 +10,7 @@ import random
 import re
 import time
 import datetime
+import os
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
                      event, schemas)
@@ -68,7 +69,11 @@ class Client(object):
         self.on_state_update = event.Event('Client.on_state_update')
 
         self._cookies = cookies
-        self._connector = aiohttp.TCPConnector()
+        proxy = os.environ.get('HTTP_PROXY')
+        if proxy:
+            self._connector = aiohttp.ProxyConnector(proxy)
+        else:
+            self._connector = aiohttp.TCPConnector()
 
         # hangups.channel.Channel instantiated in connect()
         self._channel = None
