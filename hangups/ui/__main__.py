@@ -667,6 +667,10 @@ def main():
     general_group.add('-d', '--debug', action='store_true',
                       help='log detailed debugging messages')
     general_group.add('--log', default=default_log_path, help='log file path')
+    general_group.add('--time-format', default='%I:%M:%S %p',
+                      help='timestamp format string')
+    general_group.add('--date-format', default='%y-%m-%d',
+                      help='date format string')
     key_group = parser.add_argument_group('Keybindings')
     key_group.add('--key-next-tab', default='ctrl d',
                   help='keybinding for next tab')
@@ -697,6 +701,12 @@ def main():
     logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
     # urwid makes asyncio's debugging logs VERY noisy, so adjust the log level:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
+
+    # update time and date format strings
+    global MESSAGE_TIME_FORMAT
+    MESSAGE_TIME_FORMAT = args.time_format
+    global MESSAGE_DATETIME_FORMAT
+    MESSAGE_DATETIME_FORMAT = args.date_format+MESSAGE_TIME_FORMAT
 
     try:
         ChatUI(args.cookies, {
