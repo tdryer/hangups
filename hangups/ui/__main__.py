@@ -644,10 +644,12 @@ def main():
     dirs = appdirs.AppDirs('hangups', 'hangups')
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_cookies_path = os.path.join(dirs.user_cache_dir, 'cookies.json')
-    default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
+    default_config_path = 'default.conf'
+    user_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
 
     parser = configargparse.ArgumentParser(
-        prog='hangups', default_config_files=[default_config_path],
+        prog='hangups', default_config_files=[default_config_path,
+                                              user_config_path],
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter,
         add_help=False,  # Disable help so we can add it to the correct group.
     )
@@ -675,6 +677,12 @@ def main():
     key_group.add('--key-quit', default='ctrl e',
                   help='keybinding for quitting')
     args = parser.parse_args()
+
+    # Expand user directory and env vars
+    args.log = os.path.expanduser(args.log)
+    args.log = os.path.expandvars(args.log)
+    args.cookies = os.path.expanduser(args.cookies)
+    args.cookies = os.path.expandvars(args.cookies)
 
     # Create all necessary directories.
     for path in [args.log, args.cookies]:
