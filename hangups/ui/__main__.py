@@ -653,13 +653,20 @@ def main():
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter,
         add_help=False,  # Disable help so we can add it to the correct group.
     )
+    # read (and set) defaults from default config file
+    defconf_od = parser.parse_config_file(open(default_config_path))
+    defconf = {}
+    for k in defconf_od:
+        newkey = k.replace("-", "_")
+        defconf[newkey] = defconf_od[k]
+    parser.set_defaults(**defconf)
     general_group = parser.add_argument_group('General')
     general_group.add('-h', '--help', action='help',
                       help='show this help message and exit')
     general_group.add('--cookies', default=default_cookies_path,
                       help='cookie storage path')
     general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
-                      default='default', help='colour scheme to use')
+                      help='colour scheme to use')
     general_group.add('-c', '--config', help='configuration file path',
                       is_config_file=True, default=None)
     general_group.add('-v', '--version', action='version',
@@ -667,19 +674,14 @@ def main():
     general_group.add('-d', '--debug', action='store_true',
                       help='log detailed debugging messages')
     general_group.add('--log', default=default_log_path, help='log file path')
-    general_group.add('--time-format', default='%I:%M:%S %p',
-                      help='timestamp format string')
-    general_group.add('--date-format', default='%y-%m-%d',
-                      help='date format string')
+    general_group.add('--time-format', help='timestamp format string')
+    general_group.add('--date-format', help='date format string')
     key_group = parser.add_argument_group('Keybindings')
-    key_group.add('--key-next-tab', default='ctrl d',
-                  help='keybinding for next tab')
-    key_group.add('--key-prev-tab', default='ctrl u',
+    key_group.add('--key-next-tab', help='keybinding for next tab')
+    key_group.add('--key-prev-tab',
                   help='keybinding for previous tab')
-    key_group.add('--key-close-tab', default='ctrl w',
-                  help='keybinding for close tab')
-    key_group.add('--key-quit', default='ctrl e',
-                  help='keybinding for quitting')
+    key_group.add('--key-close-tab', help='keybinding for close tab')
+    key_group.add('--key-quit', help='keybinding for quitting')
     args = parser.parse_args()
 
     # Expand user directory and env vars
