@@ -99,10 +99,15 @@ class ChatMessageSegment(object):
             is_italic = bool(segment.formatting.italic)
             is_strikethrough = bool(segment.formatting.strikethrough)
             is_underline = bool(segment.formatting.underline)
+        if segment.link_data is None:
+            link_target = None
+        else:
+            link_target = segment.link_data.link_target
         return ChatMessageSegment(
             segment.text, segment_type=segment.type_,
             is_bold=is_bold, is_italic=is_italic,
             is_strikethrough=is_strikethrough, is_underline=is_underline,
+            link_target=link_target
         )
 
     def serialize(self):
