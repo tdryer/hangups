@@ -272,7 +272,13 @@ class MessageWidget(urwid.WidgetWrap):
         ]
         if user is not None:
             text.insert(1, ('msg_sender', user.first_name + ': '))
-        self._widget = urwid.Text(text)
+        additional_opts = {}
+        if user is not None and user.is_self:
+            additional_opts['align'] = urwid.RIGHT
+            text[0] = (text[0][0], ' ' + text[0][1].rstrip())
+            text[1] = ('msg_sender', ' :' + user.first_name)
+            text = list(reversed(text))
+        self._widget = urwid.Text(text, **additional_opts)
         super().__init__(self._widget)
 
     @staticmethod
