@@ -374,7 +374,7 @@ class Client(object):
         return res
 
     @asyncio.coroutine
-    def sendchatmessage(self, conversation_id, segments):
+    def sendchatmessage(self, conversation_id, segments, imageID=None):
         """Send a chat message to a conversation.
 
         conversation_id must be a valid conversation ID. segments must be a
@@ -383,17 +383,33 @@ class Client(object):
         Raises hangups.NetworkError if the request fails.
         """
         client_generated_id = random.randint(0, 2**32)
-        body = [
-            self._get_request_header(),
-            None, None, None, [],
-            [
-                segments, []
-            ],
-            None,
-            [
-                [conversation_id], client_generated_id, 2
-            ],
-            None, None, None, []
+        if imageID is None:
+            body = [
+                self._get_request_header(),
+                None, None, None, [],
+                [
+                    segments, []
+                ],
+                None,
+                [
+                    [conversation_id], client_generated_id, 2
+                ],
+                None, None, None, []
+            ]
+        else:
+            body = [
+                self._get_request_header(),
+                None, None, None, [],
+                [
+                    [], []
+                ],
+                [
+                    [imageID, False]
+                ],
+                [
+                    [conversation_id], client_generated_id, 2
+                ],
+                None, None, None, []
         ]
         res = yield from self._request('conversations/sendchatmessage', body)
         # sendchatmessage can return 200 but still contain an error

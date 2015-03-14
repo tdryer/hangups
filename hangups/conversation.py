@@ -89,7 +89,7 @@ class Conversation(object):
         return self._user_list.get_user(user_id)
 
     @asyncio.coroutine
-    def send_message(self, segments):
+    def send_message(self, segments, imageID=None):
         """Send a message to this conversation.
 
         segments must be a list of ChatMessageSegments to include in the
@@ -98,9 +98,15 @@ class Conversation(object):
         Raises hangups.NetworkError if the message can not be sent.
         """
         try:
-            yield from self._client.sendchatmessage(
-                self.id_, [seg.serialize() for seg in segments]
-            )
+            if imageID is None:
+                yield from self._client.sendchatmessage(
+                    self.id_, [seg.serialize() for seg in segments]
+                )
+            else:
+                yield from self._client.sendchatmessage(
+                    self.id_, None, imageID
+                )
+                
         except exceptions.NetworkError as e:
             logger.warning('Failed to send message: {}'.format(e))
             raise
