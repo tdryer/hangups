@@ -462,13 +462,15 @@ class Client(object):
             ]
           }
         }
+        json.dumps(req1)
         # parse POST URL from response to request
-        url = 'http://docs.google.com/upload/photos/resumable'
+        url1 = 'http://docs.google.com/upload/photos/resumable'
         content_type = 'application/x-www-form-urlencoded;charset=UTF-8'
-        res1 = yield from self._request_general(url, content_type, req1)
-
-        print(json.dumps(res1))
-
+        res1 = yield from self._request_general(url1, content_type, req1)
+        res1 = json.loads(res1.body.decode())
+        
+        url2 = res1['sessionStatus']['externalFieldTransfers'][0]['putInfo']['url']
+        print('URL:' + url2)
         # send raw bytes to POST URL (req2)
 
         # parse ID from response to req2
