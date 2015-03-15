@@ -335,7 +335,7 @@ class Client(object):
         return res
 
     @asyncio.coroutine
-    def _request_general(self, url, body_json, use_json=True, content_type):
+    def _request_general(self, url, content_type, body_json, use_json=True):
         """Make chat API request.
 
         Raises hangups.NetworkError if the request fails.
@@ -465,7 +465,7 @@ class Client(object):
         # parse POST URL from response to request
         url = 'http://docs.google.com/upload/photos/resumable'
         content_type = 'application/x-www-form-urlencoded;charset=UTF-8'
-        res1 = yield from self._request_general(url, req1, True, content_type)
+        res1 = yield from self._request_general(url, content_type, req1)
 
         print(json.dumps(res1))
 
