@@ -334,6 +334,29 @@ class Client(object):
                      .format(endpoint, res.code, res.body))
         return res
 
+    @asyncio.coroutine
+    def _request_general(self, url, body_json, use_json=True, content_type):
+        """Make chat API request.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        headers = channel.get_authorization_headers(self._get_cookie('SAPISID'))
+        headers['content-type'] = content_type
+        required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
+        cookies = {cookie: self._get_cookie(cookie)
+                   for cookie in required_cookies}
+        params = {
+            'key': self._api_key,
+            'alt': 'json' if use_json else 'protojson',
+        }
+        res = yield from http_utils.fetch(
+            'post', url, headers=headers, cookies=cookies, params=params,
+            data=json.dumps(body_json), connector=self._connector
+        )
+        logger.debug('Response to request for {} was {}:\n{}'
+                     .format(url, res.code, res.body))
+        return res
+
     ###########################################################################
     # Raw API request methods
     ###########################################################################
@@ -418,6 +441,45 @@ class Client(object):
         if res_status != 'OK':
             raise exceptions.NetworkError('Unexpected status: {}'
                                           .format(res_status))
+
+    @asyncio.coroutine
+    def upload_image(self, filename):
+        # f = open(filename, 'r')
+
+        # send request using filename
+        req1 = {
+          "protocolVersion": "0.8",
+          "createSessionRequest": {
+            "fields": [
+              {
+                "external": {
+                  "name": "file",
+                  "filename": filename,
+                  "put": {},
+                  "size": os.path.getsize(filename)
+                }
+              }
+            ]
+          }
+        }
+        # parse POST URL from response to request
+        url = 'http://docs.google.com/upload/photos/resumable'
+        content_type = 'application/x-www-form-urlencoded;charset=UTF-8'
+        res1 = yield from self._request_general(url, req1, True, content_type)
+
+        print json.dumps(res1)
+
+        # send raw bytes to POST URL (req2)
+
+        # parse ID from response to req2
+
+        #res = yield from self._request('conversations/sendchatmessage', body)
+        # sendchatmessage can return 200 but still contain an error
+        #res = json.loads(res.body.decode())
+        #res_status = res['response_header']['status']
+        #if res_status != 'OK':
+        #    raise exceptions.NetworkError('Unexpected status: {}'
+        #                                  .format(res_status))
 
     @asyncio.coroutine
     def setactiveclient(self, is_active, timeout_secs):
