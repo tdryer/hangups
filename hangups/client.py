@@ -467,7 +467,7 @@ class Client(object):
         content_type = 'application/x-www-form-urlencoded;charset=UTF-8'
         res1 = yield from self._request_general(url, req1, True, content_type)
 
-        print json.dumps(res1)
+        print(json.dumps(res1))
 
         # send raw bytes to POST URL (req2)
 
