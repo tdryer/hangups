@@ -202,6 +202,8 @@ class Client(object):
         data_dict = {}
         for data in CHAT_INIT_REGEX.findall(res.body.decode()):
             try:
+                logger.debug("Attempting to load javascript: {}..."
+                             .format(repr(data[:100])))
                 data = javascript.loads(data)
                 # pylint: disable=invalid-sequence-index
                 data_dict[data['key']] = data['data']
