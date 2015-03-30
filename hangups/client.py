@@ -335,6 +335,29 @@ class Client(object):
                      .format(endpoint, res.code, res.body))
         return res
 
+    @asyncio.coroutine
+    def _request_general(self, url, content_type, body_json, use_json=True, raw=False):
+        """Make chat API request.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        headers = channel.get_authorization_headers(self._get_cookie('SAPISID'))
+        headers['content-type'] = content_type
+        required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
+        cookies = {cookie: self._get_cookie(cookie)
+                   for cookie in required_cookies}
+        params = {
+            'key': self._api_key,
+            'alt': 'json' if use_json else 'protojson',
+        }
+        res = yield from http_utils.fetch(
+            'post', url, headers=headers, cookies=cookies, params=params,
+            data=json.dumps(body_json) if not raw else body_json, connector=self._connector
+        )
+        logger.debug('Response to request for {} was {}:\n{}'
+                     .format(url, res.code, res.body))
+        return res
+
     ###########################################################################
     # Raw API request methods
     ###########################################################################
@@ -375,7 +398,7 @@ class Client(object):
         return res
 
     @asyncio.coroutine
-    def sendchatmessage(self, conversation_id, segments):
+    def sendchatmessage(self, conversation_id, segments, imageID=None):
         """Send a chat message to a conversation.
 
         conversation_id must be a valid conversation ID. segments must be a
@@ -384,17 +407,33 @@ class Client(object):
         Raises hangups.NetworkError if the request fails.
         """
         client_generated_id = random.randint(0, 2**32)
-        body = [
-            self._get_request_header(),
-            None, None, None, [],
-            [
-                segments, []
-            ],
-            None,
-            [
-                [conversation_id], client_generated_id, 2
-            ],
-            None, None, None, []
+        if imageID is None:
+            body = [
+                self._get_request_header(),
+                None, None, None, [],
+                [
+                    segments, []
+                ],
+                None,
+                [
+                    [conversation_id], client_generated_id, 2
+                ],
+                None, None, None, []
+            ]
+        else:
+            body = [
+                self._get_request_header(),
+                None, None, None, [],
+                [
+                    [], []
+                ],
+                [
+                    [imageID, False]
+                ],
+                [
+                    [conversation_id], client_generated_id, 2
+                ],
+                None, None, None, []
         ]
         res = yield from self._request('conversations/sendchatmessage', body)
         # sendchatmessage can return 200 but still contain an error
@@ -403,6 +442,46 @@ class Client(object):
         if res_status != 'OK':
             raise exceptions.NetworkError('Unexpected status: {}'
                                           .format(res_status))
+
+    @asyncio.coroutine
+    def upload_image(self, filename):
+        # send request using filename
+        req1 = {
+          "protocolVersion": "0.8",
+          "createSessionRequest": {
+            "fields": [
+              {
+                "external": {
+                  "name": "file",
+                  "filename": filename,
+                  "put": {},
+                  "size": os.path.getsize(filename)
+                }
+              }
+            ]
+          }
+        }
+        json.dumps(req1)
+
+        url1 = 'http://docs.google.com/upload/photos/resumable'
+        content_type = 'application/x-www-form-urlencoded;charset=UTF-8'
+        res1 = yield from self._request_general(url1, content_type, req1)
+        res1 = json.loads(res1.body.decode())
+        
+        # parse POST URL from response to request
+        url2 = res1['sessionStatus']['externalFieldTransfers'][0]['putInfo']['url']
+
+        # send raw bytes to POST URL (req2)
+        with open(filename, 'rb') as f:
+            image_data = f.read()
+        content_type = 'application/octet-stream'
+        res2 = yield from self._request_general(url2, content_type, image_data, raw=True)
+        res2 = json.loads(res2.body.decode())
+
+        # parse ID from response to req2
+        imageID = res2['sessionStatus']['additionalInfo']['uploader_service.GoogleRupioAdditionalInfo']['completionInfo']['customerSpecificInfo']['photoid']
+
+        return imageID
 
     @asyncio.coroutine
     def setactiveclient(self, is_active, timeout_secs):
