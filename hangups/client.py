@@ -712,8 +712,8 @@ class Client(object):
         """Create new conversation.
 
         conversation_id must be a valid conversation ID.
-        chat_id_list is list of users which should be invited to conversation.
-        First chat_id in chat_id_list must be UserList._self_user.id_
+        chat_id_list is list of users which should be invited to conversation
+        (except from yourself).
 
         New conversation ID is returned as res['conversation']['id']['id']
 
@@ -722,7 +722,7 @@ class Client(object):
         client_generated_id = random.randint(0, 2**32)
         body = [
             self._get_request_header(),
-            2,
+            1 if len(chat_id_list) == 1 else 2,
             client_generated_id,
             None,
             [[str(chat_id), None, None, "unknown", None, []]
@@ -756,7 +756,7 @@ class Client(object):
              for chat_id in chat_id_list],
             None,
             [
-                [conversation_id], client_generated_id, 2
+                [conversation_id], client_generated_id, 2, None, 4
             ]
         ]
 
