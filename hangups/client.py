@@ -11,7 +11,6 @@ import re
 import time
 import datetime
 import os
-
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
                      event, schemas)
 
@@ -707,3 +706,65 @@ class Client(object):
                            .format(res_status))
             raise exceptions.NetworkError()
 
+
+    @asyncio.coroutine
+    def createconversation(self, chat_id_list):
+        """Create new conversation.
+
+        conversation_id must be a valid conversation ID.
+        chat_id_list is list of users which should be invited to conversation.
+        First chat_id in chat_id_list must be UserList._self_user.id_
+
+        New conversation ID is returned as res['conversation']['id']['id']
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        client_generated_id = random.randint(0, 2**32)
+        body = [
+            self._get_request_header(),
+            2,
+            client_generated_id,
+            None,
+            [[str(chat_id), None, None, "unknown", None, []]
+             for chat_id in chat_id_list]
+        ]
+
+        res = yield from self._request('conversations/createconversation', body)
+        # can return 200 but still contain an error
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+        return res
+
+
+    @asyncio.coroutine
+    def adduser(self, conversation_id, chat_id_list):
+        """Add user to existing conversation.
+
+        conversation_id must be a valid conversation ID.
+        chat_id_list is list of users which should be invited to conversation.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        client_generated_id = random.randint(0, 2**32)
+        body = [
+            self._get_request_header(),
+            None,
+            [[str(chat_id), None, None, "unknown", None, []]
+             for chat_id in chat_id_list],
+            None,
+            [
+                [conversation_id], client_generated_id, 2
+            ]
+        ]
+
+        res = yield from self._request('conversations/adduser', body)
+        # can return 200 but still contain an error
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+        return res
