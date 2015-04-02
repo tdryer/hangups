@@ -709,7 +709,7 @@ class Client(object):
 
 
     @asyncio.coroutine
-    def createconversation(self, chat_id_list):
+    def createconversation(self, chat_id_list, force_group = False):
         """Create new conversation.
 
         conversation_id must be a valid conversation ID.
@@ -723,7 +723,7 @@ class Client(object):
         client_generated_id = random.randint(0, 2**32)
         body = [
             self._get_request_header(),
-            1 if len(chat_id_list) == 1 else 2,
+            1 if len(chat_id_list) == 1 and not force_group else 2,
             client_generated_id,
             None,
             [[str(chat_id), None, None, "unknown", None, []]
