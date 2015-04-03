@@ -202,6 +202,8 @@ class Client(object):
         data_dict = {}
         for data in CHAT_INIT_REGEX.findall(res.body.decode()):
             try:
+                logger.debug("Attempting to load javascript: {}..."
+                             .format(repr(data[:100])))
                 data = javascript.loads(data)
                 # pylint: disable=invalid-sequence-index
                 data_dict[data['key']] = data['data']
@@ -443,8 +445,21 @@ class Client(object):
                                           .format(res_status))
 
     @asyncio.coroutine
-    def upload_image(self, filename):
-        # send request using filename
+    def upload_image(self, thefile, extension_hint="jpg"):
+        filepath = False
+        image_data = False
+
+        if type(thefile) is str:
+            filepath = thefile
+            filename = os.path.basename(filepath)
+            filesize = os.path.getsize(filepath)
+        elif type(thefile) is bytes:
+            image_data = thefile
+            filename = str(int(time.time())) + '.' + extension_hint
+            filesize = len(image_data)
+        else:
+            raise ValueError("unknown parameter")
+
         req1 = {
           "protocolVersion": "0.8",
           "createSessionRequest": {
@@ -454,7 +469,7 @@ class Client(object):
                   "name": "file",
                   "filename": filename,
                   "put": {},
-                  "size": os.path.getsize(filename)
+                  "size": filesize
                 }
               }
             ]
@@ -470,9 +485,16 @@ class Client(object):
         # parse POST URL from response to request
         url2 = res1['sessionStatus']['externalFieldTransfers'][0]['putInfo']['url']
 
+        # read the imagedata if filepath supplied
+        if filepath:
+            with open(filepath, 'rb') as f:
+                image_data = f.read()
+
+        # sanity check: do we have image data?
+        if not image_data:
+            raise ValueError("image data not available")
+
         # send raw bytes to POST URL (req2)
-        with open(filename, 'rb') as f:
-            image_data = f.read()
         content_type = 'application/octet-stream'
         res2 = yield from self._request_general(url2, content_type, image_data, raw=True)
         res2 = json.loads(res2.body.decode())
@@ -784,3 +806,65 @@ class Client(object):
                            .format(res_status))
             raise exceptions.NetworkError()
 
+
+    @asyncio.coroutine
+    def createconversation(self, chat_id_list, force_group = False):
+        """Create new conversation.
+
+        conversation_id must be a valid conversation ID.
+        chat_id_list is list of users which should be invited to conversation
+        (except from yourself).
+
+        New conversation ID is returned as res['conversation']['id']['id']
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        client_generated_id = random.randint(0, 2**32)
+        body = [
+            self._get_request_header(),
+            1 if len(chat_id_list) == 1 and not force_group else 2,
+            client_generated_id,
+            None,
+            [[str(chat_id), None, None, "unknown", None, []]
+             for chat_id in chat_id_list]
+        ]
+
+        res = yield from self._request('conversations/createconversation', body)
+        # can return 200 but still contain an error
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+        return res
+
+
+    @asyncio.coroutine
+    def adduser(self, conversation_id, chat_id_list):
+        """Add user to existing conversation.
+
+        conversation_id must be a valid conversation ID.
+        chat_id_list is list of users which should be invited to conversation.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        client_generated_id = random.randint(0, 2**32)
+        body = [
+            self._get_request_header(),
+            None,
+            [[str(chat_id), None, None, "unknown", None, []]
+             for chat_id in chat_id_list],
+            None,
+            [
+                [conversation_id], client_generated_id, 2, None, 4
+            ]
+        ]
+
+        res = yield from self._request('conversations/adduser', body)
+        # can return 200 but still contain an error
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+        return res
