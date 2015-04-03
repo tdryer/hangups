@@ -445,8 +445,21 @@ class Client(object):
                                           .format(res_status))
 
     @asyncio.coroutine
-    def upload_image(self, filename):
-        # send request using filename
+    def upload_image(self, thefile, extension_hint="jpg"):
+        filepath = False
+        image_data = False
+
+        if type(thefile) is str:
+            filepath = thefile
+            filename = os.path.basename(filepath)
+            filesize = os.path.getsize(filepath)
+        elif type(thefile) is bytes:
+            image_data = thefile
+            filename = str(int(time.time())) + '.' + extension_hint
+            filesize = len(image_data)
+        else:
+            raise ValueError("unknown parameter")
+
         req1 = {
           "protocolVersion": "0.8",
           "createSessionRequest": {
@@ -456,7 +469,7 @@ class Client(object):
                   "name": "file",
                   "filename": filename,
                   "put": {},
-                  "size": os.path.getsize(filename)
+                  "size": filesize
                 }
               }
             ]
@@ -472,9 +485,16 @@ class Client(object):
         # parse POST URL from response to request
         url2 = res1['sessionStatus']['externalFieldTransfers'][0]['putInfo']['url']
 
+        # read the imagedata if filepath supplied
+        if filepath:
+            with open(filepath, 'rb') as f:
+                image_data = f.read()
+
+        # sanity check: do we have image data?
+        if not image_data:
+            raise ValueError("image data not available")
+
         # send raw bytes to POST URL (req2)
-        with open(filename, 'rb') as f:
-            image_data = f.read()
         content_type = 'application/octet-stream'
         res2 = yield from self._request_general(url2, content_type, image_data, raw=True)
         res2 = json.loads(res2.body.decode())
