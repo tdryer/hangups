@@ -40,6 +40,7 @@ Projects using hangups
 
 - `HangoutsBot`_: Python Whistler Bot
 - `HangupsBot`_: Bot for Google Hangouts
+- `Hubot Hangouts Adapter`_: Hubot adapter using hangups
 - `QHangups`_: Alternative client for Google Hangouts written in PyQt
 - `bastardbot`_: A bot to follow and interact with Google Hangouts conversations
 - `pickups`_: IRC gateway for hangups (prototype)
@@ -47,7 +48,15 @@ Projects using hangups
 
 .. _HangoutsBot: https://github.com/wardellchandler/HangoutsBot
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
+.. _Hubot Hangouts Adapter: https://github.com/groupby/hubot-hangups
 .. _QHangups: https://github.com/xmikos/qhangups
 .. _bastardbot: https://github.com/elamperti/bastardbot
 .. _pickups: https://github.com/mtomwing/pickups
 .. _telepathy-hangups: https://github.com/davidedmundson/telepathy-hangups
+
+Related projects
+----------------
+
+- `Hangish`_: A Google Hangouts native client for Sailfish
+
+.. _Hangish: https://github.com/rogora/hangish
