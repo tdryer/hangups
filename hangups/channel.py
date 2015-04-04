@@ -258,6 +258,9 @@ class Channel(object):
         # XXX: Temporary workaround for #58
         yield from asyncio.sleep(1)
 
+        """ Prevent inconsistencies for 'channel not ready' error """
+        time.sleep(1)
+
         logger.info('Subscribing channel...')
         timestamp = str(int(time.time() * 1000))
         # Hangouts for Chrome splits this over 2 requests, but it's possible to
