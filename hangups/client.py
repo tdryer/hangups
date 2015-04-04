@@ -408,33 +408,17 @@ class Client(object):
         Raises hangups.NetworkError if the request fails.
         """
         client_generated_id = random.randint(0, 2**32)
-        if imageID is None:
-            body = [
-                self._get_request_header(),
-                None, None, None, [],
-                [
-                    segments, []
-                ],
-                None,
-                [
-                    [conversation_id], client_generated_id, 2
-                ],
-                None, None, None, []
-            ]
-        else:
-            body = [
-                self._get_request_header(),
-                None, None, None, [],
-                [
-                    [], []
-                ],
-                [
-                    [imageID, False]
-                ],
-                [
-                    [conversation_id], client_generated_id, 2
-                ],
-                None, None, None, []
+        body = [
+            self._get_request_header(),
+            None, None, None, [],
+            [
+                segments, []
+            ],
+            [[imageID, False]] if imageID else None,
+            [
+                [conversation_id], client_generated_id, 2
+            ],
+            None, None, None, []
         ]
         res = yield from self._request('conversations/sendchatmessage', body)
         # sendchatmessage can return 200 but still contain an error
@@ -481,7 +465,7 @@ class Client(object):
         content_type = 'application/x-www-form-urlencoded;charset=UTF-8'
         res1 = yield from self._request_general(url1, content_type, req1)
         res1 = json.loads(res1.body.decode())
-        
+
         # parse POST URL from response to request
         url2 = res1['sessionStatus']['externalFieldTransfers'][0]['putInfo']['url']
 
