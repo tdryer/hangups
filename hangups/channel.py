@@ -258,7 +258,9 @@ class Channel(object):
         # XXX: Temporary workaround for #58
         yield from asyncio.sleep(1)
 
-        """ Prevent inconsistencies for 'channel not ready' error """
+        """ See https://github.com/tdryer/hangups/issues/45 for reason for the time.sleep(1).
+        """
+
         time.sleep(1)
 
         logger.info('Subscribing channel...')
