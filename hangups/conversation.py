@@ -285,6 +285,12 @@ class Conversation(object):
         return (schemas.ClientConversationView.ARCHIVED_VIEW in
                 self._conversation.self_conversation_state.view)
 
+    @property
+    def is_quiet(self):
+        """True if notification level for this conversation is quiet."""
+        return (self._conversation.self_conversation_state.notification_level
+                == schemas.ClientNotificationLevel.QUIET)
+
 
 class ConversationList(object):
     """Wrapper around Client that maintains a list of Conversations."""
