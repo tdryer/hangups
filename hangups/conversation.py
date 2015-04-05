@@ -89,7 +89,7 @@ class Conversation(object):
         return self._user_list.get_user(user_id)
 
     @asyncio.coroutine
-    def send_message(self, segments):
+    def send_message(self, segments, imageID=None):
         """Send a message to this conversation.
 
         segments must be a list of ChatMessageSegments to include in the
@@ -103,7 +103,7 @@ class Conversation(object):
                       else schemas.OffTheRecordStatus.ON_THE_RECORD)
         try:
             yield from self._client.sendchatmessage(
-                self.id_, [seg.serialize() for seg in segments],
+                self.id_, [seg.serialize() for seg in segments], imageID = imageID,
                 otr_status=otr_status
             )
         except exceptions.NetworkError as e:
