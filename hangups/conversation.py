@@ -97,16 +97,15 @@ class Conversation(object):
 
         Raises hangups.NetworkError if the message can not be sent.
         """
+        # Send messages with OTR status matching the conversation's status.
+        otr_status = (schemas.OffTheRecordStatus.OFF_THE_RECORD
+                      if self.is_off_the_record
+                      else schemas.OffTheRecordStatus.ON_THE_RECORD)
         try:
-            if imageID is None:
-                yield from self._client.sendchatmessage(
-                    self.id_, [seg.serialize() for seg in segments]
-                )
-            else:
-                yield from self._client.sendchatmessage(
-                    self.id_, None, imageID
-                )
-                
+            yield from self._client.sendchatmessage(
+                self.id_, [seg.serialize() for seg in segments], imageID = imageID,
+                otr_status=otr_status
+            )
         except exceptions.NetworkError as e:
             logger.warning('Failed to send message: {}'.format(e))
             raise
@@ -290,6 +289,18 @@ class Conversation(object):
         """True if this conversation has been archived."""
         return (schemas.ClientConversationView.ARCHIVED_VIEW in
                 self._conversation.self_conversation_state.view)
+
+    @property
+    def is_quiet(self):
+        """True if notification level for this conversation is quiet."""
+        return (self._conversation.self_conversation_state.notification_level
+                == schemas.ClientNotificationLevel.QUIET)
+
+    @property
+    def is_off_the_record(self):
+        """True if conversation is off the record (history is disabled)."""
+        return (self._conversation.otr_status
+                == schemas.OffTheRecordStatus.OFF_THE_RECORD)
 
 
 class ConversationList(object):

@@ -123,7 +123,14 @@ class ChatUI(object):
 
     def _on_event(self, conv_event):
         """Open conversation tab for new messages when they arrive."""
-        if isinstance(conv_event, hangups.ChatMessageEvent):
+        conv = self._conv_list.get(conv_event.conversation_id)
+        user = conv.get_user(conv_event.user_id)
+        add_tab = all((
+            isinstance(conv_event, hangups.ChatMessageEvent),
+            not user.is_self,
+            not conv.is_quiet,
+        ))
+        if add_tab:
             self.add_conversation_tab(conv_event.conversation_id)
 
     def _on_quit(self):

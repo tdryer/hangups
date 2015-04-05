@@ -399,11 +399,19 @@ class Client(object):
         return res
 
     @asyncio.coroutine
-    def sendchatmessage(self, conversation_id, segments, imageID=None):
+    def sendchatmessage(
+        self, conversation_id, segments, imageID = None,
+        otr_status=schemas.OffTheRecordStatus.ON_THE_RECORD
+    ):
         """Send a chat message to a conversation.
 
         conversation_id must be a valid conversation ID. segments must be a
         list of message segments to send, in pblite format.
+
+        otr_status determines whether the message will be saved in the server's
+        chat history. Note that the OTR status of the conversation is
+        irrelevant, clients may send messages with whatever OTR status they
+        like.
 
         Raises hangups.NetworkError if the request fails.
         """
@@ -416,7 +424,9 @@ class Client(object):
             ],
             [[imageID, False]] if imageID else None,
             [
-                [conversation_id], client_generated_id, 2
+                [conversation_id],
+                client_generated_id,
+                otr_status.value,
             ],
             None, None, None, []
         ]
