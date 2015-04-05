@@ -546,11 +546,18 @@ class ConversationWidget(urwid.WidgetWrap):
         # Ignore if the user hasn't typed a message.
         if len(text) == 0:
             return
+        elif text.startswith('/image') and len(text.split(' ')) == 2:
+            # Temporary UI for testing image uploads
+            filename = text.split(' ')[1]
+            image_file = open(filename, 'rb')
+            text = ''
+        else:
+            image_file = None
         # XXX: Exception handling here is still a bit broken. Uncaught
         # exceptions in _on_message_sent will only be logged.
         segments = hangups.ChatMessageSegment.from_str(text)
         asyncio.async(
-            self._conversation.send_message(segments)
+            self._conversation.send_message(segments, image_file=image_file)
         ).add_done_callback(self._on_message_sent)
 
     def _on_message_sent(self, future):
