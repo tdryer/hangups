@@ -1,6 +1,7 @@
 from .version import __version__
 from .schemas import (TypingStatus, FocusStatus, FocusDevice, SegmentType,
-                      MembershipChangeType, ConversationType)
+                      MembershipChangeType, ConversationType,
+                      OffTheRecordStatus)
 from .client import Client
 from .user import UserList
 from .conversation import ConversationList
