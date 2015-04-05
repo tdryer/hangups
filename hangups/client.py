@@ -17,6 +17,7 @@ from hangups import (javascript, parsers, exceptions, http_utils, channel,
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
+IMAGE_UPLOAD_URL = 'http://docs.google.com/upload/photos/resumable'
 PVT_TOKEN_URL = 'https://talkgadget.google.com/talkgadget/_/extension-start'
 CHAT_INIT_URL = 'https://talkgadget.google.com/u/0/talkgadget/_/chat'
 CHAT_INIT_PARAMS = {
@@ -319,26 +320,15 @@ class Client(object):
         Raises hangups.NetworkError if the request fails.
         """
         url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
-        headers = channel.get_authorization_headers(self._get_cookie('SAPISID'))
-        headers['content-type'] = 'application/json+protobuf'
-        required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
-        cookies = {cookie: self._get_cookie(cookie)
-                   for cookie in required_cookies}
-        params = {
-            'key': self._api_key,
-            'alt': 'json' if use_json else 'protojson',
-        }
-        res = yield from http_utils.fetch(
-            'post', url, headers=headers, cookies=cookies, params=params,
-            data=json.dumps(body_json), connector=self._connector
+        res = yield from self._base_request(
+            url, 'application/json+protobuf', json.dumps(body_json),
+            use_json=use_json
         )
-        logger.debug('Response to request for {} was {}:\n{}'
-                     .format(endpoint, res.code, res.body))
         return res
 
     @asyncio.coroutine
-    def _request_general(self, url, content_type, body_json, use_json=True, raw=False):
-        """Make chat API request.
+    def _base_request(self, url, content_type, data, use_json=True):
+        """Make API request.
 
         Raises hangups.NetworkError if the request fails.
         """
@@ -353,7 +343,7 @@ class Client(object):
         }
         res = yield from http_utils.fetch(
             'post', url, headers=headers, cookies=cookies, params=params,
-            data=json.dumps(body_json) if not raw else body_json, connector=self._connector
+            data=data, connector=self._connector
         )
         logger.debug('Response to request for {} was {}:\n{}'
                      .format(url, res.code, res.body))
@@ -400,8 +390,8 @@ class Client(object):
 
     @asyncio.coroutine
     def sendchatmessage(
-        self, conversation_id, segments, imageID = None,
-        otr_status=schemas.OffTheRecordStatus.ON_THE_RECORD
+            self, conversation_id, segments, image_id=None,
+            otr_status=schemas.OffTheRecordStatus.ON_THE_RECORD
     ):
         """Send a chat message to a conversation.
 
@@ -413,6 +403,10 @@ class Client(object):
         irrelevant, clients may send messages with whatever OTR status they
         like.
 
+        image_id is an option ID of an image retrieved from
+        Client.upload_image. If provided, the image will be attached to the
+        message.
+
         Raises hangups.NetworkError if the request fails.
         """
         client_generated_id = random.randint(0, 2**32)
@@ -422,7 +416,7 @@ class Client(object):
             [
                 segments, []
             ],
-            [[imageID, False]] if imageID else None,
+            [[image_id, False]] if image_id else None,
             [
                 [conversation_id],
                 client_generated_id,
@@ -439,64 +433,50 @@ class Client(object):
                                           .format(res_status))
 
     @asyncio.coroutine
-    def upload_image(self, thefile, extension_hint="jpg"):
-        filepath = False
-        image_data = False
+    def upload_image(self, image_file, filename=None):
+        """Upload an image that can be later attached to a chat message.
 
-        if type(thefile) is str:
-            filepath = thefile
-            filename = os.path.basename(filepath)
-            filesize = os.path.getsize(filepath)
-        elif type(thefile) is bytes:
-            image_data = thefile
-            filename = str(int(time.time())) + '.' + extension_hint
-            filesize = len(image_data)
-        else:
-            raise ValueError("unknown parameter")
+        image_file is a file-like object containing an image.
 
-        req1 = {
-          "protocolVersion": "0.8",
-          "createSessionRequest": {
-            "fields": [
-              {
-                "external": {
-                  "name": "file",
-                  "filename": filename,
-                  "put": {},
-                  "size": filesize
+        The name of the uploaded file may be changed by specifying the filename
+        argument.
+
+        Raises hangups.NetworkError if the request fails.
+
+        Returns ID of uploaded image.
+        """
+        image_filename = (filename if filename
+                          else os.path.basename(image_file.name))
+        image_data = image_file.read()
+
+        # Create image and request upload URL
+        res1 = yield from self._base_request(
+            IMAGE_UPLOAD_URL,
+            'application/x-www-form-urlencoded;charset=UTF-8',
+            json.dumps({
+                "protocolVersion": "0.8",
+                "createSessionRequest": {
+                    "fields": [{
+                        "external": {
+                            "name": "file",
+                            "filename": image_filename,
+                            "put": {},
+                            "size": len(image_data),
+                        }
+                    }]
                 }
-              }
-            ]
-          }
-        }
-        json.dumps(req1)
+            }))
+        upload_url = (json.loads(res1.body.decode())['sessionStatus']
+                      ['externalFieldTransfers'][0]['putInfo']['url'])
 
-        url1 = 'http://docs.google.com/upload/photos/resumable'
-        content_type = 'application/x-www-form-urlencoded;charset=UTF-8'
-        res1 = yield from self._request_general(url1, content_type, req1)
-        res1 = json.loads(res1.body.decode())
-
-        # parse POST URL from response to request
-        url2 = res1['sessionStatus']['externalFieldTransfers'][0]['putInfo']['url']
-
-        # read the imagedata if filepath supplied
-        if filepath:
-            with open(filepath, 'rb') as f:
-                image_data = f.read()
-
-        # sanity check: do we have image data?
-        if not image_data:
-            raise ValueError("image data not available")
-
-        # send raw bytes to POST URL (req2)
-        content_type = 'application/octet-stream'
-        res2 = yield from self._request_general(url2, content_type, image_data, raw=True)
-        res2 = json.loads(res2.body.decode())
-
-        # parse ID from response to req2
-        imageID = res2['sessionStatus']['additionalInfo']['uploader_service.GoogleRupioAdditionalInfo']['completionInfo']['customerSpecificInfo']['photoid']
-
-        return imageID
+        # Upload image data and get image ID
+        res2 = yield from self._base_request(
+            upload_url, 'application/octet-stream', image_data
+        )
+        return (json.loads(res2.body.decode())['sessionStatus']
+                ['additionalInfo']
+                ['uploader_service.GoogleRupioAdditionalInfo']
+                ['completionInfo']['customerSpecificInfo']['photoid'])
 
     @asyncio.coroutine
     def setactiveclient(self, is_active, timeout_secs):
@@ -802,7 +782,7 @@ class Client(object):
 
 
     @asyncio.coroutine
-    def createconversation(self, chat_id_list, force_group = False):
+    def createconversation(self, chat_id_list, force_group=False):
         """Create new conversation.
 
         conversation_id must be a valid conversation ID.

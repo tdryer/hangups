@@ -89,11 +89,13 @@ class Conversation(object):
         return self._user_list.get_user(user_id)
 
     @asyncio.coroutine
-    def send_message(self, segments, imageID=None):
+    def send_message(self, segments, image_file=None):
         """Send a message to this conversation.
 
-        segments must be a list of ChatMessageSegments to include in the
-        message.
+        segments is a list of ChatMessageSegments to include in the message.
+
+        image_file is an optional file-like object containing an image to be
+        attached to the message.
 
         Raises hangups.NetworkError if the message can not be sent.
         """
@@ -101,10 +103,18 @@ class Conversation(object):
         otr_status = (schemas.OffTheRecordStatus.OFF_THE_RECORD
                       if self.is_off_the_record
                       else schemas.OffTheRecordStatus.ON_THE_RECORD)
+        if image_file:
+            try:
+                image_id = yield from self._client.upload_image(image_file)
+            except exceptions.NetworkError as e:
+                logger.warning('Failed to upload image: {}'.format(e))
+                raise
+        else:
+            image_id = None
         try:
             yield from self._client.sendchatmessage(
-                self.id_, [seg.serialize() for seg in segments], imageID = imageID,
-                otr_status=otr_status
+                self.id_, [seg.serialize() for seg in segments],
+                image_id=image_id, otr_status=otr_status
             )
         except exceptions.NetworkError as e:
             logger.warning('Failed to send message: {}'.format(e))
