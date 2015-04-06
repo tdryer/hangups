@@ -433,7 +433,7 @@ class Client(object):
                                           .format(res_status))
 
     @asyncio.coroutine
-    def upload_image(self, image_file, filename=None):
+    def upload_image(self, image_file, filename=None, extension_hint="jpg"):
         """Upload an image that can be later attached to a chat message.
 
         image_file is a file-like object containing an image.
@@ -445,9 +445,18 @@ class Client(object):
 
         Returns ID of uploaded image.
         """
-        image_filename = (filename if filename
-                          else os.path.basename(image_file.name))
-        image_data = image_file.read()
+        if type(image_file) is str:
+            image_filename = (filename if filename
+                              else os.path.basename(image_file.name))
+            image_data = image_file.read()
+        elif type(image_file) is bytes:
+            image_data = image_file
+            if filename:
+                image_filename = filename
+            else:
+                image_filename = str(int(time.time())) + '.' + extension_hint
+        else:
+            raise TypeError("unhandled image type {}".format(type(image_file)))
 
         # Create image and request upload URL
         res1 = yield from self._base_request(
