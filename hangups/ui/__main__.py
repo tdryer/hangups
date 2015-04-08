@@ -149,20 +149,63 @@ class LoadingWidget(urwid.WidgetWrap):
         ))
 
 
-class ConversationPickerWidget(urwid.WidgetWrap):
-    """Widget for picking a conversation."""
+class ConversationButton(urwid.WidgetWrap):
+    """Button that shows the name and unread message count of conversation."""
+
+    def __init__(self, conversation, on_press):
+        conversation.on_event.add_observer(self._on_event)
+        # Need to update on watermark notifications as well since no event is
+        # received when the user marks messages as read.
+        conversation.on_watermark_notification.add_observer(self._on_event)
+        self._conversation = conversation
+        self._button = urwid.Button(self._get_label(), on_press=on_press,
+                                    user_data=conversation.id_)
+        super().__init__(self._button)
+
+    def _get_label(self):
+        """Return the button's label generated from the conversation."""
+        return get_conv_name(self._conversation, show_unread=True)
+
+    def _on_event(self, _):
+        """Update the button's label when an event occurs."""
+        self._button.set_label(self._get_label())
+
+    @property
+    def last_modified(self):
+        """Last modified date of conversation, used for sorting."""
+        return self._conversation.last_modified
+
+
+class ConversationListWalker(urwid.SimpleFocusListWalker):
+    """ListWalker that maintains a list of ConversationButtons.
+
+    ConversationButtons are kept in order of last modified.
+    """
 
     def __init__(self, conversation_list, on_select):
-        # Build buttons for selecting conversations ordered by most recently
-        # modified first.
+        self._conversation_list = conversation_list
+        self._conversation_list.on_event.add_observer(self._on_event)
+        self._on_press = lambda button, conv_id: on_select(conv_id)
         convs = sorted(conversation_list.get_all(), reverse=True,
                        key=lambda c: c.last_modified)
-        on_press = lambda button, conv_id: on_select(conv_id)
-        buttons = [urwid.Button(get_conv_name(conv, show_unread=True),
-                                on_press=on_press, user_data=conv.id_)
+        buttons = [ConversationButton(conv, on_press=self._on_press)
                    for conv in convs]
-        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(buttons))
-        widget = urwid.Padding(listbox, left=2, right=2)
+        super().__init__(buttons)
+
+    def _on_event(self, _):
+        """Re-order the conversations when an event occurs."""
+        # TODO: handle adding new conversations
+        self.sort(key=lambda conv_button: conv_button.last_modified,
+                  reverse=True)
+
+
+class ConversationPickerWidget(urwid.WidgetWrap):
+    """ListBox widget for picking a conversation from a list."""
+
+    def __init__(self, conversation_list, on_select):
+        list_walker = ConversationListWalker(conversation_list, on_select)
+        list_box = urwid.ListBox(list_walker)
+        widget = urwid.Padding(list_box, left=2, right=2)
         super().__init__(widget)
 
 
