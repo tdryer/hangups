@@ -446,3 +446,9 @@ CLIENT_GET_CONVERSATION_RESPONSE = Message(
     ('response_header', CLIENT_RESPONSE_HEADER),
     ('conversation_state', CLIENT_CONVERSATION_STATE),
 )
+
+CLIENT_GET_ENTITY_BY_ID_RESPONSE = Message(
+    (None, Field()),  # 'cgebirp'
+    ('response_header', CLIENT_RESPONSE_HEADER),
+    ('entities', RepeatedField(CLIENT_ENTITY)),
+)

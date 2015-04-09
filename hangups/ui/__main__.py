@@ -101,11 +101,11 @@ class ChatUI(object):
         # switch to new or existing tab for the conversation
         self.add_conversation_tab(conv_id, switch=True)
 
+    @asyncio.coroutine
     def _on_connect(self, initial_data):
         """Handle connecting for the first time."""
-        self._user_list = hangups.UserList(
-            self._client, initial_data.self_entity, initial_data.entities,
-            initial_data.conversation_participants
+        self._user_list = yield from hangups.build_user_list(
+            self._client, initial_data
         )
         self._conv_list = hangups.ConversationList(
             self._client, initial_data.conversation_states, self._user_list,

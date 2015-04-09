@@ -683,8 +683,20 @@ class Client(object):
             self._get_request_header(),
             None,
             [[str(chat_id)] for chat_id in chat_id_list],
-        ])
-        return json.loads(res.body.decode())
+        ], use_json=False)
+        try:
+            res = schemas.CLIENT_GET_ENTITY_BY_ID_RESPONSE.parse(
+                javascript.loads(res.body.decode())
+            )
+        except ValueError as e:
+            raise exceptions.NetworkError('Response failed to parse: {}'
+                                          .format(e))
+        # can return 200 but still contain an error
+        status = res.response_header.status
+        if status != 1:
+            raise exceptions.NetworkError('Response status is \'{}\''
+                                          .format(status))
+        return res
 
     @asyncio.coroutine
     def getconversation(self, conversation_id, event_timestamp, max_events=50):
