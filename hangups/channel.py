@@ -321,7 +321,7 @@ class Channel(object):
             ), CONNECT_TIMEOUT)
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
-        except aiohttp.errors.ConnectionError as e:
+        except aiohttp.errors.ClientError as e:
             raise exceptions.NetworkError('Request connection error: {}'
                                           .format(e))
         if res.status == 400 and res.reason == 'Unknown SID':
@@ -338,7 +338,7 @@ class Channel(object):
                 )
             except asyncio.TimeoutError:
                 raise exceptions.NetworkError('Request timed out')
-            except aiohttp.errors.ConnectionError as e:
+            except aiohttp.errors.ClientError as e:
                 raise exceptions.NetworkError('Request connection error: {}'
                                               .format(e))
             if chunk:

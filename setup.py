@@ -46,8 +46,8 @@ setup(
     packages=['hangups', 'hangups.ui'],
     install_requires=[
         'ConfigArgParse==0.9.3',
-        'aiohttp==0.9.1',
-        'appdirs==1.3.0',
+        'aiohttp==0.15.1',
+        'appdirs==1.4.0',
         'purplex==0.2.4',
         'requests==2.3.0',
         # use forked robobrowser that will install with pip 6.0+
@@ -58,9 +58,9 @@ setup(
         # use forked urwid to allow easy installation of version with asyncio:
         'hangups-urwid==1.2.2-dev',
         # backport enum for python3.3:
-        'enum34==1.0',
+        'enum34==1.0.4',
         # backport asyncio for python3.3:
-        'asyncio==3.4.1',
+        'asyncio==3.4.3',
     ],
     tests_require=[
         'pytest',
