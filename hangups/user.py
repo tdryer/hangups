@@ -88,9 +88,11 @@ def build_user_list(client, initial_data):
         except exceptions.NetworkError as e:
             logger.warning('Failed to request missing users: {}'.format(e))
             missing_entities = []
+        all_entities = initial_data.entities + missing_entities
         logger.debug('Received additional users: {}'.format(missing_entities))
+    all_entities = initial_data.entities
     user_list = UserList(client, initial_data.self_entity,
-                         initial_data.entities + missing_entities,
+                         all_entities,
                          initial_data.conversation_participants)
     return user_list
 
