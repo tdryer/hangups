@@ -77,6 +77,7 @@ def build_user_list(client, initial_data):
             for part in conv_state.conversation.participant_data
         }
     missing_user_ids = required_user_ids - present_user_ids
+    missing_entities = []
     if missing_user_ids:
         logger.debug('Need to request additional users: {}'
                      .format(missing_user_ids))
@@ -85,14 +86,13 @@ def build_user_list(client, initial_data):
                 [user_id.chat_id for user_id in missing_user_ids]
             )
             missing_entities = response.entities
+            logger.debug('Received additional users: {}'
+                         .format(missing_entities))
         except exceptions.NetworkError as e:
             logger.warning('Failed to request missing users: {}'.format(e))
-            missing_entities = []
-        logger.debug('Received additional users: {}'.format(missing_entities))
-    user_list = UserList(client, initial_data.self_entity,
-                         initial_data.entities + missing_entities,
-                         initial_data.conversation_participants)
-    return user_list
+    return UserList(client, initial_data.self_entity,
+                    initial_data.entities + missing_entities,
+                    initial_data.conversation_participants)
 
 
 class UserList(object):
