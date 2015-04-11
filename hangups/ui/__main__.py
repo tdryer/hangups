@@ -77,6 +77,7 @@ class ChatUI(object):
         finally:
             # Ensure urwid cleans up properly and doesn't wreck the terminal.
             self._urwid_loop.stop()
+            loop.close()
 
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""

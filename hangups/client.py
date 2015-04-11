@@ -131,6 +131,7 @@ class Client(object):
         When disconnection is complete, Client.connect will return.
         """
         self._listen_future.cancel()
+        self._connector.close()
 
     @asyncio.coroutine
     def set_active(self):

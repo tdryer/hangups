@@ -341,6 +341,10 @@ class Channel(object):
             except aiohttp.errors.ClientError as e:
                 raise exceptions.NetworkError('Request connection error: {}'
                                               .format(e))
+            except asyncio.CancelledError:
+                # Prevent ResourceWarning when channel is disconnected.
+                res.close()
+                raise
             if chunk:
                 yield from self._on_push_data(chunk)
             else:
