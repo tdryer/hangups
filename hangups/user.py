@@ -81,15 +81,16 @@ def build_user_list(client, initial_data):
         logger.debug('Need to request additional users: {}'
                      .format(missing_user_ids))
         try:
-            missing_entities = yield from client.getentitybyid(
+            response = yield from client.getentitybyid(
                 [user_id.chat_id for user_id in missing_user_ids]
             )
+            missing_entities = response.entities
         except exceptions.NetworkError as e:
             logger.warning('Failed to request missing users: {}'.format(e))
             missing_entities = []
         logger.debug('Received additional users: {}'.format(missing_entities))
     user_list = UserList(client, initial_data.self_entity,
-                         initial_data.entities + missing_entities.entities,
+                         initial_data.entities + missing_entities,
                          initial_data.conversation_participants)
     return user_list
 
