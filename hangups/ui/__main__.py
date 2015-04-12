@@ -3,6 +3,7 @@
 import appdirs
 import asyncio
 import configargparse
+import contextlib
 import logging
 import os
 import sys
@@ -71,13 +72,17 @@ class ChatUI(object):
         )
 
         self._urwid_loop.start()
-        try:
-            # Returns when the connection is closed.
-            loop.run_until_complete(self._client.connect())
-        finally:
-            # Ensure urwid cleans up properly and doesn't wreck the terminal.
-            self._urwid_loop.stop()
-            loop.close()
+        # Enable bracketed paste mode after the terminal has been switched to
+        # the alternate screen (after MainLoop.start() to work around bug
+        # 729533 in VTE.
+        with bracketed_paste_mode():
+            try:
+                # Returns when the connection is closed.
+                loop.run_until_complete(self._client.connect())
+            finally:
+                # Ensure urwid cleans up properly and doesn't wreck the terminal.
+                self._urwid_loop.stop()
+                loop.close()
 
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
@@ -214,16 +219,20 @@ class ReturnableEdit(urwid.Edit):
     """Edit widget that clears itself and calls a function on return."""
 
     def __init__(self, on_return, caption=None):
-        super().__init__(caption=caption)
+        super().__init__(caption=caption, multiline=True)
         self._on_return = on_return
+        self._paste_mode = False
 
     def keypress(self, size, key):
-        key = super().keypress(size, key)
-        if key == 'enter':
+        if key == 'begin paste':
+            self._paste_mode = True
+        elif key == 'end paste':
+            self._paste_mode = False
+        elif key == 'enter' and not self._paste_mode:
             self._on_return(self.get_edit_text())
             self.set_edit_text('')
         else:
-            return key
+            return super().keypress(size, key)
 
 
 class StatusLineWidget(urwid.WidgetWrap):
@@ -694,6 +703,16 @@ class TabbedWindowWidget(urwid.WidgetWrap):
 def set_terminal_title(title):
     """Use an xterm escape sequence to set the terminal title."""
     sys.stdout.write("\x1b]2;{}\x07".format(title))
+
+
+@contextlib.contextmanager
+def bracketed_paste_mode():
+    """Context manager for enabling/disabling bracketed paste mode."""
+    sys.stdout.write('\x1b[?2004h')
+    try:
+        yield
+    finally:
+        sys.stdout.write('\x1b[?2004l')
 
 
 def main():
