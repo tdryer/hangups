@@ -76,14 +76,20 @@ class ChatMessageSegment(object):
         This method handles automatically finding URLs and making them into
         link segments.
         """
-        last = 0
-        for match in URL_RE.finditer(text):
-            if match.start() > last:
-                yield ChatMessageSegment(text[last:match.start()])
-            yield ChatMessageSegment(match.group(), link_target=match.group())
-            last = match.end()
-        if last != len(text):
-            yield ChatMessageSegment(text[last:])
+        is_first_line = True
+        for line in text.split('\n'):
+            last = 0
+            if not is_first_line:
+                yield ChatMessageSegment('', schemas.SegmentType.LINE_BREAK)
+            is_first_line = False
+            for match in URL_RE.finditer(line):
+                if match.start() > last:
+                    yield ChatMessageSegment(line[last:match.start()])
+                yield ChatMessageSegment(match.group(),
+                                         link_target=match.group())
+                last = match.end()
+            if last != len(line):
+                yield ChatMessageSegment(line[last:])
 
     @staticmethod
     def deserialize(segment):
