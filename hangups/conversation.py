@@ -144,6 +144,18 @@ class Conversation(object):
             raise
 
     @asyncio.coroutine
+    def rename(self, name):
+        """Rename the conversation.
+
+        Hangouts only officially supports renaming group conversations, so
+        custom names for one-to-one conversations may or may not appear in all
+        first party clients.
+
+        Raises hangups.NetworkError if conversation cannot be renamed.
+        """
+        yield from self._client.setchatname(self.id_, name)
+
+    @asyncio.coroutine
     def set_typing(self, typing=schemas.TypingStatus.TYPING):
         """Set typing status.
 
