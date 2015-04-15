@@ -67,6 +67,7 @@ class ChatUI(object):
         loop = asyncio.get_event_loop()
         self._urwid_loop = urwid.MainLoop(
             LoadingWidget(), palette, handle_mouse=False,
+            input_filter=self._input_filter,
             event_loop=urwid.AsyncioEventLoop(loop=loop)
         )
 
@@ -78,6 +79,34 @@ class ChatUI(object):
             # Ensure urwid cleans up properly and doesn't wreck the terminal.
             self._urwid_loop.stop()
             loop.close()
+
+    def _input_filter(self, keys, _):
+        """Handle global keybindings."""
+        if keys == [self._keys['menu']]:
+            if self._urwid_loop.widget == self._tabbed_window:
+                self._show_menu()
+            else:
+                self._hide_menu()
+        elif keys == [self._keys['quit']]:
+            self._on_quit()
+        else:
+            return keys
+
+    def _show_menu(self):
+        """Show the overlay menu."""
+        # If the current widget in the TabbedWindowWidget has a menu,
+        # overlay it on the TabbedWindowWidget.
+        current_widget = self._tabbed_window.get_current_widget()
+        if hasattr(current_widget, 'get_menu_widget'):
+            menu_widget = current_widget.get_menu_widget(self._hide_menu)
+            overlay = urwid.Overlay(menu_widget, self._tabbed_window,
+                                    align='center', width=('relative', 80),
+                                    valign='middle', height=('relative', 80))
+            self._urwid_loop.widget = overlay
+
+    def _hide_menu(self):
+        """Hide the overlay menu."""
+        self._urwid_loop.widget = self._tabbed_window
 
     def get_conv_widget(self, conv_id):
         """Return an existing or new ConversationWidget."""
@@ -117,7 +146,7 @@ class ChatUI(object):
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
                                                self.on_select_conversation)
-        self._tabbed_window = TabbedWindowWidget(self._keys, self._on_quit)
+        self._tabbed_window = TabbedWindowWidget(self._keys)
         self._tabbed_window.set_tab(conv_picker, switch=True,
                                     title='Conversations')
         self._urwid_loop.widget = self._tabbed_window
@@ -148,6 +177,62 @@ class LoadingWidget(urwid.WidgetWrap):
         super().__init__(urwid.Filler(
             urwid.Text('Connecting...', align='center')
         ))
+
+
+class RenameConversationDialog(urwid.WidgetWrap):
+    """Dialog widget for renaming a conversation."""
+
+    def __init__(self, conversation, on_cancel, on_save):
+        self._conversation = conversation
+        edit = urwid.Edit(edit_text=get_conv_name(conversation))
+        items = [
+            urwid.Text('Rename conversation:'),
+            edit,
+            urwid.Button(
+                'Save',
+                on_press=lambda _: self._rename(edit.edit_text, on_save)
+            ),
+            urwid.Button('Cancel', on_press=lambda _: on_cancel()),
+        ]
+        list_walker = urwid.SimpleFocusListWalker(items)
+        list_box = urwid.ListBox(list_walker)
+        super().__init__(list_box)
+
+    def _rename(self, name, callback):
+        """Rename conversation and call callback."""
+        future = asyncio.async(self._conversation.rename(name))
+        future.add_done_callback(lambda future: future.result())
+        callback()
+
+
+class ConversationMenu(urwid.WidgetWrap):
+    """Menu for conversation actions."""
+
+    def __init__(self, conversation, close_callback):
+        rename_dialog = RenameConversationDialog(
+            conversation,
+            lambda: frame.contents.__setitem__('body', (list_box, None)),
+            close_callback
+        )
+        items = [
+            urwid.Text(
+                'Conversation name: {}'.format(get_conv_name(conversation))
+            ),
+            urwid.Button(
+                'Change Conversation Name',
+                on_press=lambda _: frame.contents.__setitem__(
+                    'body', (rename_dialog, None)
+                )
+            ),
+            urwid.Divider('-'),
+            urwid.Button('Back', on_press=lambda _: close_callback()),
+        ]
+        list_walker = urwid.SimpleFocusListWalker(items)
+        list_box = urwid.ListBox(list_walker)
+        frame = urwid.Frame(list_box)
+        padding = urwid.Padding(frame, left=1, right=1)
+        line_box = urwid.LineBox(padding, title='Conversation Menu')
+        super().__init__(line_box)
 
 
 class ConversationButton(urwid.WidgetWrap):
@@ -564,18 +649,19 @@ class ConversationWidget(urwid.WidgetWrap):
 
         super().__init__(self._widget)
 
+    def get_menu_widget(self, close_callback):
+        """Return the menu widget associated with this widget."""
+        return ConversationMenu(self._conversation, close_callback)
+
     def keypress(self, size, key):
         """Handle marking messages as read and keeping client active."""
-        # Ignore the keypress if the user is about to quit.
-        if key != self._keys['quit']:
+        # Set the client as active.
+        future = asyncio.async(self._client.set_active())
+        future.add_done_callback(lambda future: future.result())
 
-            # Set the client as active.
-            future = asyncio.async(self._client.set_active())
-            future.add_done_callback(lambda future: future.result())
-
-            # Mark the newest event as read.
-            future = asyncio.async(self._conversation.update_read_timestamp())
-            future.add_done_callback(lambda future: future.result())
+        # Mark the newest event as read.
+        future = asyncio.async(self._conversation.update_read_timestamp())
+        future.add_done_callback(lambda future: future.result())
 
         return super().keypress(size, key)
 
@@ -626,11 +712,10 @@ class TabbedWindowWidget(urwid.WidgetWrap):
 
     """A widget that displays a list of widgets via a tab bar."""
 
-    def __init__(self, keybindings, quit_f):
+    def __init__(self, keybindings):
         self._widgets = [] # [urwid.Widget]
         self._widget_title = {} # {urwid.Widget: str}
         self._tab_index = None # int
-        self._quit_f = quit_f
         self._keys = keybindings
         self._tabs = urwid.Text('')
         self._frame = urwid.Frame(None)
@@ -638,6 +723,10 @@ class TabbedWindowWidget(urwid.WidgetWrap):
             ('pack', urwid.AttrWrap(self._tabs, 'tab_background')),
             ('weight', 1, self._frame),
         ]))
+
+    def get_current_widget(self):
+        """Return the widget in the current tab."""
+        return self._widgets[self._tab_index]
 
     def _update_tabs(self):
         """Update tab display."""
@@ -670,8 +759,6 @@ class TabbedWindowWidget(urwid.WidgetWrap):
                 del self._widget_title[curr_tab]
                 self._tab_index -= 1
                 self._update_tabs()
-        elif key == self._keys['quit']:
-            self._quit_f()
         else:
             return key
 
@@ -732,6 +819,8 @@ def main():
                   help='keybinding for close tab')
     key_group.add('--key-quit', default='ctrl e',
                   help='keybinding for quitting')
+    key_group.add('--key-menu', default='ctrl n',
+                  help='keybinding for context menu')
     args = parser.parse_args()
 
     # Create all necessary directories.
@@ -754,6 +843,7 @@ def main():
             'prev_tab': args.key_prev_tab,
             'close_tab': args.key_close_tab,
             'quit': args.key_quit,
+            'menu': args.key_menu,
         }, COL_SCHEMES[args.col_scheme])
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
