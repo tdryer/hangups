@@ -49,13 +49,9 @@ setup(
         'aiohttp==0.15.1',
         'appdirs==1.4.0',
         'purplex==0.2.4',
-        'requests==2.3.0',
-        # use forked robobrowser that will install with pip 6.0+
-        'hangups-robobrowser==0.5.2',
-        # purplex and robobrowser need six, but pip isn't smart enough to
-        # install a version that satisfies both dependencies:
-        'six==1.7.3',
-        # use forked urwid to allow easy installation of version with asyncio:
+        'requests==2.6.0',
+        'robobrowser==0.5.2',
+        # use forked urwid until there's a 1.3 release with colour bugfix
         'hangups-urwid==1.2.2-dev',
         # backport enum for python3.3:
         'enum34==1.0.4',
