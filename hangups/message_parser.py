@@ -6,8 +6,8 @@ from hangups.schemas import SegmentType
 
 # Common regex patterns
 boundary_chars = r'\s`!()\[\]{{}};:\'".,<>?«»“”‘’'
-b_left = r'(?:(?<=[' + boundary_chars + r'])|(?<=^))' # Lookbehind
-b_right = r'(?:(?=[' + boundary_chars + r'])|(?=$))' # Lookahead
+b_left = r'(?:(?<=[' + boundary_chars + r'])|(?<=^))'  # Lookbehind
+b_right = r'(?:(?=[' + boundary_chars + r'])|(?=$))'   # Lookahead
 
 # Regex patterns used by token definitions
 markdown = b_left + r'(?P<start>{tag})(?!{tag})(?P<text>(?:\S.+?\S|\S+))(?<!{tag})(?P<end>{tag})' + b_right
@@ -26,6 +26,7 @@ auto_link = (r'(?i)\b(?P<text>'
 
 url_proto_re = re.compile(r'(?i)^[a-z][\w-]+:/{1,3}')
 url_complete = lambda u: u if url_proto_re.search(u) else 'http://' + u
+
 
 class Tokens:
     """Groups of tokens to be used by ChatMessageParser"""
