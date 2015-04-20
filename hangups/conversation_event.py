@@ -8,10 +8,10 @@ exceptions.
 import logging
 import re
 
-from hangups import parsers, user, schemas
+from hangups import parsers, message_parser, user, schemas
 
 logger = logging.getLogger(__name__)
-URL_RE = re.compile(r'https?://\S+')
+chat_message_parser = message_parser.ChatMessageParser()
 
 
 class ConversationEvent(object):
@@ -73,17 +73,11 @@ class ChatMessageSegment(object):
     def from_str(text):
         """Generate ChatMessageSegment list parsed from a string.
 
-        This method handles automatically finding URLs and making them into
-        link segments.
+        This method handles automatically finding line breaks, URLs and
+        parsing simple formatting markup (simplified Markdown and HTML).
         """
-        last = 0
-        for match in URL_RE.finditer(text):
-            if match.start() > last:
-                yield ChatMessageSegment(text[last:match.start()])
-            yield ChatMessageSegment(match.group(), link_target=match.group())
-            last = match.end()
-        if last != len(text):
-            yield ChatMessageSegment(text[last:])
+        segment_list = chat_message_parser.parse(text)
+        return [ChatMessageSegment(segment.text, **segment.params) for segment in segment_list]
 
     @staticmethod
     def deserialize(segment):
