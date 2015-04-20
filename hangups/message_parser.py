@@ -10,7 +10,7 @@ b_left = r'(?:(?<=[' + boundary_chars + r'])|(?<=^))' # Lookbehind
 b_right = r'(?:(?=[' + boundary_chars + r'])|(?=$))' # Lookahead
 
 # Regex patterns used by token definitions
-markdown = b_left + r'(?P<start>{tag})(?P<text>\S.+?\S)(?P<end>{tag})' + b_right
+markdown = b_left + r'(?P<start>{tag})(?!{tag})(?P<text>(?:\S.+?\S|\S+))(?<!{tag})(?P<end>{tag})' + b_right
 markdown_link = r'(?P<start>\[)(?P<text>.+?)\]\((?P<url>.+?)(?P<end>\))'
 html = r'(?i)(?P<start><{tag}>)(?P<text>.+?)(?P<end></{tag}>)'
 html_link = r'(?i)(?P<start><a href=[\'"](?P<url>.+?)[\'"]>)(?P<text>.+?)(?P<end></a>)'
@@ -30,8 +30,8 @@ url_complete = lambda u: u if url_proto_re.search(u) else 'http://' + u
 class Tokens:
     """Groups of tokens to be used by ChatMessageParser"""
     basic = [
-        Token(auto_link, link_target=MatchGroup('text', func=url_complete)),
-        Token(newline, text='\n', segment_type=SegmentType.LINE_BREAK)
+        Token(auto_link, final=True, link_target=MatchGroup('text', func=url_complete)),
+        Token(newline, text='\n', final=True, segment_type=SegmentType.LINE_BREAK)
     ]
 
     markdown = [
@@ -43,7 +43,7 @@ class Tokens:
         Token(markdown.format(tag=r'_'), is_italic=True),
         Token(markdown.format(tag=r'~~'), is_strikethrough=True),
         Token(markdown.format(tag=r'=='), is_underline=True),
-        Token(markdown_link, link_target=MatchGroup('url', func=url_complete))
+        Token(markdown_link, final=True, link_target=MatchGroup('url', func=url_complete))
     ]
 
     html = [
@@ -57,10 +57,10 @@ class Tokens:
         Token(html.format(tag=r'u'), is_underline=True),
         Token(html.format(tag=r'ins'), is_underline=True),
         Token(html.format(tag=r'mark'), is_underline=True),
-        Token(html_link, link_target=MatchGroup('url', func=url_complete)),
-        Token(html_img, text=MatchGroup('url', func=url_complete),
+        Token(html_link, final=True, link_target=MatchGroup('url', func=url_complete)),
+        Token(html_img, text=MatchGroup('url', func=url_complete), final=True,
               link_target=MatchGroup('url', func=url_complete)),
-        Token(html_newline, text='\n', segment_type=SegmentType.LINE_BREAK)
+        Token(html_newline, text='\n', final=True, segment_type=SegmentType.LINE_BREAK)
     ]
 
 
