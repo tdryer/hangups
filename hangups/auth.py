@@ -1,8 +1,13 @@
-"""Google auth using OAuth2.0
+"""Google login authentication using OAuth2.
 
-This module logs the refresh_token, which can be revoked from
- https://security.google.com/settings/security/permissions.
-The authorization is shown as "iOS device".
+Logging into Hangouts using OAuth2 requires a private scope only whitelisted
+for certain clients. This module uses the client ID and secret from iOS, so it
+will appear to Google to be an iOS device. Access can be revoked from this
+page:
+    https://security.google.com/settings/security/permissions
+
+For safety of public debugging, this module should not log any user credentials
+or tokens.
 
 This code may be debugged by invoking it directly:
     python -m hangups.auth
@@ -10,19 +15,24 @@ This code may be debugged by invoking it directly:
 
 import requests
 import logging
-import json
+import urllib.parse
 
 logger = logging.getLogger(__name__)
+# Disable requests' debug log since it could contain sensitive data
+logging.getLogger('requests').setLevel(logging.INFO)
 
-OAUTH2_LOGIN_URL = (
-    'https://accounts.google.com/o/oauth2/auth?'
-    'scope=https://www.google.com/accounts/OAuthLogin%20https://www.googleapis'
-    '.com/auth/userinfo.email&'
-    'redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&'
-    'client_id=936475272427.apps.googleusercontent.com'
+OAUTH2_SCOPE = 'https://www.google.com/accounts/OAuthLogin'
+OAUTH2_CLIENT_ID = '936475272427.apps.googleusercontent.com'
+OAUTH2_CLIENT_SECRET = 'KWsJlkaMn1jGLxQpWxMnOox-'
+OAUTH2_LOGIN_URL = 'https://accounts.google.com/o/oauth2/auth?{}'.format(
+    urllib.parse.urlencode(dict(
+        client_id=OAUTH2_CLIENT_ID,
+        scope=OAUTH2_SCOPE,
+        redirect_uri='urn:ietf:wg:oauth:2.0:oob',
+        response_type='code',
+    ))
 )
-CLIENT_ID = '936475272427.apps.googleusercontent.com'
-CLIENT_SECRET = 'KWsJlkaMn1jGLxQpWxMnOox-'
+OAUTH2_TOKEN_REQUEST_URL = 'https://accounts.google.com/o/oauth2/token'
 
 
 class GoogleAuthError(Exception):
@@ -30,102 +40,129 @@ class GoogleAuthError(Exception):
     """Exception raised when auth fails."""
 
 
-def _extract_cookies(session):
-    """Extract auth cookies from the session to a dict."""
-    # Just using all the cookies from the session doesn't work in the second
-    # factor case.
-    req = requests.Request("GET", "https://talkgadget.google.com")
-    mock_req = requests.cookies.MockRequest(req)
-    cookies = session.cookies._cookies_for_request(mock_req)
-    return {c.name: c.value for c in cookies}
-
-
-def _load_oauth2_refresh_token(oauth2_refresh_token_filename):
+def _load_oauth2_refresh_token(refresh_token_filename):
     """Return refresh_token loaded from file or None on failure."""
-    logger.info('Attempting to load refresh_token from %s',
-                oauth2_refresh_token_filename)
+    logger.info('Loading refresh_token from \'%s\'', refresh_token_filename)
     try:
-        with open(oauth2_refresh_token_filename) as f:
-            refresh_token = f.read()
-            logger.info('Using saved refresh_token: %s', refresh_token)
-            return refresh_token
-    except (IOError, ValueError):
-        logger.info('Failed to load saved refresh_token')
+        with open(refresh_token_filename) as f:
+            return f.read()
+    except IOError as e:
+        logger.info('Failed to load refresh_token: %s', e)
 
 
-def _save_oauth2_refresh_token(oauth2_refresh_token_filename, refresh_token):
+def _save_oauth2_refresh_token(refresh_token_filename, refresh_token):
     """Save refresh_token to file, ignoring failure."""
-    logger.info('Attempting to save auth refresh_token to %s',
-                oauth2_refresh_token_filename)
+    logger.info('Saving refresh_token to \'%s\'', refresh_token_filename)
     try:
-        with open(oauth2_refresh_token_filename, 'w') as f:
+        with open(refresh_token_filename, 'w') as f:
             f.write(refresh_token)
-        logger.info('refresh_token saved')
     except IOError as e:
         logger.warning('Failed to save refresh_token: %s', e)
     return refresh_token
 
 
-def get_auth(get_credentials_f, oauth2_refresh_token_filename):
-    """Login into Google and return oauth2 as a dict.
+def get_auth(get_credentials_f, refresh_token_filename):
+    """Login into Google and return cookies as a dict.
 
-    get_credentials_f() is called if credentials are required to log in, and
-    should return oauth auth_token.
+    get_credentials_f() is called if authorization code is required to log in,
+    and should return the code as a string.
 
-    The oauth2 are saved/loaded from oauth2_refresh_token_filename if possible,
-    so credentials may not be necessary.
+    A refresh token is saved/loaded from refresh_token_filename if possible, so
+    subsequent logins may not require re-authenticating.
 
     Raises GoogleAuthError on failure.
     """
-    refresh_token = _load_oauth2_refresh_token(oauth2_refresh_token_filename)
-    auth_code = None
+    try:
+        logger.info('Authenticating with refresh token')
+        access_token = _auth_with_refresh_token(refresh_token_filename)
+    except GoogleAuthError as e:
+        logger.info('Failed to authenticate using refresh token: %s', e)
+        logger.info('Authenticating with authorization code')
+        access_token = _auth_with_code(get_credentials_f,
+                                       refresh_token_filename)
+    logger.info('Authentication successful')
+    return _get_session_cookies(access_token)
 
+
+def _auth_with_code(get_credentials_f, refresh_token_filename):
+    """Authenticate using saved OAuth2 authentication code.
+
+    Raises GoogleAuthError authentication fails.
+
+    Return access token string.
+    """
+    # Get authentication code from user.
+    auth_code = get_credentials_f()
+
+    # Make a token request.
+    token_request_data = {
+        'client_id': OAUTH2_CLIENT_ID,
+        'client_secret': OAUTH2_CLIENT_SECRET,
+        'code': auth_code,
+        'grant_type': 'authorization_code',
+        'redirect_uri': 'urn:ietf:wg:oauth:2.0:oob',
+    }
+    r = requests.post(OAUTH2_TOKEN_REQUEST_URL, data=token_request_data)
+    res = r.json()
+
+    # Save the refresh token.
+    _save_oauth2_refresh_token(refresh_token_filename, res['refresh_token'])
+
+    return res['access_token']
+
+
+def _auth_with_refresh_token(refresh_token_filename):
+    """Authenticate using saved OAuth2 refresh token.
+
+    Raises GoogleAuthError if refresh token is not found or authentication
+    fails.
+
+    Return access token string.
+    """
+    # Load saved refresh token if present.
+    refresh_token = _load_oauth2_refresh_token(refresh_token_filename)
     if refresh_token is None:
-        auth_code = get_credentials_f()
+        raise GoogleAuthError("Refresh token not found")
 
+    # Make a token request.
+    token_request_data = {
+        'client_id': OAUTH2_CLIENT_ID,
+        'client_secret': OAUTH2_CLIENT_SECRET,
+        'grant_type': 'refresh_token',
+        'refresh_token': refresh_token,
+    }
+    r = requests.post(OAUTH2_TOKEN_REQUEST_URL, data=token_request_data)
+    res = r.json()
+    return res['access_token']
+
+
+def _get_session_cookies(access_token):
+    """Use the access token to get session cookies.
+
+    Return dict of cookies.
+    """
     session = requests.Session()
-
-    if refresh_token:
-        data = {'refresh_token': refresh_token, 'client_id': CLIENT_ID,
-                'client_secret': CLIENT_SECRET, 'grant_type': 'refresh_token'}
-    else:
-        data = {'code': auth_code, 'client_id': CLIENT_ID,
-                'client_secret': CLIENT_SECRET,
-                'grant_type': 'authorization_code',
-                'redirect_uri': 'urn:ietf:wg:oauth:2.0:oob'}
-
-    r = session.post('https://accounts.google.com/o/oauth2/token', data=data)
-    js = r.json()
-
-    if 'refresh_token' in js:
-        refresh_token = js['refresh_token']
-        _save_oauth2_refresh_token(oauth2_refresh_token_filename,
-                                   refresh_token)
-
-    headers = {'Authorization': 'Bearer {}'.format(js['access_token'])}
+    headers = {'Authorization': 'Bearer {}'.format(access_token)}
     r = session.get(('https://accounts.google.com/accounts/OAuthLogin'
                      '?source=hangups&issueuberauth=1'), headers=headers)
-
     uberauth = r.text
     r = session.get('https://accounts.google.com/MergeSession')
     r = session.get(('https://accounts.google.com/MergeSession?'
                      'service=mail&continue=http://www.google.com&uberauth={}'
                     ).format(uberauth), headers=headers)
-
-    oauth2 = _extract_cookies(session)
-    return oauth2
+    return session.cookies.get_dict(domain='.google.com')
 
 
-def get_auth_stdin(oauth2_refresh_token_filename):
+def get_auth_stdin(refresh_token_filename):
     """Wrapper for get_auth that prompts the user on stdin."""
     def get_credentials_f():
         """Prompt for and return credentials."""
-        print("Please open the following URL in a browser")
+        print("Please open the following URL in a browser:\n")
         print(OAUTH2_LOGIN_URL)
         auth_token = input('Auth Token: ')
         return auth_token
 
-    return get_auth(get_credentials_f, oauth2_refresh_token_filename)
+    return get_auth(get_credentials_f, refresh_token_filename)
 
 
 if __name__ == '__main__':
