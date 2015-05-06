@@ -42,7 +42,7 @@ COL_SCHEMES = {
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, cookies_path, keybindings, palette):
+    def __init__(self, refresh_token_path, keybindings, palette):
         """Start the user interface."""
         self._keys = keybindings
 
@@ -57,7 +57,7 @@ class ChatUI(object):
 
         # TODO Add urwid widget for getting auth.
         try:
-            cookies = hangups.auth.get_auth_stdin(cookies_path)
+            cookies = hangups.auth.get_auth_stdin(refresh_token_path)
         except hangups.GoogleAuthError as e:
             sys.exit('Login failed ({})'.format(e))
 
@@ -788,7 +788,7 @@ def main():
     # Build default paths for files.
     dirs = appdirs.AppDirs('hangups', 'hangups')
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
-    default_cookies_path = os.path.join(dirs.user_cache_dir, 'cookies.json')
+    default_token_path = os.path.join(dirs.user_cache_dir, 'refresh_token.txt')
     default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
 
     parser = configargparse.ArgumentParser(
@@ -799,8 +799,8 @@ def main():
     general_group = parser.add_argument_group('General')
     general_group.add('-h', '--help', action='help',
                       help='show this help message and exit')
-    general_group.add('--cookies', default=default_cookies_path,
-                      help='cookie storage path')
+    general_group.add('--token-path', default=default_token_path,
+                      help='path used to store OAuth refresh token')
     general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
                       default='default', help='colour scheme to use')
     general_group.add('-c', '--config', help='configuration file path',
@@ -824,7 +824,7 @@ def main():
     args = parser.parse_args()
 
     # Create all necessary directories.
-    for path in [args.log, args.cookies]:
+    for path in [args.log, args.token_path]:
         directory = os.path.dirname(path)
         if directory != '' and not os.path.isdir(directory):
             try:
@@ -838,7 +838,7 @@ def main():
     logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     try:
-        ChatUI(args.cookies, {
+        ChatUI(args.token_path, {
             'next_tab': args.key_next_tab,
             'prev_tab': args.key_prev_tab,
             'close_tab': args.key_close_tab,
