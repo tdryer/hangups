@@ -18,21 +18,25 @@ For help with command line arguments, run::
 Logging in
 ----------
 
-The first time you start hangups, you will be prompted to log into your Google
-account with your email and password. If your account requires 2-step
-verification, you will also be prompted for a PIN. After a successful login,
-hangups will be able to log in automatically after starting.
+The first time you start hangups, you will need to log in to your Google
+account. hangups supports logging in using `OAuth 2.0`_. You will be prompted
+to open a link in your browser. Google will prompt you to authorize the
+application, and then provide an authorization code. Copy and paste the
+authorization code into hangups to complete the process.
 
-hangups will only send your credentials to Google, and only session cookies
-will be stored locally. By default, session cookies are stored in a file in an
-OS-specific cache directory. The default cookie file location can be viewed
-using :code:`hangups -h`. To specify a different cookie file, use the cookies
-option::
+After a successful login, hangups will save a refresh token allowing it to
+login automatically. By default, the token is saved to a file in an OS-specific
+cache directory. The default token file path can be viewed using :code:`hangups
+-h`. To specify a different path for the token file, use the
+:code:`--token-path` option::
 
-  hangups --cookies /path/to/mycookies.json
+  hangups --token-path /path/to/refresh_token.txt
 
-If hangups is unable to access your account, try logging in through a browser
-first, and try again.
+hangups may be deauthorized from your Google account from the `Google Account
+Permissions page`_. hangups will be listed as "iOS device".
+
+.. _OAuth 2.0: http://oauth.net/2/
+.. _`Google Account Permissions page`: https://security.google.com/settings/security/permissions
 
 Usage
 -----

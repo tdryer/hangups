@@ -50,7 +50,6 @@ setup(
         'appdirs==1.4.0',
         'purplex==0.2.4',
         'requests==2.6.0',
-        'robobrowser==0.5.2',
         'ReParser>=1.4',
         # use forked urwid until there's a 1.3 release with colour bugfix
         'hangups-urwid==1.2.2-dev',
