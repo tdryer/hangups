@@ -1,4 +1,4 @@
-"""Google login authentication using OAuth2.
+"""Google login authentication using OAuth 2.0.
 
 Logging into Hangouts using OAuth2 requires a private scope only whitelisted
 for certain clients. This module uses the client ID and secret from iOS, so it
@@ -61,11 +61,11 @@ def _save_oauth2_refresh_token(refresh_token_filename, refresh_token):
     return refresh_token
 
 
-def get_auth(get_credentials_f, refresh_token_filename):
+def get_auth(get_code_f, refresh_token_filename):
     """Login into Google and return cookies as a dict.
 
-    get_credentials_f() is called if authorization code is required to log in,
-    and should return the code as a string.
+    get_code_f() is called if authorization code is required to log in, and
+    should return the code as a string.
 
     A refresh token is saved/loaded from refresh_token_filename if possible, so
     subsequent logins may not require re-authenticating.
@@ -78,21 +78,20 @@ def get_auth(get_credentials_f, refresh_token_filename):
     except GoogleAuthError as e:
         logger.info('Failed to authenticate using refresh token: %s', e)
         logger.info('Authenticating with authorization code')
-        access_token = _auth_with_code(get_credentials_f,
-                                       refresh_token_filename)
+        access_token = _auth_with_code(get_code_f, refresh_token_filename)
     logger.info('Authentication successful')
     return _get_session_cookies(access_token)
 
 
-def _auth_with_code(get_credentials_f, refresh_token_filename):
-    """Authenticate using saved OAuth2 authentication code.
+def _auth_with_code(get_code_f, refresh_token_filename):
+    """Authenticate using OAuth authentication code.
 
     Raises GoogleAuthError authentication fails.
 
     Return access token string.
     """
     # Get authentication code from user.
-    auth_code = get_credentials_f()
+    auth_code = get_code_f()
 
     # Make a token request.
     token_request_data = {
@@ -105,6 +104,11 @@ def _auth_with_code(get_credentials_f, refresh_token_filename):
     r = requests.post(OAUTH2_TOKEN_REQUEST_URL, data=token_request_data)
     res = r.json()
 
+    # If an error occurred, a key 'error' will contain an error code.
+    if 'error' in res:
+        raise GoogleAuthError('Authorization error: \'{}\''
+                              .format(res['error']))
+
     # Save the refresh token.
     _save_oauth2_refresh_token(refresh_token_filename, res['refresh_token'])
 
@@ -112,7 +116,7 @@ def _auth_with_code(get_credentials_f, refresh_token_filename):
 
 
 def _auth_with_refresh_token(refresh_token_filename):
-    """Authenticate using saved OAuth2 refresh token.
+    """Authenticate using saved OAuth refresh token.
 
     Raises GoogleAuthError if refresh token is not found or authentication
     fails.
@@ -133,6 +137,12 @@ def _auth_with_refresh_token(refresh_token_filename):
     }
     r = requests.post(OAUTH2_TOKEN_REQUEST_URL, data=token_request_data)
     res = r.json()
+
+    # If an error occurred, a key 'error' will contain an error code.
+    if 'error' in res:
+        raise GoogleAuthError('Authorization error: \'{}\''
+                              .format(res['error']))
+
     return res['access_token']
 
 
@@ -155,14 +165,14 @@ def _get_session_cookies(access_token):
 
 def get_auth_stdin(refresh_token_filename):
     """Wrapper for get_auth that prompts the user on stdin."""
-    def get_credentials_f():
+    def get_code_f():
         """Prompt for and return credentials."""
-        print("Please open the following URL in a browser:\n")
+        print('To log in, open the following link in a browser and paste the '
+              'provided authorization code below:\n')
         print(OAUTH2_LOGIN_URL)
-        auth_token = input('Auth Token: ')
+        auth_token = input('\nAuthorization Token: ')
         return auth_token
-
-    return get_auth(get_credentials_f, refresh_token_filename)
+    return get_auth(get_code_f, refresh_token_filename)
 
 
 if __name__ == '__main__':
