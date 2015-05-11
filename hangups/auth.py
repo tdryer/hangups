@@ -18,8 +18,10 @@ import logging
 import urllib.parse
 
 logger = logging.getLogger(__name__)
-# Disable requests' debug log since it could contain sensitive data
-logging.getLogger('requests').setLevel(logging.INFO)
+# Set the logging level for requests to at least INFO, since the DEBUG level
+# will log sensitive data:
+if logging.getLogger('requests').isEnabledFor(logging.DEBUG):
+    logging.getLogger('requests').setLevel(logging.INFO)
 
 OAUTH2_SCOPE = 'https://www.google.com/accounts/OAuthLogin'
 OAUTH2_CLIENT_ID = '936475272427.apps.googleusercontent.com'
