@@ -88,7 +88,9 @@ class Notifier(object):
                     cmd, stderr=subprocess.STDOUT
                 ).decode()
             except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                logger.warning('Notification command failed: {}'.format(e))
+                # Only log this at INFO level to prevent log spam when gdbus
+                # isn't available.
+                logger.info('Notification command failed: {}'.format(e))
                 return
             try:
                 self._replaces_id = RESULT_RE.match(output).groups()[0]
