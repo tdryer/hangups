@@ -321,8 +321,11 @@ class Channel(object):
             ), CONNECT_TIMEOUT)
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
-        except aiohttp.errors.ClientError as e:
+        except aiohttp.ClientError as e:
             raise exceptions.NetworkError('Request connection error: {}'
+                                          .format(e))
+        except aiohttp.ServerDisconnectedError as e:
+            raise exceptions.NetworkError('Server disconnected error: {}'
                                           .format(e))
         if res.status == 400 and res.reason == 'Unknown SID':
             raise UnknownSIDError('SID became invalid')
