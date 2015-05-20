@@ -179,7 +179,7 @@ class Channel(object):
         error.
         """
         MAX_RETRIES = 5  # maximum number of times to retry after a failure
-        retries = MAX_RETRIES # number of remaining retries
+        retries = MAX_RETRIES  # number of remaining retries
         need_new_sid = True  # whether a new SID is needed
 
         while retries >= 0:
@@ -305,7 +305,7 @@ class Channel(object):
             'VER': 8,
             'gsessionid': self._gsessionid_param,
             'RID': 'rpc',
-            't': 1, # trial
+            't': 1,  # trial
             'SID': self._sid_param,
             'CI': 0,
             'ctype': 'hangouts',  # client type

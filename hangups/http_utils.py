@@ -50,8 +50,10 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
     if res.status > 200 or res.status < 200:
         logger.info('Request returned unexpected status: {} {}'
                     .format(res.status, res.reason))
-        raise exceptions.NetworkError('Request return unexpected status: {}: {}'
-                                      .format(res.status, res.reason))
+        raise exceptions.NetworkError(
+            'Request return unexpected status: {}: {}'
+            .format(res.status, res.reason)
+        )
     logger.info('Request successful')
     cookie_dict = {name: morsel.value for name, morsel in res.cookies.items()}
     return FetchResponse(res.status, body, cookie_dict)

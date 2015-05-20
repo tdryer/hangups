@@ -43,6 +43,7 @@ class Field(object):
         """
         return self.parse(input_)
 
+
 class EnumField(object):
 
     """An enumeration field.
@@ -67,6 +68,7 @@ class EnumField(object):
         Raises ValueError if the input is not an option in the enum.
         """
         return self.parse(input_).value
+
 
 class RepeatedField(object):
 
@@ -112,6 +114,7 @@ class RepeatedField(object):
         optional, or if the input is not a list.
         """
         return self.parse(input_, serialize=True)
+
 
 class Message(object):
 
@@ -170,8 +173,10 @@ class Message(object):
         elif input_ is None and self._is_optional:
             return None
         elif not isinstance(input_, types.SimpleNamespace):
-            raise ValueError('Message expected types.SimpleNamespace but got {}'
-                             .format(type(input_)))
+            raise ValueError(
+                'Message expected types.SimpleNamespace but got {}'
+                .format(type(input_))
+            )
 
         res = []
         for name, field in self._name_field_pairs:

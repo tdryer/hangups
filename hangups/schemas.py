@@ -1,7 +1,7 @@
 """pblite message schemas and related enums."""
 
-# Stop pylint from complaining about enum:
-# pylint: disable=no-init
+# Stop pylint from complaining about enums:
+# pyline: disable=too-few-public-methods
 
 import enum
 
@@ -399,8 +399,8 @@ CLIENT_ENTITY = Message(
 )
 
 ENTITY_GROUP = Message(
-    (None, Field()), # always 0?
-    (None, Field()), # some sort of ID
+    (None, Field()),  # always 0?
+    (None, Field()),  # some sort of ID
     ('entity', RepeatedField(Message(
         ('entity', CLIENT_ENTITY),
         (None, Field()),  # always 0?

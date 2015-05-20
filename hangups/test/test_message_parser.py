@@ -1,7 +1,5 @@
 """Tests for ReParser-based message parser"""
 
-import pytest
-
 from hangups import message_parser
 from hangups.schemas import SegmentType
 

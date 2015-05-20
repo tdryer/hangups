@@ -2,6 +2,7 @@
 
 import hangups
 
+
 def get_conv_name(conv, truncate=False, show_unread=False):
     """Return a readable name for a conversation.
 
@@ -25,15 +26,17 @@ def get_conv_name(conv, truncate=False, show_unread=False):
     if conv.name is not None:
         return conv.name + postfix
     else:
-        participants = sorted((user for user in conv.users if not user.is_self),
-                              key=lambda user: user.id_)
+        participants = sorted(
+            (user for user in conv.users if not user.is_self),
+            key=lambda user: user.id_
+        )
         names = [user.first_name for user in participants]
         if len(participants) == 0:
             return "Empty Conversation" + postfix
         if len(participants) == 1:
             return participants[0].full_name + postfix
         elif truncate and len(participants) > 2:
-            return (', '.join(names[:2] + ['+{}'.format(len(names) - 2)])
-                    + postfix)
+            return (', '.join(names[:2] + ['+{}'.format(len(names) - 2)]) +
+                    postfix)
         else:
             return ', '.join(names) + postfix

@@ -42,18 +42,19 @@ COL_SCHEMES = {
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, refresh_token_path, keybindings, palette, disable_notifier):
+    def __init__(self, refresh_token_path, keybindings, palette,
+                 disable_notifier):
         """Start the user interface."""
         self._keys = keybindings
 
         set_terminal_title('hangups')
 
         # These are populated by on_connect when it's called.
-        self._conv_widgets = {} # {conversation_id: ConversationWidget}
-        self._tabbed_window = None # TabbedWindowWidget
-        self._conv_list = None # hangups.ConversationList
-        self._user_list = None # hangups.UserList
-        self._notifier = None # hangups.notify.Notifier
+        self._conv_widgets = {}  # {conversation_id: ConversationWidget}
+        self._tabbed_window = None  # TabbedWindowWidget
+        self._conv_list = None  # hangups.ConversationList
+        self._user_list = None  # hangups.UserList
+        self._notifier = None  # hangups.notify.Notifier
         self._disable_notifier = disable_notifier
 
         # TODO Add urwid widget for getting auth.
@@ -143,7 +144,6 @@ class ChatUI(object):
             initial_data.sync_timestamp
         )
         self._conv_list.on_event.add_observer(self._on_event)
-        
         if not self._disable_notifier:
             self._notifier = Notifier(self._conv_list)
         # show the conversation menu
@@ -525,8 +525,8 @@ class ConversationEventListWalker(urwid.ListWalker):
                 conv_events = []
             if len(conv_events) == 0:
                 self._first_loaded = True
-            if (self._focus_position == self.POSITION_LOADING
-                    and len(conv_events) > 0):
+            if (self._focus_position == self.POSITION_LOADING and
+                    len(conv_events) > 0):
                 # If the loading indicator is still focused, and we loaded more
                 # events, set focus on the first new event so the loaded
                 # indicator is replaced.
@@ -640,7 +640,8 @@ class ConversationWidget(urwid.WidgetWrap):
         self._widget = urwid.Pile([
             ('weight', 1, self._list_box),
             ('pack', self._status_widget),
-            ('pack', ReturnableEdit(self._on_return, caption='Send message: ')),
+            ('pack', ReturnableEdit(self._on_return,
+                                    caption='Send message: ')),
         ])
         # focus the edit widget by default
         self._widget.focus_position = 2
@@ -716,9 +717,9 @@ class TabbedWindowWidget(urwid.WidgetWrap):
     """A widget that displays a list of widgets via a tab bar."""
 
     def __init__(self, keybindings):
-        self._widgets = [] # [urwid.Widget]
-        self._widget_title = {} # {urwid.Widget: str}
-        self._tab_index = None # int
+        self._widgets = []  # [urwid.Widget]
+        self._widget_title = {}  # {urwid.Widget: str}
+        self._tab_index = None  # int
         self._keys = keybindings
         self._tabs = urwid.Text('')
         self._frame = urwid.Frame(None)

@@ -1,3 +1,5 @@
+"""Parser for message formatting markup."""
+
 import re
 
 from reparser import Parser, Token, MatchGroup
@@ -7,7 +9,7 @@ from hangups.schemas import SegmentType
 # Common regex patterns
 boundary_chars = r'\s`!()\[\]{{}};:\'".,<>?«»“”‘’*_~='
 b_left = r'(?:(?<=[' + boundary_chars + r'])|(?<=^))'  # Lookbehind
-b_right = r'(?:(?=[' + boundary_chars + r'])|(?=$))'   # Lookahead
+b_right = r'(?:(?=[' + boundary_chars + r'])|(?=$))'  # Lookahead
 
 # Regex patterns used by token definitions
 markdown_start = b_left + r'(?<!\\){tag}(?!\s)(?!{tag})'
@@ -20,7 +22,8 @@ html_img = r'(?i)<img\s+src=[\'"](?P<url>.+?)[\'"]\s*/?>'
 html_newline = r'(?i)<br\s*/?>'
 newline = r'\n|\r\n'
 
-# Based on URL regex pattern by John Gruber (http://gist.github.com/gruber/249502)
+# Based on URL regex pattern by John Gruber
+# (http://gist.github.com/gruber/249502)
 auto_link = (r'(?i)\b('
              r'(?:[a-z][\w-]+:/{1,3}|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)'
              r'(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+'
@@ -34,7 +37,7 @@ markdown_unescape_regex = re.compile(r'\\([*_~=`\[])')
 
 
 def markdown(tag):
-    """Return sequence of start and end regex patterns for simple Markdown tag"""
+    """Return start and end regex pattern sequences for simple Markdown tag."""
     return (markdown_start.format(tag=tag), markdown_end.format(tag=tag))
 
 
@@ -51,7 +54,8 @@ def url_complete(url):
 class Tokens:
     """Groups of tokens to be used by ChatMessageParser"""
     basic = [
-        Token('link', auto_link, link_target=MatchGroup('start', func=url_complete)),
+        Token('link', auto_link, link_target=MatchGroup('start',
+                                                        func=url_complete)),
         Token('br', newline, text='\n', segment_type=SegmentType.LINE_BREAK)
     ]
 
@@ -87,7 +91,8 @@ class Tokens:
               link_target=MatchGroup('url', func=url_complete)),
         Token('html_img', html_img, text=MatchGroup('url'),
               link_target=MatchGroup('url', func=url_complete)),
-        Token('html_br', html_newline, text='\n', segment_type=SegmentType.LINE_BREAK)
+        Token('html_br', html_newline, text='\n',
+              segment_type=SegmentType.LINE_BREAK)
     ]
 
 
@@ -99,7 +104,8 @@ class ChatMessageParser(Parser):
     def preprocess(self, text):
         """Preprocess text before parsing"""
         # Replace two consecutive spaces with space and non-breakable space
-        # (this is how original Hangouts client does it to preserve multiple spaces)
+        # (this is how original Hangouts client does it to preserve multiple
+        # spaces)
         return text.replace('  ', ' \xa0')
 
     def postprocess(self, text):

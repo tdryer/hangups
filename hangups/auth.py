@@ -160,8 +160,8 @@ def _get_session_cookies(access_token):
     uberauth = r.text
     r = session.get('https://accounts.google.com/MergeSession')
     r = session.get(('https://accounts.google.com/MergeSession?'
-                     'service=mail&continue=http://www.google.com&uberauth={}'
-                    ).format(uberauth), headers=headers)
+                     'service=mail&continue=http://www.google.com&uberauth={}')
+                    .format(uberauth), headers=headers)
     return session.cookies.get_dict(domain='.google.com')
 
 

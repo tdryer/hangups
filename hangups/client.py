@@ -333,7 +333,9 @@ class Client(object):
 
         Raises hangups.NetworkError if the request fails.
         """
-        headers = channel.get_authorization_headers(self._get_cookie('SAPISID'))
+        headers = channel.get_authorization_headers(
+            self._get_cookie('SAPISID')
+        )
         headers['content-type'] = content_type
         required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
         cookies = {cookie: self._get_cookie(cookie)
@@ -356,13 +358,13 @@ class Client(object):
 
     @asyncio.coroutine
     def syncallnewevents(self, timestamp):
-        """List all events occuring at or after timestamp.
+        """List all events occurring at or after timestamp.
 
         This method requests protojson rather than json so we have one chat
         message parser rather than two.
 
         timestamp: datetime.datetime instance specifying the time after
-        which to return all events occuring in.
+        which to return all events occurring in.
 
         Raises hangups.NetworkError if the request fails.
 
@@ -373,7 +375,7 @@ class Client(object):
             # last_sync_timestamp
             parsers.to_timestamp(timestamp),
             [], None, [], False, [],
-            1048576 # max_response_size_bytes
+            1048576  # max_response_size_bytes
         ], use_json=False)
         try:
             res = schemas.CLIENT_SYNC_ALL_NEW_EVENTS_RESPONSE.parse(
@@ -537,8 +539,8 @@ class Client(object):
         res = yield from self._request('conversations/deleteconversation', [
             self._get_request_header(),
             [conversation_id],
-            # Not sure what timestamp should be there, last time I have tried it
-            # Hangouts client in GMail sent something like now() - 5 hours
+            # Not sure what timestamp should be there, last time I have tried
+            # it Hangouts client in GMail sent something like now() - 5 hours
             parsers.to_timestamp(
                 datetime.datetime.now(tz=datetime.timezone.utc)
             ),
@@ -764,7 +766,8 @@ class Client(object):
             None,
             [[conversation_id], client_generated_id, 1]
         ]
-        res = yield from self._request('conversations/renameconversation', body)
+        res = yield from self._request('conversations/renameconversation',
+                                       body)
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
         if res_status != 'OK':
@@ -793,7 +796,6 @@ class Client(object):
                            .format(res_status))
             raise exceptions.NetworkError()
 
-
     @asyncio.coroutine
     def createconversation(self, chat_id_list, force_group=False):
         """Create new conversation.
@@ -816,7 +818,8 @@ class Client(object):
              for chat_id in chat_id_list]
         ]
 
-        res = yield from self._request('conversations/createconversation', body)
+        res = yield from self._request('conversations/createconversation',
+                                       body)
         # can return 200 but still contain an error
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
@@ -824,7 +827,6 @@ class Client(object):
             raise exceptions.NetworkError('Unexpected status: {}'
                                           .format(res_status))
         return res
-
 
     @asyncio.coroutine
     def adduser(self, conversation_id, chat_id_list):
