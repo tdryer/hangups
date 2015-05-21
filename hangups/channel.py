@@ -341,8 +341,11 @@ class Channel(object):
                 )
             except asyncio.TimeoutError:
                 raise exceptions.NetworkError('Request timed out')
-            except aiohttp.errors.ClientError as e:
+            except aiohttp.ClientError as e:
                 raise exceptions.NetworkError('Request connection error: {}'
+                                              .format(e))
+            except aiohttp.ServerDisconnectedError as e:
+                raise exceptions.NetworkError('Server disconnected error: {}'
                                               .format(e))
             except asyncio.CancelledError:
                 # Prevent ResourceWarning when channel is disconnected.
