@@ -160,6 +160,17 @@ class Conversation(object):
         yield from self._client.setchatname(self.id_, name)
 
     @asyncio.coroutine
+    def setnotificationlevel(self, level):
+        """Rename the conversation.
+
+        Pass schemas.ClientNotificationLevel.QUIET to disable notifications,
+        or schemas.ClientNotificationLevel.RING to enable them.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        yield from self._client.setchatnotificationlevel(self.id_, level)
+
+    @asyncio.coroutine
     def set_typing(self, typing=schemas.TypingStatus.TYPING):
         """Set typing status.
 
