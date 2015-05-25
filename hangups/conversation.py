@@ -161,7 +161,7 @@ class Conversation(object):
 
     @asyncio.coroutine
     def setnotificationlevel(self, level):
-        """Rename the conversation.
+        """Set the notification level of the conversation.
 
         Pass schemas.ClientNotificationLevel.QUIET to disable notifications,
         or schemas.ClientNotificationLevel.RING to enable them.
