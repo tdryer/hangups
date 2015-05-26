@@ -776,7 +776,7 @@ class Client(object):
             raise exceptions.NetworkError()
 
     @asyncio.coroutine
-    def setchatnotificationlevel(self, conversation_id, level):
+    def setconversationnotificationlevel(self, conversation_id, level):
         """Set the notification level of a conversation.
         
         Pass schemas.ClientNotificationLevel.QUIET to disable notifications,
