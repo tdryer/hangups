@@ -778,25 +778,27 @@ class Client(object):
     @asyncio.coroutine
     def setconversationnotificationlevel(self, conversation_id, level):
         """Set the notification level of a conversation.
-        
+
         Pass schemas.ClientNotificationLevel.QUIET to disable notifications,
         or schemas.ClientNotificationLevel.RING to enable them.
-        
+
         Raises hangups.NetworkError if the request fails.
         """
-        client_generated_id = random.randint(0, 2 ** 32)
         body = [
             self._get_request_header(),
             [conversation_id],
             level.value
         ]
-        res = yield from self._request('conversations/setconversationnotificationlevel',
-                                       body)
+        res = yield from self._request(
+            'conversations/setconversationnotificationlevel', body
+        )
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
         if res_status != 'OK':
-            logger.warning('setconversationnotificationlevel returned status {}'
-                           .format(res_status))
+            logger.warning(
+                'setconversationnotificationlevel returned status {}'
+                .format(res_status)
+            )
             raise exceptions.NetworkError()
 
     @asyncio.coroutine
