@@ -789,7 +789,7 @@ def set_terminal_title(title):
 def dir_maker(path):
     """Create a directory if it does not exist."""
     directory = os.path.dirname(path)
-    if directory != '' and if not os.path.isdir(directory):
+    if directory != '' and not os.path.isdir(directory):
         try:
             os.makedirs(directory)
         except OSError as e:
@@ -806,7 +806,7 @@ def main():
 
     # Create a default empty config file if does not exist.
     dir_maker(default_config_path)
-    if os.path.isfile(default_config_path) == False:
+    if not os.path.isfile(default_config_path):
 	    with open(default_config_path, 'a') as cfg:
 		    cfg.write("")
 
