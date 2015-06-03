@@ -786,6 +786,7 @@ def set_terminal_title(title):
     """Use an xterm escape sequence to set the terminal title."""
     sys.stdout.write("\x1b]2;{}\x07".format(title))
 
+
 def dir_maker(path):
     """Create a directory if it does not exist."""
     directory = os.path.dirname(path)
@@ -807,8 +808,8 @@ def main():
     # Create a default empty config file if does not exist.
     dir_maker(default_config_path)
     if not os.path.isfile(default_config_path):
-	    with open(default_config_path, 'a') as cfg:
-		    cfg.write("")
+        with open(default_config_path, 'a') as cfg:
+            cfg.write("")
 
     parser = configargparse.ArgumentParser(
         prog='hangups', default_config_files=[default_config_path],
