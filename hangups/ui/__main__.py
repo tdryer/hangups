@@ -786,6 +786,15 @@ def set_terminal_title(title):
     """Use an xterm escape sequence to set the terminal title."""
     sys.stdout.write("\x1b]2;{}\x07".format(title))
 
+def dir_maker(path):
+    """Create a directory if it does not exist."""
+    directory = os.path.dirname(path)
+    if directory != '' and not os.path.isdir(directory):
+        try:
+            os.makedirs(directory)
+        except OSError as e:
+            sys.exit('Failed to create directory: {}'.format(e))
+
 
 def main():
     """Main entry point."""
@@ -794,6 +803,12 @@ def main():
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_token_path = os.path.join(dirs.user_cache_dir, 'refresh_token.txt')
     default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
+
+    # Create a default empty config file if does not exist.
+    dir_maker(default_config_path)
+    if not os.path.isfile(default_config_path):
+	    with open(default_config_path, 'a') as cfg:
+		    cfg.write("")
 
     parser = configargparse.ArgumentParser(
         prog='hangups', default_config_files=[default_config_path],
@@ -808,7 +823,7 @@ def main():
     general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
                       default='default', help='colour scheme to use')
     general_group.add('-c', '--config', help='configuration file path',
-                      is_config_file=True, default=None)
+                      is_config_file=True, default=default_config_path)
     general_group.add('-v', '--version', action='version',
                       version='hangups {}'.format(hangups.__version__))
     general_group.add('-d', '--debug', action='store_true',
@@ -831,12 +846,7 @@ def main():
 
     # Create all necessary directories.
     for path in [args.log, args.token_path]:
-        directory = os.path.dirname(path)
-        if directory != '' and not os.path.isdir(directory):
-            try:
-                os.makedirs(directory)
-            except OSError as e:
-                sys.exit('Failed to create directory: {}'.format(e))
+        dir_maker(path)
 
     log_level = logging.DEBUG if args.debug else logging.WARNING
     logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
