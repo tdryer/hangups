@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 import urwid
+import readlike
 
 import hangups
 from hangups.ui.notify import Notifier
@@ -301,15 +302,20 @@ class ConversationPickerWidget(urwid.WidgetWrap):
 class ReturnableEdit(urwid.Edit):
     """Edit widget that clears itself and calls a function on return."""
 
-    def __init__(self, on_return, caption=None):
+    def __init__(self, on_return, keybindings, caption=None):
         super().__init__(caption=caption)
         self._on_return = on_return
+        self._keys = keybindings
 
     def keypress(self, size, key):
         key = super().keypress(size, key)
         if key == 'enter':
             self._on_return(self.get_edit_text())
             self.set_edit_text('')
+        elif key not in self._keys.values() and key in readlike.keys():
+            text, pos = readlike.edit(self.edit_text, self.edit_pos, key)
+            self.set_edit_text(text)
+            self.set_edit_pos(pos)
         else:
             return key
 
@@ -640,7 +646,7 @@ class ConversationWidget(urwid.WidgetWrap):
         self._widget = urwid.Pile([
             ('weight', 1, self._list_box),
             ('pack', self._status_widget),
-            ('pack', ReturnableEdit(self._on_return,
+            ('pack', ReturnableEdit(self._on_return, keybindings,
                                     caption='Send message: ')),
         ])
         # focus the edit widget by default
