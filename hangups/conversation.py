@@ -299,9 +299,12 @@ class Conversation(object):
     @property
     def last_modified(self):
         """datetime timestamp of when the conversation was last modified."""
-        return parsers.from_timestamp(
-            self._conversation.self_conversation_state.sort_timestamp
-        )
+        timestamp = self._conversation.self_conversation_state.sort_timestamp
+        # timestamp can be None for some reason when there is an ongoing video
+        # hangout
+        if timestamp is None:
+            timestamp = 0
+        return parsers.from_timestamp(timestamp)
 
     @property
     def latest_read_timestamp(self):
