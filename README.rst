@@ -59,6 +59,8 @@ Related projects
 
 - `Hangish`_: A Google Hangouts native client for Sailfish
 - `hangupsjs`_: Port of hangups to Node.js
+- `hangover`_: The first native Mac OS X client for Google Hangouts
 
 .. _Hangish: https://github.com/rogora/hangish
 .. _hangupsjs: https://github.com/algesten/hangupsjs
+.. _hangover: https://github.com/psobot/hangover
