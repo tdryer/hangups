@@ -158,7 +158,6 @@ def _get_session_cookies(access_token):
     r = session.get(('https://accounts.google.com/accounts/OAuthLogin'
                      '?source=hangups&issueuberauth=1'), headers=headers)
     uberauth = r.text
-    r = session.get('https://accounts.google.com/MergeSession')
     r = session.get(('https://accounts.google.com/MergeSession?'
                      'service=mail&continue=http://www.google.com&uberauth={}')
                     .format(uberauth), headers=headers)
