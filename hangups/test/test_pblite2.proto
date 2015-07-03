@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+message EmbeddedMessage {
+    int32 test_int = 1;
+}
+
+message TestMessage {
+    int32 test_int = 1;
+    EmbeddedMessage embedded_message = 2;
+    repeated int32 test_int_list = 3;
+    repeated EmbeddedMessage embedded_message_list = 4;
+}

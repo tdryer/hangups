@@ -4,7 +4,7 @@ import logging
 from collections import namedtuple
 import datetime
 
-from hangups import javascript, schemas, user
+from hangups import javascript, schemas, user, hangouts_pb2, pblite2
 
 
 logger = logging.getLogger(__name__)
@@ -50,6 +50,12 @@ def _parse_payload(payload):
             try:
                 state_update = schemas.CLIENT_STATE_UPDATE.parse(raw_update)
                 logger.info('Parsed ClientStateUpdate: {}'.format(state_update))
+
+                # TODO
+                msg = hangouts_pb2.ClientStateUpdate()
+                pblite2.decode(msg, raw_update)
+                logger.info('Parsed ClientStateUpdate protobuf: {}'.format(msg))
+
                 yield state_update
             except ValueError as e:
                 logger.warning('Failed to parse ClientStateUpdate: {}'

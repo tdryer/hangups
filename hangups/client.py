@@ -13,7 +13,7 @@ import datetime
 import os
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
-                     event, schemas)
+                     event, schemas, hangouts_pb2, pblite2)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -391,6 +391,22 @@ class Client(object):
                                           .format(status))
         return res
 
+    def _get_request_header_pb(self):
+        """Return populated ClientRequestHeader message."""
+        return hangouts_pb2.ClientRequestHeader(
+            client_version=hangouts_pb2.ClientClientVersion(
+                client_id=hangouts_pb2.CLIENT_ID_WEB_GMAIL,
+                build_type=hangouts_pb2.BUILD_TYPE_PRODUCTION_WEB,
+                major_version=self._header_version,
+                version_timestamp=int(self._header_date),
+            ),
+            client_identifier=hangouts_pb2.ClientClientIdentifier(
+                resource=self._client_id,
+                header_id=self._header_id,
+            ),
+            language_code='en',
+        )
+
     @asyncio.coroutine
     def sendchatmessage(
             self, conversation_id, segments, image_id=None,
@@ -413,27 +429,71 @@ class Client(object):
         Raises hangups.NetworkError if the request fails.
         """
         client_generated_id = random.randint(0, 2**32)
-        body = [
-            self._get_request_header(),
-            None, None, None, [],
-            [
-                segments, []
-            ],
-            [[image_id, False]] if image_id else None,
-            [
-                [conversation_id],
-                client_generated_id,
-                otr_status.value,
-            ],
-            None, None, None, []
-        ]
-        res = yield from self._request('conversations/sendchatmessage', body)
+
+        # TODO: temporary conversation for compat
+        segments_pb = []
+        for segment_pblite in segments:
+            segment_pb = hangouts_pb2.Segment()
+            pblite2.decode(segment_pb, segment_pblite)
+            segments_pb.append(segment_pb)
+        expected_otr = (
+            hangouts_pb2.ON_THE_RECORD
+            if otr_status == schemas.OffTheRecordStatus.ON_THE_RECORD
+            else hangouts_pb2.OFF_THE_RECORD
+        )
+
+        request = hangouts_pb2.SendChatMessageRequest(
+            request_header=self._get_request_header_pb(),
+            message_content=hangouts_pb2.ClientMessageContent(
+                segment=segments_pb,
+            ),
+            # TODO: this breaks serialization
+            #existing_media=hangouts_pb2.ClientExistingMedia(
+            #    photo=hangouts_pb2.Photo(
+            #        photo_id=image_id if image_id is not None else '',
+            #    )
+            #),
+            event_request_header=hangouts_pb2.ClientEventRequestHeader(
+                conversation_id=hangouts_pb2.ConversationID(
+                    id=conversation_id,
+                ),
+                client_generated_id=client_generated_id,
+                expected_otr=expected_otr,
+            ),
+        )
+
+        encoded_request = pblite2.encode(request)
+        logger.debug(encoded_request)
+
+        #body = [
+        #    self._get_request_header(),
+        #    None, None, None, [],
+        #    [
+        #        segments, []
+        #    ],
+        #    [[image_id, False]] if image_id else None,
+        #    [
+        #        [conversation_id],
+        #        client_generated_id,
+        #        otr_status.value,
+        #    ],
+        #    None, None, None, []
+        #]
+        #logger.debug(body)
+        #res = yield from self._request('conversations/sendchatmessage', body, use_json=False)
+        res = yield from self._request('conversations/sendchatmessage',
+                                       encoded_request, use_json=False)
         # sendchatmessage can return 200 but still contain an error
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
+        #res = json.loads(res.body.decode())
+        #res_status = res['response_header']['status']
+        #if res_status != 'OK':
+        #    raise exceptions.NetworkError('Unexpected status: {}'
+        #                                  .format(res_status))
+        pblite = javascript.loads(res.body.decode())
+        response_message = hangouts_pb2.SendChatMessageResponse()
+        pblite2.decode(response_message, pblite)
+        #logger.debug(json.dumps(pblite, indent=4))
+        logger.debug(response_message)
 
     @asyncio.coroutine
     def upload_image(self, image_file, filename=None):

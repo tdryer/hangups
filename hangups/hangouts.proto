@@ -1,0 +1,502 @@
+syntax = "proto3";
+
+enum ActiveClientState {
+    NO_ACTIVE_CLIENT = 0;
+    IS_ACTIVE_CLIENT = 1;
+    OTHER_CLIENT_IS_ACTIVE = 2;
+}
+
+message ClientDoNotDisturbSetting {
+    bool do_not_disturb = 1;
+    uint64 expiration_timestamp = 2;
+}
+
+message ClientNotificationSettings {
+    ClientDoNotDisturbSetting dnd_settings = 1;
+}
+
+message ClientStateUpdateHeader {
+    // TODO
+    ActiveClientState active_client_state = 1;
+    // unknown = 2
+    string request_trace_id = 3;
+    ClientNotificationSettings notification_settings = 4;
+    uint64 current_server_time = 5;
+    // archive settings? ([1]) = 6
+    // unknown = 7
+    // optional ID of the client causing the update (3767219427742586121) ? = 8
+}
+
+enum FocusStatus {
+    UNKNOWN = 0;
+    FOCUSED = 1;
+    UNFOCUSED = 2;
+}
+
+enum FocusDevice {
+    UNSPECIFIED = 0;
+    DESKTOP = 20;
+    MOBILE = 300;
+}
+
+message ConversationID {
+    string id = 1;
+}
+
+message UserID {
+    string gaia_id = 1;
+    string chat_id = 2;
+}
+
+message ClientSetFocusNotification {
+    ConversationID conversation_id = 1;
+    UserID user_id = 2;
+    uint64 timestamp = 3;
+    FocusStatus status = 4;
+    FocusDevice device = 5;
+}
+
+message ClientPresence {
+    bool reachable = 1;
+    bool available = 2;
+}
+
+message ClientPresenceResult {
+    UserID user_id = 1;
+    ClientPresence presence = 2;
+}
+
+message ClientPresenceNotification {
+    repeated ClientPresenceResult presence = 1;
+}
+
+enum TypingStatus {
+    TYPING_UNKNOWN = 0;
+    TYPING_STARTED = 1;  // started typing
+    TYPING_PAUSED = 2;  // stopped typing with inputted text
+    TYPING_STOPPED = 3;  // stopped typing with no inputted text
+}
+
+message ClientSetTypingNotification {
+    ConversationID conversation_id = 1;
+    UserID user_id = 2;
+    uint64 timestamp = 3;
+    TypingStatus status = 4;
+}
+
+message ClientClientIdentifier {
+    string resource = 1; // (client_id in hangups)
+    string header_id = 2; // unknown (header_id in hangups)
+}
+
+enum ClientPresenceState {
+    // TODO this all wrong
+    PRESENCE_NONE = 0;
+    PRESENCE_MOBILE = 1;
+    PRESENCE_DESKTOP_IDLE = 2;
+    PRESENCE_DESKTOP_ACTIVE = 3;
+}
+
+message ClientClientPresenceState {
+    ClientClientIdentifier identifier = 1;
+    ClientPresenceState state = 2;
+}
+
+message ClientSelfPresenceNotification {
+    // status of other clients and mood
+    // TODO: might be totally wrong
+    ClientClientPresenceState client_presence_state = 1;
+
+    // TODO
+    // setting status = 6;
+    // [None, None, None, [[[[[0, 'testing', [0, 0, 0, 0]]]]], 4589237583327000]]
+    // clearing status:
+    // [None, None, None, [[[None]], 4589237668724000]]
+}
+
+message ClientWatermarkNotification {
+    UserID participant_id = 1;
+    ConversationID conversation_id = 2;
+    uint64 latest_read_timestamp = 3;
+}
+
+enum ClientNotificationLevel {
+    NOTIFICATION_LEVEL_UNKNOWN = 0;
+    QUIET = 10;
+    RING = 30;
+}
+
+message ClientUserEventState {
+    UserID user_id = 1;
+    string client_generated_id = 2;
+    ClientNotificationLevel notification_level = 3;
+}
+
+enum SegmentType {
+    TEXT = 0;
+    LINE_BREAK = 1;
+    LINK = 2;
+}
+
+message Formatting {
+    bool bold = 1;
+    bool italic = 2;
+    bool strikethrough = 3;
+    bool underline = 4;
+}
+
+message LinkData {
+    string link_target = 1;
+}
+
+message Segment {
+    SegmentType type = 1;
+    string text = 2; // may be empty for linebreaks
+    Formatting formatting = 3;
+    LinkData link_data = 4;
+}
+
+message EmbedItem {
+    repeated uint64 type = 1; // 249 (PLUS_PHOTO), 340, 335, 0
+    // TODO: this could be a problem
+    // data (can be a dict)
+}
+
+message Attachment {
+    EmbedItem embed_item = 1;
+}
+
+message ClientMessageContent {
+    repeated Segment segment = 1;
+    repeated Attachment attachment = 2;
+}
+
+message ClientChatMessage {
+    // always 0? = 1;
+    // annotation (always None?) = 2;
+    ClientMessageContent message_content = 3;
+}
+
+message ClientMembershipChange {
+
+}
+
+message ClientConversationRename {
+
+}
+
+message ClientHangoutEvent {
+
+}
+
+message ClientOTRModification {
+
+}
+
+enum OffTheRecordStatus {
+    OFF_THE_RECORD_STATUS_UNKNOWN = 0;
+    OFF_THE_RECORD = 1;
+    ON_THE_RECORD = 2;
+}
+
+message ClientEvent {
+    ConversationID conversation_id = 1;
+    UserID sender_id = 2;
+    uint64 timestamp = 3;
+    ClientUserEventState self_event_state = 4;
+    // TODO: probably a oneof in there somewhere
+    // not used? = 5;
+    // always 0? (expiration_timestamp?) = 6;
+    ClientChatMessage chat_message = 7;
+    // not used? = 8;
+    ClientMembershipChange membership_change = 9;
+    ClientConversationRename conversation_rename = 10;
+    ClientHangoutEvent hangout_event = 11;
+    string event_id = 12;
+    bool advances_sort_timestamp = 13; // TODO: not sure about type
+    ClientOTRModification otr_modification = 14;
+    // 0, 1 or None? related to notifications? = 15;
+    OffTheRecordStatus otr_status = 16;
+    // always 1? (advances_sort_timestamp?) = 17;
+    // unknown ([1]) = 20;
+    // unknown (1) = 23;
+    // unknown timestamp = 24;
+    // something to do with sending messages (['7-H0Z7-BCTg80ySBsfibNV', 4, None, 1435550921815004]) = 26;
+}
+
+message ClientEventNotification {
+    ClientEvent event = 1;
+}
+
+enum ConversationType {
+    CONVERSATION_TYPE_UNKNOWN = 0;
+    ONE_TO_ONE = 1;
+    GROUP = 2;
+}
+
+message ClientUserReadState {
+    UserID participant_id = 1;
+    uint64 latest_read_timestamp = 2; // TODO: always 0?
+}
+
+enum ClientConversationStatus {
+    UNKNOWN_CONVERSATION_STATUS = 0;
+    INVITED = 1;
+    ACTIVE = 2;
+    LEFT = 3;
+}
+
+enum ClientConversationView {
+    UNKNOWN_CONVERSATION_VIEW = 0;
+    INBOX_VIEW = 1;
+    ARCHIVED_VIEW = 2;
+}
+
+message ClientUserConversationState {
+     ClientUserReadState self_read_state = 7;
+     ClientConversationStatus status = 8;
+     ClientNotificationLevel notification_level = 9;
+     repeated ClientConversationView view = 10;
+     UserID inviter_id = 11;
+     uint64 invite_timestamp = 12;
+     uint64 sort_timestamp = 13;
+     uint64 active_timestamp = 14; // when conversation became active?
+     // unknown [[[1], 1]] = 17
+}
+
+message ClientConversationParticipantData {
+    UserID id = 1;
+    string fallback_name = 2;
+    // unknown (2) = 3;
+    // unknown (2) = 5;
+    // unknown (2) = 6
+}
+
+message ClientConversation {
+    ConversationID conversation_id = 1;
+    ConversationType type = 2;
+    string name = 3;
+    ClientUserConversationState self_conversation_state = 4;
+    repeated ClientUserReadState read_state = 8;
+    // unknown (0) = 9;
+    OffTheRecordStatus otr_status = 10;
+    // unknown (1) = 11;
+    repeated UserID current_participant = 13;
+    repeated ClientConversationParticipantData participant_data = 14;
+    // unknown ([1]) = 18;
+    // unknown (0) = 19;
+}
+
+message ClientSetConversationNotificationLevelNotification {
+    ConversationID conversation_id = 1;
+    ClientNotificationLevel level = 2;
+    // unknown (0) = 3;
+    uint64 timestamp = 4;
+}
+
+message ClientEasterEgg {
+    string message = 1;
+}
+
+message ClientEasterEggNotification {
+    UserID sender_id = 1;
+    ConversationID conversation_id = 2;
+    ClientEasterEgg easter_egg = 3;
+}
+
+enum ClientSetting {
+    SETTING_UNKNOWN = 0;
+    SHOW_IN_CALL = 1;
+    SHOW_DEVICE = 2;
+    SHOW_LAST_SEEN = 6;
+}
+
+message ClientSettingsNotification { // 20
+    // TODO: need name for Foo?
+    message Foo {
+        ClientSetting setting = 1;
+        bool setting_value = 2;
+    }
+    // TODO: probably not repeated
+    repeated Foo foo = 1;
+}
+
+message ClientSetNotificationSettingNotification {
+    // TODO:
+    // "sounds for incoming messages" off: [None, [2, 1]]
+    // "sounds for incoming messages" on: [None, [1, 1]]
+    // "ring for incoming phone calls" off: [None, [1, 2]]
+    // "ring for incoming phone calls" on: [None, [1, 1]]
+}
+
+message ClientConversationViewModification {
+    ConversationID conversation_id = 1;
+    ClientConversationView old_view = 2;
+    ClientConversationView new_view = 3;
+    // archive:
+    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 1, 2]
+    // unarchive:
+    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 2, 1]
+
+}
+
+message ClientDeleteAction {
+    uint64 delete_action_timestamp = 1;
+    uint64 delete_upper_bound_timestamp = 2; // TODO: roughly 10 mins before
+    // unknown (1) = 3;
+}
+
+message ClientDeleteActionNotification { // 15
+    // delete conversation:
+    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], [1435638391438133, 1435637794504105, 1]]
+    ConversationID conversation_id = 1;
+    ClientDeleteAction delete_action = 2;
+}
+
+enum ClientBlockState {
+    BLOCK_STATE_UNKNOWN = 0;
+    BLOCK = 1;
+    UNBLOCK = 2;
+}
+
+message ClientBlockStateChange {
+    UserID participant_id = 1;
+    ClientBlockState new_block_state = 2;
+}
+
+message ClientBlockNotification {
+    // block someone
+    // [[[['102610215878429116806', '102610215878429116806'], 1]]]
+    repeated ClientBlockStateChange block_state_change = 1;
+}
+
+enum ClientReplyToInviteType {
+    REPLY_TO_INVITE_TYPE_UNKNOWN = 0;
+    ACCEPT = 1;
+    DECLINE = 2;
+}
+
+message ClientReplyToInviteNotification {
+    // TODO: untested
+    // [['UgwnHidpJTfc7G7BhUR4AaABAQ'], 1]
+    ConversationID conversation_id = 1;
+    ClientReplyToInviteType type = 2;
+}
+
+message ClientStateUpdate {
+    ClientStateUpdateHeader client_state_update_header = 1;
+    // only gets sent when the state of the conversation changes
+    ClientConversation client_conversation = 13;
+    // TODO: need to confirm this is a oneof
+    oneof client_state_update {
+        //UnimplementedMessage conversation_notification = 2; // always null?
+        ClientEventNotification event_notification = 3;
+        ClientSetFocusNotification focus_notification = 4;
+        ClientSetTypingNotification typing_notification = 5;
+        ClientSetConversationNotificationLevelNotification notification_level_notification = 6;
+        ClientReplyToInviteNotification reply_to_invite_notification = 7;
+        ClientWatermarkNotification watermark_notification = 8;
+        //UnimplementedMessage unknown_1 = 9;
+        //UnimplementedMessage settings_notification = 10;
+        ClientConversationViewModification view_modification = 11;
+        ClientEasterEggNotification easter_egg_notification = 12;
+        ClientSelfPresenceNotification self_presence_notification = 14;
+        ClientDeleteActionNotification delete_notification = 15;
+        ClientPresenceNotification presence_notification = 16;
+        ClientBlockNotification block_notification = 17;
+        //UnimplementedMessage invitation_watermark_notification = 18;
+        ClientSetNotificationSettingNotification notification_setting_notification = 19;
+        ClientSettingsNotification settings_notification = 20;
+    }
+}
+
+// API Requests
+
+message Photo {
+    string photo_id = 1;
+    bool delete_albumless_source_photo = 2; // TODO: never tested
+}
+
+message ClientExistingMedia {
+    Photo photo = 1;
+}
+
+message ClientEventRequestHeader {
+    ConversationID conversation_id = 1;
+    uint64 client_generated_id = 2;
+    OffTheRecordStatus expected_otr = 3;
+}
+
+enum ClientId {
+    CLIENT_ID_UNKNOWN = 0;
+    // Hangouts app for Android
+    CLIENT_ID_ANDROID = 1;
+    // Hangouts app for iOS
+    CLIENT_ID_IOS = 2;
+    // Hangouts Chrome extension
+    CLIENT_ID_CHROME = 3;
+    // Hangouts web interface in Google Plus
+    CLIENT_ID_WEB_GPLUS = 5;
+    // Hangouts web interface in Gmail
+    CLIENT_ID_WEB_GMAIL = 6;
+    // Hangouts Chrome app ("ultraviolet")
+    CLIENT_ID_ULTRAVIOLET = 13;
+}
+
+enum ClientBuildType {
+    BUILD_TYPE_UNKNOWN = 0;
+    // build type used by web apps
+    BUILD_TYPE_PRODUCTION_WEB = 1;
+    // built type used by native apps
+    // hangups used to use this, but web apps seem to use 1 now
+    BUILD_TYPE_PRODUCTION_APP = 3;
+}
+
+message ClientClientVersion {
+    ClientId client_id = 1;
+    ClientBuildType build_type = 2;
+    // client version string
+    string major_version = 3;
+    // not a timestamp in iOS/Android
+    uint64 version_timestamp = 4;
+    // OS version string, only used by native apps
+    string device_os_version = 5;
+    // device hardware name, only used by native apps
+    string device_hardware = 6;
+}
+
+message ClientRequestHeader {
+    // TODO: incomplete
+    ClientClientVersion client_version = 1;
+    ClientClientIdentifier client_identifier = 2;
+    string language_code = 4;
+}
+
+message SendChatMessageRequest {
+    // TODO: incomplete
+    ClientRequestHeader request_header = 1;
+    ClientMessageContent message_content = 6;
+    ClientExistingMedia existing_media = 7;
+    ClientEventRequestHeader event_request_header = 8;
+}
+
+enum ClientResponseStatus {
+    RESPONSE_STATUS_UNKNOWN = 0;
+    RESPONSE_STATUS_OK = 1;
+    RESPONSE_STATUS_UNEXPECTED_ERROR = 3;
+}
+
+message ClientResponseHeader {
+    ClientResponseStatus status = 1;
+    string error_description = 2;
+    // unknown string = 3;
+    string request_trace_id = 4;
+    uint64 current_server_time = 5;
+}
+
+message SendChatMessageResponse {
+    string some_code = 1;  // cscmrp
+    ClientResponseHeader request_header = 2;
+    // unknown [] = 5;
+    ClientEvent created_event = 7;
+}
