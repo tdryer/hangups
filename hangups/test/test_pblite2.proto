@@ -1,12 +1,16 @@
-syntax = "proto3";
+syntax = "proto2";
 
 message EmbeddedMessage {
-    int32 test_int = 1;
+    optional int32 test_int = 1;
 }
 
 message TestMessage {
-    int32 test_int = 1;
-    EmbeddedMessage embedded_message = 2;
+    optional int32 test_int = 1;
+    optional EmbeddedMessage embedded_message = 2;
     repeated int32 test_int_list = 3;
     repeated EmbeddedMessage embedded_message_list = 4;
+}
+
+message RequiredMessage {
+    required int32 required_int = 1;
 }

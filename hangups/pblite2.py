@@ -14,9 +14,12 @@ from google.protobuf.message import Message
 logger = logging.getLogger(__name__)
 
 
+# TODO: raise exception for missing required fields
+# TODO: document/test error checking
+
+
 def decode(pb_message, pblite):
     """Decode pblite to Protocol Buffer message."""
-    # TODO: document/test error checking
     assert pblite is not None
 
     # Reverse-engineering aid
@@ -68,8 +71,8 @@ def encode(pb):
     """Encode Protocol Buffer message to pblite."""
     assert isinstance(pb, Message)
     pblite = []
-    # ListFields only returns fields that aren't set to their default value, so
-    # use this to only encode necessary fields
+    # ListFields only returns fields that are set, so use this to only encode
+    # necessary fields
     for field_descriptor, field_value in pb.ListFields():
         if field_descriptor.label == FieldDescriptor.LABEL_REPEATED:
             if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:

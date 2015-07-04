@@ -48,3 +48,17 @@ def test_encode_empty_embedded_message():
     test_message = test_pblite2_pb2.TestMessage()
     test_message.test_int = 1
     assert pblite2.encode(test_message) == [1]
+
+def test_encode_serialize_default_value():
+    # Field is always serialized when it is set, even when set to the default
+    # value.
+    test_message = test_pblite2_pb2.TestMessage()
+    test_message.test_int = 0
+    assert pblite2.encode(test_message) == [0]
+
+def test_encode_required_field():
+    # Required fields are always serialized to the default value.
+    test_message = test_pblite2_pb2.RequiredMessage()
+    # TODO
+    #assert pblite2.encode(test_message) == [0]
+

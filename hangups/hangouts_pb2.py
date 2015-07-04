@@ -19,8 +19,8 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='hangups/hangouts.proto',
   package='',
-  syntax='proto3',
-  serialized_pb=_b('\n\x16hangups/hangouts.proto\"Q\n\x19\x43lientDoNotDisturbSetting\x12\x16\n\x0e\x64o_not_disturb\x18\x01 \x01(\x08\x12\x1c\n\x14\x65xpiration_timestamp\x18\x02 \x01(\x04\"N\n\x1a\x43lientNotificationSettings\x12\x30\n\x0c\x64nd_settings\x18\x01 \x01(\x0b\x32\x1a.ClientDoNotDisturbSetting\"\xbd\x01\n\x17\x43lientStateUpdateHeader\x12/\n\x13\x61\x63tive_client_state\x18\x01 \x01(\x0e\x32\x12.ActiveClientState\x12\x18\n\x10request_trace_id\x18\x03 \x01(\t\x12:\n\x15notification_settings\x18\x04 \x01(\x0b\x32\x1b.ClientNotificationSettings\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"\x1c\n\x0e\x43onversationID\x12\n\n\x02id\x18\x01 \x01(\t\"*\n\x06UserID\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63hat_id\x18\x02 \x01(\t\"\xaf\x01\n\x1a\x43lientSetFocusNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x18\n\x07user_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x1c\n\x06status\x18\x04 \x01(\x0e\x32\x0c.FocusStatus\x12\x1c\n\x06\x64\x65vice\x18\x05 \x01(\x0e\x32\x0c.FocusDevice\"6\n\x0e\x43lientPresence\x12\x11\n\treachable\x18\x01 \x01(\x08\x12\x11\n\tavailable\x18\x02 \x01(\x08\"S\n\x14\x43lientPresenceResult\x12\x18\n\x07user_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12!\n\x08presence\x18\x02 \x01(\x0b\x32\x0f.ClientPresence\"E\n\x1a\x43lientPresenceNotification\x12\'\n\x08presence\x18\x01 \x03(\x0b\x32\x15.ClientPresenceResult\"\x93\x01\n\x1b\x43lientSetTypingNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x18\n\x07user_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x1d\n\x06status\x18\x04 \x01(\x0e\x32\r.TypingStatus\"=\n\x16\x43lientClientIdentifier\x12\x10\n\x08resource\x18\x01 \x01(\t\x12\x11\n\theader_id\x18\x02 \x01(\t\"m\n\x19\x43lientClientPresenceState\x12+\n\nidentifier\x18\x01 \x01(\x0b\x32\x17.ClientClientIdentifier\x12#\n\x05state\x18\x02 \x01(\x0e\x32\x14.ClientPresenceState\"[\n\x1e\x43lientSelfPresenceNotification\x12\x39\n\x15\x63lient_presence_state\x18\x01 \x01(\x0b\x32\x1a.ClientClientPresenceState\"\x87\x01\n\x1b\x43lientWatermarkNotification\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationID\x12\x1d\n\x15latest_read_timestamp\x18\x03 \x01(\x04\"\x83\x01\n\x14\x43lientUserEventState\x12\x18\n\x07user_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\t\x12\x34\n\x12notification_level\x18\x03 \x01(\x0e\x32\x18.ClientNotificationLevel\"T\n\nFormatting\x12\x0c\n\x04\x62old\x18\x01 \x01(\x08\x12\x0e\n\x06italic\x18\x02 \x01(\x08\x12\x15\n\rstrikethrough\x18\x03 \x01(\x08\x12\x11\n\tunderline\x18\x04 \x01(\x08\"\x1f\n\x08LinkData\x12\x13\n\x0blink_target\x18\x01 \x01(\t\"r\n\x07Segment\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.SegmentType\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\x1f\n\nformatting\x18\x03 \x01(\x0b\x32\x0b.Formatting\x12\x1c\n\tlink_data\x18\x04 \x01(\x0b\x32\t.LinkData\"\x19\n\tEmbedItem\x12\x0c\n\x04type\x18\x01 \x03(\x04\",\n\nAttachment\x12\x1e\n\nembed_item\x18\x01 \x01(\x0b\x32\n.EmbedItem\"R\n\x14\x43lientMessageContent\x12\x19\n\x07segment\x18\x01 \x03(\x0b\x32\x08.Segment\x12\x1f\n\nattachment\x18\x02 \x03(\x0b\x32\x0b.Attachment\"C\n\x11\x43lientChatMessage\x12.\n\x0fmessage_content\x18\x03 \x01(\x0b\x32\x15.ClientMessageContent\"\x18\n\x16\x43lientMembershipChange\"\x1a\n\x18\x43lientConversationRename\"\x14\n\x12\x43lientHangoutEvent\"\x17\n\x15\x43lientOTRModification\"\xe7\x03\n\x0b\x43lientEvent\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1a\n\tsender_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12/\n\x10self_event_state\x18\x04 \x01(\x0b\x32\x15.ClientUserEventState\x12(\n\x0c\x63hat_message\x18\x07 \x01(\x0b\x32\x12.ClientChatMessage\x12\x32\n\x11membership_change\x18\t \x01(\x0b\x32\x17.ClientMembershipChange\x12\x36\n\x13\x63onversation_rename\x18\n \x01(\x0b\x32\x19.ClientConversationRename\x12*\n\rhangout_event\x18\x0b \x01(\x0b\x32\x13.ClientHangoutEvent\x12\x10\n\x08\x65vent_id\x18\x0c \x01(\t\x12\x1f\n\x17\x61\x64vances_sort_timestamp\x18\r \x01(\x08\x12\x30\n\x10otr_modification\x18\x0e \x01(\x0b\x32\x16.ClientOTRModification\x12\'\n\notr_status\x18\x10 \x01(\x0e\x32\x13.OffTheRecordStatus\"6\n\x17\x43lientEventNotification\x12\x1b\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x0c.ClientEvent\"U\n\x13\x43lientUserReadState\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1d\n\x15latest_read_timestamp\x18\x02 \x01(\x04\"\xbd\x02\n\x1b\x43lientUserConversationState\x12-\n\x0fself_read_state\x18\x07 \x01(\x0b\x32\x14.ClientUserReadState\x12)\n\x06status\x18\x08 \x01(\x0e\x32\x19.ClientConversationStatus\x12\x34\n\x12notification_level\x18\t \x01(\x0e\x32\x18.ClientNotificationLevel\x12%\n\x04view\x18\n \x03(\x0e\x32\x17.ClientConversationView\x12\x1b\n\ninviter_id\x18\x0b \x01(\x0b\x32\x07.UserID\x12\x18\n\x10invite_timestamp\x18\x0c \x01(\x04\x12\x16\n\x0esort_timestamp\x18\r \x01(\x04\x12\x18\n\x10\x61\x63tive_timestamp\x18\x0e \x01(\x04\"O\n!ClientConversationParticipantData\x12\x13\n\x02id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x15\n\rfallback_name\x18\x02 \x01(\t\"\xe3\x02\n\x12\x43lientConversation\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.ConversationType\x12\x0c\n\x04name\x18\x03 \x01(\t\x12=\n\x17self_conversation_state\x18\x04 \x01(\x0b\x32\x1c.ClientUserConversationState\x12(\n\nread_state\x18\x08 \x03(\x0b\x32\x14.ClientUserReadState\x12\'\n\notr_status\x18\n \x01(\x0e\x32\x13.OffTheRecordStatus\x12$\n\x13\x63urrent_participant\x18\r \x03(\x0b\x32\x07.UserID\x12<\n\x10participant_data\x18\x0e \x03(\x0b\x32\".ClientConversationParticipantData\"\x9a\x01\n2ClientSetConversationNotificationLevelNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\'\n\x05level\x18\x02 \x01(\x0e\x32\x18.ClientNotificationLevel\x12\x11\n\ttimestamp\x18\x04 \x01(\x04\"\"\n\x0f\x43lientEasterEgg\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x89\x01\n\x1b\x43lientEasterEggNotification\x12\x1a\n\tsender_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationID\x12$\n\neaster_egg\x18\x03 \x01(\x0b\x32\x10.ClientEasterEgg\"\x89\x01\n\x1a\x43lientSettingsNotification\x12,\n\x03\x66oo\x18\x01 \x03(\x0b\x32\x1f.ClientSettingsNotification.Foo\x1a=\n\x03\x46oo\x12\x1f\n\x07setting\x18\x01 \x01(\x0e\x32\x0e.ClientSetting\x12\x15\n\rsetting_value\x18\x02 \x01(\x08\"*\n(ClientSetNotificationSettingNotification\"\xa4\x01\n\"ClientConversationViewModification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12)\n\x08old_view\x18\x02 \x01(\x0e\x32\x17.ClientConversationView\x12)\n\x08new_view\x18\x03 \x01(\x0e\x32\x17.ClientConversationView\"[\n\x12\x43lientDeleteAction\x12\x1f\n\x17\x64\x65lete_action_timestamp\x18\x01 \x01(\x04\x12$\n\x1c\x64\x65lete_upper_bound_timestamp\x18\x02 \x01(\x04\"v\n\x1e\x43lientDeleteActionNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12*\n\rdelete_action\x18\x02 \x01(\x0b\x32\x13.ClientDeleteAction\"e\n\x16\x43lientBlockStateChange\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12*\n\x0fnew_block_state\x18\x02 \x01(\x0e\x32\x11.ClientBlockState\"N\n\x17\x43lientBlockNotification\x12\x33\n\x12\x62lock_state_change\x18\x01 \x03(\x0b\x32\x17.ClientBlockStateChange\"s\n\x1f\x43lientReplyToInviteNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12&\n\x04type\x18\x02 \x01(\x0e\x32\x18.ClientReplyToInviteType\"\xca\x08\n\x11\x43lientStateUpdate\x12<\n\x1a\x63lient_state_update_header\x18\x01 \x01(\x0b\x32\x18.ClientStateUpdateHeader\x12\x30\n\x13\x63lient_conversation\x18\r \x01(\x0b\x32\x13.ClientConversation\x12\x36\n\x12\x65vent_notification\x18\x03 \x01(\x0b\x32\x18.ClientEventNotificationH\x00\x12\x39\n\x12\x66ocus_notification\x18\x04 \x01(\x0b\x32\x1b.ClientSetFocusNotificationH\x00\x12;\n\x13typing_notification\x18\x05 \x01(\x0b\x32\x1c.ClientSetTypingNotificationH\x00\x12^\n\x1fnotification_level_notification\x18\x06 \x01(\x0b\x32\x33.ClientSetConversationNotificationLevelNotificationH\x00\x12H\n\x1creply_to_invite_notification\x18\x07 \x01(\x0b\x32 .ClientReplyToInviteNotificationH\x00\x12>\n\x16watermark_notification\x18\x08 \x01(\x0b\x32\x1c.ClientWatermarkNotificationH\x00\x12@\n\x11view_modification\x18\x0b \x01(\x0b\x32#.ClientConversationViewModificationH\x00\x12?\n\x17\x65\x61ster_egg_notification\x18\x0c \x01(\x0b\x32\x1c.ClientEasterEggNotificationH\x00\x12\x45\n\x1aself_presence_notification\x18\x0e \x01(\x0b\x32\x1f.ClientSelfPresenceNotificationH\x00\x12>\n\x13\x64\x65lete_notification\x18\x0f \x01(\x0b\x32\x1f.ClientDeleteActionNotificationH\x00\x12<\n\x15presence_notification\x18\x10 \x01(\x0b\x32\x1b.ClientPresenceNotificationH\x00\x12\x36\n\x12\x62lock_notification\x18\x11 \x01(\x0b\x32\x18.ClientBlockNotificationH\x00\x12V\n!notification_setting_notification\x18\x13 \x01(\x0b\x32).ClientSetNotificationSettingNotificationH\x00\x12<\n\x15settings_notification\x18\x14 \x01(\x0b\x32\x1b.ClientSettingsNotificationH\x00\x42\x15\n\x13\x63lient_state_update\"@\n\x05Photo\x12\x10\n\x08photo_id\x18\x01 \x01(\t\x12%\n\x1d\x64\x65lete_albumless_source_photo\x18\x02 \x01(\x08\",\n\x13\x43lientExistingMedia\x12\x15\n\x05photo\x18\x01 \x01(\x0b\x32\x06.Photo\"\x8c\x01\n\x18\x43lientEventRequestHeader\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\x04\x12)\n\x0c\x65xpected_otr\x18\x03 \x01(\x0e\x32\x13.OffTheRecordStatus\"\xbf\x01\n\x13\x43lientClientVersion\x12\x1c\n\tclient_id\x18\x01 \x01(\x0e\x32\t.ClientId\x12$\n\nbuild_type\x18\x02 \x01(\x0e\x32\x10.ClientBuildType\x12\x15\n\rmajor_version\x18\x03 \x01(\t\x12\x19\n\x11version_timestamp\x18\x04 \x01(\x04\x12\x19\n\x11\x64\x65vice_os_version\x18\x05 \x01(\t\x12\x17\n\x0f\x64\x65vice_hardware\x18\x06 \x01(\t\"\x8e\x01\n\x13\x43lientRequestHeader\x12,\n\x0e\x63lient_version\x18\x01 \x01(\x0b\x32\x14.ClientClientVersion\x12\x32\n\x11\x63lient_identifier\x18\x02 \x01(\x0b\x32\x17.ClientClientIdentifier\x12\x15\n\rlanguage_code\x18\x04 \x01(\t\"\xdd\x01\n\x16SendChatMessageRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\x12.\n\x0fmessage_content\x18\x06 \x01(\x0b\x32\x15.ClientMessageContent\x12,\n\x0e\x65xisting_media\x18\x07 \x01(\x0b\x32\x14.ClientExistingMedia\x12\x37\n\x14\x65vent_request_header\x18\x08 \x01(\x0b\x32\x19.ClientEventRequestHeader\"\x8f\x01\n\x14\x43lientResponseHeader\x12%\n\x06status\x18\x01 \x01(\x0e\x32\x15.ClientResponseStatus\x12\x19\n\x11\x65rror_description\x18\x02 \x01(\t\x12\x18\n\x10request_trace_id\x18\x04 \x01(\t\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"\x80\x01\n\x17SendChatMessageResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12-\n\x0erequest_header\x18\x02 \x01(\x0b\x32\x15.ClientResponseHeader\x12#\n\rcreated_event\x18\x07 \x01(\x0b\x32\x0c.ClientEvent*[\n\x11\x41\x63tiveClientState\x12\x14\n\x10NO_ACTIVE_CLIENT\x10\x00\x12\x14\n\x10IS_ACTIVE_CLIENT\x10\x01\x12\x1a\n\x16OTHER_CLIENT_IS_ACTIVE\x10\x02*6\n\x0b\x46ocusStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07\x46OCUSED\x10\x01\x12\r\n\tUNFOCUSED\x10\x02*8\n\x0b\x46ocusDevice\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0b\n\x07\x44\x45SKTOP\x10\x14\x12\x0b\n\x06MOBILE\x10\xac\x02*]\n\x0cTypingStatus\x12\x12\n\x0eTYPING_UNKNOWN\x10\x00\x12\x12\n\x0eTYPING_STARTED\x10\x01\x12\x11\n\rTYPING_PAUSED\x10\x02\x12\x12\n\x0eTYPING_STOPPED\x10\x03*u\n\x13\x43lientPresenceState\x12\x11\n\rPRESENCE_NONE\x10\x00\x12\x13\n\x0fPRESENCE_MOBILE\x10\x01\x12\x19\n\x15PRESENCE_DESKTOP_IDLE\x10\x02\x12\x1b\n\x17PRESENCE_DESKTOP_ACTIVE\x10\x03*N\n\x17\x43lientNotificationLevel\x12\x1e\n\x1aNOTIFICATION_LEVEL_UNKNOWN\x10\x00\x12\t\n\x05QUIET\x10\n\x12\x08\n\x04RING\x10\x1e*1\n\x0bSegmentType\x12\x08\n\x04TEXT\x10\x00\x12\x0e\n\nLINE_BREAK\x10\x01\x12\x08\n\x04LINK\x10\x02*^\n\x12OffTheRecordStatus\x12!\n\x1dOFF_THE_RECORD_STATUS_UNKNOWN\x10\x00\x12\x12\n\x0eOFF_THE_RECORD\x10\x01\x12\x11\n\rON_THE_RECORD\x10\x02*L\n\x10\x43onversationType\x12\x1d\n\x19\x43ONVERSATION_TYPE_UNKNOWN\x10\x00\x12\x0e\n\nONE_TO_ONE\x10\x01\x12\t\n\x05GROUP\x10\x02*^\n\x18\x43lientConversationStatus\x12\x1f\n\x1bUNKNOWN_CONVERSATION_STATUS\x10\x00\x12\x0b\n\x07INVITED\x10\x01\x12\n\n\x06\x41\x43TIVE\x10\x02\x12\x08\n\x04LEFT\x10\x03*Z\n\x16\x43lientConversationView\x12\x1d\n\x19UNKNOWN_CONVERSATION_VIEW\x10\x00\x12\x0e\n\nINBOX_VIEW\x10\x01\x12\x11\n\rARCHIVED_VIEW\x10\x02*[\n\rClientSetting\x12\x13\n\x0fSETTING_UNKNOWN\x10\x00\x12\x10\n\x0cSHOW_IN_CALL\x10\x01\x12\x0f\n\x0bSHOW_DEVICE\x10\x02\x12\x12\n\x0eSHOW_LAST_SEEN\x10\x06*C\n\x10\x43lientBlockState\x12\x17\n\x13\x42LOCK_STATE_UNKNOWN\x10\x00\x12\t\n\x05\x42LOCK\x10\x01\x12\x0b\n\x07UNBLOCK\x10\x02*T\n\x17\x43lientReplyToInviteType\x12 \n\x1cREPLY_TO_INVITE_TYPE_UNKNOWN\x10\x00\x12\n\n\x06\x41\x43\x43\x45PT\x10\x01\x12\x0b\n\x07\x44\x45\x43LINE\x10\x02*\xae\x01\n\x08\x43lientId\x12\x15\n\x11\x43LIENT_ID_UNKNOWN\x10\x00\x12\x15\n\x11\x43LIENT_ID_ANDROID\x10\x01\x12\x11\n\rCLIENT_ID_IOS\x10\x02\x12\x14\n\x10\x43LIENT_ID_CHROME\x10\x03\x12\x17\n\x13\x43LIENT_ID_WEB_GPLUS\x10\x05\x12\x17\n\x13\x43LIENT_ID_WEB_GMAIL\x10\x06\x12\x19\n\x15\x43LIENT_ID_ULTRAVIOLET\x10\r*g\n\x0f\x43lientBuildType\x12\x16\n\x12\x42UILD_TYPE_UNKNOWN\x10\x00\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_WEB\x10\x01\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_APP\x10\x03*q\n\x14\x43lientResponseStatus\x12\x1b\n\x17RESPONSE_STATUS_UNKNOWN\x10\x00\x12\x16\n\x12RESPONSE_STATUS_OK\x10\x01\x12$\n RESPONSE_STATUS_UNEXPECTED_ERROR\x10\x03\x62\x06proto3')
+  syntax='proto2',
+  serialized_pb=_b('\n\x16hangups/hangouts.proto\"Q\n\x19\x43lientDoNotDisturbSetting\x12\x16\n\x0e\x64o_not_disturb\x18\x01 \x01(\x08\x12\x1c\n\x14\x65xpiration_timestamp\x18\x02 \x01(\x04\"N\n\x1a\x43lientNotificationSettings\x12\x30\n\x0c\x64nd_settings\x18\x01 \x01(\x0b\x32\x1a.ClientDoNotDisturbSetting\"\xbd\x01\n\x17\x43lientStateUpdateHeader\x12/\n\x13\x61\x63tive_client_state\x18\x01 \x01(\x0e\x32\x12.ActiveClientState\x12\x18\n\x10request_trace_id\x18\x03 \x01(\t\x12:\n\x15notification_settings\x18\x04 \x01(\x0b\x32\x1b.ClientNotificationSettings\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"\x1c\n\x0e\x43onversationID\x12\n\n\x02id\x18\x01 \x01(\t\"*\n\x06UserID\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63hat_id\x18\x02 \x01(\t\"\xaf\x01\n\x1a\x43lientSetFocusNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x18\n\x07user_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x1c\n\x06status\x18\x04 \x01(\x0e\x32\x0c.FocusStatus\x12\x1c\n\x06\x64\x65vice\x18\x05 \x01(\x0e\x32\x0c.FocusDevice\"6\n\x0e\x43lientPresence\x12\x11\n\treachable\x18\x01 \x01(\x08\x12\x11\n\tavailable\x18\x02 \x01(\x08\"S\n\x14\x43lientPresenceResult\x12\x18\n\x07user_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12!\n\x08presence\x18\x02 \x01(\x0b\x32\x0f.ClientPresence\"E\n\x1a\x43lientPresenceNotification\x12\'\n\x08presence\x18\x01 \x03(\x0b\x32\x15.ClientPresenceResult\"\x93\x01\n\x1b\x43lientSetTypingNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x18\n\x07user_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x1d\n\x06status\x18\x04 \x01(\x0e\x32\r.TypingStatus\"=\n\x16\x43lientClientIdentifier\x12\x10\n\x08resource\x18\x01 \x01(\t\x12\x11\n\theader_id\x18\x02 \x01(\t\"m\n\x19\x43lientClientPresenceState\x12+\n\nidentifier\x18\x01 \x01(\x0b\x32\x17.ClientClientIdentifier\x12#\n\x05state\x18\x02 \x01(\x0e\x32\x14.ClientPresenceState\"[\n\x1e\x43lientSelfPresenceNotification\x12\x39\n\x15\x63lient_presence_state\x18\x01 \x01(\x0b\x32\x1a.ClientClientPresenceState\"\x87\x01\n\x1b\x43lientWatermarkNotification\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationID\x12\x1d\n\x15latest_read_timestamp\x18\x03 \x01(\x04\"\x83\x01\n\x14\x43lientUserEventState\x12\x18\n\x07user_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\t\x12\x34\n\x12notification_level\x18\x03 \x01(\x0e\x32\x18.ClientNotificationLevel\"T\n\nFormatting\x12\x0c\n\x04\x62old\x18\x01 \x01(\x08\x12\x0e\n\x06italic\x18\x02 \x01(\x08\x12\x15\n\rstrikethrough\x18\x03 \x01(\x08\x12\x11\n\tunderline\x18\x04 \x01(\x08\"\x1f\n\x08LinkData\x12\x13\n\x0blink_target\x18\x01 \x01(\t\"r\n\x07Segment\x12\x1a\n\x04type\x18\x01 \x02(\x0e\x32\x0c.SegmentType\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\x1f\n\nformatting\x18\x03 \x01(\x0b\x32\x0b.Formatting\x12\x1c\n\tlink_data\x18\x04 \x01(\x0b\x32\t.LinkData\"\x19\n\tEmbedItem\x12\x0c\n\x04type\x18\x01 \x03(\x04\",\n\nAttachment\x12\x1e\n\nembed_item\x18\x01 \x01(\x0b\x32\n.EmbedItem\"R\n\x14\x43lientMessageContent\x12\x19\n\x07segment\x18\x01 \x03(\x0b\x32\x08.Segment\x12\x1f\n\nattachment\x18\x02 \x03(\x0b\x32\x0b.Attachment\"C\n\x11\x43lientChatMessage\x12.\n\x0fmessage_content\x18\x03 \x01(\x0b\x32\x15.ClientMessageContent\"\x18\n\x16\x43lientMembershipChange\"\x1a\n\x18\x43lientConversationRename\"\x14\n\x12\x43lientHangoutEvent\"\x17\n\x15\x43lientOTRModification\"\xe7\x03\n\x0b\x43lientEvent\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1a\n\tsender_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12/\n\x10self_event_state\x18\x04 \x01(\x0b\x32\x15.ClientUserEventState\x12(\n\x0c\x63hat_message\x18\x07 \x01(\x0b\x32\x12.ClientChatMessage\x12\x32\n\x11membership_change\x18\t \x01(\x0b\x32\x17.ClientMembershipChange\x12\x36\n\x13\x63onversation_rename\x18\n \x01(\x0b\x32\x19.ClientConversationRename\x12*\n\rhangout_event\x18\x0b \x01(\x0b\x32\x13.ClientHangoutEvent\x12\x10\n\x08\x65vent_id\x18\x0c \x01(\t\x12\x1f\n\x17\x61\x64vances_sort_timestamp\x18\r \x01(\x08\x12\x30\n\x10otr_modification\x18\x0e \x01(\x0b\x32\x16.ClientOTRModification\x12\'\n\notr_status\x18\x10 \x01(\x0e\x32\x13.OffTheRecordStatus\"6\n\x17\x43lientEventNotification\x12\x1b\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x0c.ClientEvent\"U\n\x13\x43lientUserReadState\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1d\n\x15latest_read_timestamp\x18\x02 \x01(\x04\"\xbd\x02\n\x1b\x43lientUserConversationState\x12-\n\x0fself_read_state\x18\x07 \x01(\x0b\x32\x14.ClientUserReadState\x12)\n\x06status\x18\x08 \x01(\x0e\x32\x19.ClientConversationStatus\x12\x34\n\x12notification_level\x18\t \x01(\x0e\x32\x18.ClientNotificationLevel\x12%\n\x04view\x18\n \x03(\x0e\x32\x17.ClientConversationView\x12\x1b\n\ninviter_id\x18\x0b \x01(\x0b\x32\x07.UserID\x12\x18\n\x10invite_timestamp\x18\x0c \x01(\x04\x12\x16\n\x0esort_timestamp\x18\r \x01(\x04\x12\x18\n\x10\x61\x63tive_timestamp\x18\x0e \x01(\x04\"O\n!ClientConversationParticipantData\x12\x13\n\x02id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x15\n\rfallback_name\x18\x02 \x01(\t\"\xe3\x02\n\x12\x43lientConversation\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.ConversationType\x12\x0c\n\x04name\x18\x03 \x01(\t\x12=\n\x17self_conversation_state\x18\x04 \x01(\x0b\x32\x1c.ClientUserConversationState\x12(\n\nread_state\x18\x08 \x03(\x0b\x32\x14.ClientUserReadState\x12\'\n\notr_status\x18\n \x01(\x0e\x32\x13.OffTheRecordStatus\x12$\n\x13\x63urrent_participant\x18\r \x03(\x0b\x32\x07.UserID\x12<\n\x10participant_data\x18\x0e \x03(\x0b\x32\".ClientConversationParticipantData\"\x9a\x01\n2ClientSetConversationNotificationLevelNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\'\n\x05level\x18\x02 \x01(\x0e\x32\x18.ClientNotificationLevel\x12\x11\n\ttimestamp\x18\x04 \x01(\x04\"\"\n\x0f\x43lientEasterEgg\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x89\x01\n\x1b\x43lientEasterEggNotification\x12\x1a\n\tsender_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationID\x12$\n\neaster_egg\x18\x03 \x01(\x0b\x32\x10.ClientEasterEgg\"\x89\x01\n\x1a\x43lientSettingsNotification\x12,\n\x03\x66oo\x18\x01 \x03(\x0b\x32\x1f.ClientSettingsNotification.Foo\x1a=\n\x03\x46oo\x12\x1f\n\x07setting\x18\x01 \x01(\x0e\x32\x0e.ClientSetting\x12\x15\n\rsetting_value\x18\x02 \x01(\x08\"*\n(ClientSetNotificationSettingNotification\"\xa4\x01\n\"ClientConversationViewModification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12)\n\x08old_view\x18\x02 \x01(\x0e\x32\x17.ClientConversationView\x12)\n\x08new_view\x18\x03 \x01(\x0e\x32\x17.ClientConversationView\"[\n\x12\x43lientDeleteAction\x12\x1f\n\x17\x64\x65lete_action_timestamp\x18\x01 \x01(\x04\x12$\n\x1c\x64\x65lete_upper_bound_timestamp\x18\x02 \x01(\x04\"v\n\x1e\x43lientDeleteActionNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12*\n\rdelete_action\x18\x02 \x01(\x0b\x32\x13.ClientDeleteAction\"e\n\x16\x43lientBlockStateChange\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12*\n\x0fnew_block_state\x18\x02 \x01(\x0e\x32\x11.ClientBlockState\"N\n\x17\x43lientBlockNotification\x12\x33\n\x12\x62lock_state_change\x18\x01 \x03(\x0b\x32\x17.ClientBlockStateChange\"s\n\x1f\x43lientReplyToInviteNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12&\n\x04type\x18\x02 \x01(\x0e\x32\x18.ClientReplyToInviteType\"\xca\x08\n\x11\x43lientStateUpdate\x12<\n\x1a\x63lient_state_update_header\x18\x01 \x01(\x0b\x32\x18.ClientStateUpdateHeader\x12\x30\n\x13\x63lient_conversation\x18\r \x01(\x0b\x32\x13.ClientConversation\x12\x36\n\x12\x65vent_notification\x18\x03 \x01(\x0b\x32\x18.ClientEventNotificationH\x00\x12\x39\n\x12\x66ocus_notification\x18\x04 \x01(\x0b\x32\x1b.ClientSetFocusNotificationH\x00\x12;\n\x13typing_notification\x18\x05 \x01(\x0b\x32\x1c.ClientSetTypingNotificationH\x00\x12^\n\x1fnotification_level_notification\x18\x06 \x01(\x0b\x32\x33.ClientSetConversationNotificationLevelNotificationH\x00\x12H\n\x1creply_to_invite_notification\x18\x07 \x01(\x0b\x32 .ClientReplyToInviteNotificationH\x00\x12>\n\x16watermark_notification\x18\x08 \x01(\x0b\x32\x1c.ClientWatermarkNotificationH\x00\x12@\n\x11view_modification\x18\x0b \x01(\x0b\x32#.ClientConversationViewModificationH\x00\x12?\n\x17\x65\x61ster_egg_notification\x18\x0c \x01(\x0b\x32\x1c.ClientEasterEggNotificationH\x00\x12\x45\n\x1aself_presence_notification\x18\x0e \x01(\x0b\x32\x1f.ClientSelfPresenceNotificationH\x00\x12>\n\x13\x64\x65lete_notification\x18\x0f \x01(\x0b\x32\x1f.ClientDeleteActionNotificationH\x00\x12<\n\x15presence_notification\x18\x10 \x01(\x0b\x32\x1b.ClientPresenceNotificationH\x00\x12\x36\n\x12\x62lock_notification\x18\x11 \x01(\x0b\x32\x18.ClientBlockNotificationH\x00\x12V\n!notification_setting_notification\x18\x13 \x01(\x0b\x32).ClientSetNotificationSettingNotificationH\x00\x12<\n\x15settings_notification\x18\x14 \x01(\x0b\x32\x1b.ClientSettingsNotificationH\x00\x42\x15\n\x13\x63lient_state_update\"@\n\x05Photo\x12\x10\n\x08photo_id\x18\x01 \x01(\t\x12%\n\x1d\x64\x65lete_albumless_source_photo\x18\x02 \x01(\x08\",\n\x13\x43lientExistingMedia\x12\x15\n\x05photo\x18\x01 \x01(\x0b\x32\x06.Photo\"\x8c\x01\n\x18\x43lientEventRequestHeader\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\x04\x12)\n\x0c\x65xpected_otr\x18\x03 \x01(\x0e\x32\x13.OffTheRecordStatus\"\xbf\x01\n\x13\x43lientClientVersion\x12\x1c\n\tclient_id\x18\x01 \x01(\x0e\x32\t.ClientId\x12$\n\nbuild_type\x18\x02 \x01(\x0e\x32\x10.ClientBuildType\x12\x15\n\rmajor_version\x18\x03 \x01(\t\x12\x19\n\x11version_timestamp\x18\x04 \x01(\x04\x12\x19\n\x11\x64\x65vice_os_version\x18\x05 \x01(\t\x12\x17\n\x0f\x64\x65vice_hardware\x18\x06 \x01(\t\"\x8e\x01\n\x13\x43lientRequestHeader\x12,\n\x0e\x63lient_version\x18\x01 \x01(\x0b\x32\x14.ClientClientVersion\x12\x32\n\x11\x63lient_identifier\x18\x02 \x01(\x0b\x32\x17.ClientClientIdentifier\x12\x15\n\rlanguage_code\x18\x04 \x01(\t\"\x8f\x01\n\x14\x43lientResponseHeader\x12%\n\x06status\x18\x01 \x01(\x0e\x32\x15.ClientResponseStatus\x12\x19\n\x11\x65rror_description\x18\x02 \x01(\t\x12\x18\n\x10request_trace_id\x18\x04 \x01(\t\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\">\n\x0e\x41\x64\x64UserRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x11\n\x0f\x41\x64\x64UserResponse\"I\n\x19\x43reateConversationRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x1c\n\x1a\x43reateConversationResponse\"I\n\x19\x44\x65leteConversationRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x1c\n\x1a\x44\x65leteConversationResponse\"F\n\x16GetConversationRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x19\n\x17GetConversationResponse\"D\n\x14GetEntityByIdRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x17\n\x15GetEntityByIdResponse\"B\n\x12GetSelfInfoRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x15\n\x13GetSelfInfoResponse\"D\n\x14QueryPresenceRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x17\n\x15QueryPresenceResponse\"A\n\x11RemoveUserRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x14\n\x12RemoveUserResponse\"E\n\x15SearchEntitiesRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x18\n\x16SearchEntitiesResponse\"\xdd\x01\n\x16SendChatMessageRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\x12.\n\x0fmessage_content\x18\x06 \x01(\x0b\x32\x15.ClientMessageContent\x12,\n\x0e\x65xisting_media\x18\x07 \x01(\x0b\x32\x14.ClientExistingMedia\x12\x37\n\x14\x65vent_request_header\x18\x08 \x01(\x0b\x32\x19.ClientEventRequestHeader\"\x81\x01\n\x17SendChatMessageResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12.\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x15.ClientResponseHeader\x12#\n\rcreated_event\x18\x07 \x01(\x0b\x32\x0c.ClientEvent\"D\n\x14SendEasterEggRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x17\n\x15SendEasterEggResponse\"\x81\x01\n\x16SetActiveClientRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\x12\x11\n\tis_active\x18\x02 \x01(\x08\x12\x10\n\x08\x66ull_jid\x18\x03 \x01(\t\x12\x14\n\x0ctimeout_secs\x18\x04 \x01(\x04\"\\\n\x17SetActiveClientResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12.\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x15.ClientResponseHeader\"B\n\x12SetChatNameRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x15\n\x13SetChatNameResponse\"K\n\x1bSetConversationLevelRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x1e\n\x1cSetConversationLevelResponse\"B\n\x12SetPresenceRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x15\n\x13SetPresenceResponse\"@\n\x10SetTypingRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x13\n\x11SetTypingResponse\"G\n\x17SyncAllNewEventsRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x1a\n\x18SyncAllNewEventsResponse\"N\n\x1eSyncRecentConversationsRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"!\n\x1fSyncRecentConversationsResponse\"F\n\x16UpdateWatermarkRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x19\n\x17UpdateWatermarkResponse*[\n\x11\x41\x63tiveClientState\x12\x14\n\x10NO_ACTIVE_CLIENT\x10\x00\x12\x14\n\x10IS_ACTIVE_CLIENT\x10\x01\x12\x1a\n\x16OTHER_CLIENT_IS_ACTIVE\x10\x02*6\n\x0b\x46ocusStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07\x46OCUSED\x10\x01\x12\r\n\tUNFOCUSED\x10\x02*8\n\x0b\x46ocusDevice\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0b\n\x07\x44\x45SKTOP\x10\x14\x12\x0b\n\x06MOBILE\x10\xac\x02*]\n\x0cTypingStatus\x12\x12\n\x0eTYPING_UNKNOWN\x10\x00\x12\x12\n\x0eTYPING_STARTED\x10\x01\x12\x11\n\rTYPING_PAUSED\x10\x02\x12\x12\n\x0eTYPING_STOPPED\x10\x03*u\n\x13\x43lientPresenceState\x12\x11\n\rPRESENCE_NONE\x10\x00\x12\x13\n\x0fPRESENCE_MOBILE\x10\x01\x12\x19\n\x15PRESENCE_DESKTOP_IDLE\x10\x02\x12\x1b\n\x17PRESENCE_DESKTOP_ACTIVE\x10\x03*N\n\x17\x43lientNotificationLevel\x12\x1e\n\x1aNOTIFICATION_LEVEL_UNKNOWN\x10\x00\x12\t\n\x05QUIET\x10\n\x12\x08\n\x04RING\x10\x1e*1\n\x0bSegmentType\x12\x08\n\x04TEXT\x10\x00\x12\x0e\n\nLINE_BREAK\x10\x01\x12\x08\n\x04LINK\x10\x02*^\n\x12OffTheRecordStatus\x12!\n\x1dOFF_THE_RECORD_STATUS_UNKNOWN\x10\x00\x12\x12\n\x0eOFF_THE_RECORD\x10\x01\x12\x11\n\rON_THE_RECORD\x10\x02*L\n\x10\x43onversationType\x12\x1d\n\x19\x43ONVERSATION_TYPE_UNKNOWN\x10\x00\x12\x0e\n\nONE_TO_ONE\x10\x01\x12\t\n\x05GROUP\x10\x02*^\n\x18\x43lientConversationStatus\x12\x1f\n\x1bUNKNOWN_CONVERSATION_STATUS\x10\x00\x12\x0b\n\x07INVITED\x10\x01\x12\n\n\x06\x41\x43TIVE\x10\x02\x12\x08\n\x04LEFT\x10\x03*Z\n\x16\x43lientConversationView\x12\x1d\n\x19UNKNOWN_CONVERSATION_VIEW\x10\x00\x12\x0e\n\nINBOX_VIEW\x10\x01\x12\x11\n\rARCHIVED_VIEW\x10\x02*[\n\rClientSetting\x12\x13\n\x0fSETTING_UNKNOWN\x10\x00\x12\x10\n\x0cSHOW_IN_CALL\x10\x01\x12\x0f\n\x0bSHOW_DEVICE\x10\x02\x12\x12\n\x0eSHOW_LAST_SEEN\x10\x06*C\n\x10\x43lientBlockState\x12\x17\n\x13\x42LOCK_STATE_UNKNOWN\x10\x00\x12\t\n\x05\x42LOCK\x10\x01\x12\x0b\n\x07UNBLOCK\x10\x02*T\n\x17\x43lientReplyToInviteType\x12 \n\x1cREPLY_TO_INVITE_TYPE_UNKNOWN\x10\x00\x12\n\n\x06\x41\x43\x43\x45PT\x10\x01\x12\x0b\n\x07\x44\x45\x43LINE\x10\x02*\xae\x01\n\x08\x43lientId\x12\x15\n\x11\x43LIENT_ID_UNKNOWN\x10\x00\x12\x15\n\x11\x43LIENT_ID_ANDROID\x10\x01\x12\x11\n\rCLIENT_ID_IOS\x10\x02\x12\x14\n\x10\x43LIENT_ID_CHROME\x10\x03\x12\x17\n\x13\x43LIENT_ID_WEB_GPLUS\x10\x05\x12\x17\n\x13\x43LIENT_ID_WEB_GMAIL\x10\x06\x12\x19\n\x15\x43LIENT_ID_ULTRAVIOLET\x10\r*g\n\x0f\x43lientBuildType\x12\x16\n\x12\x42UILD_TYPE_UNKNOWN\x10\x00\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_WEB\x10\x01\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_APP\x10\x03*\x96\x01\n\x14\x43lientResponseStatus\x12\x1b\n\x17RESPONSE_STATUS_UNKNOWN\x10\x00\x12\x16\n\x12RESPONSE_STATUS_OK\x10\x01\x12$\n RESPONSE_STATUS_UNEXPECTED_ERROR\x10\x03\x12#\n\x1fRESPONSE_STATUS_INVALID_REQUEST\x10\x04')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -45,8 +45,8 @@ _ACTIVECLIENTSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6881,
-  serialized_end=6972,
+  serialized_start=8755,
+  serialized_end=8846,
 )
 _sym_db.RegisterEnumDescriptor(_ACTIVECLIENTSTATE)
 
@@ -72,8 +72,8 @@ _FOCUSSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6974,
-  serialized_end=7028,
+  serialized_start=8848,
+  serialized_end=8902,
 )
 _sym_db.RegisterEnumDescriptor(_FOCUSSTATUS)
 
@@ -99,8 +99,8 @@ _FOCUSDEVICE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7030,
-  serialized_end=7086,
+  serialized_start=8904,
+  serialized_end=8960,
 )
 _sym_db.RegisterEnumDescriptor(_FOCUSDEVICE)
 
@@ -130,8 +130,8 @@ _TYPINGSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7088,
-  serialized_end=7181,
+  serialized_start=8962,
+  serialized_end=9055,
 )
 _sym_db.RegisterEnumDescriptor(_TYPINGSTATUS)
 
@@ -161,8 +161,8 @@ _CLIENTPRESENCESTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7183,
-  serialized_end=7300,
+  serialized_start=9057,
+  serialized_end=9174,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTPRESENCESTATE)
 
@@ -188,8 +188,8 @@ _CLIENTNOTIFICATIONLEVEL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7302,
-  serialized_end=7380,
+  serialized_start=9176,
+  serialized_end=9254,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTNOTIFICATIONLEVEL)
 
@@ -215,8 +215,8 @@ _SEGMENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7382,
-  serialized_end=7431,
+  serialized_start=9256,
+  serialized_end=9305,
 )
 _sym_db.RegisterEnumDescriptor(_SEGMENTTYPE)
 
@@ -242,8 +242,8 @@ _OFFTHERECORDSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7433,
-  serialized_end=7527,
+  serialized_start=9307,
+  serialized_end=9401,
 )
 _sym_db.RegisterEnumDescriptor(_OFFTHERECORDSTATUS)
 
@@ -269,8 +269,8 @@ _CONVERSATIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7529,
-  serialized_end=7605,
+  serialized_start=9403,
+  serialized_end=9479,
 )
 _sym_db.RegisterEnumDescriptor(_CONVERSATIONTYPE)
 
@@ -300,8 +300,8 @@ _CLIENTCONVERSATIONSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7607,
-  serialized_end=7701,
+  serialized_start=9481,
+  serialized_end=9575,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTCONVERSATIONSTATUS)
 
@@ -327,8 +327,8 @@ _CLIENTCONVERSATIONVIEW = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7703,
-  serialized_end=7793,
+  serialized_start=9577,
+  serialized_end=9667,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTCONVERSATIONVIEW)
 
@@ -358,8 +358,8 @@ _CLIENTSETTING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7795,
-  serialized_end=7886,
+  serialized_start=9669,
+  serialized_end=9760,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTSETTING)
 
@@ -385,8 +385,8 @@ _CLIENTBLOCKSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7888,
-  serialized_end=7955,
+  serialized_start=9762,
+  serialized_end=9829,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTBLOCKSTATE)
 
@@ -412,8 +412,8 @@ _CLIENTREPLYTOINVITETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7957,
-  serialized_end=8041,
+  serialized_start=9831,
+  serialized_end=9915,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTREPLYTOINVITETYPE)
 
@@ -455,8 +455,8 @@ _CLIENTID = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=8044,
-  serialized_end=8218,
+  serialized_start=9918,
+  serialized_end=10092,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTID)
 
@@ -482,8 +482,8 @@ _CLIENTBUILDTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=8220,
-  serialized_end=8323,
+  serialized_start=10094,
+  serialized_end=10197,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTBUILDTYPE)
 
@@ -506,11 +506,15 @@ _CLIENTRESPONSESTATUS = _descriptor.EnumDescriptor(
       name='RESPONSE_STATUS_UNEXPECTED_ERROR', index=2, number=3,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='RESPONSE_STATUS_INVALID_REQUEST', index=3, number=4,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=8325,
-  serialized_end=8438,
+  serialized_start=10200,
+  serialized_end=10350,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTRESPONSESTATUS)
 
@@ -574,6 +578,7 @@ BUILD_TYPE_PRODUCTION_APP = 3
 RESPONSE_STATUS_UNKNOWN = 0
 RESPONSE_STATUS_OK = 1
 RESPONSE_STATUS_UNEXPECTED_ERROR = 3
+RESPONSE_STATUS_INVALID_REQUEST = 4
 
 
 
@@ -606,7 +611,7 @@ _CLIENTDONOTDISTURBSETTING = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -637,7 +642,7 @@ _CLIENTNOTIFICATIONSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -689,7 +694,7 @@ _CLIENTSTATEUPDATEHEADER = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -720,7 +725,7 @@ _CONVERSATIONID = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -758,7 +763,7 @@ _USERID = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -817,7 +822,7 @@ _CLIENTSETFOCUSNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -855,7 +860,7 @@ _CLIENTPRESENCE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -893,7 +898,7 @@ _CLIENTPRESENCERESULT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -924,7 +929,7 @@ _CLIENTPRESENCENOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -976,7 +981,7 @@ _CLIENTSETTYPINGNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1014,7 +1019,7 @@ _CLIENTCLIENTIDENTIFIER = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1052,7 +1057,7 @@ _CLIENTCLIENTPRESENCESTATE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1083,7 +1088,7 @@ _CLIENTSELFPRESENCENOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1128,7 +1133,7 @@ _CLIENTWATERMARKNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1173,7 +1178,7 @@ _CLIENTUSEREVENTSTATE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1225,7 +1230,7 @@ _FORMATTING = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1256,7 +1261,7 @@ _LINKDATA = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1274,7 +1279,7 @@ _SEGMENT = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='type', full_name='Segment.type', index=0,
-      number=1, type=14, cpp_type=8, label=1,
+      number=1, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -1308,7 +1313,7 @@ _SEGMENT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1339,7 +1344,7 @@ _EMBEDITEM = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1370,7 +1375,7 @@ _ATTACHMENT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1408,7 +1413,7 @@ _CLIENTMESSAGECONTENT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1439,7 +1444,7 @@ _CLIENTCHATMESSAGE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1463,7 +1468,7 @@ _CLIENTMEMBERSHIPCHANGE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1487,7 +1492,7 @@ _CLIENTCONVERSATIONRENAME = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1511,7 +1516,7 @@ _CLIENTHANGOUTEVENT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1535,7 +1540,7 @@ _CLIENTOTRMODIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1643,7 +1648,7 @@ _CLIENTEVENT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1674,7 +1679,7 @@ _CLIENTEVENTNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1712,7 +1717,7 @@ _CLIENTUSERREADSTATE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1792,7 +1797,7 @@ _CLIENTUSERCONVERSATIONSTATE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1830,7 +1835,7 @@ _CLIENTCONVERSATIONPARTICIPANTDATA = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1910,7 +1915,7 @@ _CLIENTCONVERSATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1955,7 +1960,7 @@ _CLIENTSETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1986,7 +1991,7 @@ _CLIENTEASTEREGG = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2031,7 +2036,7 @@ _CLIENTEASTEREGGNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2069,7 +2074,7 @@ _CLIENTSETTINGSNOTIFICATION_FOO = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2099,7 +2104,7 @@ _CLIENTSETTINGSNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2123,7 +2128,7 @@ _CLIENTSETNOTIFICATIONSETTINGNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2168,7 +2173,7 @@ _CLIENTCONVERSATIONVIEWMODIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2206,7 +2211,7 @@ _CLIENTDELETEACTION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2244,7 +2249,7 @@ _CLIENTDELETEACTIONNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2282,7 +2287,7 @@ _CLIENTBLOCKSTATECHANGE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2313,7 +2318,7 @@ _CLIENTBLOCKNOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2351,7 +2356,7 @@ _CLIENTREPLYTOINVITENOTIFICATION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2487,7 +2492,7 @@ _CLIENTSTATEUPDATE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
@@ -2528,7 +2533,7 @@ _PHOTO = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2559,7 +2564,7 @@ _CLIENTEXISTINGMEDIA = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2604,7 +2609,7 @@ _CLIENTEVENTREQUESTHEADER = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2670,7 +2675,7 @@ _CLIENTCLIENTVERSION = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -2715,64 +2720,12 @@ _CLIENTREQUESTHEADER = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
   serialized_start=6236,
   serialized_end=6378,
-)
-
-
-_SENDCHATMESSAGEREQUEST = _descriptor.Descriptor(
-  name='SendChatMessageRequest',
-  full_name='SendChatMessageRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='request_header', full_name='SendChatMessageRequest.request_header', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='message_content', full_name='SendChatMessageRequest.message_content', index=1,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='existing_media', full_name='SendChatMessageRequest.existing_media', index=2,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='event_request_header', full_name='SendChatMessageRequest.event_request_header', index=3,
-      number=8, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6381,
-  serialized_end=6602,
 )
 
 
@@ -2819,12 +2772,559 @@ _CLIENTRESPONSEHEADER = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6605,
-  serialized_end=6748,
+  serialized_start=6381,
+  serialized_end=6524,
+)
+
+
+_ADDUSERREQUEST = _descriptor.Descriptor(
+  name='AddUserRequest',
+  full_name='AddUserRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='AddUserRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6526,
+  serialized_end=6588,
+)
+
+
+_ADDUSERRESPONSE = _descriptor.Descriptor(
+  name='AddUserResponse',
+  full_name='AddUserResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6590,
+  serialized_end=6607,
+)
+
+
+_CREATECONVERSATIONREQUEST = _descriptor.Descriptor(
+  name='CreateConversationRequest',
+  full_name='CreateConversationRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='CreateConversationRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6609,
+  serialized_end=6682,
+)
+
+
+_CREATECONVERSATIONRESPONSE = _descriptor.Descriptor(
+  name='CreateConversationResponse',
+  full_name='CreateConversationResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6684,
+  serialized_end=6712,
+)
+
+
+_DELETECONVERSATIONREQUEST = _descriptor.Descriptor(
+  name='DeleteConversationRequest',
+  full_name='DeleteConversationRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='DeleteConversationRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6714,
+  serialized_end=6787,
+)
+
+
+_DELETECONVERSATIONRESPONSE = _descriptor.Descriptor(
+  name='DeleteConversationResponse',
+  full_name='DeleteConversationResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6789,
+  serialized_end=6817,
+)
+
+
+_GETCONVERSATIONREQUEST = _descriptor.Descriptor(
+  name='GetConversationRequest',
+  full_name='GetConversationRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='GetConversationRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6819,
+  serialized_end=6889,
+)
+
+
+_GETCONVERSATIONRESPONSE = _descriptor.Descriptor(
+  name='GetConversationResponse',
+  full_name='GetConversationResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6891,
+  serialized_end=6916,
+)
+
+
+_GETENTITYBYIDREQUEST = _descriptor.Descriptor(
+  name='GetEntityByIdRequest',
+  full_name='GetEntityByIdRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='GetEntityByIdRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6918,
+  serialized_end=6986,
+)
+
+
+_GETENTITYBYIDRESPONSE = _descriptor.Descriptor(
+  name='GetEntityByIdResponse',
+  full_name='GetEntityByIdResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6988,
+  serialized_end=7011,
+)
+
+
+_GETSELFINFOREQUEST = _descriptor.Descriptor(
+  name='GetSelfInfoRequest',
+  full_name='GetSelfInfoRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='GetSelfInfoRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7013,
+  serialized_end=7079,
+)
+
+
+_GETSELFINFORESPONSE = _descriptor.Descriptor(
+  name='GetSelfInfoResponse',
+  full_name='GetSelfInfoResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7081,
+  serialized_end=7102,
+)
+
+
+_QUERYPRESENCEREQUEST = _descriptor.Descriptor(
+  name='QueryPresenceRequest',
+  full_name='QueryPresenceRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='QueryPresenceRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7104,
+  serialized_end=7172,
+)
+
+
+_QUERYPRESENCERESPONSE = _descriptor.Descriptor(
+  name='QueryPresenceResponse',
+  full_name='QueryPresenceResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7174,
+  serialized_end=7197,
+)
+
+
+_REMOVEUSERREQUEST = _descriptor.Descriptor(
+  name='RemoveUserRequest',
+  full_name='RemoveUserRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='RemoveUserRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7199,
+  serialized_end=7264,
+)
+
+
+_REMOVEUSERRESPONSE = _descriptor.Descriptor(
+  name='RemoveUserResponse',
+  full_name='RemoveUserResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7266,
+  serialized_end=7286,
+)
+
+
+_SEARCHENTITIESREQUEST = _descriptor.Descriptor(
+  name='SearchEntitiesRequest',
+  full_name='SearchEntitiesRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SearchEntitiesRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7288,
+  serialized_end=7357,
+)
+
+
+_SEARCHENTITIESRESPONSE = _descriptor.Descriptor(
+  name='SearchEntitiesResponse',
+  full_name='SearchEntitiesResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7359,
+  serialized_end=7383,
+)
+
+
+_SENDCHATMESSAGEREQUEST = _descriptor.Descriptor(
+  name='SendChatMessageRequest',
+  full_name='SendChatMessageRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SendChatMessageRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='message_content', full_name='SendChatMessageRequest.message_content', index=1,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='existing_media', full_name='SendChatMessageRequest.existing_media', index=2,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='event_request_header', full_name='SendChatMessageRequest.event_request_header', index=3,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7386,
+  serialized_end=7607,
 )
 
 
@@ -2843,7 +3343,7 @@ _SENDCHATMESSAGERESPONSE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='request_header', full_name='SendChatMessageResponse.request_header', index=1,
+      name='response_header', full_name='SendChatMessageResponse.response_header', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -2864,12 +3364,542 @@ _SENDCHATMESSAGERESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6751,
-  serialized_end=6879,
+  serialized_start=7610,
+  serialized_end=7739,
+)
+
+
+_SENDEASTEREGGREQUEST = _descriptor.Descriptor(
+  name='SendEasterEggRequest',
+  full_name='SendEasterEggRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SendEasterEggRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7741,
+  serialized_end=7809,
+)
+
+
+_SENDEASTEREGGRESPONSE = _descriptor.Descriptor(
+  name='SendEasterEggResponse',
+  full_name='SendEasterEggResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7811,
+  serialized_end=7834,
+)
+
+
+_SETACTIVECLIENTREQUEST = _descriptor.Descriptor(
+  name='SetActiveClientRequest',
+  full_name='SetActiveClientRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SetActiveClientRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='is_active', full_name='SetActiveClientRequest.is_active', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='full_jid', full_name='SetActiveClientRequest.full_jid', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='timeout_secs', full_name='SetActiveClientRequest.timeout_secs', index=3,
+      number=4, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7837,
+  serialized_end=7966,
+)
+
+
+_SETACTIVECLIENTRESPONSE = _descriptor.Descriptor(
+  name='SetActiveClientResponse',
+  full_name='SetActiveClientResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='some_code', full_name='SetActiveClientResponse.some_code', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='response_header', full_name='SetActiveClientResponse.response_header', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7968,
+  serialized_end=8060,
+)
+
+
+_SETCHATNAMEREQUEST = _descriptor.Descriptor(
+  name='SetChatNameRequest',
+  full_name='SetChatNameRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SetChatNameRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8062,
+  serialized_end=8128,
+)
+
+
+_SETCHATNAMERESPONSE = _descriptor.Descriptor(
+  name='SetChatNameResponse',
+  full_name='SetChatNameResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8130,
+  serialized_end=8151,
+)
+
+
+_SETCONVERSATIONLEVELREQUEST = _descriptor.Descriptor(
+  name='SetConversationLevelRequest',
+  full_name='SetConversationLevelRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SetConversationLevelRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8153,
+  serialized_end=8228,
+)
+
+
+_SETCONVERSATIONLEVELRESPONSE = _descriptor.Descriptor(
+  name='SetConversationLevelResponse',
+  full_name='SetConversationLevelResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8230,
+  serialized_end=8260,
+)
+
+
+_SETPRESENCEREQUEST = _descriptor.Descriptor(
+  name='SetPresenceRequest',
+  full_name='SetPresenceRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SetPresenceRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8262,
+  serialized_end=8328,
+)
+
+
+_SETPRESENCERESPONSE = _descriptor.Descriptor(
+  name='SetPresenceResponse',
+  full_name='SetPresenceResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8330,
+  serialized_end=8351,
+)
+
+
+_SETTYPINGREQUEST = _descriptor.Descriptor(
+  name='SetTypingRequest',
+  full_name='SetTypingRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SetTypingRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8353,
+  serialized_end=8417,
+)
+
+
+_SETTYPINGRESPONSE = _descriptor.Descriptor(
+  name='SetTypingResponse',
+  full_name='SetTypingResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8419,
+  serialized_end=8438,
+)
+
+
+_SYNCALLNEWEVENTSREQUEST = _descriptor.Descriptor(
+  name='SyncAllNewEventsRequest',
+  full_name='SyncAllNewEventsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SyncAllNewEventsRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8440,
+  serialized_end=8511,
+)
+
+
+_SYNCALLNEWEVENTSRESPONSE = _descriptor.Descriptor(
+  name='SyncAllNewEventsResponse',
+  full_name='SyncAllNewEventsResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8513,
+  serialized_end=8539,
+)
+
+
+_SYNCRECENTCONVERSATIONSREQUEST = _descriptor.Descriptor(
+  name='SyncRecentConversationsRequest',
+  full_name='SyncRecentConversationsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='SyncRecentConversationsRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8541,
+  serialized_end=8619,
+)
+
+
+_SYNCRECENTCONVERSATIONSRESPONSE = _descriptor.Descriptor(
+  name='SyncRecentConversationsResponse',
+  full_name='SyncRecentConversationsResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8621,
+  serialized_end=8654,
+)
+
+
+_UPDATEWATERMARKREQUEST = _descriptor.Descriptor(
+  name='UpdateWatermarkRequest',
+  full_name='UpdateWatermarkRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='UpdateWatermarkRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8656,
+  serialized_end=8726,
+)
+
+
+_UPDATEWATERMARKRESPONSE = _descriptor.Descriptor(
+  name='UpdateWatermarkResponse',
+  full_name='UpdateWatermarkResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8728,
+  serialized_end=8753,
 )
 
 _CLIENTNOTIFICATIONSETTINGS.fields_by_name['dnd_settings'].message_type = _CLIENTDONOTDISTURBSETTING
@@ -3006,13 +4036,32 @@ _CLIENTCLIENTVERSION.fields_by_name['client_id'].enum_type = _CLIENTID
 _CLIENTCLIENTVERSION.fields_by_name['build_type'].enum_type = _CLIENTBUILDTYPE
 _CLIENTREQUESTHEADER.fields_by_name['client_version'].message_type = _CLIENTCLIENTVERSION
 _CLIENTREQUESTHEADER.fields_by_name['client_identifier'].message_type = _CLIENTCLIENTIDENTIFIER
+_CLIENTRESPONSEHEADER.fields_by_name['status'].enum_type = _CLIENTRESPONSESTATUS
+_ADDUSERREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_CREATECONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_DELETECONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_GETCONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_GETENTITYBYIDREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_GETSELFINFOREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_QUERYPRESENCEREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_REMOVEUSERREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_SEARCHENTITIESREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
 _SENDCHATMESSAGEREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
 _SENDCHATMESSAGEREQUEST.fields_by_name['message_content'].message_type = _CLIENTMESSAGECONTENT
 _SENDCHATMESSAGEREQUEST.fields_by_name['existing_media'].message_type = _CLIENTEXISTINGMEDIA
 _SENDCHATMESSAGEREQUEST.fields_by_name['event_request_header'].message_type = _CLIENTEVENTREQUESTHEADER
-_CLIENTRESPONSEHEADER.fields_by_name['status'].enum_type = _CLIENTRESPONSESTATUS
-_SENDCHATMESSAGERESPONSE.fields_by_name['request_header'].message_type = _CLIENTRESPONSEHEADER
+_SENDCHATMESSAGERESPONSE.fields_by_name['response_header'].message_type = _CLIENTRESPONSEHEADER
 _SENDCHATMESSAGERESPONSE.fields_by_name['created_event'].message_type = _CLIENTEVENT
+_SENDEASTEREGGREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_SETACTIVECLIENTREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_SETACTIVECLIENTRESPONSE.fields_by_name['response_header'].message_type = _CLIENTRESPONSEHEADER
+_SETCHATNAMEREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_SETCONVERSATIONLEVELREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_SETPRESENCEREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_SETTYPINGREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_SYNCALLNEWEVENTSREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_SYNCRECENTCONVERSATIONSREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
+_UPDATEWATERMARKREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
 DESCRIPTOR.message_types_by_name['ClientDoNotDisturbSetting'] = _CLIENTDONOTDISTURBSETTING
 DESCRIPTOR.message_types_by_name['ClientNotificationSettings'] = _CLIENTNOTIFICATIONSETTINGS
 DESCRIPTOR.message_types_by_name['ClientStateUpdateHeader'] = _CLIENTSTATEUPDATEHEADER
@@ -3062,9 +4111,45 @@ DESCRIPTOR.message_types_by_name['ClientExistingMedia'] = _CLIENTEXISTINGMEDIA
 DESCRIPTOR.message_types_by_name['ClientEventRequestHeader'] = _CLIENTEVENTREQUESTHEADER
 DESCRIPTOR.message_types_by_name['ClientClientVersion'] = _CLIENTCLIENTVERSION
 DESCRIPTOR.message_types_by_name['ClientRequestHeader'] = _CLIENTREQUESTHEADER
-DESCRIPTOR.message_types_by_name['SendChatMessageRequest'] = _SENDCHATMESSAGEREQUEST
 DESCRIPTOR.message_types_by_name['ClientResponseHeader'] = _CLIENTRESPONSEHEADER
+DESCRIPTOR.message_types_by_name['AddUserRequest'] = _ADDUSERREQUEST
+DESCRIPTOR.message_types_by_name['AddUserResponse'] = _ADDUSERRESPONSE
+DESCRIPTOR.message_types_by_name['CreateConversationRequest'] = _CREATECONVERSATIONREQUEST
+DESCRIPTOR.message_types_by_name['CreateConversationResponse'] = _CREATECONVERSATIONRESPONSE
+DESCRIPTOR.message_types_by_name['DeleteConversationRequest'] = _DELETECONVERSATIONREQUEST
+DESCRIPTOR.message_types_by_name['DeleteConversationResponse'] = _DELETECONVERSATIONRESPONSE
+DESCRIPTOR.message_types_by_name['GetConversationRequest'] = _GETCONVERSATIONREQUEST
+DESCRIPTOR.message_types_by_name['GetConversationResponse'] = _GETCONVERSATIONRESPONSE
+DESCRIPTOR.message_types_by_name['GetEntityByIdRequest'] = _GETENTITYBYIDREQUEST
+DESCRIPTOR.message_types_by_name['GetEntityByIdResponse'] = _GETENTITYBYIDRESPONSE
+DESCRIPTOR.message_types_by_name['GetSelfInfoRequest'] = _GETSELFINFOREQUEST
+DESCRIPTOR.message_types_by_name['GetSelfInfoResponse'] = _GETSELFINFORESPONSE
+DESCRIPTOR.message_types_by_name['QueryPresenceRequest'] = _QUERYPRESENCEREQUEST
+DESCRIPTOR.message_types_by_name['QueryPresenceResponse'] = _QUERYPRESENCERESPONSE
+DESCRIPTOR.message_types_by_name['RemoveUserRequest'] = _REMOVEUSERREQUEST
+DESCRIPTOR.message_types_by_name['RemoveUserResponse'] = _REMOVEUSERRESPONSE
+DESCRIPTOR.message_types_by_name['SearchEntitiesRequest'] = _SEARCHENTITIESREQUEST
+DESCRIPTOR.message_types_by_name['SearchEntitiesResponse'] = _SEARCHENTITIESRESPONSE
+DESCRIPTOR.message_types_by_name['SendChatMessageRequest'] = _SENDCHATMESSAGEREQUEST
 DESCRIPTOR.message_types_by_name['SendChatMessageResponse'] = _SENDCHATMESSAGERESPONSE
+DESCRIPTOR.message_types_by_name['SendEasterEggRequest'] = _SENDEASTEREGGREQUEST
+DESCRIPTOR.message_types_by_name['SendEasterEggResponse'] = _SENDEASTEREGGRESPONSE
+DESCRIPTOR.message_types_by_name['SetActiveClientRequest'] = _SETACTIVECLIENTREQUEST
+DESCRIPTOR.message_types_by_name['SetActiveClientResponse'] = _SETACTIVECLIENTRESPONSE
+DESCRIPTOR.message_types_by_name['SetChatNameRequest'] = _SETCHATNAMEREQUEST
+DESCRIPTOR.message_types_by_name['SetChatNameResponse'] = _SETCHATNAMERESPONSE
+DESCRIPTOR.message_types_by_name['SetConversationLevelRequest'] = _SETCONVERSATIONLEVELREQUEST
+DESCRIPTOR.message_types_by_name['SetConversationLevelResponse'] = _SETCONVERSATIONLEVELRESPONSE
+DESCRIPTOR.message_types_by_name['SetPresenceRequest'] = _SETPRESENCEREQUEST
+DESCRIPTOR.message_types_by_name['SetPresenceResponse'] = _SETPRESENCERESPONSE
+DESCRIPTOR.message_types_by_name['SetTypingRequest'] = _SETTYPINGREQUEST
+DESCRIPTOR.message_types_by_name['SetTypingResponse'] = _SETTYPINGRESPONSE
+DESCRIPTOR.message_types_by_name['SyncAllNewEventsRequest'] = _SYNCALLNEWEVENTSREQUEST
+DESCRIPTOR.message_types_by_name['SyncAllNewEventsResponse'] = _SYNCALLNEWEVENTSRESPONSE
+DESCRIPTOR.message_types_by_name['SyncRecentConversationsRequest'] = _SYNCRECENTCONVERSATIONSREQUEST
+DESCRIPTOR.message_types_by_name['SyncRecentConversationsResponse'] = _SYNCRECENTCONVERSATIONSRESPONSE
+DESCRIPTOR.message_types_by_name['UpdateWatermarkRequest'] = _UPDATEWATERMARKREQUEST
+DESCRIPTOR.message_types_by_name['UpdateWatermarkResponse'] = _UPDATEWATERMARKRESPONSE
 DESCRIPTOR.enum_types_by_name['ActiveClientState'] = _ACTIVECLIENTSTATE
 DESCRIPTOR.enum_types_by_name['FocusStatus'] = _FOCUSSTATUS
 DESCRIPTOR.enum_types_by_name['FocusDevice'] = _FOCUSDEVICE
@@ -3434,13 +4519,6 @@ ClientRequestHeader = _reflection.GeneratedProtocolMessageType('ClientRequestHea
   ))
 _sym_db.RegisterMessage(ClientRequestHeader)
 
-SendChatMessageRequest = _reflection.GeneratedProtocolMessageType('SendChatMessageRequest', (_message.Message,), dict(
-  DESCRIPTOR = _SENDCHATMESSAGEREQUEST,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:SendChatMessageRequest)
-  ))
-_sym_db.RegisterMessage(SendChatMessageRequest)
-
 ClientResponseHeader = _reflection.GeneratedProtocolMessageType('ClientResponseHeader', (_message.Message,), dict(
   DESCRIPTOR = _CLIENTRESPONSEHEADER,
   __module__ = 'hangups.hangouts_pb2'
@@ -3448,12 +4526,271 @@ ClientResponseHeader = _reflection.GeneratedProtocolMessageType('ClientResponseH
   ))
 _sym_db.RegisterMessage(ClientResponseHeader)
 
+AddUserRequest = _reflection.GeneratedProtocolMessageType('AddUserRequest', (_message.Message,), dict(
+  DESCRIPTOR = _ADDUSERREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:AddUserRequest)
+  ))
+_sym_db.RegisterMessage(AddUserRequest)
+
+AddUserResponse = _reflection.GeneratedProtocolMessageType('AddUserResponse', (_message.Message,), dict(
+  DESCRIPTOR = _ADDUSERRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:AddUserResponse)
+  ))
+_sym_db.RegisterMessage(AddUserResponse)
+
+CreateConversationRequest = _reflection.GeneratedProtocolMessageType('CreateConversationRequest', (_message.Message,), dict(
+  DESCRIPTOR = _CREATECONVERSATIONREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:CreateConversationRequest)
+  ))
+_sym_db.RegisterMessage(CreateConversationRequest)
+
+CreateConversationResponse = _reflection.GeneratedProtocolMessageType('CreateConversationResponse', (_message.Message,), dict(
+  DESCRIPTOR = _CREATECONVERSATIONRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:CreateConversationResponse)
+  ))
+_sym_db.RegisterMessage(CreateConversationResponse)
+
+DeleteConversationRequest = _reflection.GeneratedProtocolMessageType('DeleteConversationRequest', (_message.Message,), dict(
+  DESCRIPTOR = _DELETECONVERSATIONREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:DeleteConversationRequest)
+  ))
+_sym_db.RegisterMessage(DeleteConversationRequest)
+
+DeleteConversationResponse = _reflection.GeneratedProtocolMessageType('DeleteConversationResponse', (_message.Message,), dict(
+  DESCRIPTOR = _DELETECONVERSATIONRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:DeleteConversationResponse)
+  ))
+_sym_db.RegisterMessage(DeleteConversationResponse)
+
+GetConversationRequest = _reflection.GeneratedProtocolMessageType('GetConversationRequest', (_message.Message,), dict(
+  DESCRIPTOR = _GETCONVERSATIONREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:GetConversationRequest)
+  ))
+_sym_db.RegisterMessage(GetConversationRequest)
+
+GetConversationResponse = _reflection.GeneratedProtocolMessageType('GetConversationResponse', (_message.Message,), dict(
+  DESCRIPTOR = _GETCONVERSATIONRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:GetConversationResponse)
+  ))
+_sym_db.RegisterMessage(GetConversationResponse)
+
+GetEntityByIdRequest = _reflection.GeneratedProtocolMessageType('GetEntityByIdRequest', (_message.Message,), dict(
+  DESCRIPTOR = _GETENTITYBYIDREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:GetEntityByIdRequest)
+  ))
+_sym_db.RegisterMessage(GetEntityByIdRequest)
+
+GetEntityByIdResponse = _reflection.GeneratedProtocolMessageType('GetEntityByIdResponse', (_message.Message,), dict(
+  DESCRIPTOR = _GETENTITYBYIDRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:GetEntityByIdResponse)
+  ))
+_sym_db.RegisterMessage(GetEntityByIdResponse)
+
+GetSelfInfoRequest = _reflection.GeneratedProtocolMessageType('GetSelfInfoRequest', (_message.Message,), dict(
+  DESCRIPTOR = _GETSELFINFOREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:GetSelfInfoRequest)
+  ))
+_sym_db.RegisterMessage(GetSelfInfoRequest)
+
+GetSelfInfoResponse = _reflection.GeneratedProtocolMessageType('GetSelfInfoResponse', (_message.Message,), dict(
+  DESCRIPTOR = _GETSELFINFORESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:GetSelfInfoResponse)
+  ))
+_sym_db.RegisterMessage(GetSelfInfoResponse)
+
+QueryPresenceRequest = _reflection.GeneratedProtocolMessageType('QueryPresenceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _QUERYPRESENCEREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:QueryPresenceRequest)
+  ))
+_sym_db.RegisterMessage(QueryPresenceRequest)
+
+QueryPresenceResponse = _reflection.GeneratedProtocolMessageType('QueryPresenceResponse', (_message.Message,), dict(
+  DESCRIPTOR = _QUERYPRESENCERESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:QueryPresenceResponse)
+  ))
+_sym_db.RegisterMessage(QueryPresenceResponse)
+
+RemoveUserRequest = _reflection.GeneratedProtocolMessageType('RemoveUserRequest', (_message.Message,), dict(
+  DESCRIPTOR = _REMOVEUSERREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:RemoveUserRequest)
+  ))
+_sym_db.RegisterMessage(RemoveUserRequest)
+
+RemoveUserResponse = _reflection.GeneratedProtocolMessageType('RemoveUserResponse', (_message.Message,), dict(
+  DESCRIPTOR = _REMOVEUSERRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:RemoveUserResponse)
+  ))
+_sym_db.RegisterMessage(RemoveUserResponse)
+
+SearchEntitiesRequest = _reflection.GeneratedProtocolMessageType('SearchEntitiesRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SEARCHENTITIESREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SearchEntitiesRequest)
+  ))
+_sym_db.RegisterMessage(SearchEntitiesRequest)
+
+SearchEntitiesResponse = _reflection.GeneratedProtocolMessageType('SearchEntitiesResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SEARCHENTITIESRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SearchEntitiesResponse)
+  ))
+_sym_db.RegisterMessage(SearchEntitiesResponse)
+
+SendChatMessageRequest = _reflection.GeneratedProtocolMessageType('SendChatMessageRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SENDCHATMESSAGEREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SendChatMessageRequest)
+  ))
+_sym_db.RegisterMessage(SendChatMessageRequest)
+
 SendChatMessageResponse = _reflection.GeneratedProtocolMessageType('SendChatMessageResponse', (_message.Message,), dict(
   DESCRIPTOR = _SENDCHATMESSAGERESPONSE,
   __module__ = 'hangups.hangouts_pb2'
   # @@protoc_insertion_point(class_scope:SendChatMessageResponse)
   ))
 _sym_db.RegisterMessage(SendChatMessageResponse)
+
+SendEasterEggRequest = _reflection.GeneratedProtocolMessageType('SendEasterEggRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SENDEASTEREGGREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SendEasterEggRequest)
+  ))
+_sym_db.RegisterMessage(SendEasterEggRequest)
+
+SendEasterEggResponse = _reflection.GeneratedProtocolMessageType('SendEasterEggResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SENDEASTEREGGRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SendEasterEggResponse)
+  ))
+_sym_db.RegisterMessage(SendEasterEggResponse)
+
+SetActiveClientRequest = _reflection.GeneratedProtocolMessageType('SetActiveClientRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SETACTIVECLIENTREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetActiveClientRequest)
+  ))
+_sym_db.RegisterMessage(SetActiveClientRequest)
+
+SetActiveClientResponse = _reflection.GeneratedProtocolMessageType('SetActiveClientResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SETACTIVECLIENTRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetActiveClientResponse)
+  ))
+_sym_db.RegisterMessage(SetActiveClientResponse)
+
+SetChatNameRequest = _reflection.GeneratedProtocolMessageType('SetChatNameRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SETCHATNAMEREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetChatNameRequest)
+  ))
+_sym_db.RegisterMessage(SetChatNameRequest)
+
+SetChatNameResponse = _reflection.GeneratedProtocolMessageType('SetChatNameResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SETCHATNAMERESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetChatNameResponse)
+  ))
+_sym_db.RegisterMessage(SetChatNameResponse)
+
+SetConversationLevelRequest = _reflection.GeneratedProtocolMessageType('SetConversationLevelRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SETCONVERSATIONLEVELREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetConversationLevelRequest)
+  ))
+_sym_db.RegisterMessage(SetConversationLevelRequest)
+
+SetConversationLevelResponse = _reflection.GeneratedProtocolMessageType('SetConversationLevelResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SETCONVERSATIONLEVELRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetConversationLevelResponse)
+  ))
+_sym_db.RegisterMessage(SetConversationLevelResponse)
+
+SetPresenceRequest = _reflection.GeneratedProtocolMessageType('SetPresenceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SETPRESENCEREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetPresenceRequest)
+  ))
+_sym_db.RegisterMessage(SetPresenceRequest)
+
+SetPresenceResponse = _reflection.GeneratedProtocolMessageType('SetPresenceResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SETPRESENCERESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetPresenceResponse)
+  ))
+_sym_db.RegisterMessage(SetPresenceResponse)
+
+SetTypingRequest = _reflection.GeneratedProtocolMessageType('SetTypingRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SETTYPINGREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetTypingRequest)
+  ))
+_sym_db.RegisterMessage(SetTypingRequest)
+
+SetTypingResponse = _reflection.GeneratedProtocolMessageType('SetTypingResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SETTYPINGRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetTypingResponse)
+  ))
+_sym_db.RegisterMessage(SetTypingResponse)
+
+SyncAllNewEventsRequest = _reflection.GeneratedProtocolMessageType('SyncAllNewEventsRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SYNCALLNEWEVENTSREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SyncAllNewEventsRequest)
+  ))
+_sym_db.RegisterMessage(SyncAllNewEventsRequest)
+
+SyncAllNewEventsResponse = _reflection.GeneratedProtocolMessageType('SyncAllNewEventsResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SYNCALLNEWEVENTSRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SyncAllNewEventsResponse)
+  ))
+_sym_db.RegisterMessage(SyncAllNewEventsResponse)
+
+SyncRecentConversationsRequest = _reflection.GeneratedProtocolMessageType('SyncRecentConversationsRequest', (_message.Message,), dict(
+  DESCRIPTOR = _SYNCRECENTCONVERSATIONSREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SyncRecentConversationsRequest)
+  ))
+_sym_db.RegisterMessage(SyncRecentConversationsRequest)
+
+SyncRecentConversationsResponse = _reflection.GeneratedProtocolMessageType('SyncRecentConversationsResponse', (_message.Message,), dict(
+  DESCRIPTOR = _SYNCRECENTCONVERSATIONSRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SyncRecentConversationsResponse)
+  ))
+_sym_db.RegisterMessage(SyncRecentConversationsResponse)
+
+UpdateWatermarkRequest = _reflection.GeneratedProtocolMessageType('UpdateWatermarkRequest', (_message.Message,), dict(
+  DESCRIPTOR = _UPDATEWATERMARKREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:UpdateWatermarkRequest)
+  ))
+_sym_db.RegisterMessage(UpdateWatermarkRequest)
+
+UpdateWatermarkResponse = _reflection.GeneratedProtocolMessageType('UpdateWatermarkResponse', (_message.Message,), dict(
+  DESCRIPTOR = _UPDATEWATERMARKRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:UpdateWatermarkResponse)
+  ))
+_sym_db.RegisterMessage(UpdateWatermarkResponse)
 
 
 # @@protoc_insertion_point(module_scope)

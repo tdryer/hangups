@@ -225,6 +225,7 @@ class Client(object):
         # Extract various values that we will need.
         try:
             self._api_key = data_dict['ds:7'][0][2]
+            # TODO: this seems to be wrong
             self._email = data_dict['ds:34'][0][2]
             self._header_date = data_dict['ds:2'][0][4]
             self._header_version = data_dict['ds:2'][0][6]
@@ -314,6 +315,30 @@ class Client(object):
                 )
                 yield from self.on_state_update.fire(state_update)
 
+    # TODO: add better logging here and remove it from _base_request
+    @asyncio.coroutine
+    def _pb_request(self, endpoint, request_pb, response_pb):
+        """Make chat API request with protobuf request/response.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
+        body = json.dumps(pblite2.encode(request_pb))
+        logger.debug(body)
+        content_type = 'application/json+protobuf'
+        res = yield from self._base_request(url, content_type, body,
+                                            use_json=False)
+        pblite2.decode(response_pb, javascript.loads(res.body.decode()))
+        logger.debug(response_pb)
+        status = response_pb.response_header.status
+        description = response_pb.response_header.error_description
+        if status != hangouts_pb2.RESPONSE_STATUS_OK:
+            raise exceptions.NetworkError(
+                'Request failed with status {}: \'{}\''
+                .format(status, description)
+            )
+
+    # TODO: remove this
     @asyncio.coroutine
     def _request(self, endpoint, body_json, use_json=True):
         """Make chat API request.
@@ -351,6 +376,22 @@ class Client(object):
         logger.debug('Response to request for {} was {}:\n{}'
                      .format(url, res.code, res.body))
         return res
+
+    def _get_request_header_pb(self):
+        """Return populated ClientRequestHeader message."""
+        return hangouts_pb2.ClientRequestHeader(
+            client_version=hangouts_pb2.ClientClientVersion(
+                client_id=hangouts_pb2.CLIENT_ID_WEB_GMAIL,
+                build_type=hangouts_pb2.BUILD_TYPE_PRODUCTION_WEB,
+                major_version=self._header_version,
+                version_timestamp=int(self._header_date),
+            ),
+            client_identifier=hangouts_pb2.ClientClientIdentifier(
+                resource=self._client_id,
+                header_id=self._header_id,
+            ),
+            language_code='en',
+        )
 
     ###########################################################################
     # Raw API request methods
@@ -390,22 +431,6 @@ class Client(object):
             raise exceptions.NetworkError('Response status is \'{}\''
                                           .format(status))
         return res
-
-    def _get_request_header_pb(self):
-        """Return populated ClientRequestHeader message."""
-        return hangouts_pb2.ClientRequestHeader(
-            client_version=hangouts_pb2.ClientClientVersion(
-                client_id=hangouts_pb2.CLIENT_ID_WEB_GMAIL,
-                build_type=hangouts_pb2.BUILD_TYPE_PRODUCTION_WEB,
-                major_version=self._header_version,
-                version_timestamp=int(self._header_date),
-            ),
-            client_identifier=hangouts_pb2.ClientClientIdentifier(
-                resource=self._client_id,
-                header_id=self._header_id,
-            ),
-            language_code='en',
-        )
 
     @asyncio.coroutine
     def sendchatmessage(
@@ -447,12 +472,6 @@ class Client(object):
             message_content=hangouts_pb2.ClientMessageContent(
                 segment=segments_pb,
             ),
-            # TODO: this breaks serialization
-            #existing_media=hangouts_pb2.ClientExistingMedia(
-            #    photo=hangouts_pb2.Photo(
-            #        photo_id=image_id if image_id is not None else '',
-            #    )
-            #),
             event_request_header=hangouts_pb2.ClientEventRequestHeader(
                 conversation_id=hangouts_pb2.ConversationID(
                     id=conversation_id,
@@ -462,38 +481,138 @@ class Client(object):
             ),
         )
 
-        encoded_request = pblite2.encode(request)
-        logger.debug(encoded_request)
+        if image_id is not None:
+            request.existing_media = hangouts_pb2.ClientExistingMedia(
+                photo=hangouts_pb2.Photo(photo_id=image_id)
+            )
 
-        #body = [
-        #    self._get_request_header(),
-        #    None, None, None, [],
-        #    [
-        #        segments, []
-        #    ],
-        #    [[image_id, False]] if image_id else None,
-        #    [
-        #        [conversation_id],
-        #        client_generated_id,
-        #        otr_status.value,
-        #    ],
-        #    None, None, None, []
-        #]
-        #logger.debug(body)
-        #res = yield from self._request('conversations/sendchatmessage', body, use_json=False)
-        res = yield from self._request('conversations/sendchatmessage',
-                                       encoded_request, use_json=False)
-        # sendchatmessage can return 200 but still contain an error
-        #res = json.loads(res.body.decode())
-        #res_status = res['response_header']['status']
-        #if res_status != 'OK':
-        #    raise exceptions.NetworkError('Unexpected status: {}'
-        #                                  .format(res_status))
-        pblite = javascript.loads(res.body.decode())
-        response_message = hangouts_pb2.SendChatMessageResponse()
-        pblite2.decode(response_message, pblite)
-        #logger.debug(json.dumps(pblite, indent=4))
-        logger.debug(response_message)
+        logger.debug(request)
+        response = hangouts_pb2.SendChatMessageResponse()
+        yield from self._pb_request('conversations/sendchatmessage', request,
+                                    response)
+        return response
+
+    @asyncio.coroutine
+    def setactiveclient(self, is_active, timeout_secs):
+        """Set the active client.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        request = hangouts_pb2.SetActiveClientRequest(
+            request_header=self._get_request_header_pb(),
+            is_active=is_active,
+            full_jid="{}/{}".format(self._email, self._client_id),
+            timeout_secs=timeout_secs,
+        )
+        response = hangouts_pb2.SetActiveClientResponse()
+        yield from self._pb_request('clients/setactiveclient', request,
+                                    response)
+        return response
+
+    @asyncio.coroutine
+    def updatewatermark(self, conv_id, read_timestamp):
+        """Update the watermark (read timestamp) for a conversation.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('conversations/updatewatermark', [
+            self._get_request_header(),
+            # conversation_id
+            [conv_id],
+            # latest_read_timestamp
+            parsers.to_timestamp(read_timestamp),
+        ])
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            raise exceptions.NetworkError('Unexpected status: {}'
+                                          .format(res_status))
+
+    @asyncio.coroutine
+    def getentitybyid(self, chat_id_list):
+        """Return information about a list of contacts.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('contacts/getentitybyid', [
+            self._get_request_header(),
+            None,
+            [[str(chat_id)] for chat_id in chat_id_list],
+        ], use_json=False)
+        try:
+            res = schemas.CLIENT_GET_ENTITY_BY_ID_RESPONSE.parse(
+                javascript.loads(res.body.decode())
+            )
+        except ValueError as e:
+            raise exceptions.NetworkError('Response failed to parse: {}'
+                                          .format(e))
+        # can return 200 but still contain an error
+        status = res.response_header.status
+        if status != 1:
+            raise exceptions.NetworkError('Response status is \'{}\''
+                                          .format(status))
+        return res
+
+    @asyncio.coroutine
+    def setchatname(self, conversation_id, name):
+        """Set the name of a conversation.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        client_generated_id = random.randint(0, 2 ** 32)
+        body = [
+            self._get_request_header(),
+            None,
+            name,
+            None,
+            [[conversation_id], client_generated_id, 1]
+        ]
+        res = yield from self._request('conversations/renameconversation',
+                                       body)
+        res = json.loads(res.body.decode())
+        res_status = res['response_header']['status']
+        if res_status != 'OK':
+            logger.warning('renameconversation returned status {}'
+                           .format(res_status))
+            raise exceptions.NetworkError()
+
+    @asyncio.coroutine
+    def getconversation(self, conversation_id, event_timestamp, max_events=50):
+        """Return conversation events.
+
+        This is mainly used for retrieving conversation scrollback. Events
+        occurring before event_timestamp are returned, in order from oldest to
+        newest.
+
+        Raises hangups.NetworkError if the request fails.
+        """
+        res = yield from self._request('conversations/getconversation', [
+            self._get_request_header(),
+            [[conversation_id], [], []],  # conversationSpec
+            False,  # includeConversationMetadata
+            True,  # includeEvents
+            None,  # ???
+            max_events,  # maxEventsPerConversation
+            # eventContinuationToken (specifying timestamp is sufficient)
+            [
+                None,  # eventId
+                None,  # storageContinuationToken
+                parsers.to_timestamp(event_timestamp),  # eventTimestamp
+            ]
+        ], use_json=False)
+        try:
+            res = schemas.CLIENT_GET_CONVERSATION_RESPONSE.parse(
+                javascript.loads(res.body.decode())
+            )
+        except ValueError as e:
+            raise exceptions.NetworkError('Response failed to parse: {}'
+                                          .format(e))
+        # can return 200 but still contain an error
+        status = res.response_header.status
+        if status != 1:
+            raise exceptions.NetworkError('Response status is \'{}\''
+                                          .format(status))
+        return res
 
     @asyncio.coroutine
     def upload_image(self, image_file, filename=None):
@@ -540,27 +659,6 @@ class Client(object):
                 ['additionalInfo']
                 ['uploader_service.GoogleRupioAdditionalInfo']
                 ['completionInfo']['customerSpecificInfo']['photoid'])
-
-    @asyncio.coroutine
-    def setactiveclient(self, is_active, timeout_secs):
-        """Set the active client.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        res = yield from self._request('clients/setactiveclient', [
-            self._get_request_header(),
-            # is_active: whether the client is active or not
-            is_active,
-            # full_jid: user@domain/resource
-            "{}/{}".format(self._email, self._client_id),
-            # timeout_secs: timeout in seconds for this client to be active
-            timeout_secs
-        ])
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
 
     ###########################################################################
     # UNUSED raw API request methods (by hangups itself) for reference
@@ -625,25 +723,6 @@ class Client(object):
             self._get_request_header(),
             [conversation_id],
             typing.value
-        ])
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
-
-    @asyncio.coroutine
-    def updatewatermark(self, conv_id, read_timestamp):
-        """Update the watermark (read timestamp) for a conversation.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        res = yield from self._request('conversations/updatewatermark', [
-            self._get_request_header(),
-            # conversation_id
-            [conv_id],
-            # latest_read_timestamp
-            parsers.to_timestamp(read_timestamp),
         ])
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
@@ -737,69 +816,6 @@ class Client(object):
         return json.loads(res.body.decode())
 
     @asyncio.coroutine
-    def getentitybyid(self, chat_id_list):
-        """Return information about a list of contacts.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        res = yield from self._request('contacts/getentitybyid', [
-            self._get_request_header(),
-            None,
-            [[str(chat_id)] for chat_id in chat_id_list],
-        ], use_json=False)
-        try:
-            res = schemas.CLIENT_GET_ENTITY_BY_ID_RESPONSE.parse(
-                javascript.loads(res.body.decode())
-            )
-        except ValueError as e:
-            raise exceptions.NetworkError('Response failed to parse: {}'
-                                          .format(e))
-        # can return 200 but still contain an error
-        status = res.response_header.status
-        if status != 1:
-            raise exceptions.NetworkError('Response status is \'{}\''
-                                          .format(status))
-        return res
-
-    @asyncio.coroutine
-    def getconversation(self, conversation_id, event_timestamp, max_events=50):
-        """Return conversation events.
-
-        This is mainly used for retrieving conversation scrollback. Events
-        occurring before event_timestamp are returned, in order from oldest to
-        newest.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        res = yield from self._request('conversations/getconversation', [
-            self._get_request_header(),
-            [[conversation_id], [], []],  # conversationSpec
-            False,  # includeConversationMetadata
-            True,  # includeEvents
-            None,  # ???
-            max_events,  # maxEventsPerConversation
-            # eventContinuationToken (specifying timestamp is sufficient)
-            [
-                None,  # eventId
-                None,  # storageContinuationToken
-                parsers.to_timestamp(event_timestamp),  # eventTimestamp
-            ]
-        ], use_json=False)
-        try:
-            res = schemas.CLIENT_GET_CONVERSATION_RESPONSE.parse(
-                javascript.loads(res.body.decode())
-            )
-        except ValueError as e:
-            raise exceptions.NetworkError('Response failed to parse: {}'
-                                          .format(e))
-        # can return 200 but still contain an error
-        status = res.response_header.status
-        if status != 1:
-            raise exceptions.NetworkError('Response status is \'{}\''
-                                          .format(status))
-        return res
-
-    @asyncio.coroutine
     def syncrecentconversations(self):
         """List the contents of recent conversations, including messages.
 
@@ -811,29 +827,6 @@ class Client(object):
         res = yield from self._request('conversations/syncrecentconversations',
                                        [self._get_request_header()])
         return json.loads(res.body.decode())
-
-    @asyncio.coroutine
-    def setchatname(self, conversation_id, name):
-        """Set the name of a conversation.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        client_generated_id = random.randint(0, 2 ** 32)
-        body = [
-            self._get_request_header(),
-            None,
-            name,
-            None,
-            [[conversation_id], client_generated_id, 1]
-        ]
-        res = yield from self._request('conversations/renameconversation',
-                                       body)
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            logger.warning('renameconversation returned status {}'
-                           .format(res_status))
-            raise exceptions.NetworkError()
 
     @asyncio.coroutine
     def setconversationnotificationlevel(self, conversation_id, level):
