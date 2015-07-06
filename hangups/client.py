@@ -13,7 +13,7 @@ import datetime
 import os
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
-                     event, hangouts_pb2, pblite2)
+                     event, hangouts_pb2, pblite)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -238,15 +238,15 @@ class Client(object):
 
         # Parse GetSelfInfoResponse
         get_self_info_response = hangouts_pb2.GetSelfInfoResponse()
-        pblite2.decode(get_self_info_response, data_dict['ds:20'][0])
+        pblite.decode(get_self_info_response, data_dict['ds:20'][0])
         logger.debug('Parsed GetSelfInfoResponse:\n%s', get_self_info_response)
 
         # Parse SyncRecentConversationsResponse
         sync_recent_conversations_response = (
             hangouts_pb2.SyncRecentConversationsResponse()
         )
-        pblite2.decode(sync_recent_conversations_response,
-                       data_dict['ds:19'][0])
+        pblite.decode(sync_recent_conversations_response,
+                      data_dict['ds:19'][0])
         # TODO: this might be too much data to log
         #logger.debug('Parsed SyncRecentConversationsResponse:\n%s',
         #             sync_recent_conversations_response)
@@ -255,7 +255,7 @@ class Client(object):
         # This gives us entities for the user's contacts, but doesn't include
         # users not in contacts.
         get_suggested_entities_response = hangouts_pb2.GetSuggestedEntitiesResponse()
-        pblite2.decode(get_suggested_entities_response, data_dict['ds:21'][0])
+        pblite.decode(get_suggested_entities_response, data_dict['ds:21'][0])
         logger.debug('Parsed GetSuggestedEntitiesResponse:\n%s', get_suggested_entities_response)
 
         # Combine entities from all responses into one list of all the known
@@ -330,12 +330,12 @@ class Client(object):
         Raises hangups.NetworkError if the request fails.
         """
         url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
-        body = json.dumps(pblite2.encode(request_pb))
+        body = json.dumps(pblite.encode(request_pb))
         logger.debug(body)
         content_type = 'application/json+protobuf'
         res = yield from self._base_request(url, content_type, body,
                                             use_json=False)
-        pblite2.decode(response_pb, javascript.loads(res.body.decode()))
+        pblite.decode(response_pb, javascript.loads(res.body.decode()))
         logger.debug(response_pb)
         status = response_pb.response_header.status
         description = response_pb.response_header.error_description
@@ -459,7 +459,7 @@ class Client(object):
         segments_pb = []
         for segment_pblite in segments:
             segment_pb = hangouts_pb2.Segment()
-            pblite2.decode(segment_pb, segment_pblite)
+            pblite.decode(segment_pb, segment_pblite)
             segments_pb.append(segment_pb)
 
         request = hangouts_pb2.SendChatMessageRequest(
