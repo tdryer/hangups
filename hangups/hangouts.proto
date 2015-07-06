@@ -6,15 +6,13 @@ Hangouts chat protocol.
 Originally based on Darryl Pogue's reversed engineered proto file from an early
 version of Hangouts for Android: https://gist.github.com/dpogue/5692114
 
-Where available, field and message names match those used by Google. Once
-exception is that "Client" prefixes have been removed.
+Field and message name should generally match those used by Google, with the
+major exception that "Client" prefixes have been removed.
 
  */
 
 // proto2 is required because we need to be able to serialize default values:
 syntax = "proto2";
-
-// TODO: proto2 seems to handle enums a bit differently, raises exception for unknowns
 
 enum ActiveClientState {
     NO_ACTIVE_CLIENT = 0;

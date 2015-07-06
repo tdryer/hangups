@@ -273,11 +273,6 @@ class Client(object):
 
         # Create list of ConversationParticipant data to use as a fallback for
         # entities that can't be found.
-        #all_participants = [
-        #    conversation_state.conversation.participant_data
-        #    for conversation_state in
-        #    sync_recent_conversations_response.conversation_state
-        #]
         conv_part_list = []
         for conversation_state in sync_recent_conversations_response.conversation_state:
             conv_part_list.extend(conversation_state.conversation.participant_data)
