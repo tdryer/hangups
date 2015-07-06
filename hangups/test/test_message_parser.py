@@ -1,7 +1,6 @@
 """Tests for ReParser-based message parser"""
 
-from hangups import message_parser
-from hangups.schemas import SegmentType
+from hangups import message_parser, hangouts_pb2
 
 
 def parse_text(text):
@@ -12,9 +11,9 @@ def parse_text(text):
 def test_parse_linebreaks():
     text = 'line1\nline2\r\nline3'
     expected = [('line1', {}),
-                ('\n', {'segment_type': SegmentType.LINE_BREAK}),
+                ('\n', {'segment_type': hangouts_pb2.LINE_BREAK}),
                 ('line2', {}),
-                ('\n', {'segment_type': SegmentType.LINE_BREAK}),
+                ('\n', {'segment_type': hangouts_pb2.LINE_BREAK}),
                 ('line3', {})]
     assert expected == parse_text(text)
 
@@ -59,7 +58,7 @@ def test_parse_html():
                 ('italic', {'is_italic': True}),
                 (' ', {}),
                 ('strike', {'is_strikethrough': True}),
-                ('\n', {'segment_type': SegmentType.LINE_BREAK}),
+                ('\n', {'segment_type': hangouts_pb2.LINE_BREAK}),
                 ('Google', {'link_target': 'http://google.com'}),
                 ('https://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg',
                  {'link_target': 'https://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg'})]

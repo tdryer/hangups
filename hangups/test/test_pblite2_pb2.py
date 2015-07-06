@@ -19,11 +19,106 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='hangups/test/test_pblite2.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n\x1fhangups/test/test_pblite2.proto\"#\n\x0f\x45mbeddedMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\"\x93\x01\n\x0bTestMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\x12*\n\x10\x65mbedded_message\x18\x02 \x01(\x0b\x32\x10.EmbeddedMessage\x12\x15\n\rtest_int_list\x18\x03 \x03(\x05\x12/\n\x15\x65mbedded_message_list\x18\x04 \x03(\x0b\x32\x10.EmbeddedMessage\"\'\n\x0fRequiredMessage\x12\x14\n\x0crequired_int\x18\x01 \x02(\x05')
+  serialized_pb=_b('\n\x1fhangups/test/test_pblite2.proto\"[\n\x0b\x45numMessage\x12(\n\ttest_enum\x18\x01 \x01(\x0e\x32\x15.EnumMessage.TestEnum\"\"\n\x08TestEnum\x12\n\n\x06TEST_0\x10\x00\x12\n\n\x06TEST_1\x10\x01\"B\n\x0cOneOfMessage\x12\x0f\n\x05int_1\x18\x01 \x01(\x05H\x00\x12\x0f\n\x05int_2\x18\x02 \x01(\x05H\x00\x42\x10\n\x0eone_of_message\"#\n\x0f\x45mbeddedMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\"\x93\x01\n\x0bTestMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\x12*\n\x10\x65mbedded_message\x18\x02 \x01(\x0b\x32\x10.EmbeddedMessage\x12\x15\n\rtest_int_list\x18\x03 \x03(\x05\x12/\n\x15\x65mbedded_message_list\x18\x04 \x03(\x0b\x32\x10.EmbeddedMessage\"\'\n\x0fRequiredMessage\x12\x14\n\x0crequired_int\x18\x01 \x02(\x05')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
+
+_ENUMMESSAGE_TESTENUM = _descriptor.EnumDescriptor(
+  name='TestEnum',
+  full_name='EnumMessage.TestEnum',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='TEST_0', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TEST_1', index=1, number=1,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=92,
+  serialized_end=126,
+)
+_sym_db.RegisterEnumDescriptor(_ENUMMESSAGE_TESTENUM)
+
+
+_ENUMMESSAGE = _descriptor.Descriptor(
+  name='EnumMessage',
+  full_name='EnumMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='test_enum', full_name='EnumMessage.test_enum', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _ENUMMESSAGE_TESTENUM,
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=35,
+  serialized_end=126,
+)
+
+
+_ONEOFMESSAGE = _descriptor.Descriptor(
+  name='OneOfMessage',
+  full_name='OneOfMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='int_1', full_name='OneOfMessage.int_1', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='int_2', full_name='OneOfMessage.int_2', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='one_of_message', full_name='OneOfMessage.one_of_message',
+      index=0, containing_type=None, fields=[]),
+  ],
+  serialized_start=128,
+  serialized_end=194,
+)
 
 
 _EMBEDDEDMESSAGE = _descriptor.Descriptor(
@@ -52,8 +147,8 @@ _EMBEDDEDMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=35,
-  serialized_end=70,
+  serialized_start=196,
+  serialized_end=231,
 )
 
 
@@ -104,8 +199,8 @@ _TESTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=73,
-  serialized_end=220,
+  serialized_start=234,
+  serialized_end=381,
 )
 
 
@@ -135,15 +230,39 @@ _REQUIREDMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=222,
-  serialized_end=261,
+  serialized_start=383,
+  serialized_end=422,
 )
 
+_ENUMMESSAGE.fields_by_name['test_enum'].enum_type = _ENUMMESSAGE_TESTENUM
+_ENUMMESSAGE_TESTENUM.containing_type = _ENUMMESSAGE
+_ONEOFMESSAGE.oneofs_by_name['one_of_message'].fields.append(
+  _ONEOFMESSAGE.fields_by_name['int_1'])
+_ONEOFMESSAGE.fields_by_name['int_1'].containing_oneof = _ONEOFMESSAGE.oneofs_by_name['one_of_message']
+_ONEOFMESSAGE.oneofs_by_name['one_of_message'].fields.append(
+  _ONEOFMESSAGE.fields_by_name['int_2'])
+_ONEOFMESSAGE.fields_by_name['int_2'].containing_oneof = _ONEOFMESSAGE.oneofs_by_name['one_of_message']
 _TESTMESSAGE.fields_by_name['embedded_message'].message_type = _EMBEDDEDMESSAGE
 _TESTMESSAGE.fields_by_name['embedded_message_list'].message_type = _EMBEDDEDMESSAGE
+DESCRIPTOR.message_types_by_name['EnumMessage'] = _ENUMMESSAGE
+DESCRIPTOR.message_types_by_name['OneOfMessage'] = _ONEOFMESSAGE
 DESCRIPTOR.message_types_by_name['EmbeddedMessage'] = _EMBEDDEDMESSAGE
 DESCRIPTOR.message_types_by_name['TestMessage'] = _TESTMESSAGE
 DESCRIPTOR.message_types_by_name['RequiredMessage'] = _REQUIREDMESSAGE
+
+EnumMessage = _reflection.GeneratedProtocolMessageType('EnumMessage', (_message.Message,), dict(
+  DESCRIPTOR = _ENUMMESSAGE,
+  __module__ = 'hangups.test.test_pblite2_pb2'
+  # @@protoc_insertion_point(class_scope:EnumMessage)
+  ))
+_sym_db.RegisterMessage(EnumMessage)
+
+OneOfMessage = _reflection.GeneratedProtocolMessageType('OneOfMessage', (_message.Message,), dict(
+  DESCRIPTOR = _ONEOFMESSAGE,
+  __module__ = 'hangups.test.test_pblite2_pb2'
+  # @@protoc_insertion_point(class_scope:OneOfMessage)
+  ))
+_sym_db.RegisterMessage(OneOfMessage)
 
 EmbeddedMessage = _reflection.GeneratedProtocolMessageType('EmbeddedMessage', (_message.Message,), dict(
   DESCRIPTOR = _EMBEDDEDMESSAGE,

@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: raise exception for missing required fields
 # TODO: document/test error checking
+# TODO: catch oneof violations for encode/decode
 
 
 def decode(pb_message, pblite):
@@ -64,6 +65,12 @@ def decode(pb_message, pblite):
                     logger.warning(
                         'Message {} ignoring field {} with invalid type: {}'
                         .format(pb_message.__class__.__name__, field.name, e)
+                    )
+                except ValueError as e:
+                    logger.warning(
+                        'Message {} ignoring field {} with unknown value: {}'
+                        .format(pb_message.__class__.__name__, field.name,
+                                repr(value))
                     )
 
 

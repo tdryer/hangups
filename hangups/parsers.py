@@ -4,14 +4,14 @@ import logging
 from collections import namedtuple
 import datetime
 
-from hangups import javascript, schemas, user, hangouts_pb2, pblite2
+from hangups import javascript, user, hangouts_pb2, pblite2
 
 
 logger = logging.getLogger(__name__)
 
 
 def parse_submission(submission):
-    """Yield ClientStateUpdate instances from a channel submission."""
+    """Yield StateUpdate messages from a channel submission."""
     # For each submission payload, yield its messages
     for payload in _get_submission_payloads(submission):
         if payload is not None:
@@ -32,6 +32,7 @@ def _get_submission_payloads(submission):
     for sub in javascript.loads(submission):
 
         if sub[1][0] != 'noop':
+            # TODO: can we use json here instead?
             wrapper = javascript.loads(sub[1][0]['p'])
             # pylint: disable=invalid-sequence-index
             if '3' in wrapper and '2' in wrapper['3']:
@@ -43,23 +44,15 @@ def _get_submission_payloads(submission):
 
 
 def _parse_payload(payload):
-    """Yield a list of ClientStateUpdates."""
-    if payload[0] == 'cbu':
-        # payload[1] is a list of state updates.
-        for raw_update in payload[1]:
-            try:
-                state_update = schemas.CLIENT_STATE_UPDATE.parse(raw_update)
-                logger.info('Parsed ClientStateUpdate: {}'.format(state_update))
-
-                # TODO
-                msg = hangouts_pb2.ClientStateUpdate()
-                pblite2.decode(msg, raw_update)
-                logger.info('Parsed ClientStateUpdate protobuf: {}'.format(msg))
-
-                yield state_update
-            except ValueError as e:
-                logger.warning('Failed to parse ClientStateUpdate: {}'
-                               .format(e))
+    """Yield a list of StateUpdate messages."""
+    if payload[0] == 'cbu':  # ClientBatchUpdate
+        # This is a BatchUpdate containing StateUpdate messages
+        batch_update = hangouts_pb2.BatchUpdate()
+        # TODO: error handling
+        pblite2.decode(batch_update, payload)
+        for state_update in batch_update.state_update:
+            logger.debug('Received StateUpdate:\n%s', state_update)
+            yield state_update
     else:
         logger.info('Ignoring payload with header: {}'.format(payload[0]))
 

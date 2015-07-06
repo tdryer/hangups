@@ -1,5 +1,20 @@
 syntax = "proto2";
 
+message EnumMessage{
+    enum TestEnum {
+        TEST_0 = 0;
+        TEST_1 = 1;
+    }
+    optional TestEnum test_enum = 1;
+}
+
+message OneOfMessage {
+    oneof one_of_message {
+        int32 int_1 = 1;
+        int32 int_2 = 2;
+    }
+}
+
 message EmbeddedMessage {
     optional int32 test_int = 1;
 }

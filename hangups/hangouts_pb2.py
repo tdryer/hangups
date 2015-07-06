@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='hangups/hangouts.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n\x16hangups/hangouts.proto\"Q\n\x19\x43lientDoNotDisturbSetting\x12\x16\n\x0e\x64o_not_disturb\x18\x01 \x01(\x08\x12\x1c\n\x14\x65xpiration_timestamp\x18\x02 \x01(\x04\"N\n\x1a\x43lientNotificationSettings\x12\x30\n\x0c\x64nd_settings\x18\x01 \x01(\x0b\x32\x1a.ClientDoNotDisturbSetting\"\xbd\x01\n\x17\x43lientStateUpdateHeader\x12/\n\x13\x61\x63tive_client_state\x18\x01 \x01(\x0e\x32\x12.ActiveClientState\x12\x18\n\x10request_trace_id\x18\x03 \x01(\t\x12:\n\x15notification_settings\x18\x04 \x01(\x0b\x32\x1b.ClientNotificationSettings\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"\x1c\n\x0e\x43onversationID\x12\n\n\x02id\x18\x01 \x01(\t\"*\n\x06UserID\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63hat_id\x18\x02 \x01(\t\"\xaf\x01\n\x1a\x43lientSetFocusNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x18\n\x07user_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x1c\n\x06status\x18\x04 \x01(\x0e\x32\x0c.FocusStatus\x12\x1c\n\x06\x64\x65vice\x18\x05 \x01(\x0e\x32\x0c.FocusDevice\"6\n\x0e\x43lientPresence\x12\x11\n\treachable\x18\x01 \x01(\x08\x12\x11\n\tavailable\x18\x02 \x01(\x08\"S\n\x14\x43lientPresenceResult\x12\x18\n\x07user_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12!\n\x08presence\x18\x02 \x01(\x0b\x32\x0f.ClientPresence\"E\n\x1a\x43lientPresenceNotification\x12\'\n\x08presence\x18\x01 \x03(\x0b\x32\x15.ClientPresenceResult\"\x93\x01\n\x1b\x43lientSetTypingNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x18\n\x07user_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x1d\n\x06status\x18\x04 \x01(\x0e\x32\r.TypingStatus\"=\n\x16\x43lientClientIdentifier\x12\x10\n\x08resource\x18\x01 \x01(\t\x12\x11\n\theader_id\x18\x02 \x01(\t\"m\n\x19\x43lientClientPresenceState\x12+\n\nidentifier\x18\x01 \x01(\x0b\x32\x17.ClientClientIdentifier\x12#\n\x05state\x18\x02 \x01(\x0e\x32\x14.ClientPresenceState\"[\n\x1e\x43lientSelfPresenceNotification\x12\x39\n\x15\x63lient_presence_state\x18\x01 \x01(\x0b\x32\x1a.ClientClientPresenceState\"\x87\x01\n\x1b\x43lientWatermarkNotification\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationID\x12\x1d\n\x15latest_read_timestamp\x18\x03 \x01(\x04\"\x83\x01\n\x14\x43lientUserEventState\x12\x18\n\x07user_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\t\x12\x34\n\x12notification_level\x18\x03 \x01(\x0e\x32\x18.ClientNotificationLevel\"T\n\nFormatting\x12\x0c\n\x04\x62old\x18\x01 \x01(\x08\x12\x0e\n\x06italic\x18\x02 \x01(\x08\x12\x15\n\rstrikethrough\x18\x03 \x01(\x08\x12\x11\n\tunderline\x18\x04 \x01(\x08\"\x1f\n\x08LinkData\x12\x13\n\x0blink_target\x18\x01 \x01(\t\"r\n\x07Segment\x12\x1a\n\x04type\x18\x01 \x02(\x0e\x32\x0c.SegmentType\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\x1f\n\nformatting\x18\x03 \x01(\x0b\x32\x0b.Formatting\x12\x1c\n\tlink_data\x18\x04 \x01(\x0b\x32\t.LinkData\"\x19\n\tEmbedItem\x12\x0c\n\x04type\x18\x01 \x03(\x04\",\n\nAttachment\x12\x1e\n\nembed_item\x18\x01 \x01(\x0b\x32\n.EmbedItem\"R\n\x14\x43lientMessageContent\x12\x19\n\x07segment\x18\x01 \x03(\x0b\x32\x08.Segment\x12\x1f\n\nattachment\x18\x02 \x03(\x0b\x32\x0b.Attachment\"C\n\x11\x43lientChatMessage\x12.\n\x0fmessage_content\x18\x03 \x01(\x0b\x32\x15.ClientMessageContent\"\x18\n\x16\x43lientMembershipChange\"\x1a\n\x18\x43lientConversationRename\"\x14\n\x12\x43lientHangoutEvent\"\x17\n\x15\x43lientOTRModification\"\xe7\x03\n\x0b\x43lientEvent\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1a\n\tsender_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12/\n\x10self_event_state\x18\x04 \x01(\x0b\x32\x15.ClientUserEventState\x12(\n\x0c\x63hat_message\x18\x07 \x01(\x0b\x32\x12.ClientChatMessage\x12\x32\n\x11membership_change\x18\t \x01(\x0b\x32\x17.ClientMembershipChange\x12\x36\n\x13\x63onversation_rename\x18\n \x01(\x0b\x32\x19.ClientConversationRename\x12*\n\rhangout_event\x18\x0b \x01(\x0b\x32\x13.ClientHangoutEvent\x12\x10\n\x08\x65vent_id\x18\x0c \x01(\t\x12\x1f\n\x17\x61\x64vances_sort_timestamp\x18\r \x01(\x08\x12\x30\n\x10otr_modification\x18\x0e \x01(\x0b\x32\x16.ClientOTRModification\x12\'\n\notr_status\x18\x10 \x01(\x0e\x32\x13.OffTheRecordStatus\"6\n\x17\x43lientEventNotification\x12\x1b\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x0c.ClientEvent\"U\n\x13\x43lientUserReadState\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1d\n\x15latest_read_timestamp\x18\x02 \x01(\x04\"\xbd\x02\n\x1b\x43lientUserConversationState\x12-\n\x0fself_read_state\x18\x07 \x01(\x0b\x32\x14.ClientUserReadState\x12)\n\x06status\x18\x08 \x01(\x0e\x32\x19.ClientConversationStatus\x12\x34\n\x12notification_level\x18\t \x01(\x0e\x32\x18.ClientNotificationLevel\x12%\n\x04view\x18\n \x03(\x0e\x32\x17.ClientConversationView\x12\x1b\n\ninviter_id\x18\x0b \x01(\x0b\x32\x07.UserID\x12\x18\n\x10invite_timestamp\x18\x0c \x01(\x04\x12\x16\n\x0esort_timestamp\x18\r \x01(\x04\x12\x18\n\x10\x61\x63tive_timestamp\x18\x0e \x01(\x04\"O\n!ClientConversationParticipantData\x12\x13\n\x02id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x15\n\rfallback_name\x18\x02 \x01(\t\"\xe3\x02\n\x12\x43lientConversation\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.ConversationType\x12\x0c\n\x04name\x18\x03 \x01(\t\x12=\n\x17self_conversation_state\x18\x04 \x01(\x0b\x32\x1c.ClientUserConversationState\x12(\n\nread_state\x18\x08 \x03(\x0b\x32\x14.ClientUserReadState\x12\'\n\notr_status\x18\n \x01(\x0e\x32\x13.OffTheRecordStatus\x12$\n\x13\x63urrent_participant\x18\r \x03(\x0b\x32\x07.UserID\x12<\n\x10participant_data\x18\x0e \x03(\x0b\x32\".ClientConversationParticipantData\"\x9a\x01\n2ClientSetConversationNotificationLevelNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\'\n\x05level\x18\x02 \x01(\x0e\x32\x18.ClientNotificationLevel\x12\x11\n\ttimestamp\x18\x04 \x01(\x04\"\"\n\x0f\x43lientEasterEgg\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x89\x01\n\x1b\x43lientEasterEggNotification\x12\x1a\n\tsender_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationID\x12$\n\neaster_egg\x18\x03 \x01(\x0b\x32\x10.ClientEasterEgg\"\x89\x01\n\x1a\x43lientSettingsNotification\x12,\n\x03\x66oo\x18\x01 \x03(\x0b\x32\x1f.ClientSettingsNotification.Foo\x1a=\n\x03\x46oo\x12\x1f\n\x07setting\x18\x01 \x01(\x0e\x32\x0e.ClientSetting\x12\x15\n\rsetting_value\x18\x02 \x01(\x08\"*\n(ClientSetNotificationSettingNotification\"\xa4\x01\n\"ClientConversationViewModification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12)\n\x08old_view\x18\x02 \x01(\x0e\x32\x17.ClientConversationView\x12)\n\x08new_view\x18\x03 \x01(\x0e\x32\x17.ClientConversationView\"[\n\x12\x43lientDeleteAction\x12\x1f\n\x17\x64\x65lete_action_timestamp\x18\x01 \x01(\x04\x12$\n\x1c\x64\x65lete_upper_bound_timestamp\x18\x02 \x01(\x04\"v\n\x1e\x43lientDeleteActionNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12*\n\rdelete_action\x18\x02 \x01(\x0b\x32\x13.ClientDeleteAction\"e\n\x16\x43lientBlockStateChange\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12*\n\x0fnew_block_state\x18\x02 \x01(\x0e\x32\x11.ClientBlockState\"N\n\x17\x43lientBlockNotification\x12\x33\n\x12\x62lock_state_change\x18\x01 \x03(\x0b\x32\x17.ClientBlockStateChange\"s\n\x1f\x43lientReplyToInviteNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12&\n\x04type\x18\x02 \x01(\x0e\x32\x18.ClientReplyToInviteType\"\xca\x08\n\x11\x43lientStateUpdate\x12<\n\x1a\x63lient_state_update_header\x18\x01 \x01(\x0b\x32\x18.ClientStateUpdateHeader\x12\x30\n\x13\x63lient_conversation\x18\r \x01(\x0b\x32\x13.ClientConversation\x12\x36\n\x12\x65vent_notification\x18\x03 \x01(\x0b\x32\x18.ClientEventNotificationH\x00\x12\x39\n\x12\x66ocus_notification\x18\x04 \x01(\x0b\x32\x1b.ClientSetFocusNotificationH\x00\x12;\n\x13typing_notification\x18\x05 \x01(\x0b\x32\x1c.ClientSetTypingNotificationH\x00\x12^\n\x1fnotification_level_notification\x18\x06 \x01(\x0b\x32\x33.ClientSetConversationNotificationLevelNotificationH\x00\x12H\n\x1creply_to_invite_notification\x18\x07 \x01(\x0b\x32 .ClientReplyToInviteNotificationH\x00\x12>\n\x16watermark_notification\x18\x08 \x01(\x0b\x32\x1c.ClientWatermarkNotificationH\x00\x12@\n\x11view_modification\x18\x0b \x01(\x0b\x32#.ClientConversationViewModificationH\x00\x12?\n\x17\x65\x61ster_egg_notification\x18\x0c \x01(\x0b\x32\x1c.ClientEasterEggNotificationH\x00\x12\x45\n\x1aself_presence_notification\x18\x0e \x01(\x0b\x32\x1f.ClientSelfPresenceNotificationH\x00\x12>\n\x13\x64\x65lete_notification\x18\x0f \x01(\x0b\x32\x1f.ClientDeleteActionNotificationH\x00\x12<\n\x15presence_notification\x18\x10 \x01(\x0b\x32\x1b.ClientPresenceNotificationH\x00\x12\x36\n\x12\x62lock_notification\x18\x11 \x01(\x0b\x32\x18.ClientBlockNotificationH\x00\x12V\n!notification_setting_notification\x18\x13 \x01(\x0b\x32).ClientSetNotificationSettingNotificationH\x00\x12<\n\x15settings_notification\x18\x14 \x01(\x0b\x32\x1b.ClientSettingsNotificationH\x00\x42\x15\n\x13\x63lient_state_update\"@\n\x05Photo\x12\x10\n\x08photo_id\x18\x01 \x01(\t\x12%\n\x1d\x64\x65lete_albumless_source_photo\x18\x02 \x01(\x08\",\n\x13\x43lientExistingMedia\x12\x15\n\x05photo\x18\x01 \x01(\x0b\x32\x06.Photo\"\x8c\x01\n\x18\x43lientEventRequestHeader\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\x04\x12)\n\x0c\x65xpected_otr\x18\x03 \x01(\x0e\x32\x13.OffTheRecordStatus\"\xbf\x01\n\x13\x43lientClientVersion\x12\x1c\n\tclient_id\x18\x01 \x01(\x0e\x32\t.ClientId\x12$\n\nbuild_type\x18\x02 \x01(\x0e\x32\x10.ClientBuildType\x12\x15\n\rmajor_version\x18\x03 \x01(\t\x12\x19\n\x11version_timestamp\x18\x04 \x01(\x04\x12\x19\n\x11\x64\x65vice_os_version\x18\x05 \x01(\t\x12\x17\n\x0f\x64\x65vice_hardware\x18\x06 \x01(\t\"\x8e\x01\n\x13\x43lientRequestHeader\x12,\n\x0e\x63lient_version\x18\x01 \x01(\x0b\x32\x14.ClientClientVersion\x12\x32\n\x11\x63lient_identifier\x18\x02 \x01(\x0b\x32\x17.ClientClientIdentifier\x12\x15\n\rlanguage_code\x18\x04 \x01(\t\"\x8f\x01\n\x14\x43lientResponseHeader\x12%\n\x06status\x18\x01 \x01(\x0e\x32\x15.ClientResponseStatus\x12\x19\n\x11\x65rror_description\x18\x02 \x01(\t\x12\x18\n\x10request_trace_id\x18\x04 \x01(\t\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\">\n\x0e\x41\x64\x64UserRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x11\n\x0f\x41\x64\x64UserResponse\"I\n\x19\x43reateConversationRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x1c\n\x1a\x43reateConversationResponse\"I\n\x19\x44\x65leteConversationRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x1c\n\x1a\x44\x65leteConversationResponse\"F\n\x16GetConversationRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x19\n\x17GetConversationResponse\"D\n\x14GetEntityByIdRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x17\n\x15GetEntityByIdResponse\"B\n\x12GetSelfInfoRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x15\n\x13GetSelfInfoResponse\"D\n\x14QueryPresenceRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x17\n\x15QueryPresenceResponse\"A\n\x11RemoveUserRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x14\n\x12RemoveUserResponse\"E\n\x15SearchEntitiesRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x18\n\x16SearchEntitiesResponse\"\xdd\x01\n\x16SendChatMessageRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\x12.\n\x0fmessage_content\x18\x06 \x01(\x0b\x32\x15.ClientMessageContent\x12,\n\x0e\x65xisting_media\x18\x07 \x01(\x0b\x32\x14.ClientExistingMedia\x12\x37\n\x14\x65vent_request_header\x18\x08 \x01(\x0b\x32\x19.ClientEventRequestHeader\"\x81\x01\n\x17SendChatMessageResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12.\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x15.ClientResponseHeader\x12#\n\rcreated_event\x18\x07 \x01(\x0b\x32\x0c.ClientEvent\"D\n\x14SendEasterEggRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x17\n\x15SendEasterEggResponse\"\x81\x01\n\x16SetActiveClientRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\x12\x11\n\tis_active\x18\x02 \x01(\x08\x12\x10\n\x08\x66ull_jid\x18\x03 \x01(\t\x12\x14\n\x0ctimeout_secs\x18\x04 \x01(\x04\"\\\n\x17SetActiveClientResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12.\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x15.ClientResponseHeader\"B\n\x12SetChatNameRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x15\n\x13SetChatNameResponse\"K\n\x1bSetConversationLevelRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x1e\n\x1cSetConversationLevelResponse\"B\n\x12SetPresenceRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x15\n\x13SetPresenceResponse\"@\n\x10SetTypingRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x13\n\x11SetTypingResponse\"G\n\x17SyncAllNewEventsRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x1a\n\x18SyncAllNewEventsResponse\"N\n\x1eSyncRecentConversationsRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"!\n\x1fSyncRecentConversationsResponse\"F\n\x16UpdateWatermarkRequest\x12,\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x14.ClientRequestHeader\"\x19\n\x17UpdateWatermarkResponse*[\n\x11\x41\x63tiveClientState\x12\x14\n\x10NO_ACTIVE_CLIENT\x10\x00\x12\x14\n\x10IS_ACTIVE_CLIENT\x10\x01\x12\x1a\n\x16OTHER_CLIENT_IS_ACTIVE\x10\x02*6\n\x0b\x46ocusStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07\x46OCUSED\x10\x01\x12\r\n\tUNFOCUSED\x10\x02*8\n\x0b\x46ocusDevice\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0b\n\x07\x44\x45SKTOP\x10\x14\x12\x0b\n\x06MOBILE\x10\xac\x02*]\n\x0cTypingStatus\x12\x12\n\x0eTYPING_UNKNOWN\x10\x00\x12\x12\n\x0eTYPING_STARTED\x10\x01\x12\x11\n\rTYPING_PAUSED\x10\x02\x12\x12\n\x0eTYPING_STOPPED\x10\x03*u\n\x13\x43lientPresenceState\x12\x11\n\rPRESENCE_NONE\x10\x00\x12\x13\n\x0fPRESENCE_MOBILE\x10\x01\x12\x19\n\x15PRESENCE_DESKTOP_IDLE\x10\x02\x12\x1b\n\x17PRESENCE_DESKTOP_ACTIVE\x10\x03*N\n\x17\x43lientNotificationLevel\x12\x1e\n\x1aNOTIFICATION_LEVEL_UNKNOWN\x10\x00\x12\t\n\x05QUIET\x10\n\x12\x08\n\x04RING\x10\x1e*1\n\x0bSegmentType\x12\x08\n\x04TEXT\x10\x00\x12\x0e\n\nLINE_BREAK\x10\x01\x12\x08\n\x04LINK\x10\x02*^\n\x12OffTheRecordStatus\x12!\n\x1dOFF_THE_RECORD_STATUS_UNKNOWN\x10\x00\x12\x12\n\x0eOFF_THE_RECORD\x10\x01\x12\x11\n\rON_THE_RECORD\x10\x02*L\n\x10\x43onversationType\x12\x1d\n\x19\x43ONVERSATION_TYPE_UNKNOWN\x10\x00\x12\x0e\n\nONE_TO_ONE\x10\x01\x12\t\n\x05GROUP\x10\x02*^\n\x18\x43lientConversationStatus\x12\x1f\n\x1bUNKNOWN_CONVERSATION_STATUS\x10\x00\x12\x0b\n\x07INVITED\x10\x01\x12\n\n\x06\x41\x43TIVE\x10\x02\x12\x08\n\x04LEFT\x10\x03*Z\n\x16\x43lientConversationView\x12\x1d\n\x19UNKNOWN_CONVERSATION_VIEW\x10\x00\x12\x0e\n\nINBOX_VIEW\x10\x01\x12\x11\n\rARCHIVED_VIEW\x10\x02*[\n\rClientSetting\x12\x13\n\x0fSETTING_UNKNOWN\x10\x00\x12\x10\n\x0cSHOW_IN_CALL\x10\x01\x12\x0f\n\x0bSHOW_DEVICE\x10\x02\x12\x12\n\x0eSHOW_LAST_SEEN\x10\x06*C\n\x10\x43lientBlockState\x12\x17\n\x13\x42LOCK_STATE_UNKNOWN\x10\x00\x12\t\n\x05\x42LOCK\x10\x01\x12\x0b\n\x07UNBLOCK\x10\x02*T\n\x17\x43lientReplyToInviteType\x12 \n\x1cREPLY_TO_INVITE_TYPE_UNKNOWN\x10\x00\x12\n\n\x06\x41\x43\x43\x45PT\x10\x01\x12\x0b\n\x07\x44\x45\x43LINE\x10\x02*\xae\x01\n\x08\x43lientId\x12\x15\n\x11\x43LIENT_ID_UNKNOWN\x10\x00\x12\x15\n\x11\x43LIENT_ID_ANDROID\x10\x01\x12\x11\n\rCLIENT_ID_IOS\x10\x02\x12\x14\n\x10\x43LIENT_ID_CHROME\x10\x03\x12\x17\n\x13\x43LIENT_ID_WEB_GPLUS\x10\x05\x12\x17\n\x13\x43LIENT_ID_WEB_GMAIL\x10\x06\x12\x19\n\x15\x43LIENT_ID_ULTRAVIOLET\x10\r*g\n\x0f\x43lientBuildType\x12\x16\n\x12\x42UILD_TYPE_UNKNOWN\x10\x00\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_WEB\x10\x01\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_APP\x10\x03*\x96\x01\n\x14\x43lientResponseStatus\x12\x1b\n\x17RESPONSE_STATUS_UNKNOWN\x10\x00\x12\x16\n\x12RESPONSE_STATUS_OK\x10\x01\x12$\n RESPONSE_STATUS_UNEXPECTED_ERROR\x10\x03\x12#\n\x1fRESPONSE_STATUS_INVALID_REQUEST\x10\x04')
+  serialized_pb=_b('\n\x16hangups/hangouts.proto\"K\n\x13\x44oNotDisturbSetting\x12\x16\n\x0e\x64o_not_disturb\x18\x01 \x01(\x08\x12\x1c\n\x14\x65xpiration_timestamp\x18\x02 \x01(\x04\"B\n\x14NotificationSettings\x12*\n\x0c\x64nd_settings\x18\x01 \x01(\x0b\x32\x14.DoNotDisturbSetting\"\x1c\n\x0e\x43onversationID\x12\n\n\x02id\x18\x01 \x01(\t\"*\n\x06UserID\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63hat_id\x18\x02 \x01(\t\"0\n\x08Presence\x12\x11\n\treachable\x18\x01 \x01(\x08\x12\x11\n\tavailable\x18\x02 \x01(\x08\"G\n\x0ePresenceResult\x12\x18\n\x07user_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1b\n\x08presence\x18\x02 \x01(\x0b\x32\t.Presence\"7\n\x10\x43lientIdentifier\x12\x10\n\x08resource\x18\x01 \x01(\t\x12\x11\n\theader_id\x18\x02 \x01(\t\"e\n\x13\x43lientPresenceState\x12%\n\nidentifier\x18\x01 \x01(\x0b\x32\x11.ClientIdentifier\x12\'\n\x05state\x18\x02 \x01(\x0e\x32\x18.ClientPresenceStateType\"w\n\x0eUserEventState\x12\x18\n\x07user_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\t\x12.\n\x12notification_level\x18\x03 \x01(\x0e\x32\x12.NotificationLevel\"T\n\nFormatting\x12\x0c\n\x04\x62old\x18\x01 \x01(\x08\x12\x0e\n\x06italic\x18\x02 \x01(\x08\x12\x15\n\rstrikethrough\x18\x03 \x01(\x08\x12\x11\n\tunderline\x18\x04 \x01(\x08\"\x1f\n\x08LinkData\x12\x13\n\x0blink_target\x18\x01 \x01(\t\"r\n\x07Segment\x12\x1a\n\x04type\x18\x01 \x02(\x0e\x32\x0c.SegmentType\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\x1f\n\nformatting\x18\x03 \x01(\x0b\x32\x0b.Formatting\x12\x1c\n\tlink_data\x18\x04 \x01(\x0b\x32\t.LinkData\"\x19\n\tEmbedItem\x12\x0c\n\x04type\x18\x01 \x03(\x04\",\n\nAttachment\x12\x1e\n\nembed_item\x18\x01 \x01(\x0b\x32\n.EmbedItem\"L\n\x0eMessageContent\x12\x19\n\x07segment\x18\x01 \x03(\x0b\x32\x08.Segment\x12\x1f\n\nattachment\x18\x02 \x03(\x0b\x32\x0b.Attachment\"7\n\x0b\x43hatMessage\x12(\n\x0fmessage_content\x18\x03 \x01(\x0b\x32\x0f.MessageContent\"\x12\n\x10MembershipChange\"\x14\n\x12\x43onversationRename\"\x0e\n\x0cHangoutEvent\"\x11\n\x0fOTRModification\"\xbd\x03\n\x05\x45vent\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1a\n\tsender_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12)\n\x10self_event_state\x18\x04 \x01(\x0b\x32\x0f.UserEventState\x12\"\n\x0c\x63hat_message\x18\x07 \x01(\x0b\x32\x0c.ChatMessage\x12,\n\x11membership_change\x18\t \x01(\x0b\x32\x11.MembershipChange\x12\x30\n\x13\x63onversation_rename\x18\n \x01(\x0b\x32\x13.ConversationRename\x12$\n\rhangout_event\x18\x0b \x01(\x0b\x32\r.HangoutEvent\x12\x10\n\x08\x65vent_id\x18\x0c \x01(\t\x12\x1f\n\x17\x61\x64vances_sort_timestamp\x18\r \x01(\x08\x12*\n\x10otr_modification\x18\x0e \x01(\x0b\x32\x10.OTRModification\x12\'\n\notr_status\x18\x10 \x01(\x0e\x32\x13.OffTheRecordStatus\"O\n\rUserReadState\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x1d\n\x15latest_read_timestamp\x18\x02 \x01(\x04\"\x9f\x02\n\x15UserConversationState\x12\'\n\x0fself_read_state\x18\x07 \x01(\x0b\x32\x0e.UserReadState\x12#\n\x06status\x18\x08 \x01(\x0e\x32\x13.ConversationStatus\x12.\n\x12notification_level\x18\t \x01(\x0e\x32\x12.NotificationLevel\x12\x1f\n\x04view\x18\n \x03(\x0e\x32\x11.ConversationView\x12\x1b\n\ninviter_id\x18\x0b \x01(\x0b\x32\x07.UserID\x12\x18\n\x10invite_timestamp\x18\x0c \x01(\x04\x12\x16\n\x0esort_timestamp\x18\r \x01(\x04\x12\x18\n\x10\x61\x63tive_timestamp\x18\x0e \x01(\x04\"I\n\x1b\x43onversationParticipantData\x12\x13\n\x02id\x18\x01 \x01(\x0b\x32\x07.UserID\x12\x15\n\rfallback_name\x18\x02 \x01(\t\"\xcb\x02\n\x0c\x43onversation\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.ConversationType\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x37\n\x17self_conversation_state\x18\x04 \x01(\x0b\x32\x16.UserConversationState\x12\"\n\nread_state\x18\x08 \x03(\x0b\x32\x0e.UserReadState\x12\'\n\notr_status\x18\n \x01(\x0e\x32\x13.OffTheRecordStatus\x12$\n\x13\x63urrent_participant\x18\r \x03(\x0b\x32\x07.UserID\x12\x36\n\x10participant_data\x18\x0e \x03(\x0b\x32\x1c.ConversationParticipantData\"\x1c\n\tEasterEgg\x12\x0f\n\x07message\x18\x01 \x01(\t\"U\n\x0c\x44\x65leteAction\x12\x1f\n\x17\x64\x65lete_action_timestamp\x18\x01 \x01(\x04\x12$\n\x1c\x64\x65lete_upper_bound_timestamp\x18\x02 \x01(\x04\"Y\n\x10\x42lockStateChange\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12$\n\x0fnew_block_state\x18\x02 \x01(\x0e\x32\x0b.BlockState\"@\n\x05Photo\x12\x10\n\x08photo_id\x18\x01 \x01(\t\x12%\n\x1d\x64\x65lete_albumless_source_photo\x18\x02 \x01(\x08\"&\n\rExistingMedia\x12\x15\n\x05photo\x18\x01 \x01(\x0b\x32\x06.Photo\"\x86\x01\n\x12\x45ventRequestHeader\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\x04\x12)\n\x0c\x65xpected_otr\x18\x03 \x01(\x0e\x32\x13.OffTheRecordStatus\"\xb9\x01\n\rClientVersion\x12\x1c\n\tclient_id\x18\x01 \x01(\x0e\x32\t.ClientId\x12$\n\nbuild_type\x18\x02 \x01(\x0e\x32\x10.ClientBuildType\x12\x15\n\rmajor_version\x18\x03 \x01(\t\x12\x19\n\x11version_timestamp\x18\x04 \x01(\x04\x12\x19\n\x11\x64\x65vice_os_version\x18\x05 \x01(\t\x12\x17\n\x0f\x64\x65vice_hardware\x18\x06 \x01(\t\"|\n\rRequestHeader\x12&\n\x0e\x63lient_version\x18\x01 \x01(\x0b\x32\x0e.ClientVersion\x12,\n\x11\x63lient_identifier\x18\x02 \x01(\x0b\x32\x11.ClientIdentifier\x12\x15\n\rlanguage_code\x18\x04 \x01(\t\"\x83\x01\n\x0eResponseHeader\x12\x1f\n\x06status\x18\x01 \x01(\x0e\x32\x0f.ResponseStatus\x12\x19\n\x11\x65rror_description\x18\x02 \x01(\t\x12\x18\n\x10request_trace_id\x18\x04 \x01(\t\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"D\n\x06\x45ntity\x12\x13\n\x02id\x18\t \x01(\x0b\x32\x07.UserID\x12%\n\nproperties\x18\n \x01(\x0b\x32\x11.EntityProperties\"\xff\x01\n\x10\x45ntityProperties\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.ProfileType\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x11\n\tphoto_url\x18\x04 \x01(\t\x12\r\n\x05\x65mail\x18\x05 \x03(\t\x12\r\n\x05phone\x18\x06 \x03(\t\x12\x17\n\x0fin_users_domain\x18\n \x01(\x08\x12\x17\n\x06gender\x18\x0b \x01(\x0e\x32\x07.Gender\x12)\n\x10photo_url_status\x18\x0c \x01(\x0e\x32\x0f.PhotoUrlStatus\x12\x17\n\x0f\x63\x61nonical_email\x18\x0f \x01(\t\"\xb4\x01\n\x11\x43onversationState\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12#\n\x0c\x63onversation\x18\x02 \x01(\x0b\x32\r.Conversation\x12\x15\n\x05\x65vent\x18\x03 \x03(\x0b\x32\x06.Event\x12\x39\n\x18\x65vent_continuation_token\x18\x05 \x01(\x0b\x32\x17.EventContinuationToken\"g\n\x16\x45ventContinuationToken\x12\x10\n\x08\x65vent_id\x18\x01 \x01(\t\x12\"\n\x1astorage_continuation_token\x18\x02 \x01(\t\x12\x17\n\x0f\x65vent_timestamp\x18\x03 \x01(\x04\"#\n\x10\x45ntityLookupSpec\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\"\xcf\x07\n\x0bStateUpdate\x12/\n\x13state_update_header\x18\x01 \x01(\x0b\x32\x12.StateUpdateHeader\x12#\n\x0c\x63onversation\x18\r \x01(\x0b\x32\r.Conversation\x12\x30\n\x12\x65vent_notification\x18\x03 \x01(\x0b\x32\x12.EventNotificationH\x00\x12\x33\n\x12\x66ocus_notification\x18\x04 \x01(\x0b\x32\x15.SetFocusNotificationH\x00\x12\x35\n\x13typing_notification\x18\x05 \x01(\x0b\x32\x16.SetTypingNotificationH\x00\x12X\n\x1fnotification_level_notification\x18\x06 \x01(\x0b\x32-.SetConversationNotificationLevelNotificationH\x00\x12\x42\n\x1creply_to_invite_notification\x18\x07 \x01(\x0b\x32\x1a.ReplyToInviteNotificationH\x00\x12\x38\n\x16watermark_notification\x18\x08 \x01(\x0b\x32\x16.WatermarkNotificationH\x00\x12:\n\x11view_modification\x18\x0b \x01(\x0b\x32\x1d.ConversationViewModificationH\x00\x12\x39\n\x17\x65\x61ster_egg_notification\x18\x0c \x01(\x0b\x32\x16.EasterEggNotificationH\x00\x12?\n\x1aself_presence_notification\x18\x0e \x01(\x0b\x32\x19.SelfPresenceNotificationH\x00\x12\x38\n\x13\x64\x65lete_notification\x18\x0f \x01(\x0b\x32\x19.DeleteActionNotificationH\x00\x12\x36\n\x15presence_notification\x18\x10 \x01(\x0b\x32\x15.PresenceNotificationH\x00\x12\x30\n\x12\x62lock_notification\x18\x11 \x01(\x0b\x32\x12.BlockNotificationH\x00\x12P\n!notification_setting_notification\x18\x13 \x01(\x0b\x32#.SetNotificationSettingNotificationH\x00\x12\x36\n\x15settings_notification\x18\x14 \x01(\x0b\x32\x15.SettingsNotificationH\x00\x42\x0e\n\x0cstate_update\"\xb1\x01\n\x11StateUpdateHeader\x12/\n\x13\x61\x63tive_client_state\x18\x01 \x01(\x0e\x32\x12.ActiveClientState\x12\x18\n\x10request_trace_id\x18\x03 \x01(\t\x12\x34\n\x15notification_settings\x18\x04 \x01(\x0b\x32\x15.NotificationSettings\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"D\n\x0b\x42\x61tchUpdate\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12\"\n\x0cstate_update\x18\x02 \x03(\x0b\x32\x0c.StateUpdate\"*\n\x11\x45ventNotification\x12\x15\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x06.Event\"\xa9\x01\n\x14SetFocusNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x18\n\x07user_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x1c\n\x06status\x18\x04 \x01(\x0e\x32\x0c.FocusStatus\x12\x1c\n\x06\x64\x65vice\x18\x05 \x01(\x0e\x32\x0c.FocusDevice\"\x8d\x01\n\x15SetTypingNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12\x18\n\x07user_id\x18\x02 \x01(\x0b\x32\x07.UserID\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x1d\n\x06status\x18\x04 \x01(\x0e\x32\r.TypingStatus\"\x8e\x01\n,SetConversationNotificationLevelNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12!\n\x05level\x18\x02 \x01(\x0e\x32\x12.NotificationLevel\x12\x11\n\ttimestamp\x18\x04 \x01(\x04\"g\n\x19ReplyToInviteNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12 \n\x04type\x18\x02 \x01(\x0e\x32\x12.ReplyToInviteType\"\x81\x01\n\x15WatermarkNotification\x12\x1f\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationID\x12\x1d\n\x15latest_read_timestamp\x18\x03 \x01(\x04\"\x92\x01\n\x1c\x43onversationViewModification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12#\n\x08old_view\x18\x02 \x01(\x0e\x32\x11.ConversationView\x12#\n\x08new_view\x18\x03 \x01(\x0e\x32\x11.ConversationView\"}\n\x15\x45\x61sterEggNotification\x12\x1a\n\tsender_id\x18\x01 \x01(\x0b\x32\x07.UserID\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationID\x12\x1e\n\neaster_egg\x18\x03 \x01(\x0b\x32\n.EasterEgg\"O\n\x18SelfPresenceNotification\x12\x33\n\x15\x63lient_presence_state\x18\x01 \x01(\x0b\x32\x14.ClientPresenceState\"j\n\x18\x44\x65leteActionNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\x12$\n\rdelete_action\x18\x02 \x01(\x0b\x32\r.DeleteAction\"9\n\x14PresenceNotification\x12!\n\x08presence\x18\x01 \x03(\x0b\x32\x0f.PresenceResult\"B\n\x11\x42lockNotification\x12-\n\x12\x62lock_state_change\x18\x01 \x03(\x0b\x32\x11.BlockStateChange\"$\n\"SetNotificationSettingNotification\"{\n\x14SettingsNotification\x12&\n\x03\x66oo\x18\x01 \x03(\x0b\x32\x19.SettingsNotification.Foo\x1a;\n\x03\x46oo\x12\x1d\n\x07setting\x18\x01 \x01(\x0e\x32\x0c.SettingType\x12\x15\n\rsetting_value\x18\x02 \x01(\x08\"<\n\x10\x43onversationSpec\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationID\"8\n\x0e\x41\x64\x64UserRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x11\n\x0f\x41\x64\x64UserResponse\"C\n\x19\x43reateConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x1c\n\x1a\x43reateConversationResponse\"C\n\x19\x44\x65leteConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x1c\n\x1a\x44\x65leteConversationResponse\"\xe5\x01\n\x16GetConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12,\n\x11\x63onversation_spec\x18\x02 \x01(\x0b\x32\x11.ConversationSpec\x12\x15\n\rinclude_event\x18\x04 \x01(\x08\x12#\n\x1bmax_events_per_conversation\x18\x06 \x01(\x04\x12\x39\n\x18\x65vent_continuation_token\x18\x07 \x01(\x0b\x32\x17.EventContinuationToken\"\x86\x01\n\x17GetConversationResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12(\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x0f.ResponseHeader\x12.\n\x12\x63onversation_state\x18\x03 \x01(\x0b\x32\x12.ConversationState\"l\n\x14GetEntityByIdRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12,\n\x11\x62\x61tch_lookup_spec\x18\x03 \x03(\x0b\x32\x11.EntityLookupSpec\"m\n\x15GetEntityByIdResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12(\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x0f.ResponseHeader\x12\x17\n\x06\x65ntity\x18\x03 \x03(\x0b\x32\x07.Entity\"E\n\x1bGetSuggestedEntitiesRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\xc4\x04\n\x1cGetSuggestedEntitiesResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12(\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x0f.ResponseHeader\x12\x17\n\x06\x65ntity\x18\x03 \x03(\x0b\x32\x07.Entity\x12\x39\n\x06group1\x18\x05 \x01(\x0b\x32).GetSuggestedEntitiesResponse.EntityGroup\x12\x39\n\x06group2\x18\x06 \x01(\x0b\x32).GetSuggestedEntitiesResponse.EntityGroup\x12\x39\n\x06group3\x18\x07 \x01(\x0b\x32).GetSuggestedEntitiesResponse.EntityGroup\x12\x39\n\x06group4\x18\x08 \x01(\x0b\x32).GetSuggestedEntitiesResponse.EntityGroup\x12\x39\n\x06group5\x18\t \x01(\x0b\x32).GetSuggestedEntitiesResponse.EntityGroup\x12\x39\n\x06group6\x18\n \x01(\x0b\x32).GetSuggestedEntitiesResponse.EntityGroup\x1al\n\x0b\x45ntityGroup\x12=\n\x06\x65ntity\x18\x03 \x03(\x0b\x32-.GetSuggestedEntitiesResponse.EntityGroup.Foo\x1a\x1e\n\x03\x46oo\x12\x17\n\x06\x65ntity\x18\x01 \x01(\x0b\x32\x07.Entity\"<\n\x12GetSelfInfoRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"p\n\x13GetSelfInfoResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12(\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1c\n\x0bself_entity\x18\x03 \x01(\x0b\x32\x07.Entity\">\n\x14QueryPresenceRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x17\n\x15QueryPresenceResponse\";\n\x11RemoveUserRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x14\n\x12RemoveUserResponse\"?\n\x15SearchEntitiesRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x18\n\x16SearchEntitiesResponse\"\xc5\x01\n\x16SendChatMessageRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0fmessage_content\x18\x06 \x01(\x0b\x32\x0f.MessageContent\x12&\n\x0e\x65xisting_media\x18\x07 \x01(\x0b\x32\x0e.ExistingMedia\x12\x31\n\x14\x65vent_request_header\x18\x08 \x01(\x0b\x32\x13.EventRequestHeader\"u\n\x17SendChatMessageResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12(\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x07 \x01(\x0b\x32\x06.Event\">\n\x14SendEasterEggRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x17\n\x15SendEasterEggResponse\"{\n\x16SetActiveClientRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x11\n\tis_active\x18\x02 \x01(\x08\x12\x10\n\x08\x66ull_jid\x18\x03 \x01(\t\x12\x14\n\x0ctimeout_secs\x18\x04 \x01(\x04\"V\n\x17SetActiveClientResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12(\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x0f.ResponseHeader\"<\n\x12SetChatNameRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x15\n\x13SetChatNameResponse\"E\n\x1bSetConversationLevelRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x1e\n\x1cSetConversationLevelResponse\"<\n\x12SetPresenceRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x15\n\x13SetPresenceResponse\":\n\x10SetTypingRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x13\n\x11SetTypingResponse\"\x7f\n\x17SyncAllNewEventsRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1b\n\x13last_sync_timestamp\x18\x02 \x01(\x04\x12\x1f\n\x17max_response_size_bytes\x18\x08 \x01(\x04\"\x9f\x01\n\x18SyncAllNewEventsResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12(\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x0f.ResponseHeader\x12\x16\n\x0esync_timestamp\x18\x03 \x01(\x04\x12.\n\x12\x63onversation_state\x18\x04 \x03(\x0b\x32\x12.ConversationState\"H\n\x1eSyncRecentConversationsRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\xa6\x01\n\x1fSyncRecentConversationsResponse\x12\x11\n\tsome_code\x18\x01 \x01(\t\x12(\n\x0fresponse_header\x18\x02 \x01(\x0b\x32\x0f.ResponseHeader\x12\x16\n\x0esync_timestamp\x18\x03 \x01(\x04\x12.\n\x12\x63onversation_state\x18\x04 \x03(\x0b\x32\x12.ConversationState\"@\n\x16UpdateWatermarkRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\x19\n\x17UpdateWatermarkResponse*[\n\x11\x41\x63tiveClientState\x12\x14\n\x10NO_ACTIVE_CLIENT\x10\x00\x12\x14\n\x10IS_ACTIVE_CLIENT\x10\x01\x12\x1a\n\x16OTHER_CLIENT_IS_ACTIVE\x10\x02*6\n\x0b\x46ocusStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07\x46OCUSED\x10\x01\x12\r\n\tUNFOCUSED\x10\x02*8\n\x0b\x46ocusDevice\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0b\n\x07\x44\x45SKTOP\x10\x14\x12\x0b\n\x06MOBILE\x10\xac\x02*]\n\x0cTypingStatus\x12\x12\n\x0eTYPING_UNKNOWN\x10\x00\x12\x12\n\x0eTYPING_STARTED\x10\x01\x12\x11\n\rTYPING_PAUSED\x10\x02\x12\x12\n\x0eTYPING_STOPPED\x10\x03*y\n\x17\x43lientPresenceStateType\x12\x11\n\rPRESENCE_NONE\x10\x00\x12\x13\n\x0fPRESENCE_MOBILE\x10\x01\x12\x19\n\x15PRESENCE_DESKTOP_IDLE\x10\x02\x12\x1b\n\x17PRESENCE_DESKTOP_ACTIVE\x10\x03*H\n\x11NotificationLevel\x12\x1e\n\x1aNOTIFICATION_LEVEL_UNKNOWN\x10\x00\x12\t\n\x05QUIET\x10\n\x12\x08\n\x04RING\x10\x1e*1\n\x0bSegmentType\x12\x08\n\x04TEXT\x10\x00\x12\x0e\n\nLINE_BREAK\x10\x01\x12\x08\n\x04LINK\x10\x02*^\n\x12OffTheRecordStatus\x12!\n\x1dOFF_THE_RECORD_STATUS_UNKNOWN\x10\x00\x12\x12\n\x0eOFF_THE_RECORD\x10\x01\x12\x11\n\rON_THE_RECORD\x10\x02*L\n\x10\x43onversationType\x12\x1d\n\x19\x43ONVERSATION_TYPE_UNKNOWN\x10\x00\x12\x0e\n\nONE_TO_ONE\x10\x01\x12\t\n\x05GROUP\x10\x02*X\n\x12\x43onversationStatus\x12\x1f\n\x1bUNKNOWN_CONVERSATION_STATUS\x10\x00\x12\x0b\n\x07INVITED\x10\x01\x12\n\n\x06\x41\x43TIVE\x10\x02\x12\x08\n\x04LEFT\x10\x03*T\n\x10\x43onversationView\x12\x1d\n\x19UNKNOWN_CONVERSATION_VIEW\x10\x00\x12\x0e\n\nINBOX_VIEW\x10\x01\x12\x11\n\rARCHIVED_VIEW\x10\x02*Y\n\x0bSettingType\x12\x13\n\x0fSETTING_UNKNOWN\x10\x00\x12\x10\n\x0cSHOW_IN_CALL\x10\x01\x12\x0f\n\x0bSHOW_DEVICE\x10\x02\x12\x12\n\x0eSHOW_LAST_SEEN\x10\x06*=\n\nBlockState\x12\x17\n\x13\x42LOCK_STATE_UNKNOWN\x10\x00\x12\t\n\x05\x42LOCK\x10\x01\x12\x0b\n\x07UNBLOCK\x10\x02*N\n\x11ReplyToInviteType\x12 \n\x1cREPLY_TO_INVITE_TYPE_UNKNOWN\x10\x00\x12\n\n\x06\x41\x43\x43\x45PT\x10\x01\x12\x0b\n\x07\x44\x45\x43LINE\x10\x02*\xae\x01\n\x08\x43lientId\x12\x15\n\x11\x43LIENT_ID_UNKNOWN\x10\x00\x12\x15\n\x11\x43LIENT_ID_ANDROID\x10\x01\x12\x11\n\rCLIENT_ID_IOS\x10\x02\x12\x14\n\x10\x43LIENT_ID_CHROME\x10\x03\x12\x17\n\x13\x43LIENT_ID_WEB_GPLUS\x10\x05\x12\x17\n\x13\x43LIENT_ID_WEB_GMAIL\x10\x06\x12\x19\n\x15\x43LIENT_ID_ULTRAVIOLET\x10\r*g\n\x0f\x43lientBuildType\x12\x16\n\x12\x42UILD_TYPE_UNKNOWN\x10\x00\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_WEB\x10\x01\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_APP\x10\x03*\x90\x01\n\x0eResponseStatus\x12\x1b\n\x17RESPONSE_STATUS_UNKNOWN\x10\x00\x12\x16\n\x12RESPONSE_STATUS_OK\x10\x01\x12$\n RESPONSE_STATUS_UNEXPECTED_ERROR\x10\x03\x12#\n\x1fRESPONSE_STATUS_INVALID_REQUEST\x10\x04*O\n\x0ePhotoUrlStatus\x12\x1c\n\x18PHOTO_URL_STATUS_UNKNOWN\x10\x00\x12\x1f\n\x1bPHOTO_URL_STATUS_USER_PHOTO\x10\x02*@\n\x06Gender\x12\x12\n\x0eGENDER_UNKNOWN\x10\x00\x12\x0f\n\x0bGENDER_MALE\x10\x01\x12\x11\n\rGENDER_FEMALE\x10\x02*>\n\x0bProfileType\x12\x15\n\x11PROFILE_TYPE_NONE\x10\x00\x12\x18\n\x14PROFILE_TYPE_ES_USER\x10\x01')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -45,8 +45,8 @@ _ACTIVECLIENTSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=8755,
-  serialized_end=8846,
+  serialized_start=10296,
+  serialized_end=10387,
 )
 _sym_db.RegisterEnumDescriptor(_ACTIVECLIENTSTATE)
 
@@ -72,8 +72,8 @@ _FOCUSSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=8848,
-  serialized_end=8902,
+  serialized_start=10389,
+  serialized_end=10443,
 )
 _sym_db.RegisterEnumDescriptor(_FOCUSSTATUS)
 
@@ -99,8 +99,8 @@ _FOCUSDEVICE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=8904,
-  serialized_end=8960,
+  serialized_start=10445,
+  serialized_end=10501,
 )
 _sym_db.RegisterEnumDescriptor(_FOCUSDEVICE)
 
@@ -130,15 +130,15 @@ _TYPINGSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=8962,
-  serialized_end=9055,
+  serialized_start=10503,
+  serialized_end=10596,
 )
 _sym_db.RegisterEnumDescriptor(_TYPINGSTATUS)
 
 TypingStatus = enum_type_wrapper.EnumTypeWrapper(_TYPINGSTATUS)
-_CLIENTPRESENCESTATE = _descriptor.EnumDescriptor(
-  name='ClientPresenceState',
-  full_name='ClientPresenceState',
+_CLIENTPRESENCESTATETYPE = _descriptor.EnumDescriptor(
+  name='ClientPresenceStateType',
+  full_name='ClientPresenceStateType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -161,15 +161,15 @@ _CLIENTPRESENCESTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9057,
-  serialized_end=9174,
+  serialized_start=10598,
+  serialized_end=10719,
 )
-_sym_db.RegisterEnumDescriptor(_CLIENTPRESENCESTATE)
+_sym_db.RegisterEnumDescriptor(_CLIENTPRESENCESTATETYPE)
 
-ClientPresenceState = enum_type_wrapper.EnumTypeWrapper(_CLIENTPRESENCESTATE)
-_CLIENTNOTIFICATIONLEVEL = _descriptor.EnumDescriptor(
-  name='ClientNotificationLevel',
-  full_name='ClientNotificationLevel',
+ClientPresenceStateType = enum_type_wrapper.EnumTypeWrapper(_CLIENTPRESENCESTATETYPE)
+_NOTIFICATIONLEVEL = _descriptor.EnumDescriptor(
+  name='NotificationLevel',
+  full_name='NotificationLevel',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -188,12 +188,12 @@ _CLIENTNOTIFICATIONLEVEL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9176,
-  serialized_end=9254,
+  serialized_start=10721,
+  serialized_end=10793,
 )
-_sym_db.RegisterEnumDescriptor(_CLIENTNOTIFICATIONLEVEL)
+_sym_db.RegisterEnumDescriptor(_NOTIFICATIONLEVEL)
 
-ClientNotificationLevel = enum_type_wrapper.EnumTypeWrapper(_CLIENTNOTIFICATIONLEVEL)
+NotificationLevel = enum_type_wrapper.EnumTypeWrapper(_NOTIFICATIONLEVEL)
 _SEGMENTTYPE = _descriptor.EnumDescriptor(
   name='SegmentType',
   full_name='SegmentType',
@@ -215,8 +215,8 @@ _SEGMENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9256,
-  serialized_end=9305,
+  serialized_start=10795,
+  serialized_end=10844,
 )
 _sym_db.RegisterEnumDescriptor(_SEGMENTTYPE)
 
@@ -242,8 +242,8 @@ _OFFTHERECORDSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9307,
-  serialized_end=9401,
+  serialized_start=10846,
+  serialized_end=10940,
 )
 _sym_db.RegisterEnumDescriptor(_OFFTHERECORDSTATUS)
 
@@ -269,15 +269,15 @@ _CONVERSATIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9403,
-  serialized_end=9479,
+  serialized_start=10942,
+  serialized_end=11018,
 )
 _sym_db.RegisterEnumDescriptor(_CONVERSATIONTYPE)
 
 ConversationType = enum_type_wrapper.EnumTypeWrapper(_CONVERSATIONTYPE)
-_CLIENTCONVERSATIONSTATUS = _descriptor.EnumDescriptor(
-  name='ClientConversationStatus',
-  full_name='ClientConversationStatus',
+_CONVERSATIONSTATUS = _descriptor.EnumDescriptor(
+  name='ConversationStatus',
+  full_name='ConversationStatus',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -300,15 +300,15 @@ _CLIENTCONVERSATIONSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9481,
-  serialized_end=9575,
+  serialized_start=11020,
+  serialized_end=11108,
 )
-_sym_db.RegisterEnumDescriptor(_CLIENTCONVERSATIONSTATUS)
+_sym_db.RegisterEnumDescriptor(_CONVERSATIONSTATUS)
 
-ClientConversationStatus = enum_type_wrapper.EnumTypeWrapper(_CLIENTCONVERSATIONSTATUS)
-_CLIENTCONVERSATIONVIEW = _descriptor.EnumDescriptor(
-  name='ClientConversationView',
-  full_name='ClientConversationView',
+ConversationStatus = enum_type_wrapper.EnumTypeWrapper(_CONVERSATIONSTATUS)
+_CONVERSATIONVIEW = _descriptor.EnumDescriptor(
+  name='ConversationView',
+  full_name='ConversationView',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -327,15 +327,15 @@ _CLIENTCONVERSATIONVIEW = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9577,
-  serialized_end=9667,
+  serialized_start=11110,
+  serialized_end=11194,
 )
-_sym_db.RegisterEnumDescriptor(_CLIENTCONVERSATIONVIEW)
+_sym_db.RegisterEnumDescriptor(_CONVERSATIONVIEW)
 
-ClientConversationView = enum_type_wrapper.EnumTypeWrapper(_CLIENTCONVERSATIONVIEW)
-_CLIENTSETTING = _descriptor.EnumDescriptor(
-  name='ClientSetting',
-  full_name='ClientSetting',
+ConversationView = enum_type_wrapper.EnumTypeWrapper(_CONVERSATIONVIEW)
+_SETTINGTYPE = _descriptor.EnumDescriptor(
+  name='SettingType',
+  full_name='SettingType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -358,15 +358,15 @@ _CLIENTSETTING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9669,
-  serialized_end=9760,
+  serialized_start=11196,
+  serialized_end=11285,
 )
-_sym_db.RegisterEnumDescriptor(_CLIENTSETTING)
+_sym_db.RegisterEnumDescriptor(_SETTINGTYPE)
 
-ClientSetting = enum_type_wrapper.EnumTypeWrapper(_CLIENTSETTING)
-_CLIENTBLOCKSTATE = _descriptor.EnumDescriptor(
-  name='ClientBlockState',
-  full_name='ClientBlockState',
+SettingType = enum_type_wrapper.EnumTypeWrapper(_SETTINGTYPE)
+_BLOCKSTATE = _descriptor.EnumDescriptor(
+  name='BlockState',
+  full_name='BlockState',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -385,15 +385,15 @@ _CLIENTBLOCKSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9762,
-  serialized_end=9829,
+  serialized_start=11287,
+  serialized_end=11348,
 )
-_sym_db.RegisterEnumDescriptor(_CLIENTBLOCKSTATE)
+_sym_db.RegisterEnumDescriptor(_BLOCKSTATE)
 
-ClientBlockState = enum_type_wrapper.EnumTypeWrapper(_CLIENTBLOCKSTATE)
-_CLIENTREPLYTOINVITETYPE = _descriptor.EnumDescriptor(
-  name='ClientReplyToInviteType',
-  full_name='ClientReplyToInviteType',
+BlockState = enum_type_wrapper.EnumTypeWrapper(_BLOCKSTATE)
+_REPLYTOINVITETYPE = _descriptor.EnumDescriptor(
+  name='ReplyToInviteType',
+  full_name='ReplyToInviteType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -412,12 +412,12 @@ _CLIENTREPLYTOINVITETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9831,
-  serialized_end=9915,
+  serialized_start=11350,
+  serialized_end=11428,
 )
-_sym_db.RegisterEnumDescriptor(_CLIENTREPLYTOINVITETYPE)
+_sym_db.RegisterEnumDescriptor(_REPLYTOINVITETYPE)
 
-ClientReplyToInviteType = enum_type_wrapper.EnumTypeWrapper(_CLIENTREPLYTOINVITETYPE)
+ReplyToInviteType = enum_type_wrapper.EnumTypeWrapper(_REPLYTOINVITETYPE)
 _CLIENTID = _descriptor.EnumDescriptor(
   name='ClientId',
   full_name='ClientId',
@@ -455,8 +455,8 @@ _CLIENTID = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9918,
-  serialized_end=10092,
+  serialized_start=11431,
+  serialized_end=11605,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTID)
 
@@ -482,15 +482,15 @@ _CLIENTBUILDTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=10094,
-  serialized_end=10197,
+  serialized_start=11607,
+  serialized_end=11710,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTBUILDTYPE)
 
 ClientBuildType = enum_type_wrapper.EnumTypeWrapper(_CLIENTBUILDTYPE)
-_CLIENTRESPONSESTATUS = _descriptor.EnumDescriptor(
-  name='ClientResponseStatus',
-  full_name='ClientResponseStatus',
+_RESPONSESTATUS = _descriptor.EnumDescriptor(
+  name='ResponseStatus',
+  full_name='ResponseStatus',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -513,12 +513,85 @@ _CLIENTRESPONSESTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=10200,
-  serialized_end=10350,
+  serialized_start=11713,
+  serialized_end=11857,
 )
-_sym_db.RegisterEnumDescriptor(_CLIENTRESPONSESTATUS)
+_sym_db.RegisterEnumDescriptor(_RESPONSESTATUS)
 
-ClientResponseStatus = enum_type_wrapper.EnumTypeWrapper(_CLIENTRESPONSESTATUS)
+ResponseStatus = enum_type_wrapper.EnumTypeWrapper(_RESPONSESTATUS)
+_PHOTOURLSTATUS = _descriptor.EnumDescriptor(
+  name='PhotoUrlStatus',
+  full_name='PhotoUrlStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='PHOTO_URL_STATUS_UNKNOWN', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PHOTO_URL_STATUS_USER_PHOTO', index=1, number=2,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=11859,
+  serialized_end=11938,
+)
+_sym_db.RegisterEnumDescriptor(_PHOTOURLSTATUS)
+
+PhotoUrlStatus = enum_type_wrapper.EnumTypeWrapper(_PHOTOURLSTATUS)
+_GENDER = _descriptor.EnumDescriptor(
+  name='Gender',
+  full_name='Gender',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='GENDER_UNKNOWN', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GENDER_MALE', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GENDER_FEMALE', index=2, number=2,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=11940,
+  serialized_end=12004,
+)
+_sym_db.RegisterEnumDescriptor(_GENDER)
+
+Gender = enum_type_wrapper.EnumTypeWrapper(_GENDER)
+_PROFILETYPE = _descriptor.EnumDescriptor(
+  name='ProfileType',
+  full_name='ProfileType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='PROFILE_TYPE_NONE', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PROFILE_TYPE_ES_USER', index=1, number=1,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=12006,
+  serialized_end=12068,
+)
+_sym_db.RegisterEnumDescriptor(_PROFILETYPE)
+
+ProfileType = enum_type_wrapper.EnumTypeWrapper(_PROFILETYPE)
 NO_ACTIVE_CLIENT = 0
 IS_ACTIVE_CLIENT = 1
 OTHER_CLIENT_IS_ACTIVE = 2
@@ -579,25 +652,32 @@ RESPONSE_STATUS_UNKNOWN = 0
 RESPONSE_STATUS_OK = 1
 RESPONSE_STATUS_UNEXPECTED_ERROR = 3
 RESPONSE_STATUS_INVALID_REQUEST = 4
+PHOTO_URL_STATUS_UNKNOWN = 0
+PHOTO_URL_STATUS_USER_PHOTO = 2
+GENDER_UNKNOWN = 0
+GENDER_MALE = 1
+GENDER_FEMALE = 2
+PROFILE_TYPE_NONE = 0
+PROFILE_TYPE_ES_USER = 1
 
 
 
-_CLIENTDONOTDISTURBSETTING = _descriptor.Descriptor(
-  name='ClientDoNotDisturbSetting',
-  full_name='ClientDoNotDisturbSetting',
+_DONOTDISTURBSETTING = _descriptor.Descriptor(
+  name='DoNotDisturbSetting',
+  full_name='DoNotDisturbSetting',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='do_not_disturb', full_name='ClientDoNotDisturbSetting.do_not_disturb', index=0,
+      name='do_not_disturb', full_name='DoNotDisturbSetting.do_not_disturb', index=0,
       number=1, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='expiration_timestamp', full_name='ClientDoNotDisturbSetting.expiration_timestamp', index=1,
+      name='expiration_timestamp', full_name='DoNotDisturbSetting.expiration_timestamp', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -616,19 +696,19 @@ _CLIENTDONOTDISTURBSETTING = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=26,
-  serialized_end=107,
+  serialized_end=101,
 )
 
 
-_CLIENTNOTIFICATIONSETTINGS = _descriptor.Descriptor(
-  name='ClientNotificationSettings',
-  full_name='ClientNotificationSettings',
+_NOTIFICATIONSETTINGS = _descriptor.Descriptor(
+  name='NotificationSettings',
+  full_name='NotificationSettings',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='dnd_settings', full_name='ClientNotificationSettings.dnd_settings', index=0,
+      name='dnd_settings', full_name='NotificationSettings.dnd_settings', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -646,60 +726,8 @@ _CLIENTNOTIFICATIONSETTINGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=109,
-  serialized_end=187,
-)
-
-
-_CLIENTSTATEUPDATEHEADER = _descriptor.Descriptor(
-  name='ClientStateUpdateHeader',
-  full_name='ClientStateUpdateHeader',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='active_client_state', full_name='ClientStateUpdateHeader.active_client_state', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='request_trace_id', full_name='ClientStateUpdateHeader.request_trace_id', index=1,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='notification_settings', full_name='ClientStateUpdateHeader.notification_settings', index=2,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='current_server_time', full_name='ClientStateUpdateHeader.current_server_time', index=3,
-      number=5, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=190,
-  serialized_end=379,
+  serialized_start=103,
+  serialized_end=169,
 )
 
 
@@ -729,8 +757,8 @@ _CONVERSATIONID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=381,
-  serialized_end=409,
+  serialized_start=171,
+  serialized_end=199,
 )
 
 
@@ -767,86 +795,27 @@ _USERID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=411,
-  serialized_end=453,
+  serialized_start=201,
+  serialized_end=243,
 )
 
 
-_CLIENTSETFOCUSNOTIFICATION = _descriptor.Descriptor(
-  name='ClientSetFocusNotification',
-  full_name='ClientSetFocusNotification',
+_PRESENCE = _descriptor.Descriptor(
+  name='Presence',
+  full_name='Presence',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientSetFocusNotification.conversation_id', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='user_id', full_name='ClientSetFocusNotification.user_id', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ClientSetFocusNotification.timestamp', index=2,
-      number=3, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='status', full_name='ClientSetFocusNotification.status', index=3,
-      number=4, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='device', full_name='ClientSetFocusNotification.device', index=4,
-      number=5, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=456,
-  serialized_end=631,
-)
-
-
-_CLIENTPRESENCE = _descriptor.Descriptor(
-  name='ClientPresence',
-  full_name='ClientPresence',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='reachable', full_name='ClientPresence.reachable', index=0,
+      name='reachable', full_name='Presence.reachable', index=0,
       number=1, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='available', full_name='ClientPresence.available', index=1,
+      name='available', full_name='Presence.available', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
@@ -864,27 +833,27 @@ _CLIENTPRESENCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=633,
-  serialized_end=687,
+  serialized_start=245,
+  serialized_end=293,
 )
 
 
-_CLIENTPRESENCERESULT = _descriptor.Descriptor(
-  name='ClientPresenceResult',
-  full_name='ClientPresenceResult',
+_PRESENCERESULT = _descriptor.Descriptor(
+  name='PresenceResult',
+  full_name='PresenceResult',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='user_id', full_name='ClientPresenceResult.user_id', index=0,
+      name='user_id', full_name='PresenceResult.user_id', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='presence', full_name='ClientPresenceResult.presence', index=1,
+      name='presence', full_name='PresenceResult.presence', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -902,110 +871,27 @@ _CLIENTPRESENCERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=689,
-  serialized_end=772,
+  serialized_start=295,
+  serialized_end=366,
 )
 
 
-_CLIENTPRESENCENOTIFICATION = _descriptor.Descriptor(
-  name='ClientPresenceNotification',
-  full_name='ClientPresenceNotification',
+_CLIENTIDENTIFIER = _descriptor.Descriptor(
+  name='ClientIdentifier',
+  full_name='ClientIdentifier',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='presence', full_name='ClientPresenceNotification.presence', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=774,
-  serialized_end=843,
-)
-
-
-_CLIENTSETTYPINGNOTIFICATION = _descriptor.Descriptor(
-  name='ClientSetTypingNotification',
-  full_name='ClientSetTypingNotification',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientSetTypingNotification.conversation_id', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='user_id', full_name='ClientSetTypingNotification.user_id', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ClientSetTypingNotification.timestamp', index=2,
-      number=3, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='status', full_name='ClientSetTypingNotification.status', index=3,
-      number=4, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=846,
-  serialized_end=993,
-)
-
-
-_CLIENTCLIENTIDENTIFIER = _descriptor.Descriptor(
-  name='ClientClientIdentifier',
-  full_name='ClientClientIdentifier',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='resource', full_name='ClientClientIdentifier.resource', index=0,
+      name='resource', full_name='ClientIdentifier.resource', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='header_id', full_name='ClientClientIdentifier.header_id', index=1,
+      name='header_id', full_name='ClientIdentifier.header_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -1023,27 +909,27 @@ _CLIENTCLIENTIDENTIFIER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=995,
-  serialized_end=1056,
+  serialized_start=368,
+  serialized_end=423,
 )
 
 
-_CLIENTCLIENTPRESENCESTATE = _descriptor.Descriptor(
-  name='ClientClientPresenceState',
-  full_name='ClientClientPresenceState',
+_CLIENTPRESENCESTATE = _descriptor.Descriptor(
+  name='ClientPresenceState',
+  full_name='ClientPresenceState',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='identifier', full_name='ClientClientPresenceState.identifier', index=0,
+      name='identifier', full_name='ClientPresenceState.identifier', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='state', full_name='ClientClientPresenceState.state', index=1,
+      name='state', full_name='ClientPresenceState.state', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1061,110 +947,34 @@ _CLIENTCLIENTPRESENCESTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1058,
-  serialized_end=1167,
+  serialized_start=425,
+  serialized_end=526,
 )
 
 
-_CLIENTSELFPRESENCENOTIFICATION = _descriptor.Descriptor(
-  name='ClientSelfPresenceNotification',
-  full_name='ClientSelfPresenceNotification',
+_USEREVENTSTATE = _descriptor.Descriptor(
+  name='UserEventState',
+  full_name='UserEventState',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='client_presence_state', full_name='ClientSelfPresenceNotification.client_presence_state', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1169,
-  serialized_end=1260,
-)
-
-
-_CLIENTWATERMARKNOTIFICATION = _descriptor.Descriptor(
-  name='ClientWatermarkNotification',
-  full_name='ClientWatermarkNotification',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='participant_id', full_name='ClientWatermarkNotification.participant_id', index=0,
+      name='user_id', full_name='UserEventState.user_id', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientWatermarkNotification.conversation_id', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='latest_read_timestamp', full_name='ClientWatermarkNotification.latest_read_timestamp', index=2,
-      number=3, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1263,
-  serialized_end=1398,
-)
-
-
-_CLIENTUSEREVENTSTATE = _descriptor.Descriptor(
-  name='ClientUserEventState',
-  full_name='ClientUserEventState',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='user_id', full_name='ClientUserEventState.user_id', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='client_generated_id', full_name='ClientUserEventState.client_generated_id', index=1,
+      name='client_generated_id', full_name='UserEventState.client_generated_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='notification_level', full_name='ClientUserEventState.notification_level', index=2,
+      name='notification_level', full_name='UserEventState.notification_level', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1182,8 +992,8 @@ _CLIENTUSEREVENTSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1401,
-  serialized_end=1532,
+  serialized_start=528,
+  serialized_end=647,
 )
 
 
@@ -1234,8 +1044,8 @@ _FORMATTING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1534,
-  serialized_end=1618,
+  serialized_start=649,
+  serialized_end=733,
 )
 
 
@@ -1265,8 +1075,8 @@ _LINKDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1620,
-  serialized_end=1651,
+  serialized_start=735,
+  serialized_end=766,
 )
 
 
@@ -1317,8 +1127,8 @@ _SEGMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1653,
-  serialized_end=1767,
+  serialized_start=768,
+  serialized_end=882,
 )
 
 
@@ -1348,8 +1158,8 @@ _EMBEDITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1769,
-  serialized_end=1794,
+  serialized_start=884,
+  serialized_end=909,
 )
 
 
@@ -1379,27 +1189,27 @@ _ATTACHMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1796,
-  serialized_end=1840,
+  serialized_start=911,
+  serialized_end=955,
 )
 
 
-_CLIENTMESSAGECONTENT = _descriptor.Descriptor(
-  name='ClientMessageContent',
-  full_name='ClientMessageContent',
+_MESSAGECONTENT = _descriptor.Descriptor(
+  name='MessageContent',
+  full_name='MessageContent',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='segment', full_name='ClientMessageContent.segment', index=0,
+      name='segment', full_name='MessageContent.segment', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='attachment', full_name='ClientMessageContent.attachment', index=1,
+      name='attachment', full_name='MessageContent.attachment', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1417,20 +1227,20 @@ _CLIENTMESSAGECONTENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1842,
-  serialized_end=1924,
+  serialized_start=957,
+  serialized_end=1033,
 )
 
 
-_CLIENTCHATMESSAGE = _descriptor.Descriptor(
-  name='ClientChatMessage',
-  full_name='ClientChatMessage',
+_CHATMESSAGE = _descriptor.Descriptor(
+  name='ChatMessage',
+  full_name='ChatMessage',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='message_content', full_name='ClientChatMessage.message_content', index=0,
+      name='message_content', full_name='ChatMessage.message_content', index=0,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -1448,14 +1258,14 @@ _CLIENTCHATMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1926,
-  serialized_end=1993,
+  serialized_start=1035,
+  serialized_end=1090,
 )
 
 
-_CLIENTMEMBERSHIPCHANGE = _descriptor.Descriptor(
-  name='ClientMembershipChange',
-  full_name='ClientMembershipChange',
+_MEMBERSHIPCHANGE = _descriptor.Descriptor(
+  name='MembershipChange',
+  full_name='MembershipChange',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -1472,14 +1282,14 @@ _CLIENTMEMBERSHIPCHANGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1995,
-  serialized_end=2019,
+  serialized_start=1092,
+  serialized_end=1110,
 )
 
 
-_CLIENTCONVERSATIONRENAME = _descriptor.Descriptor(
-  name='ClientConversationRename',
-  full_name='ClientConversationRename',
+_CONVERSATIONRENAME = _descriptor.Descriptor(
+  name='ConversationRename',
+  full_name='ConversationRename',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -1496,14 +1306,14 @@ _CLIENTCONVERSATIONRENAME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2021,
-  serialized_end=2047,
+  serialized_start=1112,
+  serialized_end=1132,
 )
 
 
-_CLIENTHANGOUTEVENT = _descriptor.Descriptor(
-  name='ClientHangoutEvent',
-  full_name='ClientHangoutEvent',
+_HANGOUTEVENT = _descriptor.Descriptor(
+  name='HangoutEvent',
+  full_name='HangoutEvent',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -1520,14 +1330,14 @@ _CLIENTHANGOUTEVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2049,
-  serialized_end=2069,
+  serialized_start=1134,
+  serialized_end=1148,
 )
 
 
-_CLIENTOTRMODIFICATION = _descriptor.Descriptor(
-  name='ClientOTRModification',
-  full_name='ClientOTRModification',
+_OTRMODIFICATION = _descriptor.Descriptor(
+  name='OTRModification',
+  full_name='OTRModification',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -1544,97 +1354,97 @@ _CLIENTOTRMODIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2071,
-  serialized_end=2094,
+  serialized_start=1150,
+  serialized_end=1167,
 )
 
 
-_CLIENTEVENT = _descriptor.Descriptor(
-  name='ClientEvent',
-  full_name='ClientEvent',
+_EVENT = _descriptor.Descriptor(
+  name='Event',
+  full_name='Event',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientEvent.conversation_id', index=0,
+      name='conversation_id', full_name='Event.conversation_id', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='sender_id', full_name='ClientEvent.sender_id', index=1,
+      name='sender_id', full_name='Event.sender_id', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ClientEvent.timestamp', index=2,
+      name='timestamp', full_name='Event.timestamp', index=2,
       number=3, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='self_event_state', full_name='ClientEvent.self_event_state', index=3,
+      name='self_event_state', full_name='Event.self_event_state', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='chat_message', full_name='ClientEvent.chat_message', index=4,
+      name='chat_message', full_name='Event.chat_message', index=4,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='membership_change', full_name='ClientEvent.membership_change', index=5,
+      name='membership_change', full_name='Event.membership_change', index=5,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='conversation_rename', full_name='ClientEvent.conversation_rename', index=6,
+      name='conversation_rename', full_name='Event.conversation_rename', index=6,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='hangout_event', full_name='ClientEvent.hangout_event', index=7,
+      name='hangout_event', full_name='Event.hangout_event', index=7,
       number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='event_id', full_name='ClientEvent.event_id', index=8,
+      name='event_id', full_name='Event.event_id', index=8,
       number=12, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='advances_sort_timestamp', full_name='ClientEvent.advances_sort_timestamp', index=9,
+      name='advances_sort_timestamp', full_name='Event.advances_sort_timestamp', index=9,
       number=13, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='otr_modification', full_name='ClientEvent.otr_modification', index=10,
+      name='otr_modification', full_name='Event.otr_modification', index=10,
       number=14, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='otr_status', full_name='ClientEvent.otr_status', index=11,
+      name='otr_status', full_name='Event.otr_status', index=11,
       number=16, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1652,58 +1462,27 @@ _CLIENTEVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2097,
-  serialized_end=2584,
+  serialized_start=1170,
+  serialized_end=1615,
 )
 
 
-_CLIENTEVENTNOTIFICATION = _descriptor.Descriptor(
-  name='ClientEventNotification',
-  full_name='ClientEventNotification',
+_USERREADSTATE = _descriptor.Descriptor(
+  name='UserReadState',
+  full_name='UserReadState',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='event', full_name='ClientEventNotification.event', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2586,
-  serialized_end=2640,
-)
-
-
-_CLIENTUSERREADSTATE = _descriptor.Descriptor(
-  name='ClientUserReadState',
-  full_name='ClientUserReadState',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='participant_id', full_name='ClientUserReadState.participant_id', index=0,
+      name='participant_id', full_name='UserReadState.participant_id', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='latest_read_timestamp', full_name='ClientUserReadState.latest_read_timestamp', index=1,
+      name='latest_read_timestamp', full_name='UserReadState.latest_read_timestamp', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1721,69 +1500,69 @@ _CLIENTUSERREADSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2642,
-  serialized_end=2727,
+  serialized_start=1617,
+  serialized_end=1696,
 )
 
 
-_CLIENTUSERCONVERSATIONSTATE = _descriptor.Descriptor(
-  name='ClientUserConversationState',
-  full_name='ClientUserConversationState',
+_USERCONVERSATIONSTATE = _descriptor.Descriptor(
+  name='UserConversationState',
+  full_name='UserConversationState',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='self_read_state', full_name='ClientUserConversationState.self_read_state', index=0,
+      name='self_read_state', full_name='UserConversationState.self_read_state', index=0,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='status', full_name='ClientUserConversationState.status', index=1,
+      name='status', full_name='UserConversationState.status', index=1,
       number=8, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='notification_level', full_name='ClientUserConversationState.notification_level', index=2,
+      name='notification_level', full_name='UserConversationState.notification_level', index=2,
       number=9, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='view', full_name='ClientUserConversationState.view', index=3,
+      name='view', full_name='UserConversationState.view', index=3,
       number=10, type=14, cpp_type=8, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='inviter_id', full_name='ClientUserConversationState.inviter_id', index=4,
+      name='inviter_id', full_name='UserConversationState.inviter_id', index=4,
       number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='invite_timestamp', full_name='ClientUserConversationState.invite_timestamp', index=5,
+      name='invite_timestamp', full_name='UserConversationState.invite_timestamp', index=5,
       number=12, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='sort_timestamp', full_name='ClientUserConversationState.sort_timestamp', index=6,
+      name='sort_timestamp', full_name='UserConversationState.sort_timestamp', index=6,
       number=13, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='active_timestamp', full_name='ClientUserConversationState.active_timestamp', index=7,
+      name='active_timestamp', full_name='UserConversationState.active_timestamp', index=7,
       number=14, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -1801,27 +1580,27 @@ _CLIENTUSERCONVERSATIONSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2730,
-  serialized_end=3047,
+  serialized_start=1699,
+  serialized_end=1986,
 )
 
 
-_CLIENTCONVERSATIONPARTICIPANTDATA = _descriptor.Descriptor(
-  name='ClientConversationParticipantData',
-  full_name='ClientConversationParticipantData',
+_CONVERSATIONPARTICIPANTDATA = _descriptor.Descriptor(
+  name='ConversationParticipantData',
+  full_name='ConversationParticipantData',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='ClientConversationParticipantData.id', index=0,
+      name='id', full_name='ConversationParticipantData.id', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='fallback_name', full_name='ClientConversationParticipantData.fallback_name', index=1,
+      name='fallback_name', full_name='ConversationParticipantData.fallback_name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -1839,69 +1618,69 @@ _CLIENTCONVERSATIONPARTICIPANTDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3049,
-  serialized_end=3128,
+  serialized_start=1988,
+  serialized_end=2061,
 )
 
 
-_CLIENTCONVERSATION = _descriptor.Descriptor(
-  name='ClientConversation',
-  full_name='ClientConversation',
+_CONVERSATION = _descriptor.Descriptor(
+  name='Conversation',
+  full_name='Conversation',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientConversation.conversation_id', index=0,
+      name='conversation_id', full_name='Conversation.conversation_id', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='type', full_name='ClientConversation.type', index=1,
+      name='type', full_name='Conversation.type', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='name', full_name='ClientConversation.name', index=2,
+      name='name', full_name='Conversation.name', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='self_conversation_state', full_name='ClientConversation.self_conversation_state', index=3,
+      name='self_conversation_state', full_name='Conversation.self_conversation_state', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='read_state', full_name='ClientConversation.read_state', index=4,
+      name='read_state', full_name='Conversation.read_state', index=4,
       number=8, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='otr_status', full_name='ClientConversation.otr_status', index=5,
+      name='otr_status', full_name='Conversation.otr_status', index=5,
       number=10, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='current_participant', full_name='ClientConversation.current_participant', index=6,
+      name='current_participant', full_name='Conversation.current_participant', index=6,
       number=13, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='participant_data', full_name='ClientConversation.participant_data', index=7,
+      name='participant_data', full_name='Conversation.participant_data', index=7,
       number=14, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1919,65 +1698,20 @@ _CLIENTCONVERSATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3131,
-  serialized_end=3486,
+  serialized_start=2064,
+  serialized_end=2395,
 )
 
 
-_CLIENTSETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION = _descriptor.Descriptor(
-  name='ClientSetConversationNotificationLevelNotification',
-  full_name='ClientSetConversationNotificationLevelNotification',
+_EASTEREGG = _descriptor.Descriptor(
+  name='EasterEgg',
+  full_name='EasterEgg',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientSetConversationNotificationLevelNotification.conversation_id', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='level', full_name='ClientSetConversationNotificationLevelNotification.level', index=1,
-      number=2, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ClientSetConversationNotificationLevelNotification.timestamp', index=2,
-      number=4, type=4, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3489,
-  serialized_end=3643,
-)
-
-
-_CLIENTEASTEREGG = _descriptor.Descriptor(
-  name='ClientEasterEgg',
-  full_name='ClientEasterEgg',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='message', full_name='ClientEasterEgg.message', index=0,
+      name='message', full_name='EasterEgg.message', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -1995,209 +1729,27 @@ _CLIENTEASTEREGG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3645,
-  serialized_end=3679,
+  serialized_start=2397,
+  serialized_end=2425,
 )
 
 
-_CLIENTEASTEREGGNOTIFICATION = _descriptor.Descriptor(
-  name='ClientEasterEggNotification',
-  full_name='ClientEasterEggNotification',
+_DELETEACTION = _descriptor.Descriptor(
+  name='DeleteAction',
+  full_name='DeleteAction',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='sender_id', full_name='ClientEasterEggNotification.sender_id', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientEasterEggNotification.conversation_id', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='easter_egg', full_name='ClientEasterEggNotification.easter_egg', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3682,
-  serialized_end=3819,
-)
-
-
-_CLIENTSETTINGSNOTIFICATION_FOO = _descriptor.Descriptor(
-  name='Foo',
-  full_name='ClientSettingsNotification.Foo',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='setting', full_name='ClientSettingsNotification.Foo.setting', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='setting_value', full_name='ClientSettingsNotification.Foo.setting_value', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3898,
-  serialized_end=3959,
-)
-
-_CLIENTSETTINGSNOTIFICATION = _descriptor.Descriptor(
-  name='ClientSettingsNotification',
-  full_name='ClientSettingsNotification',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='foo', full_name='ClientSettingsNotification.foo', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[_CLIENTSETTINGSNOTIFICATION_FOO, ],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3822,
-  serialized_end=3959,
-)
-
-
-_CLIENTSETNOTIFICATIONSETTINGNOTIFICATION = _descriptor.Descriptor(
-  name='ClientSetNotificationSettingNotification',
-  full_name='ClientSetNotificationSettingNotification',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3961,
-  serialized_end=4003,
-)
-
-
-_CLIENTCONVERSATIONVIEWMODIFICATION = _descriptor.Descriptor(
-  name='ClientConversationViewModification',
-  full_name='ClientConversationViewModification',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientConversationViewModification.conversation_id', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='old_view', full_name='ClientConversationViewModification.old_view', index=1,
-      number=2, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='new_view', full_name='ClientConversationViewModification.new_view', index=2,
-      number=3, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4006,
-  serialized_end=4170,
-)
-
-
-_CLIENTDELETEACTION = _descriptor.Descriptor(
-  name='ClientDeleteAction',
-  full_name='ClientDeleteAction',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='delete_action_timestamp', full_name='ClientDeleteAction.delete_action_timestamp', index=0,
+      name='delete_action_timestamp', full_name='DeleteAction.delete_action_timestamp', index=0,
       number=1, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='delete_upper_bound_timestamp', full_name='ClientDeleteAction.delete_upper_bound_timestamp', index=1,
+      name='delete_upper_bound_timestamp', full_name='DeleteAction.delete_upper_bound_timestamp', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -2215,65 +1767,27 @@ _CLIENTDELETEACTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4172,
-  serialized_end=4263,
+  serialized_start=2427,
+  serialized_end=2512,
 )
 
 
-_CLIENTDELETEACTIONNOTIFICATION = _descriptor.Descriptor(
-  name='ClientDeleteActionNotification',
-  full_name='ClientDeleteActionNotification',
+_BLOCKSTATECHANGE = _descriptor.Descriptor(
+  name='BlockStateChange',
+  full_name='BlockStateChange',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientDeleteActionNotification.conversation_id', index=0,
+      name='participant_id', full_name='BlockStateChange.participant_id', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='delete_action', full_name='ClientDeleteActionNotification.delete_action', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4265,
-  serialized_end=4383,
-)
-
-
-_CLIENTBLOCKSTATECHANGE = _descriptor.Descriptor(
-  name='ClientBlockStateChange',
-  full_name='ClientBlockStateChange',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='participant_id', full_name='ClientBlockStateChange.participant_id', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='new_block_state', full_name='ClientBlockStateChange.new_block_state', index=1,
+      name='new_block_state', full_name='BlockStateChange.new_block_state', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -2291,216 +1805,8 @@ _CLIENTBLOCKSTATECHANGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4385,
-  serialized_end=4486,
-)
-
-
-_CLIENTBLOCKNOTIFICATION = _descriptor.Descriptor(
-  name='ClientBlockNotification',
-  full_name='ClientBlockNotification',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='block_state_change', full_name='ClientBlockNotification.block_state_change', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4488,
-  serialized_end=4566,
-)
-
-
-_CLIENTREPLYTOINVITENOTIFICATION = _descriptor.Descriptor(
-  name='ClientReplyToInviteNotification',
-  full_name='ClientReplyToInviteNotification',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientReplyToInviteNotification.conversation_id', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='type', full_name='ClientReplyToInviteNotification.type', index=1,
-      number=2, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4568,
-  serialized_end=4683,
-)
-
-
-_CLIENTSTATEUPDATE = _descriptor.Descriptor(
-  name='ClientStateUpdate',
-  full_name='ClientStateUpdate',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='client_state_update_header', full_name='ClientStateUpdate.client_state_update_header', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='client_conversation', full_name='ClientStateUpdate.client_conversation', index=1,
-      number=13, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='event_notification', full_name='ClientStateUpdate.event_notification', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='focus_notification', full_name='ClientStateUpdate.focus_notification', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='typing_notification', full_name='ClientStateUpdate.typing_notification', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='notification_level_notification', full_name='ClientStateUpdate.notification_level_notification', index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='reply_to_invite_notification', full_name='ClientStateUpdate.reply_to_invite_notification', index=6,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='watermark_notification', full_name='ClientStateUpdate.watermark_notification', index=7,
-      number=8, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='view_modification', full_name='ClientStateUpdate.view_modification', index=8,
-      number=11, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='easter_egg_notification', full_name='ClientStateUpdate.easter_egg_notification', index=9,
-      number=12, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='self_presence_notification', full_name='ClientStateUpdate.self_presence_notification', index=10,
-      number=14, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='delete_notification', full_name='ClientStateUpdate.delete_notification', index=11,
-      number=15, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='presence_notification', full_name='ClientStateUpdate.presence_notification', index=12,
-      number=16, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='block_notification', full_name='ClientStateUpdate.block_notification', index=13,
-      number=17, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='notification_setting_notification', full_name='ClientStateUpdate.notification_setting_notification', index=14,
-      number=19, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='settings_notification', full_name='ClientStateUpdate.settings_notification', index=15,
-      number=20, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='client_state_update', full_name='ClientStateUpdate.client_state_update',
-      index=0, containing_type=None, fields=[]),
-  ],
-  serialized_start=4686,
-  serialized_end=5784,
+  serialized_start=2514,
+  serialized_end=2603,
 )
 
 
@@ -2537,20 +1843,20 @@ _PHOTO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5786,
-  serialized_end=5850,
+  serialized_start=2605,
+  serialized_end=2669,
 )
 
 
-_CLIENTEXISTINGMEDIA = _descriptor.Descriptor(
-  name='ClientExistingMedia',
-  full_name='ClientExistingMedia',
+_EXISTINGMEDIA = _descriptor.Descriptor(
+  name='ExistingMedia',
+  full_name='ExistingMedia',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='photo', full_name='ClientExistingMedia.photo', index=0,
+      name='photo', full_name='ExistingMedia.photo', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -2568,34 +1874,34 @@ _CLIENTEXISTINGMEDIA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5852,
-  serialized_end=5896,
+  serialized_start=2671,
+  serialized_end=2709,
 )
 
 
-_CLIENTEVENTREQUESTHEADER = _descriptor.Descriptor(
-  name='ClientEventRequestHeader',
-  full_name='ClientEventRequestHeader',
+_EVENTREQUESTHEADER = _descriptor.Descriptor(
+  name='EventRequestHeader',
+  full_name='EventRequestHeader',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='conversation_id', full_name='ClientEventRequestHeader.conversation_id', index=0,
+      name='conversation_id', full_name='EventRequestHeader.conversation_id', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='client_generated_id', full_name='ClientEventRequestHeader.client_generated_id', index=1,
+      name='client_generated_id', full_name='EventRequestHeader.client_generated_id', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='expected_otr', full_name='ClientEventRequestHeader.expected_otr', index=2,
+      name='expected_otr', full_name='EventRequestHeader.expected_otr', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -2613,55 +1919,55 @@ _CLIENTEVENTREQUESTHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5899,
-  serialized_end=6039,
+  serialized_start=2712,
+  serialized_end=2846,
 )
 
 
-_CLIENTCLIENTVERSION = _descriptor.Descriptor(
-  name='ClientClientVersion',
-  full_name='ClientClientVersion',
+_CLIENTVERSION = _descriptor.Descriptor(
+  name='ClientVersion',
+  full_name='ClientVersion',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='client_id', full_name='ClientClientVersion.client_id', index=0,
+      name='client_id', full_name='ClientVersion.client_id', index=0,
       number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='build_type', full_name='ClientClientVersion.build_type', index=1,
+      name='build_type', full_name='ClientVersion.build_type', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='major_version', full_name='ClientClientVersion.major_version', index=2,
+      name='major_version', full_name='ClientVersion.major_version', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='version_timestamp', full_name='ClientClientVersion.version_timestamp', index=3,
+      name='version_timestamp', full_name='ClientVersion.version_timestamp', index=3,
       number=4, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='device_os_version', full_name='ClientClientVersion.device_os_version', index=4,
+      name='device_os_version', full_name='ClientVersion.device_os_version', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='device_hardware', full_name='ClientClientVersion.device_hardware', index=5,
+      name='device_hardware', full_name='ClientVersion.device_hardware', index=5,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -2679,34 +1985,34 @@ _CLIENTCLIENTVERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6042,
-  serialized_end=6233,
+  serialized_start=2849,
+  serialized_end=3034,
 )
 
 
-_CLIENTREQUESTHEADER = _descriptor.Descriptor(
-  name='ClientRequestHeader',
-  full_name='ClientRequestHeader',
+_REQUESTHEADER = _descriptor.Descriptor(
+  name='RequestHeader',
+  full_name='RequestHeader',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='client_version', full_name='ClientRequestHeader.client_version', index=0,
+      name='client_version', full_name='RequestHeader.client_version', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='client_identifier', full_name='ClientRequestHeader.client_identifier', index=1,
+      name='client_identifier', full_name='RequestHeader.client_identifier', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='language_code', full_name='ClientRequestHeader.language_code', index=2,
+      name='language_code', full_name='RequestHeader.language_code', index=2,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -2724,41 +2030,41 @@ _CLIENTREQUESTHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6236,
-  serialized_end=6378,
+  serialized_start=3036,
+  serialized_end=3160,
 )
 
 
-_CLIENTRESPONSEHEADER = _descriptor.Descriptor(
-  name='ClientResponseHeader',
-  full_name='ClientResponseHeader',
+_RESPONSEHEADER = _descriptor.Descriptor(
+  name='ResponseHeader',
+  full_name='ResponseHeader',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='status', full_name='ClientResponseHeader.status', index=0,
+      name='status', full_name='ResponseHeader.status', index=0,
       number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='error_description', full_name='ClientResponseHeader.error_description', index=1,
+      name='error_description', full_name='ResponseHeader.error_description', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='request_trace_id', full_name='ClientResponseHeader.request_trace_id', index=2,
+      name='request_trace_id', full_name='ResponseHeader.request_trace_id', index=2,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='current_server_time', full_name='ClientResponseHeader.current_server_time', index=3,
+      name='current_server_time', full_name='ResponseHeader.current_server_time', index=3,
       number=5, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -2776,8 +2082,1111 @@ _CLIENTRESPONSEHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6381,
-  serialized_end=6524,
+  serialized_start=3163,
+  serialized_end=3294,
+)
+
+
+_ENTITY = _descriptor.Descriptor(
+  name='Entity',
+  full_name='Entity',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='Entity.id', index=0,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='properties', full_name='Entity.properties', index=1,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3296,
+  serialized_end=3364,
+)
+
+
+_ENTITYPROPERTIES = _descriptor.Descriptor(
+  name='EntityProperties',
+  full_name='EntityProperties',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='type', full_name='EntityProperties.type', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='display_name', full_name='EntityProperties.display_name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='first_name', full_name='EntityProperties.first_name', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='photo_url', full_name='EntityProperties.photo_url', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='email', full_name='EntityProperties.email', index=4,
+      number=5, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='phone', full_name='EntityProperties.phone', index=5,
+      number=6, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='in_users_domain', full_name='EntityProperties.in_users_domain', index=6,
+      number=10, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='gender', full_name='EntityProperties.gender', index=7,
+      number=11, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='photo_url_status', full_name='EntityProperties.photo_url_status', index=8,
+      number=12, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='canonical_email', full_name='EntityProperties.canonical_email', index=9,
+      number=15, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3367,
+  serialized_end=3622,
+)
+
+
+_CONVERSATIONSTATE = _descriptor.Descriptor(
+  name='ConversationState',
+  full_name='ConversationState',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='ConversationState.conversation_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation', full_name='ConversationState.conversation', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='event', full_name='ConversationState.event', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='event_continuation_token', full_name='ConversationState.event_continuation_token', index=3,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3625,
+  serialized_end=3805,
+)
+
+
+_EVENTCONTINUATIONTOKEN = _descriptor.Descriptor(
+  name='EventContinuationToken',
+  full_name='EventContinuationToken',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='event_id', full_name='EventContinuationToken.event_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='storage_continuation_token', full_name='EventContinuationToken.storage_continuation_token', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='event_timestamp', full_name='EventContinuationToken.event_timestamp', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3807,
+  serialized_end=3910,
+)
+
+
+_ENTITYLOOKUPSPEC = _descriptor.Descriptor(
+  name='EntityLookupSpec',
+  full_name='EntityLookupSpec',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='gaia_id', full_name='EntityLookupSpec.gaia_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3912,
+  serialized_end=3947,
+)
+
+
+_STATEUPDATE = _descriptor.Descriptor(
+  name='StateUpdate',
+  full_name='StateUpdate',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='state_update_header', full_name='StateUpdate.state_update_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation', full_name='StateUpdate.conversation', index=1,
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='event_notification', full_name='StateUpdate.event_notification', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='focus_notification', full_name='StateUpdate.focus_notification', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='typing_notification', full_name='StateUpdate.typing_notification', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='notification_level_notification', full_name='StateUpdate.notification_level_notification', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='reply_to_invite_notification', full_name='StateUpdate.reply_to_invite_notification', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='watermark_notification', full_name='StateUpdate.watermark_notification', index=7,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='view_modification', full_name='StateUpdate.view_modification', index=8,
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='easter_egg_notification', full_name='StateUpdate.easter_egg_notification', index=9,
+      number=12, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='self_presence_notification', full_name='StateUpdate.self_presence_notification', index=10,
+      number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='delete_notification', full_name='StateUpdate.delete_notification', index=11,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='presence_notification', full_name='StateUpdate.presence_notification', index=12,
+      number=16, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='block_notification', full_name='StateUpdate.block_notification', index=13,
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='notification_setting_notification', full_name='StateUpdate.notification_setting_notification', index=14,
+      number=19, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='settings_notification', full_name='StateUpdate.settings_notification', index=15,
+      number=20, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='state_update', full_name='StateUpdate.state_update',
+      index=0, containing_type=None, fields=[]),
+  ],
+  serialized_start=3950,
+  serialized_end=4925,
+)
+
+
+_STATEUPDATEHEADER = _descriptor.Descriptor(
+  name='StateUpdateHeader',
+  full_name='StateUpdateHeader',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='active_client_state', full_name='StateUpdateHeader.active_client_state', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='request_trace_id', full_name='StateUpdateHeader.request_trace_id', index=1,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='notification_settings', full_name='StateUpdateHeader.notification_settings', index=2,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='current_server_time', full_name='StateUpdateHeader.current_server_time', index=3,
+      number=5, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4928,
+  serialized_end=5105,
+)
+
+
+_BATCHUPDATE = _descriptor.Descriptor(
+  name='BatchUpdate',
+  full_name='BatchUpdate',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='some_code', full_name='BatchUpdate.some_code', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='state_update', full_name='BatchUpdate.state_update', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5107,
+  serialized_end=5175,
+)
+
+
+_EVENTNOTIFICATION = _descriptor.Descriptor(
+  name='EventNotification',
+  full_name='EventNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='event', full_name='EventNotification.event', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5177,
+  serialized_end=5219,
+)
+
+
+_SETFOCUSNOTIFICATION = _descriptor.Descriptor(
+  name='SetFocusNotification',
+  full_name='SetFocusNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='SetFocusNotification.conversation_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='SetFocusNotification.user_id', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='SetFocusNotification.timestamp', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='status', full_name='SetFocusNotification.status', index=3,
+      number=4, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='device', full_name='SetFocusNotification.device', index=4,
+      number=5, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5222,
+  serialized_end=5391,
+)
+
+
+_SETTYPINGNOTIFICATION = _descriptor.Descriptor(
+  name='SetTypingNotification',
+  full_name='SetTypingNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='SetTypingNotification.conversation_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='SetTypingNotification.user_id', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='SetTypingNotification.timestamp', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='status', full_name='SetTypingNotification.status', index=3,
+      number=4, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5394,
+  serialized_end=5535,
+)
+
+
+_SETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION = _descriptor.Descriptor(
+  name='SetConversationNotificationLevelNotification',
+  full_name='SetConversationNotificationLevelNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='SetConversationNotificationLevelNotification.conversation_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='level', full_name='SetConversationNotificationLevelNotification.level', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='timestamp', full_name='SetConversationNotificationLevelNotification.timestamp', index=2,
+      number=4, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5538,
+  serialized_end=5680,
+)
+
+
+_REPLYTOINVITENOTIFICATION = _descriptor.Descriptor(
+  name='ReplyToInviteNotification',
+  full_name='ReplyToInviteNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='ReplyToInviteNotification.conversation_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='ReplyToInviteNotification.type', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5682,
+  serialized_end=5785,
+)
+
+
+_WATERMARKNOTIFICATION = _descriptor.Descriptor(
+  name='WatermarkNotification',
+  full_name='WatermarkNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='participant_id', full_name='WatermarkNotification.participant_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='WatermarkNotification.conversation_id', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='latest_read_timestamp', full_name='WatermarkNotification.latest_read_timestamp', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5788,
+  serialized_end=5917,
+)
+
+
+_CONVERSATIONVIEWMODIFICATION = _descriptor.Descriptor(
+  name='ConversationViewModification',
+  full_name='ConversationViewModification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='ConversationViewModification.conversation_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='old_view', full_name='ConversationViewModification.old_view', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='new_view', full_name='ConversationViewModification.new_view', index=2,
+      number=3, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=5920,
+  serialized_end=6066,
+)
+
+
+_EASTEREGGNOTIFICATION = _descriptor.Descriptor(
+  name='EasterEggNotification',
+  full_name='EasterEggNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='sender_id', full_name='EasterEggNotification.sender_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='EasterEggNotification.conversation_id', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='easter_egg', full_name='EasterEggNotification.easter_egg', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6068,
+  serialized_end=6193,
+)
+
+
+_SELFPRESENCENOTIFICATION = _descriptor.Descriptor(
+  name='SelfPresenceNotification',
+  full_name='SelfPresenceNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='client_presence_state', full_name='SelfPresenceNotification.client_presence_state', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6195,
+  serialized_end=6274,
+)
+
+
+_DELETEACTIONNOTIFICATION = _descriptor.Descriptor(
+  name='DeleteActionNotification',
+  full_name='DeleteActionNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='DeleteActionNotification.conversation_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='delete_action', full_name='DeleteActionNotification.delete_action', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6276,
+  serialized_end=6382,
+)
+
+
+_PRESENCENOTIFICATION = _descriptor.Descriptor(
+  name='PresenceNotification',
+  full_name='PresenceNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='presence', full_name='PresenceNotification.presence', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6384,
+  serialized_end=6441,
+)
+
+
+_BLOCKNOTIFICATION = _descriptor.Descriptor(
+  name='BlockNotification',
+  full_name='BlockNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='block_state_change', full_name='BlockNotification.block_state_change', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6443,
+  serialized_end=6509,
+)
+
+
+_SETNOTIFICATIONSETTINGNOTIFICATION = _descriptor.Descriptor(
+  name='SetNotificationSettingNotification',
+  full_name='SetNotificationSettingNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6511,
+  serialized_end=6547,
+)
+
+
+_SETTINGSNOTIFICATION_FOO = _descriptor.Descriptor(
+  name='Foo',
+  full_name='SettingsNotification.Foo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='setting', full_name='SettingsNotification.Foo.setting', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='setting_value', full_name='SettingsNotification.Foo.setting_value', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6613,
+  serialized_end=6672,
+)
+
+_SETTINGSNOTIFICATION = _descriptor.Descriptor(
+  name='SettingsNotification',
+  full_name='SettingsNotification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='foo', full_name='SettingsNotification.foo', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_SETTINGSNOTIFICATION_FOO, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6549,
+  serialized_end=6672,
+)
+
+
+_CONVERSATIONSPEC = _descriptor.Descriptor(
+  name='ConversationSpec',
+  full_name='ConversationSpec',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='conversation_id', full_name='ConversationSpec.conversation_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=6674,
+  serialized_end=6734,
 )
 
 
@@ -2807,8 +3216,8 @@ _ADDUSERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6526,
-  serialized_end=6588,
+  serialized_start=6736,
+  serialized_end=6792,
 )
 
 
@@ -2831,8 +3240,8 @@ _ADDUSERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6590,
-  serialized_end=6607,
+  serialized_start=6794,
+  serialized_end=6811,
 )
 
 
@@ -2862,8 +3271,8 @@ _CREATECONVERSATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6609,
-  serialized_end=6682,
+  serialized_start=6813,
+  serialized_end=6880,
 )
 
 
@@ -2886,8 +3295,8 @@ _CREATECONVERSATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6684,
-  serialized_end=6712,
+  serialized_start=6882,
+  serialized_end=6910,
 )
 
 
@@ -2917,8 +3326,8 @@ _DELETECONVERSATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6714,
-  serialized_end=6787,
+  serialized_start=6912,
+  serialized_end=6979,
 )
 
 
@@ -2941,8 +3350,8 @@ _DELETECONVERSATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6789,
-  serialized_end=6817,
+  serialized_start=6981,
+  serialized_end=7009,
 )
 
 
@@ -2960,6 +3369,34 @@ _GETCONVERSATIONREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation_spec', full_name='GetConversationRequest.conversation_spec', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='include_event', full_name='GetConversationRequest.include_event', index=2,
+      number=4, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='max_events_per_conversation', full_name='GetConversationRequest.max_events_per_conversation', index=3,
+      number=6, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='event_continuation_token', full_name='GetConversationRequest.event_continuation_token', index=4,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -2972,8 +3409,8 @@ _GETCONVERSATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6819,
-  serialized_end=6889,
+  serialized_start=7012,
+  serialized_end=7241,
 )
 
 
@@ -2984,6 +3421,27 @@ _GETCONVERSATIONRESPONSE = _descriptor.Descriptor(
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='some_code', full_name='GetConversationResponse.some_code', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='response_header', full_name='GetConversationResponse.response_header', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation_state', full_name='GetConversationResponse.conversation_state', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -2996,8 +3454,8 @@ _GETCONVERSATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6891,
-  serialized_end=6916,
+  serialized_start=7244,
+  serialized_end=7378,
 )
 
 
@@ -3015,6 +3473,13 @@ _GETENTITYBYIDREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='batch_lookup_spec', full_name='GetEntityByIdRequest.batch_lookup_spec', index=1,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -3027,8 +3492,8 @@ _GETENTITYBYIDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6918,
-  serialized_end=6986,
+  serialized_start=7380,
+  serialized_end=7488,
 )
 
 
@@ -3039,6 +3504,27 @@ _GETENTITYBYIDRESPONSE = _descriptor.Descriptor(
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='some_code', full_name='GetEntityByIdResponse.some_code', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='response_header', full_name='GetEntityByIdResponse.response_header', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='entity', full_name='GetEntityByIdResponse.entity', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -3051,8 +3537,186 @@ _GETENTITYBYIDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6988,
-  serialized_end=7011,
+  serialized_start=7490,
+  serialized_end=7599,
+)
+
+
+_GETSUGGESTEDENTITIESREQUEST = _descriptor.Descriptor(
+  name='GetSuggestedEntitiesRequest',
+  full_name='GetSuggestedEntitiesRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='request_header', full_name='GetSuggestedEntitiesRequest.request_header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7601,
+  serialized_end=7670,
+)
+
+
+_GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP_FOO = _descriptor.Descriptor(
+  name='Foo',
+  full_name='GetSuggestedEntitiesResponse.EntityGroup.Foo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='entity', full_name='GetSuggestedEntitiesResponse.EntityGroup.Foo.entity', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8223,
+  serialized_end=8253,
+)
+
+_GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP = _descriptor.Descriptor(
+  name='EntityGroup',
+  full_name='GetSuggestedEntitiesResponse.EntityGroup',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='entity', full_name='GetSuggestedEntitiesResponse.EntityGroup.entity', index=0,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP_FOO, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8145,
+  serialized_end=8253,
+)
+
+_GETSUGGESTEDENTITIESRESPONSE = _descriptor.Descriptor(
+  name='GetSuggestedEntitiesResponse',
+  full_name='GetSuggestedEntitiesResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='some_code', full_name='GetSuggestedEntitiesResponse.some_code', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='response_header', full_name='GetSuggestedEntitiesResponse.response_header', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='entity', full_name='GetSuggestedEntitiesResponse.entity', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='group1', full_name='GetSuggestedEntitiesResponse.group1', index=3,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='group2', full_name='GetSuggestedEntitiesResponse.group2', index=4,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='group3', full_name='GetSuggestedEntitiesResponse.group3', index=5,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='group4', full_name='GetSuggestedEntitiesResponse.group4', index=6,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='group5', full_name='GetSuggestedEntitiesResponse.group5', index=7,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='group6', full_name='GetSuggestedEntitiesResponse.group6', index=8,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=7673,
+  serialized_end=8253,
 )
 
 
@@ -3082,8 +3746,8 @@ _GETSELFINFOREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7013,
-  serialized_end=7079,
+  serialized_start=8255,
+  serialized_end=8315,
 )
 
 
@@ -3094,6 +3758,27 @@ _GETSELFINFORESPONSE = _descriptor.Descriptor(
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='some_code', full_name='GetSelfInfoResponse.some_code', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='response_header', full_name='GetSelfInfoResponse.response_header', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='self_entity', full_name='GetSelfInfoResponse.self_entity', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -3106,8 +3791,8 @@ _GETSELFINFORESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7081,
-  serialized_end=7102,
+  serialized_start=8317,
+  serialized_end=8429,
 )
 
 
@@ -3137,8 +3822,8 @@ _QUERYPRESENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7104,
-  serialized_end=7172,
+  serialized_start=8431,
+  serialized_end=8493,
 )
 
 
@@ -3161,8 +3846,8 @@ _QUERYPRESENCERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7174,
-  serialized_end=7197,
+  serialized_start=8495,
+  serialized_end=8518,
 )
 
 
@@ -3192,8 +3877,8 @@ _REMOVEUSERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7199,
-  serialized_end=7264,
+  serialized_start=8520,
+  serialized_end=8579,
 )
 
 
@@ -3216,8 +3901,8 @@ _REMOVEUSERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7266,
-  serialized_end=7286,
+  serialized_start=8581,
+  serialized_end=8601,
 )
 
 
@@ -3247,8 +3932,8 @@ _SEARCHENTITIESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7288,
-  serialized_end=7357,
+  serialized_start=8603,
+  serialized_end=8666,
 )
 
 
@@ -3271,8 +3956,8 @@ _SEARCHENTITIESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7359,
-  serialized_end=7383,
+  serialized_start=8668,
+  serialized_end=8692,
 )
 
 
@@ -3323,8 +4008,8 @@ _SENDCHATMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7386,
-  serialized_end=7607,
+  serialized_start=8695,
+  serialized_end=8892,
 )
 
 
@@ -3368,8 +4053,8 @@ _SENDCHATMESSAGERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7610,
-  serialized_end=7739,
+  serialized_start=8894,
+  serialized_end=9011,
 )
 
 
@@ -3399,8 +4084,8 @@ _SENDEASTEREGGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7741,
-  serialized_end=7809,
+  serialized_start=9013,
+  serialized_end=9075,
 )
 
 
@@ -3423,8 +4108,8 @@ _SENDEASTEREGGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7811,
-  serialized_end=7834,
+  serialized_start=9077,
+  serialized_end=9100,
 )
 
 
@@ -3475,8 +4160,8 @@ _SETACTIVECLIENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7837,
-  serialized_end=7966,
+  serialized_start=9102,
+  serialized_end=9225,
 )
 
 
@@ -3513,8 +4198,8 @@ _SETACTIVECLIENTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7968,
-  serialized_end=8060,
+  serialized_start=9227,
+  serialized_end=9313,
 )
 
 
@@ -3544,8 +4229,8 @@ _SETCHATNAMEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8062,
-  serialized_end=8128,
+  serialized_start=9315,
+  serialized_end=9375,
 )
 
 
@@ -3568,8 +4253,8 @@ _SETCHATNAMERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8130,
-  serialized_end=8151,
+  serialized_start=9377,
+  serialized_end=9398,
 )
 
 
@@ -3599,8 +4284,8 @@ _SETCONVERSATIONLEVELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8153,
-  serialized_end=8228,
+  serialized_start=9400,
+  serialized_end=9469,
 )
 
 
@@ -3623,8 +4308,8 @@ _SETCONVERSATIONLEVELRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8230,
-  serialized_end=8260,
+  serialized_start=9471,
+  serialized_end=9501,
 )
 
 
@@ -3654,8 +4339,8 @@ _SETPRESENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8262,
-  serialized_end=8328,
+  serialized_start=9503,
+  serialized_end=9563,
 )
 
 
@@ -3678,8 +4363,8 @@ _SETPRESENCERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8330,
-  serialized_end=8351,
+  serialized_start=9565,
+  serialized_end=9586,
 )
 
 
@@ -3709,8 +4394,8 @@ _SETTYPINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8353,
-  serialized_end=8417,
+  serialized_start=9588,
+  serialized_end=9646,
 )
 
 
@@ -3733,8 +4418,8 @@ _SETTYPINGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8419,
-  serialized_end=8438,
+  serialized_start=9648,
+  serialized_end=9667,
 )
 
 
@@ -3752,6 +4437,20 @@ _SYNCALLNEWEVENTSREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='last_sync_timestamp', full_name='SyncAllNewEventsRequest.last_sync_timestamp', index=1,
+      number=2, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='max_response_size_bytes', full_name='SyncAllNewEventsRequest.max_response_size_bytes', index=2,
+      number=8, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -3764,8 +4463,8 @@ _SYNCALLNEWEVENTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8440,
-  serialized_end=8511,
+  serialized_start=9669,
+  serialized_end=9796,
 )
 
 
@@ -3776,6 +4475,34 @@ _SYNCALLNEWEVENTSRESPONSE = _descriptor.Descriptor(
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='some_code', full_name='SyncAllNewEventsResponse.some_code', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='response_header', full_name='SyncAllNewEventsResponse.response_header', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='sync_timestamp', full_name='SyncAllNewEventsResponse.sync_timestamp', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation_state', full_name='SyncAllNewEventsResponse.conversation_state', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -3788,8 +4515,8 @@ _SYNCALLNEWEVENTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8513,
-  serialized_end=8539,
+  serialized_start=9799,
+  serialized_end=9958,
 )
 
 
@@ -3819,8 +4546,8 @@ _SYNCRECENTCONVERSATIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8541,
-  serialized_end=8619,
+  serialized_start=9960,
+  serialized_end=10032,
 )
 
 
@@ -3831,6 +4558,34 @@ _SYNCRECENTCONVERSATIONSRESPONSE = _descriptor.Descriptor(
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='some_code', full_name='SyncRecentConversationsResponse.some_code', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='response_header', full_name='SyncRecentConversationsResponse.response_header', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='sync_timestamp', full_name='SyncRecentConversationsResponse.sync_timestamp', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation_state', full_name='SyncRecentConversationsResponse.conversation_state', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -3843,8 +4598,8 @@ _SYNCRECENTCONVERSATIONSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8621,
-  serialized_end=8654,
+  serialized_start=10035,
+  serialized_end=10201,
 )
 
 
@@ -3874,8 +4629,8 @@ _UPDATEWATERMARKREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8656,
-  serialized_end=8726,
+  serialized_start=10203,
+  serialized_end=10267,
 )
 
 
@@ -3898,220 +4653,264 @@ _UPDATEWATERMARKRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8728,
-  serialized_end=8753,
+  serialized_start=10269,
+  serialized_end=10294,
 )
 
-_CLIENTNOTIFICATIONSETTINGS.fields_by_name['dnd_settings'].message_type = _CLIENTDONOTDISTURBSETTING
-_CLIENTSTATEUPDATEHEADER.fields_by_name['active_client_state'].enum_type = _ACTIVECLIENTSTATE
-_CLIENTSTATEUPDATEHEADER.fields_by_name['notification_settings'].message_type = _CLIENTNOTIFICATIONSETTINGS
-_CLIENTSETFOCUSNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTSETFOCUSNOTIFICATION.fields_by_name['user_id'].message_type = _USERID
-_CLIENTSETFOCUSNOTIFICATION.fields_by_name['status'].enum_type = _FOCUSSTATUS
-_CLIENTSETFOCUSNOTIFICATION.fields_by_name['device'].enum_type = _FOCUSDEVICE
-_CLIENTPRESENCERESULT.fields_by_name['user_id'].message_type = _USERID
-_CLIENTPRESENCERESULT.fields_by_name['presence'].message_type = _CLIENTPRESENCE
-_CLIENTPRESENCENOTIFICATION.fields_by_name['presence'].message_type = _CLIENTPRESENCERESULT
-_CLIENTSETTYPINGNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTSETTYPINGNOTIFICATION.fields_by_name['user_id'].message_type = _USERID
-_CLIENTSETTYPINGNOTIFICATION.fields_by_name['status'].enum_type = _TYPINGSTATUS
-_CLIENTCLIENTPRESENCESTATE.fields_by_name['identifier'].message_type = _CLIENTCLIENTIDENTIFIER
-_CLIENTCLIENTPRESENCESTATE.fields_by_name['state'].enum_type = _CLIENTPRESENCESTATE
-_CLIENTSELFPRESENCENOTIFICATION.fields_by_name['client_presence_state'].message_type = _CLIENTCLIENTPRESENCESTATE
-_CLIENTWATERMARKNOTIFICATION.fields_by_name['participant_id'].message_type = _USERID
-_CLIENTWATERMARKNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTUSEREVENTSTATE.fields_by_name['user_id'].message_type = _USERID
-_CLIENTUSEREVENTSTATE.fields_by_name['notification_level'].enum_type = _CLIENTNOTIFICATIONLEVEL
+_NOTIFICATIONSETTINGS.fields_by_name['dnd_settings'].message_type = _DONOTDISTURBSETTING
+_PRESENCERESULT.fields_by_name['user_id'].message_type = _USERID
+_PRESENCERESULT.fields_by_name['presence'].message_type = _PRESENCE
+_CLIENTPRESENCESTATE.fields_by_name['identifier'].message_type = _CLIENTIDENTIFIER
+_CLIENTPRESENCESTATE.fields_by_name['state'].enum_type = _CLIENTPRESENCESTATETYPE
+_USEREVENTSTATE.fields_by_name['user_id'].message_type = _USERID
+_USEREVENTSTATE.fields_by_name['notification_level'].enum_type = _NOTIFICATIONLEVEL
 _SEGMENT.fields_by_name['type'].enum_type = _SEGMENTTYPE
 _SEGMENT.fields_by_name['formatting'].message_type = _FORMATTING
 _SEGMENT.fields_by_name['link_data'].message_type = _LINKDATA
 _ATTACHMENT.fields_by_name['embed_item'].message_type = _EMBEDITEM
-_CLIENTMESSAGECONTENT.fields_by_name['segment'].message_type = _SEGMENT
-_CLIENTMESSAGECONTENT.fields_by_name['attachment'].message_type = _ATTACHMENT
-_CLIENTCHATMESSAGE.fields_by_name['message_content'].message_type = _CLIENTMESSAGECONTENT
-_CLIENTEVENT.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTEVENT.fields_by_name['sender_id'].message_type = _USERID
-_CLIENTEVENT.fields_by_name['self_event_state'].message_type = _CLIENTUSEREVENTSTATE
-_CLIENTEVENT.fields_by_name['chat_message'].message_type = _CLIENTCHATMESSAGE
-_CLIENTEVENT.fields_by_name['membership_change'].message_type = _CLIENTMEMBERSHIPCHANGE
-_CLIENTEVENT.fields_by_name['conversation_rename'].message_type = _CLIENTCONVERSATIONRENAME
-_CLIENTEVENT.fields_by_name['hangout_event'].message_type = _CLIENTHANGOUTEVENT
-_CLIENTEVENT.fields_by_name['otr_modification'].message_type = _CLIENTOTRMODIFICATION
-_CLIENTEVENT.fields_by_name['otr_status'].enum_type = _OFFTHERECORDSTATUS
-_CLIENTEVENTNOTIFICATION.fields_by_name['event'].message_type = _CLIENTEVENT
-_CLIENTUSERREADSTATE.fields_by_name['participant_id'].message_type = _USERID
-_CLIENTUSERCONVERSATIONSTATE.fields_by_name['self_read_state'].message_type = _CLIENTUSERREADSTATE
-_CLIENTUSERCONVERSATIONSTATE.fields_by_name['status'].enum_type = _CLIENTCONVERSATIONSTATUS
-_CLIENTUSERCONVERSATIONSTATE.fields_by_name['notification_level'].enum_type = _CLIENTNOTIFICATIONLEVEL
-_CLIENTUSERCONVERSATIONSTATE.fields_by_name['view'].enum_type = _CLIENTCONVERSATIONVIEW
-_CLIENTUSERCONVERSATIONSTATE.fields_by_name['inviter_id'].message_type = _USERID
-_CLIENTCONVERSATIONPARTICIPANTDATA.fields_by_name['id'].message_type = _USERID
-_CLIENTCONVERSATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTCONVERSATION.fields_by_name['type'].enum_type = _CONVERSATIONTYPE
-_CLIENTCONVERSATION.fields_by_name['self_conversation_state'].message_type = _CLIENTUSERCONVERSATIONSTATE
-_CLIENTCONVERSATION.fields_by_name['read_state'].message_type = _CLIENTUSERREADSTATE
-_CLIENTCONVERSATION.fields_by_name['otr_status'].enum_type = _OFFTHERECORDSTATUS
-_CLIENTCONVERSATION.fields_by_name['current_participant'].message_type = _USERID
-_CLIENTCONVERSATION.fields_by_name['participant_data'].message_type = _CLIENTCONVERSATIONPARTICIPANTDATA
-_CLIENTSETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTSETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION.fields_by_name['level'].enum_type = _CLIENTNOTIFICATIONLEVEL
-_CLIENTEASTEREGGNOTIFICATION.fields_by_name['sender_id'].message_type = _USERID
-_CLIENTEASTEREGGNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTEASTEREGGNOTIFICATION.fields_by_name['easter_egg'].message_type = _CLIENTEASTEREGG
-_CLIENTSETTINGSNOTIFICATION_FOO.fields_by_name['setting'].enum_type = _CLIENTSETTING
-_CLIENTSETTINGSNOTIFICATION_FOO.containing_type = _CLIENTSETTINGSNOTIFICATION
-_CLIENTSETTINGSNOTIFICATION.fields_by_name['foo'].message_type = _CLIENTSETTINGSNOTIFICATION_FOO
-_CLIENTCONVERSATIONVIEWMODIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTCONVERSATIONVIEWMODIFICATION.fields_by_name['old_view'].enum_type = _CLIENTCONVERSATIONVIEW
-_CLIENTCONVERSATIONVIEWMODIFICATION.fields_by_name['new_view'].enum_type = _CLIENTCONVERSATIONVIEW
-_CLIENTDELETEACTIONNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTDELETEACTIONNOTIFICATION.fields_by_name['delete_action'].message_type = _CLIENTDELETEACTION
-_CLIENTBLOCKSTATECHANGE.fields_by_name['participant_id'].message_type = _USERID
-_CLIENTBLOCKSTATECHANGE.fields_by_name['new_block_state'].enum_type = _CLIENTBLOCKSTATE
-_CLIENTBLOCKNOTIFICATION.fields_by_name['block_state_change'].message_type = _CLIENTBLOCKSTATECHANGE
-_CLIENTREPLYTOINVITENOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTREPLYTOINVITENOTIFICATION.fields_by_name['type'].enum_type = _CLIENTREPLYTOINVITETYPE
-_CLIENTSTATEUPDATE.fields_by_name['client_state_update_header'].message_type = _CLIENTSTATEUPDATEHEADER
-_CLIENTSTATEUPDATE.fields_by_name['client_conversation'].message_type = _CLIENTCONVERSATION
-_CLIENTSTATEUPDATE.fields_by_name['event_notification'].message_type = _CLIENTEVENTNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['focus_notification'].message_type = _CLIENTSETFOCUSNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['typing_notification'].message_type = _CLIENTSETTYPINGNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['notification_level_notification'].message_type = _CLIENTSETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['reply_to_invite_notification'].message_type = _CLIENTREPLYTOINVITENOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['watermark_notification'].message_type = _CLIENTWATERMARKNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['view_modification'].message_type = _CLIENTCONVERSATIONVIEWMODIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['easter_egg_notification'].message_type = _CLIENTEASTEREGGNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['self_presence_notification'].message_type = _CLIENTSELFPRESENCENOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['delete_notification'].message_type = _CLIENTDELETEACTIONNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['presence_notification'].message_type = _CLIENTPRESENCENOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['block_notification'].message_type = _CLIENTBLOCKNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['notification_setting_notification'].message_type = _CLIENTSETNOTIFICATIONSETTINGNOTIFICATION
-_CLIENTSTATEUPDATE.fields_by_name['settings_notification'].message_type = _CLIENTSETTINGSNOTIFICATION
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['event_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['event_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['focus_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['focus_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['typing_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['typing_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['notification_level_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['notification_level_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['reply_to_invite_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['reply_to_invite_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['watermark_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['watermark_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['view_modification'])
-_CLIENTSTATEUPDATE.fields_by_name['view_modification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['easter_egg_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['easter_egg_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['self_presence_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['self_presence_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['delete_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['delete_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['presence_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['presence_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['block_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['block_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['notification_setting_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['notification_setting_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTSTATEUPDATE.oneofs_by_name['client_state_update'].fields.append(
-  _CLIENTSTATEUPDATE.fields_by_name['settings_notification'])
-_CLIENTSTATEUPDATE.fields_by_name['settings_notification'].containing_oneof = _CLIENTSTATEUPDATE.oneofs_by_name['client_state_update']
-_CLIENTEXISTINGMEDIA.fields_by_name['photo'].message_type = _PHOTO
-_CLIENTEVENTREQUESTHEADER.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
-_CLIENTEVENTREQUESTHEADER.fields_by_name['expected_otr'].enum_type = _OFFTHERECORDSTATUS
-_CLIENTCLIENTVERSION.fields_by_name['client_id'].enum_type = _CLIENTID
-_CLIENTCLIENTVERSION.fields_by_name['build_type'].enum_type = _CLIENTBUILDTYPE
-_CLIENTREQUESTHEADER.fields_by_name['client_version'].message_type = _CLIENTCLIENTVERSION
-_CLIENTREQUESTHEADER.fields_by_name['client_identifier'].message_type = _CLIENTCLIENTIDENTIFIER
-_CLIENTRESPONSEHEADER.fields_by_name['status'].enum_type = _CLIENTRESPONSESTATUS
-_ADDUSERREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_CREATECONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_DELETECONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_GETCONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_GETENTITYBYIDREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_GETSELFINFOREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_QUERYPRESENCEREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_REMOVEUSERREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SEARCHENTITIESREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SENDCHATMESSAGEREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SENDCHATMESSAGEREQUEST.fields_by_name['message_content'].message_type = _CLIENTMESSAGECONTENT
-_SENDCHATMESSAGEREQUEST.fields_by_name['existing_media'].message_type = _CLIENTEXISTINGMEDIA
-_SENDCHATMESSAGEREQUEST.fields_by_name['event_request_header'].message_type = _CLIENTEVENTREQUESTHEADER
-_SENDCHATMESSAGERESPONSE.fields_by_name['response_header'].message_type = _CLIENTRESPONSEHEADER
-_SENDCHATMESSAGERESPONSE.fields_by_name['created_event'].message_type = _CLIENTEVENT
-_SENDEASTEREGGREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SETACTIVECLIENTREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SETACTIVECLIENTRESPONSE.fields_by_name['response_header'].message_type = _CLIENTRESPONSEHEADER
-_SETCHATNAMEREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SETCONVERSATIONLEVELREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SETPRESENCEREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SETTYPINGREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SYNCALLNEWEVENTSREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_SYNCRECENTCONVERSATIONSREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-_UPDATEWATERMARKREQUEST.fields_by_name['request_header'].message_type = _CLIENTREQUESTHEADER
-DESCRIPTOR.message_types_by_name['ClientDoNotDisturbSetting'] = _CLIENTDONOTDISTURBSETTING
-DESCRIPTOR.message_types_by_name['ClientNotificationSettings'] = _CLIENTNOTIFICATIONSETTINGS
-DESCRIPTOR.message_types_by_name['ClientStateUpdateHeader'] = _CLIENTSTATEUPDATEHEADER
+_MESSAGECONTENT.fields_by_name['segment'].message_type = _SEGMENT
+_MESSAGECONTENT.fields_by_name['attachment'].message_type = _ATTACHMENT
+_CHATMESSAGE.fields_by_name['message_content'].message_type = _MESSAGECONTENT
+_EVENT.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_EVENT.fields_by_name['sender_id'].message_type = _USERID
+_EVENT.fields_by_name['self_event_state'].message_type = _USEREVENTSTATE
+_EVENT.fields_by_name['chat_message'].message_type = _CHATMESSAGE
+_EVENT.fields_by_name['membership_change'].message_type = _MEMBERSHIPCHANGE
+_EVENT.fields_by_name['conversation_rename'].message_type = _CONVERSATIONRENAME
+_EVENT.fields_by_name['hangout_event'].message_type = _HANGOUTEVENT
+_EVENT.fields_by_name['otr_modification'].message_type = _OTRMODIFICATION
+_EVENT.fields_by_name['otr_status'].enum_type = _OFFTHERECORDSTATUS
+_USERREADSTATE.fields_by_name['participant_id'].message_type = _USERID
+_USERCONVERSATIONSTATE.fields_by_name['self_read_state'].message_type = _USERREADSTATE
+_USERCONVERSATIONSTATE.fields_by_name['status'].enum_type = _CONVERSATIONSTATUS
+_USERCONVERSATIONSTATE.fields_by_name['notification_level'].enum_type = _NOTIFICATIONLEVEL
+_USERCONVERSATIONSTATE.fields_by_name['view'].enum_type = _CONVERSATIONVIEW
+_USERCONVERSATIONSTATE.fields_by_name['inviter_id'].message_type = _USERID
+_CONVERSATIONPARTICIPANTDATA.fields_by_name['id'].message_type = _USERID
+_CONVERSATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_CONVERSATION.fields_by_name['type'].enum_type = _CONVERSATIONTYPE
+_CONVERSATION.fields_by_name['self_conversation_state'].message_type = _USERCONVERSATIONSTATE
+_CONVERSATION.fields_by_name['read_state'].message_type = _USERREADSTATE
+_CONVERSATION.fields_by_name['otr_status'].enum_type = _OFFTHERECORDSTATUS
+_CONVERSATION.fields_by_name['current_participant'].message_type = _USERID
+_CONVERSATION.fields_by_name['participant_data'].message_type = _CONVERSATIONPARTICIPANTDATA
+_BLOCKSTATECHANGE.fields_by_name['participant_id'].message_type = _USERID
+_BLOCKSTATECHANGE.fields_by_name['new_block_state'].enum_type = _BLOCKSTATE
+_EXISTINGMEDIA.fields_by_name['photo'].message_type = _PHOTO
+_EVENTREQUESTHEADER.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_EVENTREQUESTHEADER.fields_by_name['expected_otr'].enum_type = _OFFTHERECORDSTATUS
+_CLIENTVERSION.fields_by_name['client_id'].enum_type = _CLIENTID
+_CLIENTVERSION.fields_by_name['build_type'].enum_type = _CLIENTBUILDTYPE
+_REQUESTHEADER.fields_by_name['client_version'].message_type = _CLIENTVERSION
+_REQUESTHEADER.fields_by_name['client_identifier'].message_type = _CLIENTIDENTIFIER
+_RESPONSEHEADER.fields_by_name['status'].enum_type = _RESPONSESTATUS
+_ENTITY.fields_by_name['id'].message_type = _USERID
+_ENTITY.fields_by_name['properties'].message_type = _ENTITYPROPERTIES
+_ENTITYPROPERTIES.fields_by_name['type'].enum_type = _PROFILETYPE
+_ENTITYPROPERTIES.fields_by_name['gender'].enum_type = _GENDER
+_ENTITYPROPERTIES.fields_by_name['photo_url_status'].enum_type = _PHOTOURLSTATUS
+_CONVERSATIONSTATE.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_CONVERSATIONSTATE.fields_by_name['conversation'].message_type = _CONVERSATION
+_CONVERSATIONSTATE.fields_by_name['event'].message_type = _EVENT
+_CONVERSATIONSTATE.fields_by_name['event_continuation_token'].message_type = _EVENTCONTINUATIONTOKEN
+_STATEUPDATE.fields_by_name['state_update_header'].message_type = _STATEUPDATEHEADER
+_STATEUPDATE.fields_by_name['conversation'].message_type = _CONVERSATION
+_STATEUPDATE.fields_by_name['event_notification'].message_type = _EVENTNOTIFICATION
+_STATEUPDATE.fields_by_name['focus_notification'].message_type = _SETFOCUSNOTIFICATION
+_STATEUPDATE.fields_by_name['typing_notification'].message_type = _SETTYPINGNOTIFICATION
+_STATEUPDATE.fields_by_name['notification_level_notification'].message_type = _SETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION
+_STATEUPDATE.fields_by_name['reply_to_invite_notification'].message_type = _REPLYTOINVITENOTIFICATION
+_STATEUPDATE.fields_by_name['watermark_notification'].message_type = _WATERMARKNOTIFICATION
+_STATEUPDATE.fields_by_name['view_modification'].message_type = _CONVERSATIONVIEWMODIFICATION
+_STATEUPDATE.fields_by_name['easter_egg_notification'].message_type = _EASTEREGGNOTIFICATION
+_STATEUPDATE.fields_by_name['self_presence_notification'].message_type = _SELFPRESENCENOTIFICATION
+_STATEUPDATE.fields_by_name['delete_notification'].message_type = _DELETEACTIONNOTIFICATION
+_STATEUPDATE.fields_by_name['presence_notification'].message_type = _PRESENCENOTIFICATION
+_STATEUPDATE.fields_by_name['block_notification'].message_type = _BLOCKNOTIFICATION
+_STATEUPDATE.fields_by_name['notification_setting_notification'].message_type = _SETNOTIFICATIONSETTINGNOTIFICATION
+_STATEUPDATE.fields_by_name['settings_notification'].message_type = _SETTINGSNOTIFICATION
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['event_notification'])
+_STATEUPDATE.fields_by_name['event_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['focus_notification'])
+_STATEUPDATE.fields_by_name['focus_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['typing_notification'])
+_STATEUPDATE.fields_by_name['typing_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['notification_level_notification'])
+_STATEUPDATE.fields_by_name['notification_level_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['reply_to_invite_notification'])
+_STATEUPDATE.fields_by_name['reply_to_invite_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['watermark_notification'])
+_STATEUPDATE.fields_by_name['watermark_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['view_modification'])
+_STATEUPDATE.fields_by_name['view_modification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['easter_egg_notification'])
+_STATEUPDATE.fields_by_name['easter_egg_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['self_presence_notification'])
+_STATEUPDATE.fields_by_name['self_presence_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['delete_notification'])
+_STATEUPDATE.fields_by_name['delete_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['presence_notification'])
+_STATEUPDATE.fields_by_name['presence_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['block_notification'])
+_STATEUPDATE.fields_by_name['block_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['notification_setting_notification'])
+_STATEUPDATE.fields_by_name['notification_setting_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATE.oneofs_by_name['state_update'].fields.append(
+  _STATEUPDATE.fields_by_name['settings_notification'])
+_STATEUPDATE.fields_by_name['settings_notification'].containing_oneof = _STATEUPDATE.oneofs_by_name['state_update']
+_STATEUPDATEHEADER.fields_by_name['active_client_state'].enum_type = _ACTIVECLIENTSTATE
+_STATEUPDATEHEADER.fields_by_name['notification_settings'].message_type = _NOTIFICATIONSETTINGS
+_BATCHUPDATE.fields_by_name['state_update'].message_type = _STATEUPDATE
+_EVENTNOTIFICATION.fields_by_name['event'].message_type = _EVENT
+_SETFOCUSNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_SETFOCUSNOTIFICATION.fields_by_name['user_id'].message_type = _USERID
+_SETFOCUSNOTIFICATION.fields_by_name['status'].enum_type = _FOCUSSTATUS
+_SETFOCUSNOTIFICATION.fields_by_name['device'].enum_type = _FOCUSDEVICE
+_SETTYPINGNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_SETTYPINGNOTIFICATION.fields_by_name['user_id'].message_type = _USERID
+_SETTYPINGNOTIFICATION.fields_by_name['status'].enum_type = _TYPINGSTATUS
+_SETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_SETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION.fields_by_name['level'].enum_type = _NOTIFICATIONLEVEL
+_REPLYTOINVITENOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_REPLYTOINVITENOTIFICATION.fields_by_name['type'].enum_type = _REPLYTOINVITETYPE
+_WATERMARKNOTIFICATION.fields_by_name['participant_id'].message_type = _USERID
+_WATERMARKNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_CONVERSATIONVIEWMODIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_CONVERSATIONVIEWMODIFICATION.fields_by_name['old_view'].enum_type = _CONVERSATIONVIEW
+_CONVERSATIONVIEWMODIFICATION.fields_by_name['new_view'].enum_type = _CONVERSATIONVIEW
+_EASTEREGGNOTIFICATION.fields_by_name['sender_id'].message_type = _USERID
+_EASTEREGGNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_EASTEREGGNOTIFICATION.fields_by_name['easter_egg'].message_type = _EASTEREGG
+_SELFPRESENCENOTIFICATION.fields_by_name['client_presence_state'].message_type = _CLIENTPRESENCESTATE
+_DELETEACTIONNOTIFICATION.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_DELETEACTIONNOTIFICATION.fields_by_name['delete_action'].message_type = _DELETEACTION
+_PRESENCENOTIFICATION.fields_by_name['presence'].message_type = _PRESENCERESULT
+_BLOCKNOTIFICATION.fields_by_name['block_state_change'].message_type = _BLOCKSTATECHANGE
+_SETTINGSNOTIFICATION_FOO.fields_by_name['setting'].enum_type = _SETTINGTYPE
+_SETTINGSNOTIFICATION_FOO.containing_type = _SETTINGSNOTIFICATION
+_SETTINGSNOTIFICATION.fields_by_name['foo'].message_type = _SETTINGSNOTIFICATION_FOO
+_CONVERSATIONSPEC.fields_by_name['conversation_id'].message_type = _CONVERSATIONID
+_ADDUSERREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_CREATECONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_DELETECONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_GETCONVERSATIONREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_GETCONVERSATIONREQUEST.fields_by_name['conversation_spec'].message_type = _CONVERSATIONSPEC
+_GETCONVERSATIONREQUEST.fields_by_name['event_continuation_token'].message_type = _EVENTCONTINUATIONTOKEN
+_GETCONVERSATIONRESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
+_GETCONVERSATIONRESPONSE.fields_by_name['conversation_state'].message_type = _CONVERSATIONSTATE
+_GETENTITYBYIDREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_GETENTITYBYIDREQUEST.fields_by_name['batch_lookup_spec'].message_type = _ENTITYLOOKUPSPEC
+_GETENTITYBYIDRESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
+_GETENTITYBYIDRESPONSE.fields_by_name['entity'].message_type = _ENTITY
+_GETSUGGESTEDENTITIESREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP_FOO.fields_by_name['entity'].message_type = _ENTITY
+_GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP_FOO.containing_type = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP
+_GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP.fields_by_name['entity'].message_type = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP_FOO
+_GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP.containing_type = _GETSUGGESTEDENTITIESRESPONSE
+_GETSUGGESTEDENTITIESRESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
+_GETSUGGESTEDENTITIESRESPONSE.fields_by_name['entity'].message_type = _ENTITY
+_GETSUGGESTEDENTITIESRESPONSE.fields_by_name['group1'].message_type = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP
+_GETSUGGESTEDENTITIESRESPONSE.fields_by_name['group2'].message_type = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP
+_GETSUGGESTEDENTITIESRESPONSE.fields_by_name['group3'].message_type = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP
+_GETSUGGESTEDENTITIESRESPONSE.fields_by_name['group4'].message_type = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP
+_GETSUGGESTEDENTITIESRESPONSE.fields_by_name['group5'].message_type = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP
+_GETSUGGESTEDENTITIESRESPONSE.fields_by_name['group6'].message_type = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP
+_GETSELFINFOREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_GETSELFINFORESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
+_GETSELFINFORESPONSE.fields_by_name['self_entity'].message_type = _ENTITY
+_QUERYPRESENCEREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_REMOVEUSERREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SEARCHENTITIESREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SENDCHATMESSAGEREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SENDCHATMESSAGEREQUEST.fields_by_name['message_content'].message_type = _MESSAGECONTENT
+_SENDCHATMESSAGEREQUEST.fields_by_name['existing_media'].message_type = _EXISTINGMEDIA
+_SENDCHATMESSAGEREQUEST.fields_by_name['event_request_header'].message_type = _EVENTREQUESTHEADER
+_SENDCHATMESSAGERESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
+_SENDCHATMESSAGERESPONSE.fields_by_name['created_event'].message_type = _EVENT
+_SENDEASTEREGGREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SETACTIVECLIENTREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SETACTIVECLIENTRESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
+_SETCHATNAMEREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SETCONVERSATIONLEVELREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SETPRESENCEREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SETTYPINGREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SYNCALLNEWEVENTSREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SYNCALLNEWEVENTSRESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
+_SYNCALLNEWEVENTSRESPONSE.fields_by_name['conversation_state'].message_type = _CONVERSATIONSTATE
+_SYNCRECENTCONVERSATIONSREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+_SYNCRECENTCONVERSATIONSRESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
+_SYNCRECENTCONVERSATIONSRESPONSE.fields_by_name['conversation_state'].message_type = _CONVERSATIONSTATE
+_UPDATEWATERMARKREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
+DESCRIPTOR.message_types_by_name['DoNotDisturbSetting'] = _DONOTDISTURBSETTING
+DESCRIPTOR.message_types_by_name['NotificationSettings'] = _NOTIFICATIONSETTINGS
 DESCRIPTOR.message_types_by_name['ConversationID'] = _CONVERSATIONID
 DESCRIPTOR.message_types_by_name['UserID'] = _USERID
-DESCRIPTOR.message_types_by_name['ClientSetFocusNotification'] = _CLIENTSETFOCUSNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientPresence'] = _CLIENTPRESENCE
-DESCRIPTOR.message_types_by_name['ClientPresenceResult'] = _CLIENTPRESENCERESULT
-DESCRIPTOR.message_types_by_name['ClientPresenceNotification'] = _CLIENTPRESENCENOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientSetTypingNotification'] = _CLIENTSETTYPINGNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientClientIdentifier'] = _CLIENTCLIENTIDENTIFIER
-DESCRIPTOR.message_types_by_name['ClientClientPresenceState'] = _CLIENTCLIENTPRESENCESTATE
-DESCRIPTOR.message_types_by_name['ClientSelfPresenceNotification'] = _CLIENTSELFPRESENCENOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientWatermarkNotification'] = _CLIENTWATERMARKNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientUserEventState'] = _CLIENTUSEREVENTSTATE
+DESCRIPTOR.message_types_by_name['Presence'] = _PRESENCE
+DESCRIPTOR.message_types_by_name['PresenceResult'] = _PRESENCERESULT
+DESCRIPTOR.message_types_by_name['ClientIdentifier'] = _CLIENTIDENTIFIER
+DESCRIPTOR.message_types_by_name['ClientPresenceState'] = _CLIENTPRESENCESTATE
+DESCRIPTOR.message_types_by_name['UserEventState'] = _USEREVENTSTATE
 DESCRIPTOR.message_types_by_name['Formatting'] = _FORMATTING
 DESCRIPTOR.message_types_by_name['LinkData'] = _LINKDATA
 DESCRIPTOR.message_types_by_name['Segment'] = _SEGMENT
 DESCRIPTOR.message_types_by_name['EmbedItem'] = _EMBEDITEM
 DESCRIPTOR.message_types_by_name['Attachment'] = _ATTACHMENT
-DESCRIPTOR.message_types_by_name['ClientMessageContent'] = _CLIENTMESSAGECONTENT
-DESCRIPTOR.message_types_by_name['ClientChatMessage'] = _CLIENTCHATMESSAGE
-DESCRIPTOR.message_types_by_name['ClientMembershipChange'] = _CLIENTMEMBERSHIPCHANGE
-DESCRIPTOR.message_types_by_name['ClientConversationRename'] = _CLIENTCONVERSATIONRENAME
-DESCRIPTOR.message_types_by_name['ClientHangoutEvent'] = _CLIENTHANGOUTEVENT
-DESCRIPTOR.message_types_by_name['ClientOTRModification'] = _CLIENTOTRMODIFICATION
-DESCRIPTOR.message_types_by_name['ClientEvent'] = _CLIENTEVENT
-DESCRIPTOR.message_types_by_name['ClientEventNotification'] = _CLIENTEVENTNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientUserReadState'] = _CLIENTUSERREADSTATE
-DESCRIPTOR.message_types_by_name['ClientUserConversationState'] = _CLIENTUSERCONVERSATIONSTATE
-DESCRIPTOR.message_types_by_name['ClientConversationParticipantData'] = _CLIENTCONVERSATIONPARTICIPANTDATA
-DESCRIPTOR.message_types_by_name['ClientConversation'] = _CLIENTCONVERSATION
-DESCRIPTOR.message_types_by_name['ClientSetConversationNotificationLevelNotification'] = _CLIENTSETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientEasterEgg'] = _CLIENTEASTEREGG
-DESCRIPTOR.message_types_by_name['ClientEasterEggNotification'] = _CLIENTEASTEREGGNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientSettingsNotification'] = _CLIENTSETTINGSNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientSetNotificationSettingNotification'] = _CLIENTSETNOTIFICATIONSETTINGNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientConversationViewModification'] = _CLIENTCONVERSATIONVIEWMODIFICATION
-DESCRIPTOR.message_types_by_name['ClientDeleteAction'] = _CLIENTDELETEACTION
-DESCRIPTOR.message_types_by_name['ClientDeleteActionNotification'] = _CLIENTDELETEACTIONNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientBlockStateChange'] = _CLIENTBLOCKSTATECHANGE
-DESCRIPTOR.message_types_by_name['ClientBlockNotification'] = _CLIENTBLOCKNOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientReplyToInviteNotification'] = _CLIENTREPLYTOINVITENOTIFICATION
-DESCRIPTOR.message_types_by_name['ClientStateUpdate'] = _CLIENTSTATEUPDATE
+DESCRIPTOR.message_types_by_name['MessageContent'] = _MESSAGECONTENT
+DESCRIPTOR.message_types_by_name['ChatMessage'] = _CHATMESSAGE
+DESCRIPTOR.message_types_by_name['MembershipChange'] = _MEMBERSHIPCHANGE
+DESCRIPTOR.message_types_by_name['ConversationRename'] = _CONVERSATIONRENAME
+DESCRIPTOR.message_types_by_name['HangoutEvent'] = _HANGOUTEVENT
+DESCRIPTOR.message_types_by_name['OTRModification'] = _OTRMODIFICATION
+DESCRIPTOR.message_types_by_name['Event'] = _EVENT
+DESCRIPTOR.message_types_by_name['UserReadState'] = _USERREADSTATE
+DESCRIPTOR.message_types_by_name['UserConversationState'] = _USERCONVERSATIONSTATE
+DESCRIPTOR.message_types_by_name['ConversationParticipantData'] = _CONVERSATIONPARTICIPANTDATA
+DESCRIPTOR.message_types_by_name['Conversation'] = _CONVERSATION
+DESCRIPTOR.message_types_by_name['EasterEgg'] = _EASTEREGG
+DESCRIPTOR.message_types_by_name['DeleteAction'] = _DELETEACTION
+DESCRIPTOR.message_types_by_name['BlockStateChange'] = _BLOCKSTATECHANGE
 DESCRIPTOR.message_types_by_name['Photo'] = _PHOTO
-DESCRIPTOR.message_types_by_name['ClientExistingMedia'] = _CLIENTEXISTINGMEDIA
-DESCRIPTOR.message_types_by_name['ClientEventRequestHeader'] = _CLIENTEVENTREQUESTHEADER
-DESCRIPTOR.message_types_by_name['ClientClientVersion'] = _CLIENTCLIENTVERSION
-DESCRIPTOR.message_types_by_name['ClientRequestHeader'] = _CLIENTREQUESTHEADER
-DESCRIPTOR.message_types_by_name['ClientResponseHeader'] = _CLIENTRESPONSEHEADER
+DESCRIPTOR.message_types_by_name['ExistingMedia'] = _EXISTINGMEDIA
+DESCRIPTOR.message_types_by_name['EventRequestHeader'] = _EVENTREQUESTHEADER
+DESCRIPTOR.message_types_by_name['ClientVersion'] = _CLIENTVERSION
+DESCRIPTOR.message_types_by_name['RequestHeader'] = _REQUESTHEADER
+DESCRIPTOR.message_types_by_name['ResponseHeader'] = _RESPONSEHEADER
+DESCRIPTOR.message_types_by_name['Entity'] = _ENTITY
+DESCRIPTOR.message_types_by_name['EntityProperties'] = _ENTITYPROPERTIES
+DESCRIPTOR.message_types_by_name['ConversationState'] = _CONVERSATIONSTATE
+DESCRIPTOR.message_types_by_name['EventContinuationToken'] = _EVENTCONTINUATIONTOKEN
+DESCRIPTOR.message_types_by_name['EntityLookupSpec'] = _ENTITYLOOKUPSPEC
+DESCRIPTOR.message_types_by_name['StateUpdate'] = _STATEUPDATE
+DESCRIPTOR.message_types_by_name['StateUpdateHeader'] = _STATEUPDATEHEADER
+DESCRIPTOR.message_types_by_name['BatchUpdate'] = _BATCHUPDATE
+DESCRIPTOR.message_types_by_name['EventNotification'] = _EVENTNOTIFICATION
+DESCRIPTOR.message_types_by_name['SetFocusNotification'] = _SETFOCUSNOTIFICATION
+DESCRIPTOR.message_types_by_name['SetTypingNotification'] = _SETTYPINGNOTIFICATION
+DESCRIPTOR.message_types_by_name['SetConversationNotificationLevelNotification'] = _SETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION
+DESCRIPTOR.message_types_by_name['ReplyToInviteNotification'] = _REPLYTOINVITENOTIFICATION
+DESCRIPTOR.message_types_by_name['WatermarkNotification'] = _WATERMARKNOTIFICATION
+DESCRIPTOR.message_types_by_name['ConversationViewModification'] = _CONVERSATIONVIEWMODIFICATION
+DESCRIPTOR.message_types_by_name['EasterEggNotification'] = _EASTEREGGNOTIFICATION
+DESCRIPTOR.message_types_by_name['SelfPresenceNotification'] = _SELFPRESENCENOTIFICATION
+DESCRIPTOR.message_types_by_name['DeleteActionNotification'] = _DELETEACTIONNOTIFICATION
+DESCRIPTOR.message_types_by_name['PresenceNotification'] = _PRESENCENOTIFICATION
+DESCRIPTOR.message_types_by_name['BlockNotification'] = _BLOCKNOTIFICATION
+DESCRIPTOR.message_types_by_name['SetNotificationSettingNotification'] = _SETNOTIFICATIONSETTINGNOTIFICATION
+DESCRIPTOR.message_types_by_name['SettingsNotification'] = _SETTINGSNOTIFICATION
+DESCRIPTOR.message_types_by_name['ConversationSpec'] = _CONVERSATIONSPEC
 DESCRIPTOR.message_types_by_name['AddUserRequest'] = _ADDUSERREQUEST
 DESCRIPTOR.message_types_by_name['AddUserResponse'] = _ADDUSERRESPONSE
 DESCRIPTOR.message_types_by_name['CreateConversationRequest'] = _CREATECONVERSATIONREQUEST
@@ -4122,6 +4921,8 @@ DESCRIPTOR.message_types_by_name['GetConversationRequest'] = _GETCONVERSATIONREQ
 DESCRIPTOR.message_types_by_name['GetConversationResponse'] = _GETCONVERSATIONRESPONSE
 DESCRIPTOR.message_types_by_name['GetEntityByIdRequest'] = _GETENTITYBYIDREQUEST
 DESCRIPTOR.message_types_by_name['GetEntityByIdResponse'] = _GETENTITYBYIDRESPONSE
+DESCRIPTOR.message_types_by_name['GetSuggestedEntitiesRequest'] = _GETSUGGESTEDENTITIESREQUEST
+DESCRIPTOR.message_types_by_name['GetSuggestedEntitiesResponse'] = _GETSUGGESTEDENTITIESRESPONSE
 DESCRIPTOR.message_types_by_name['GetSelfInfoRequest'] = _GETSELFINFOREQUEST
 DESCRIPTOR.message_types_by_name['GetSelfInfoResponse'] = _GETSELFINFORESPONSE
 DESCRIPTOR.message_types_by_name['QueryPresenceRequest'] = _QUERYPRESENCEREQUEST
@@ -4154,40 +4955,36 @@ DESCRIPTOR.enum_types_by_name['ActiveClientState'] = _ACTIVECLIENTSTATE
 DESCRIPTOR.enum_types_by_name['FocusStatus'] = _FOCUSSTATUS
 DESCRIPTOR.enum_types_by_name['FocusDevice'] = _FOCUSDEVICE
 DESCRIPTOR.enum_types_by_name['TypingStatus'] = _TYPINGSTATUS
-DESCRIPTOR.enum_types_by_name['ClientPresenceState'] = _CLIENTPRESENCESTATE
-DESCRIPTOR.enum_types_by_name['ClientNotificationLevel'] = _CLIENTNOTIFICATIONLEVEL
+DESCRIPTOR.enum_types_by_name['ClientPresenceStateType'] = _CLIENTPRESENCESTATETYPE
+DESCRIPTOR.enum_types_by_name['NotificationLevel'] = _NOTIFICATIONLEVEL
 DESCRIPTOR.enum_types_by_name['SegmentType'] = _SEGMENTTYPE
 DESCRIPTOR.enum_types_by_name['OffTheRecordStatus'] = _OFFTHERECORDSTATUS
 DESCRIPTOR.enum_types_by_name['ConversationType'] = _CONVERSATIONTYPE
-DESCRIPTOR.enum_types_by_name['ClientConversationStatus'] = _CLIENTCONVERSATIONSTATUS
-DESCRIPTOR.enum_types_by_name['ClientConversationView'] = _CLIENTCONVERSATIONVIEW
-DESCRIPTOR.enum_types_by_name['ClientSetting'] = _CLIENTSETTING
-DESCRIPTOR.enum_types_by_name['ClientBlockState'] = _CLIENTBLOCKSTATE
-DESCRIPTOR.enum_types_by_name['ClientReplyToInviteType'] = _CLIENTREPLYTOINVITETYPE
+DESCRIPTOR.enum_types_by_name['ConversationStatus'] = _CONVERSATIONSTATUS
+DESCRIPTOR.enum_types_by_name['ConversationView'] = _CONVERSATIONVIEW
+DESCRIPTOR.enum_types_by_name['SettingType'] = _SETTINGTYPE
+DESCRIPTOR.enum_types_by_name['BlockState'] = _BLOCKSTATE
+DESCRIPTOR.enum_types_by_name['ReplyToInviteType'] = _REPLYTOINVITETYPE
 DESCRIPTOR.enum_types_by_name['ClientId'] = _CLIENTID
 DESCRIPTOR.enum_types_by_name['ClientBuildType'] = _CLIENTBUILDTYPE
-DESCRIPTOR.enum_types_by_name['ClientResponseStatus'] = _CLIENTRESPONSESTATUS
+DESCRIPTOR.enum_types_by_name['ResponseStatus'] = _RESPONSESTATUS
+DESCRIPTOR.enum_types_by_name['PhotoUrlStatus'] = _PHOTOURLSTATUS
+DESCRIPTOR.enum_types_by_name['Gender'] = _GENDER
+DESCRIPTOR.enum_types_by_name['ProfileType'] = _PROFILETYPE
 
-ClientDoNotDisturbSetting = _reflection.GeneratedProtocolMessageType('ClientDoNotDisturbSetting', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTDONOTDISTURBSETTING,
+DoNotDisturbSetting = _reflection.GeneratedProtocolMessageType('DoNotDisturbSetting', (_message.Message,), dict(
+  DESCRIPTOR = _DONOTDISTURBSETTING,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientDoNotDisturbSetting)
+  # @@protoc_insertion_point(class_scope:DoNotDisturbSetting)
   ))
-_sym_db.RegisterMessage(ClientDoNotDisturbSetting)
+_sym_db.RegisterMessage(DoNotDisturbSetting)
 
-ClientNotificationSettings = _reflection.GeneratedProtocolMessageType('ClientNotificationSettings', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTNOTIFICATIONSETTINGS,
+NotificationSettings = _reflection.GeneratedProtocolMessageType('NotificationSettings', (_message.Message,), dict(
+  DESCRIPTOR = _NOTIFICATIONSETTINGS,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientNotificationSettings)
+  # @@protoc_insertion_point(class_scope:NotificationSettings)
   ))
-_sym_db.RegisterMessage(ClientNotificationSettings)
-
-ClientStateUpdateHeader = _reflection.GeneratedProtocolMessageType('ClientStateUpdateHeader', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTSTATEUPDATEHEADER,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientStateUpdateHeader)
-  ))
-_sym_db.RegisterMessage(ClientStateUpdateHeader)
+_sym_db.RegisterMessage(NotificationSettings)
 
 ConversationID = _reflection.GeneratedProtocolMessageType('ConversationID', (_message.Message,), dict(
   DESCRIPTOR = _CONVERSATIONID,
@@ -4203,75 +5000,40 @@ UserID = _reflection.GeneratedProtocolMessageType('UserID', (_message.Message,),
   ))
 _sym_db.RegisterMessage(UserID)
 
-ClientSetFocusNotification = _reflection.GeneratedProtocolMessageType('ClientSetFocusNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTSETFOCUSNOTIFICATION,
+Presence = _reflection.GeneratedProtocolMessageType('Presence', (_message.Message,), dict(
+  DESCRIPTOR = _PRESENCE,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientSetFocusNotification)
+  # @@protoc_insertion_point(class_scope:Presence)
   ))
-_sym_db.RegisterMessage(ClientSetFocusNotification)
+_sym_db.RegisterMessage(Presence)
 
-ClientPresence = _reflection.GeneratedProtocolMessageType('ClientPresence', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTPRESENCE,
+PresenceResult = _reflection.GeneratedProtocolMessageType('PresenceResult', (_message.Message,), dict(
+  DESCRIPTOR = _PRESENCERESULT,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientPresence)
+  # @@protoc_insertion_point(class_scope:PresenceResult)
   ))
-_sym_db.RegisterMessage(ClientPresence)
+_sym_db.RegisterMessage(PresenceResult)
 
-ClientPresenceResult = _reflection.GeneratedProtocolMessageType('ClientPresenceResult', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTPRESENCERESULT,
+ClientIdentifier = _reflection.GeneratedProtocolMessageType('ClientIdentifier', (_message.Message,), dict(
+  DESCRIPTOR = _CLIENTIDENTIFIER,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientPresenceResult)
+  # @@protoc_insertion_point(class_scope:ClientIdentifier)
   ))
-_sym_db.RegisterMessage(ClientPresenceResult)
+_sym_db.RegisterMessage(ClientIdentifier)
 
-ClientPresenceNotification = _reflection.GeneratedProtocolMessageType('ClientPresenceNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTPRESENCENOTIFICATION,
+ClientPresenceState = _reflection.GeneratedProtocolMessageType('ClientPresenceState', (_message.Message,), dict(
+  DESCRIPTOR = _CLIENTPRESENCESTATE,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientPresenceNotification)
+  # @@protoc_insertion_point(class_scope:ClientPresenceState)
   ))
-_sym_db.RegisterMessage(ClientPresenceNotification)
+_sym_db.RegisterMessage(ClientPresenceState)
 
-ClientSetTypingNotification = _reflection.GeneratedProtocolMessageType('ClientSetTypingNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTSETTYPINGNOTIFICATION,
+UserEventState = _reflection.GeneratedProtocolMessageType('UserEventState', (_message.Message,), dict(
+  DESCRIPTOR = _USEREVENTSTATE,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientSetTypingNotification)
+  # @@protoc_insertion_point(class_scope:UserEventState)
   ))
-_sym_db.RegisterMessage(ClientSetTypingNotification)
-
-ClientClientIdentifier = _reflection.GeneratedProtocolMessageType('ClientClientIdentifier', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTCLIENTIDENTIFIER,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientClientIdentifier)
-  ))
-_sym_db.RegisterMessage(ClientClientIdentifier)
-
-ClientClientPresenceState = _reflection.GeneratedProtocolMessageType('ClientClientPresenceState', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTCLIENTPRESENCESTATE,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientClientPresenceState)
-  ))
-_sym_db.RegisterMessage(ClientClientPresenceState)
-
-ClientSelfPresenceNotification = _reflection.GeneratedProtocolMessageType('ClientSelfPresenceNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTSELFPRESENCENOTIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientSelfPresenceNotification)
-  ))
-_sym_db.RegisterMessage(ClientSelfPresenceNotification)
-
-ClientWatermarkNotification = _reflection.GeneratedProtocolMessageType('ClientWatermarkNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTWATERMARKNOTIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientWatermarkNotification)
-  ))
-_sym_db.RegisterMessage(ClientWatermarkNotification)
-
-ClientUserEventState = _reflection.GeneratedProtocolMessageType('ClientUserEventState', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTUSEREVENTSTATE,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientUserEventState)
-  ))
-_sym_db.RegisterMessage(ClientUserEventState)
+_sym_db.RegisterMessage(UserEventState)
 
 Formatting = _reflection.GeneratedProtocolMessageType('Formatting', (_message.Message,), dict(
   DESCRIPTOR = _FORMATTING,
@@ -4308,181 +5070,103 @@ Attachment = _reflection.GeneratedProtocolMessageType('Attachment', (_message.Me
   ))
 _sym_db.RegisterMessage(Attachment)
 
-ClientMessageContent = _reflection.GeneratedProtocolMessageType('ClientMessageContent', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTMESSAGECONTENT,
+MessageContent = _reflection.GeneratedProtocolMessageType('MessageContent', (_message.Message,), dict(
+  DESCRIPTOR = _MESSAGECONTENT,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientMessageContent)
+  # @@protoc_insertion_point(class_scope:MessageContent)
   ))
-_sym_db.RegisterMessage(ClientMessageContent)
+_sym_db.RegisterMessage(MessageContent)
 
-ClientChatMessage = _reflection.GeneratedProtocolMessageType('ClientChatMessage', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTCHATMESSAGE,
+ChatMessage = _reflection.GeneratedProtocolMessageType('ChatMessage', (_message.Message,), dict(
+  DESCRIPTOR = _CHATMESSAGE,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientChatMessage)
+  # @@protoc_insertion_point(class_scope:ChatMessage)
   ))
-_sym_db.RegisterMessage(ClientChatMessage)
+_sym_db.RegisterMessage(ChatMessage)
 
-ClientMembershipChange = _reflection.GeneratedProtocolMessageType('ClientMembershipChange', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTMEMBERSHIPCHANGE,
+MembershipChange = _reflection.GeneratedProtocolMessageType('MembershipChange', (_message.Message,), dict(
+  DESCRIPTOR = _MEMBERSHIPCHANGE,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientMembershipChange)
+  # @@protoc_insertion_point(class_scope:MembershipChange)
   ))
-_sym_db.RegisterMessage(ClientMembershipChange)
+_sym_db.RegisterMessage(MembershipChange)
 
-ClientConversationRename = _reflection.GeneratedProtocolMessageType('ClientConversationRename', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTCONVERSATIONRENAME,
+ConversationRename = _reflection.GeneratedProtocolMessageType('ConversationRename', (_message.Message,), dict(
+  DESCRIPTOR = _CONVERSATIONRENAME,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientConversationRename)
+  # @@protoc_insertion_point(class_scope:ConversationRename)
   ))
-_sym_db.RegisterMessage(ClientConversationRename)
+_sym_db.RegisterMessage(ConversationRename)
 
-ClientHangoutEvent = _reflection.GeneratedProtocolMessageType('ClientHangoutEvent', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTHANGOUTEVENT,
+HangoutEvent = _reflection.GeneratedProtocolMessageType('HangoutEvent', (_message.Message,), dict(
+  DESCRIPTOR = _HANGOUTEVENT,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientHangoutEvent)
+  # @@protoc_insertion_point(class_scope:HangoutEvent)
   ))
-_sym_db.RegisterMessage(ClientHangoutEvent)
+_sym_db.RegisterMessage(HangoutEvent)
 
-ClientOTRModification = _reflection.GeneratedProtocolMessageType('ClientOTRModification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTOTRMODIFICATION,
+OTRModification = _reflection.GeneratedProtocolMessageType('OTRModification', (_message.Message,), dict(
+  DESCRIPTOR = _OTRMODIFICATION,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientOTRModification)
+  # @@protoc_insertion_point(class_scope:OTRModification)
   ))
-_sym_db.RegisterMessage(ClientOTRModification)
+_sym_db.RegisterMessage(OTRModification)
 
-ClientEvent = _reflection.GeneratedProtocolMessageType('ClientEvent', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTEVENT,
+Event = _reflection.GeneratedProtocolMessageType('Event', (_message.Message,), dict(
+  DESCRIPTOR = _EVENT,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientEvent)
+  # @@protoc_insertion_point(class_scope:Event)
   ))
-_sym_db.RegisterMessage(ClientEvent)
+_sym_db.RegisterMessage(Event)
 
-ClientEventNotification = _reflection.GeneratedProtocolMessageType('ClientEventNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTEVENTNOTIFICATION,
+UserReadState = _reflection.GeneratedProtocolMessageType('UserReadState', (_message.Message,), dict(
+  DESCRIPTOR = _USERREADSTATE,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientEventNotification)
+  # @@protoc_insertion_point(class_scope:UserReadState)
   ))
-_sym_db.RegisterMessage(ClientEventNotification)
+_sym_db.RegisterMessage(UserReadState)
 
-ClientUserReadState = _reflection.GeneratedProtocolMessageType('ClientUserReadState', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTUSERREADSTATE,
+UserConversationState = _reflection.GeneratedProtocolMessageType('UserConversationState', (_message.Message,), dict(
+  DESCRIPTOR = _USERCONVERSATIONSTATE,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientUserReadState)
+  # @@protoc_insertion_point(class_scope:UserConversationState)
   ))
-_sym_db.RegisterMessage(ClientUserReadState)
+_sym_db.RegisterMessage(UserConversationState)
 
-ClientUserConversationState = _reflection.GeneratedProtocolMessageType('ClientUserConversationState', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTUSERCONVERSATIONSTATE,
+ConversationParticipantData = _reflection.GeneratedProtocolMessageType('ConversationParticipantData', (_message.Message,), dict(
+  DESCRIPTOR = _CONVERSATIONPARTICIPANTDATA,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientUserConversationState)
+  # @@protoc_insertion_point(class_scope:ConversationParticipantData)
   ))
-_sym_db.RegisterMessage(ClientUserConversationState)
+_sym_db.RegisterMessage(ConversationParticipantData)
 
-ClientConversationParticipantData = _reflection.GeneratedProtocolMessageType('ClientConversationParticipantData', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTCONVERSATIONPARTICIPANTDATA,
+Conversation = _reflection.GeneratedProtocolMessageType('Conversation', (_message.Message,), dict(
+  DESCRIPTOR = _CONVERSATION,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientConversationParticipantData)
+  # @@protoc_insertion_point(class_scope:Conversation)
   ))
-_sym_db.RegisterMessage(ClientConversationParticipantData)
+_sym_db.RegisterMessage(Conversation)
 
-ClientConversation = _reflection.GeneratedProtocolMessageType('ClientConversation', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTCONVERSATION,
+EasterEgg = _reflection.GeneratedProtocolMessageType('EasterEgg', (_message.Message,), dict(
+  DESCRIPTOR = _EASTEREGG,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientConversation)
+  # @@protoc_insertion_point(class_scope:EasterEgg)
   ))
-_sym_db.RegisterMessage(ClientConversation)
+_sym_db.RegisterMessage(EasterEgg)
 
-ClientSetConversationNotificationLevelNotification = _reflection.GeneratedProtocolMessageType('ClientSetConversationNotificationLevelNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTSETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION,
+DeleteAction = _reflection.GeneratedProtocolMessageType('DeleteAction', (_message.Message,), dict(
+  DESCRIPTOR = _DELETEACTION,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientSetConversationNotificationLevelNotification)
+  # @@protoc_insertion_point(class_scope:DeleteAction)
   ))
-_sym_db.RegisterMessage(ClientSetConversationNotificationLevelNotification)
+_sym_db.RegisterMessage(DeleteAction)
 
-ClientEasterEgg = _reflection.GeneratedProtocolMessageType('ClientEasterEgg', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTEASTEREGG,
+BlockStateChange = _reflection.GeneratedProtocolMessageType('BlockStateChange', (_message.Message,), dict(
+  DESCRIPTOR = _BLOCKSTATECHANGE,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientEasterEgg)
+  # @@protoc_insertion_point(class_scope:BlockStateChange)
   ))
-_sym_db.RegisterMessage(ClientEasterEgg)
-
-ClientEasterEggNotification = _reflection.GeneratedProtocolMessageType('ClientEasterEggNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTEASTEREGGNOTIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientEasterEggNotification)
-  ))
-_sym_db.RegisterMessage(ClientEasterEggNotification)
-
-ClientSettingsNotification = _reflection.GeneratedProtocolMessageType('ClientSettingsNotification', (_message.Message,), dict(
-
-  Foo = _reflection.GeneratedProtocolMessageType('Foo', (_message.Message,), dict(
-    DESCRIPTOR = _CLIENTSETTINGSNOTIFICATION_FOO,
-    __module__ = 'hangups.hangouts_pb2'
-    # @@protoc_insertion_point(class_scope:ClientSettingsNotification.Foo)
-    ))
-  ,
-  DESCRIPTOR = _CLIENTSETTINGSNOTIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientSettingsNotification)
-  ))
-_sym_db.RegisterMessage(ClientSettingsNotification)
-_sym_db.RegisterMessage(ClientSettingsNotification.Foo)
-
-ClientSetNotificationSettingNotification = _reflection.GeneratedProtocolMessageType('ClientSetNotificationSettingNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTSETNOTIFICATIONSETTINGNOTIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientSetNotificationSettingNotification)
-  ))
-_sym_db.RegisterMessage(ClientSetNotificationSettingNotification)
-
-ClientConversationViewModification = _reflection.GeneratedProtocolMessageType('ClientConversationViewModification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTCONVERSATIONVIEWMODIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientConversationViewModification)
-  ))
-_sym_db.RegisterMessage(ClientConversationViewModification)
-
-ClientDeleteAction = _reflection.GeneratedProtocolMessageType('ClientDeleteAction', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTDELETEACTION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientDeleteAction)
-  ))
-_sym_db.RegisterMessage(ClientDeleteAction)
-
-ClientDeleteActionNotification = _reflection.GeneratedProtocolMessageType('ClientDeleteActionNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTDELETEACTIONNOTIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientDeleteActionNotification)
-  ))
-_sym_db.RegisterMessage(ClientDeleteActionNotification)
-
-ClientBlockStateChange = _reflection.GeneratedProtocolMessageType('ClientBlockStateChange', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTBLOCKSTATECHANGE,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientBlockStateChange)
-  ))
-_sym_db.RegisterMessage(ClientBlockStateChange)
-
-ClientBlockNotification = _reflection.GeneratedProtocolMessageType('ClientBlockNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTBLOCKNOTIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientBlockNotification)
-  ))
-_sym_db.RegisterMessage(ClientBlockNotification)
-
-ClientReplyToInviteNotification = _reflection.GeneratedProtocolMessageType('ClientReplyToInviteNotification', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTREPLYTOINVITENOTIFICATION,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientReplyToInviteNotification)
-  ))
-_sym_db.RegisterMessage(ClientReplyToInviteNotification)
-
-ClientStateUpdate = _reflection.GeneratedProtocolMessageType('ClientStateUpdate', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTSTATEUPDATE,
-  __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientStateUpdate)
-  ))
-_sym_db.RegisterMessage(ClientStateUpdate)
+_sym_db.RegisterMessage(BlockStateChange)
 
 Photo = _reflection.GeneratedProtocolMessageType('Photo', (_message.Message,), dict(
   DESCRIPTOR = _PHOTO,
@@ -4491,40 +5175,209 @@ Photo = _reflection.GeneratedProtocolMessageType('Photo', (_message.Message,), d
   ))
 _sym_db.RegisterMessage(Photo)
 
-ClientExistingMedia = _reflection.GeneratedProtocolMessageType('ClientExistingMedia', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTEXISTINGMEDIA,
+ExistingMedia = _reflection.GeneratedProtocolMessageType('ExistingMedia', (_message.Message,), dict(
+  DESCRIPTOR = _EXISTINGMEDIA,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientExistingMedia)
+  # @@protoc_insertion_point(class_scope:ExistingMedia)
   ))
-_sym_db.RegisterMessage(ClientExistingMedia)
+_sym_db.RegisterMessage(ExistingMedia)
 
-ClientEventRequestHeader = _reflection.GeneratedProtocolMessageType('ClientEventRequestHeader', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTEVENTREQUESTHEADER,
+EventRequestHeader = _reflection.GeneratedProtocolMessageType('EventRequestHeader', (_message.Message,), dict(
+  DESCRIPTOR = _EVENTREQUESTHEADER,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientEventRequestHeader)
+  # @@protoc_insertion_point(class_scope:EventRequestHeader)
   ))
-_sym_db.RegisterMessage(ClientEventRequestHeader)
+_sym_db.RegisterMessage(EventRequestHeader)
 
-ClientClientVersion = _reflection.GeneratedProtocolMessageType('ClientClientVersion', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTCLIENTVERSION,
+ClientVersion = _reflection.GeneratedProtocolMessageType('ClientVersion', (_message.Message,), dict(
+  DESCRIPTOR = _CLIENTVERSION,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientClientVersion)
+  # @@protoc_insertion_point(class_scope:ClientVersion)
   ))
-_sym_db.RegisterMessage(ClientClientVersion)
+_sym_db.RegisterMessage(ClientVersion)
 
-ClientRequestHeader = _reflection.GeneratedProtocolMessageType('ClientRequestHeader', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTREQUESTHEADER,
+RequestHeader = _reflection.GeneratedProtocolMessageType('RequestHeader', (_message.Message,), dict(
+  DESCRIPTOR = _REQUESTHEADER,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientRequestHeader)
+  # @@protoc_insertion_point(class_scope:RequestHeader)
   ))
-_sym_db.RegisterMessage(ClientRequestHeader)
+_sym_db.RegisterMessage(RequestHeader)
 
-ClientResponseHeader = _reflection.GeneratedProtocolMessageType('ClientResponseHeader', (_message.Message,), dict(
-  DESCRIPTOR = _CLIENTRESPONSEHEADER,
+ResponseHeader = _reflection.GeneratedProtocolMessageType('ResponseHeader', (_message.Message,), dict(
+  DESCRIPTOR = _RESPONSEHEADER,
   __module__ = 'hangups.hangouts_pb2'
-  # @@protoc_insertion_point(class_scope:ClientResponseHeader)
+  # @@protoc_insertion_point(class_scope:ResponseHeader)
   ))
-_sym_db.RegisterMessage(ClientResponseHeader)
+_sym_db.RegisterMessage(ResponseHeader)
+
+Entity = _reflection.GeneratedProtocolMessageType('Entity', (_message.Message,), dict(
+  DESCRIPTOR = _ENTITY,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:Entity)
+  ))
+_sym_db.RegisterMessage(Entity)
+
+EntityProperties = _reflection.GeneratedProtocolMessageType('EntityProperties', (_message.Message,), dict(
+  DESCRIPTOR = _ENTITYPROPERTIES,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:EntityProperties)
+  ))
+_sym_db.RegisterMessage(EntityProperties)
+
+ConversationState = _reflection.GeneratedProtocolMessageType('ConversationState', (_message.Message,), dict(
+  DESCRIPTOR = _CONVERSATIONSTATE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:ConversationState)
+  ))
+_sym_db.RegisterMessage(ConversationState)
+
+EventContinuationToken = _reflection.GeneratedProtocolMessageType('EventContinuationToken', (_message.Message,), dict(
+  DESCRIPTOR = _EVENTCONTINUATIONTOKEN,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:EventContinuationToken)
+  ))
+_sym_db.RegisterMessage(EventContinuationToken)
+
+EntityLookupSpec = _reflection.GeneratedProtocolMessageType('EntityLookupSpec', (_message.Message,), dict(
+  DESCRIPTOR = _ENTITYLOOKUPSPEC,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:EntityLookupSpec)
+  ))
+_sym_db.RegisterMessage(EntityLookupSpec)
+
+StateUpdate = _reflection.GeneratedProtocolMessageType('StateUpdate', (_message.Message,), dict(
+  DESCRIPTOR = _STATEUPDATE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:StateUpdate)
+  ))
+_sym_db.RegisterMessage(StateUpdate)
+
+StateUpdateHeader = _reflection.GeneratedProtocolMessageType('StateUpdateHeader', (_message.Message,), dict(
+  DESCRIPTOR = _STATEUPDATEHEADER,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:StateUpdateHeader)
+  ))
+_sym_db.RegisterMessage(StateUpdateHeader)
+
+BatchUpdate = _reflection.GeneratedProtocolMessageType('BatchUpdate', (_message.Message,), dict(
+  DESCRIPTOR = _BATCHUPDATE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:BatchUpdate)
+  ))
+_sym_db.RegisterMessage(BatchUpdate)
+
+EventNotification = _reflection.GeneratedProtocolMessageType('EventNotification', (_message.Message,), dict(
+  DESCRIPTOR = _EVENTNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:EventNotification)
+  ))
+_sym_db.RegisterMessage(EventNotification)
+
+SetFocusNotification = _reflection.GeneratedProtocolMessageType('SetFocusNotification', (_message.Message,), dict(
+  DESCRIPTOR = _SETFOCUSNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetFocusNotification)
+  ))
+_sym_db.RegisterMessage(SetFocusNotification)
+
+SetTypingNotification = _reflection.GeneratedProtocolMessageType('SetTypingNotification', (_message.Message,), dict(
+  DESCRIPTOR = _SETTYPINGNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetTypingNotification)
+  ))
+_sym_db.RegisterMessage(SetTypingNotification)
+
+SetConversationNotificationLevelNotification = _reflection.GeneratedProtocolMessageType('SetConversationNotificationLevelNotification', (_message.Message,), dict(
+  DESCRIPTOR = _SETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetConversationNotificationLevelNotification)
+  ))
+_sym_db.RegisterMessage(SetConversationNotificationLevelNotification)
+
+ReplyToInviteNotification = _reflection.GeneratedProtocolMessageType('ReplyToInviteNotification', (_message.Message,), dict(
+  DESCRIPTOR = _REPLYTOINVITENOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:ReplyToInviteNotification)
+  ))
+_sym_db.RegisterMessage(ReplyToInviteNotification)
+
+WatermarkNotification = _reflection.GeneratedProtocolMessageType('WatermarkNotification', (_message.Message,), dict(
+  DESCRIPTOR = _WATERMARKNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:WatermarkNotification)
+  ))
+_sym_db.RegisterMessage(WatermarkNotification)
+
+ConversationViewModification = _reflection.GeneratedProtocolMessageType('ConversationViewModification', (_message.Message,), dict(
+  DESCRIPTOR = _CONVERSATIONVIEWMODIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:ConversationViewModification)
+  ))
+_sym_db.RegisterMessage(ConversationViewModification)
+
+EasterEggNotification = _reflection.GeneratedProtocolMessageType('EasterEggNotification', (_message.Message,), dict(
+  DESCRIPTOR = _EASTEREGGNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:EasterEggNotification)
+  ))
+_sym_db.RegisterMessage(EasterEggNotification)
+
+SelfPresenceNotification = _reflection.GeneratedProtocolMessageType('SelfPresenceNotification', (_message.Message,), dict(
+  DESCRIPTOR = _SELFPRESENCENOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SelfPresenceNotification)
+  ))
+_sym_db.RegisterMessage(SelfPresenceNotification)
+
+DeleteActionNotification = _reflection.GeneratedProtocolMessageType('DeleteActionNotification', (_message.Message,), dict(
+  DESCRIPTOR = _DELETEACTIONNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:DeleteActionNotification)
+  ))
+_sym_db.RegisterMessage(DeleteActionNotification)
+
+PresenceNotification = _reflection.GeneratedProtocolMessageType('PresenceNotification', (_message.Message,), dict(
+  DESCRIPTOR = _PRESENCENOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:PresenceNotification)
+  ))
+_sym_db.RegisterMessage(PresenceNotification)
+
+BlockNotification = _reflection.GeneratedProtocolMessageType('BlockNotification', (_message.Message,), dict(
+  DESCRIPTOR = _BLOCKNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:BlockNotification)
+  ))
+_sym_db.RegisterMessage(BlockNotification)
+
+SetNotificationSettingNotification = _reflection.GeneratedProtocolMessageType('SetNotificationSettingNotification', (_message.Message,), dict(
+  DESCRIPTOR = _SETNOTIFICATIONSETTINGNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SetNotificationSettingNotification)
+  ))
+_sym_db.RegisterMessage(SetNotificationSettingNotification)
+
+SettingsNotification = _reflection.GeneratedProtocolMessageType('SettingsNotification', (_message.Message,), dict(
+
+  Foo = _reflection.GeneratedProtocolMessageType('Foo', (_message.Message,), dict(
+    DESCRIPTOR = _SETTINGSNOTIFICATION_FOO,
+    __module__ = 'hangups.hangouts_pb2'
+    # @@protoc_insertion_point(class_scope:SettingsNotification.Foo)
+    ))
+  ,
+  DESCRIPTOR = _SETTINGSNOTIFICATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:SettingsNotification)
+  ))
+_sym_db.RegisterMessage(SettingsNotification)
+_sym_db.RegisterMessage(SettingsNotification.Foo)
+
+ConversationSpec = _reflection.GeneratedProtocolMessageType('ConversationSpec', (_message.Message,), dict(
+  DESCRIPTOR = _CONVERSATIONSPEC,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:ConversationSpec)
+  ))
+_sym_db.RegisterMessage(ConversationSpec)
 
 AddUserRequest = _reflection.GeneratedProtocolMessageType('AddUserRequest', (_message.Message,), dict(
   DESCRIPTOR = _ADDUSERREQUEST,
@@ -4595,6 +5448,36 @@ GetEntityByIdResponse = _reflection.GeneratedProtocolMessageType('GetEntityByIdR
   # @@protoc_insertion_point(class_scope:GetEntityByIdResponse)
   ))
 _sym_db.RegisterMessage(GetEntityByIdResponse)
+
+GetSuggestedEntitiesRequest = _reflection.GeneratedProtocolMessageType('GetSuggestedEntitiesRequest', (_message.Message,), dict(
+  DESCRIPTOR = _GETSUGGESTEDENTITIESREQUEST,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:GetSuggestedEntitiesRequest)
+  ))
+_sym_db.RegisterMessage(GetSuggestedEntitiesRequest)
+
+GetSuggestedEntitiesResponse = _reflection.GeneratedProtocolMessageType('GetSuggestedEntitiesResponse', (_message.Message,), dict(
+
+  EntityGroup = _reflection.GeneratedProtocolMessageType('EntityGroup', (_message.Message,), dict(
+
+    Foo = _reflection.GeneratedProtocolMessageType('Foo', (_message.Message,), dict(
+      DESCRIPTOR = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP_FOO,
+      __module__ = 'hangups.hangouts_pb2'
+      # @@protoc_insertion_point(class_scope:GetSuggestedEntitiesResponse.EntityGroup.Foo)
+      ))
+    ,
+    DESCRIPTOR = _GETSUGGESTEDENTITIESRESPONSE_ENTITYGROUP,
+    __module__ = 'hangups.hangouts_pb2'
+    # @@protoc_insertion_point(class_scope:GetSuggestedEntitiesResponse.EntityGroup)
+    ))
+  ,
+  DESCRIPTOR = _GETSUGGESTEDENTITIESRESPONSE,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:GetSuggestedEntitiesResponse)
+  ))
+_sym_db.RegisterMessage(GetSuggestedEntitiesResponse)
+_sym_db.RegisterMessage(GetSuggestedEntitiesResponse.EntityGroup)
+_sym_db.RegisterMessage(GetSuggestedEntitiesResponse.EntityGroup.Foo)
 
 GetSelfInfoRequest = _reflection.GeneratedProtocolMessageType('GetSelfInfoRequest', (_message.Message,), dict(
   DESCRIPTOR = _GETSELFINFOREQUEST,

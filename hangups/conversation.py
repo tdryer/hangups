@@ -4,7 +4,7 @@ import asyncio
 import logging
 
 from hangups import (parsers, event, user, conversation_event, exceptions,
-                     schemas)
+                     hangouts_pb2)
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,8 @@ class Conversation(object):
         """Initialize a new Conversation."""
         self._client = client  # Client
         self._user_list = user_list  # UserList
-        self._conversation = client_conversation  # ClientConversation
-        self._events = []  # [ConversationEvent]
+        self._conversation = client_conversation  # hangouts_pb2.Conversation
+        self._events = []  # [hangouts_pb2.Event]
         self._events_dict = {}  # {event_id: ConversationEvent}
         self._send_message_lock = asyncio.Lock()
         for event_ in client_events:
@@ -52,13 +52,13 @@ class Conversation(object):
                 parsers.to_timestamp(notif.read_timestamp)
             )
 
-    def update_conversation(self, client_conversation):
+    def update_conversation(self, conversation):
         """Update the internal ClientConversation."""
         # When latest_read_timestamp is 0, this seems to indicate no change
         # from the previous value. Word around this by saving and restoring the
         # previous value.
         old_timestamp = self.latest_read_timestamp
-        self._conversation = client_conversation
+        self._conversation = conversation
         if parsers.to_timestamp(self.latest_read_timestamp) == 0:
             self_conversation_state = (
                 self._conversation.self_conversation_state
@@ -114,9 +114,8 @@ class Conversation(object):
         """
         with (yield from self._send_message_lock):
             # Send messages with OTR status matching the conversation's status.
-            otr_status = (schemas.OffTheRecordStatus.OFF_THE_RECORD
-                          if self.is_off_the_record
-                          else schemas.OffTheRecordStatus.ON_THE_RECORD)
+            otr_status = (hangouts_pb2.OFF_THE_RECORD if self.is_off_the_record
+                          else hangouts_pb2.ON_THE_RECORD)
             if image_file:
                 try:
                     image_id = yield from self._client.upload_image(image_file)
@@ -139,7 +138,7 @@ class Conversation(object):
         Raises hangups.NetworkError if conversation cannot be left.
         """
         try:
-            if self._conversation.type_ == schemas.ConversationType.GROUP:
+            if self._conversation.type_ == hangouts_pb2.GROUP:
                 yield from self._client.removeuser(self.id_)
             else:
                 yield from self._client.deleteconversation(self.id_)
@@ -163,8 +162,8 @@ class Conversation(object):
     def set_notification_level(self, level):
         """Set the notification level of the conversation.
 
-        Pass schemas.ClientNotificationLevel.QUIET to disable notifications,
-        or schemas.ClientNotificationLevel.RING to enable them.
+        Pass hangouts_pb2.QUIET to disable notifications, or hangouts_pb2.RING
+        to enable them.
 
         Raises hangups.NetworkError if the request fails.
         """
@@ -172,7 +171,7 @@ class Conversation(object):
                                                                  level)
 
     @asyncio.coroutine
-    def set_typing(self, typing=schemas.TypingStatus.TYPING):
+    def set_typing(self, typing=hangouts_pb2.TYPING_STARTED):
         """Set typing status.
 
         TODO: Add rate-limiting to avoid unnecessary requests.
@@ -282,19 +281,20 @@ class Conversation(object):
     @property
     def id_(self):
         """The conversation's ID."""
-        return self._conversation.conversation_id.id_
+        return self._conversation.conversation_id.id
 
     @property
     def users(self):
         """User instances of the conversation's current participants."""
-        return [self._user_list.get_user(user.UserID(chat_id=part.id_.chat_id,
-                                                     gaia_id=part.id_.gaia_id))
+        return [self._user_list.get_user(user.UserID(chat_id=part.id.chat_id,
+                                                     gaia_id=part.id.gaia_id))
                 for part in self._conversation.participant_data]
 
     @property
     def name(self):
         """The conversation's custom name, or None if it doesn't have one."""
-        return self._conversation.name
+        custom_name = self._conversation.name
+        return None if custom_name == '' else custom_name
 
     @property
     def last_modified(self):
@@ -336,20 +336,20 @@ class Conversation(object):
     @property
     def is_archived(self):
         """True if this conversation has been archived."""
-        return (schemas.ClientConversationView.ARCHIVED_VIEW in
+        return (hangouts_pb2.ARCHIVED_VIEW in
                 self._conversation.self_conversation_state.view)
 
     @property
     def is_quiet(self):
         """True if notification level for this conversation is quiet."""
         level = self._conversation.self_conversation_state.notification_level
-        return level == schemas.ClientNotificationLevel.QUIET
+        return level == hangouts_pb2.QUIET
 
     @property
     def is_off_the_record(self):
         """True if conversation is off the record (history is disabled)."""
         status = self._conversation.otr_status
-        return status == schemas.OffTheRecordStatus.OFF_THE_RECORD
+        return status == hangouts_pb2.OFF_THE_RECORD
 
 
 class ConversationList(object):
@@ -397,14 +397,12 @@ class ConversationList(object):
         """
         return self._conv_dict[conv_id]
 
-    def add_conversation(self, client_conversation, client_events=[]):
+    def add_conversation(self, conversation, client_events=[]):
         """Add new conversation from ClientConversation"""
-        conv_id = client_conversation.conversation_id.id_
+        conv_id = conversation.conversation_id.id
         logger.info('Adding new conversation: {}'.format(conv_id))
-        conv = Conversation(
-            self._client, self._user_list,
-            client_conversation, client_events
-        )
+        conv = Conversation(self._client, self._user_list, conversation,
+                            client_events)
         self._conv_dict[conv_id] = conv
         return conv
 
@@ -417,18 +415,21 @@ class ConversationList(object):
 
     @asyncio.coroutine
     def _on_state_update(self, state_update):
-        """Receive a ClientStateUpdate and fan out to Conversations."""
-        if state_update.client_conversation is not None:
-            self._handle_client_conversation(state_update.client_conversation)
-        if state_update.typing_notification is not None:
+        """Receive a StateUpdate and fan out to Conversations."""
+        # Handle updating a conversation
+        if state_update.HasField('conversation'):
+            self._handle_client_conversation(state_update.conversation)
+        # Handle the notification
+        notification_type = state_update.WhichOneof('state_update')
+        if notification_type == 'typing_notification':
             yield from self._handle_set_typing_notification(
                 state_update.typing_notification
             )
-        if state_update.watermark_notification is not None:
+        elif notification_type == 'watermark_notification':
             yield from self._handle_watermark_notification(
                 state_update.watermark_notification
             )
-        if state_update.event_notification is not None:
+        elif notification_type == 'event_notification':
             yield from self._on_client_event(
                 state_update.event_notification.event
             )
@@ -438,28 +439,28 @@ class ConversationList(object):
         """Receive a ClientEvent and fan out to Conversations."""
         self._sync_timestamp = parsers.from_timestamp(event_.timestamp)
         try:
-            conv = self._conv_dict[event_.conversation_id.id_]
+            conv = self._conv_dict[event_.conversation_id.id]
         except KeyError:
             logger.warning('Received ClientEvent for unknown conversation {}'
-                           .format(event_.conversation_id.id_))
+                           .format(event_.conversation_id.id))
         else:
             conv_event = conv.add_event(event_)
             yield from self.on_event.fire(conv_event)
             yield from conv.on_event.fire(conv_event)
 
-    def _handle_client_conversation(self, client_conversation):
-        """Receive ClientConversation and create or update the conversation."""
-        conv_id = client_conversation.conversation_id.id_
+    def _handle_client_conversation(self, conversation):
+        """Receive Conversation and create or update the conversation."""
+        conv_id = conversation.conversation_id.id
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
-            conv.update_conversation(client_conversation)
+            conv.update_conversation(conversation)
         else:
-            self.add_conversation(client_conversation)
+            self.add_conversation(conversation)
 
     @asyncio.coroutine
     def _handle_set_typing_notification(self, set_typing_notification):
         """Receive ClientSetTypingNotification and update the conversation."""
-        conv_id = set_typing_notification.conversation_id.id_
+        conv_id = set_typing_notification.conversation_id.id
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
             res = parsers.parse_typing_status_message(set_typing_notification)
@@ -472,7 +473,7 @@ class ConversationList(object):
     @asyncio.coroutine
     def _handle_watermark_notification(self, watermark_notification):
         """Receive ClientWatermarkNotification and update the conversation."""
-        conv_id = watermark_notification.conversation_id.id_
+        conv_id = watermark_notification.conversation_id.id
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
             res = parsers.parse_watermark_notification(watermark_notification)
@@ -495,7 +496,7 @@ class ConversationList(object):
                            .format(e))
         else:
             for conv_state in res.conversation_state:
-                conv_id = conv_state.conversation_id.id_
+                conv_id = conv_state.conversation_id.id
                 conv = self._conv_dict.get(conv_id, None)
                 if conv is not None:
                     conv.update_conversation(conv_state.conversation)

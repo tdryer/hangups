@@ -13,7 +13,7 @@ import datetime
 import os
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
-                     event, schemas, hangouts_pb2, pblite2)
+                     event, hangouts_pb2, pblite2)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -90,7 +90,7 @@ class Client(object):
         self._email = None
         # Time in seconds that the client as last set as active:
         self._last_active_secs = 0.0
-        # ActiveClientState enum value or None:
+        # ActiveClientState enum int value or None:
         self._active_client_state = None
         # Future for Channel.listen
         self._listen_future = None
@@ -143,15 +143,13 @@ class Client(object):
         frequently, and it will only make a request when necessary.
         """
         is_active = (self._active_client_state ==
-                     schemas.ActiveClientState.IS_ACTIVE_CLIENT)
+                     hangouts_pb2.IS_ACTIVE_CLIENT)
         timed_out = (time.time() - self._last_active_secs >
                      SETACTIVECLIENT_LIMIT_SECS)
         if not is_active or timed_out:
             # Update these immediately so if the function is called again
             # before the API request finishes, we don't start extra requests.
-            self._active_client_state = (
-                schemas.ActiveClientState.IS_ACTIVE_CLIENT
-            )
+            self._active_client_state = hangouts_pb2.IS_ACTIVE_CLIENT
             self._last_active_secs = time.time()
             try:
                 yield from self.setactiveclient(True, ACTIVE_TIMEOUT_SECS)
@@ -225,64 +223,74 @@ class Client(object):
         # Extract various values that we will need.
         try:
             self._api_key = data_dict['ds:7'][0][2]
-            # TODO: this seems to be wrong
-            self._email = data_dict['ds:34'][0][2]
+            logger.info('Found api_key: %s', self._api_key)
+            self._email = data_dict['ds:33'][0][2]
+            logger.info('Found email: %s', self._email)
             self._header_date = data_dict['ds:2'][0][4]
+            logger.info('Found header_date: %s', self._header_date)
             self._header_version = data_dict['ds:2'][0][6]
+            logger.info('Found header_version: %s', self._header_version)
             self._header_id = data_dict['ds:4'][0][7]
-            _sync_timestamp = parsers.from_timestamp(
-                # cgserp?
-                # data_dict['ds:21'][0][1][4]
-                # data_dict['ds:35'][0][1][4]
-                data_dict['ds:21'][0][1][4]
-            )
+            logger.info('Found header_id: %s', self._header_id)
         except KeyError as e:
             raise exceptions.HangupsError('Failed to get initialize chat '
                                           'value: {}'.format(e))
 
-        # Parse the entity representing the current user.
-        self_entity = schemas.CLIENT_GET_SELF_INFO_RESPONSE.parse(
-            # cgsirp?
-            # data_dict['ds:20'][0]
-            # data_dict['ds:35'][0]
-            data_dict['ds:20'][0]
-        ).self_entity
+        # Parse GetSelfInfoResponse
+        get_self_info_response = hangouts_pb2.GetSelfInfoResponse()
+        pblite2.decode(get_self_info_response, data_dict['ds:20'][0])
+        logger.debug('Parsed GetSelfInfoResponse:\n%s', get_self_info_response)
 
-        # Parse every existing conversation's state, including participants.
-        initial_conv_states = schemas.CLIENT_CONVERSATION_STATE_LIST.parse(
-            # csrcrp?
-            # data_dict['ds:19'][0][3]
-            # data_dict['ds:36'][0][3]
-            data_dict['ds:19'][0][3]
+        # Parse SyncRecentConversationsResponse
+        sync_recent_conversations_response = (
+            hangouts_pb2.SyncRecentConversationsResponse()
         )
-        initial_conv_parts = []
-        for conv_state in initial_conv_states:
-            initial_conv_parts.extend(conv_state.conversation.participant_data)
+        pblite2.decode(sync_recent_conversations_response,
+                       data_dict['ds:19'][0])
+        # TODO: this might be too much data to log
+        #logger.debug('Parsed SyncRecentConversationsResponse:\n%s',
+        #             sync_recent_conversations_response)
 
-        # Parse the entities for the user's contacts (doesn't include users not
-        # in contacts). If this fails, continue without the rest of the
-        # entities.
+        # Parse GetSuggestedEntitiesResponse
+        # This gives us entities for the user's contacts, but doesn't include
+        # users not in contacts.
+        get_suggested_entities_response = hangouts_pb2.GetSuggestedEntitiesResponse()
+        pblite2.decode(get_suggested_entities_response, data_dict['ds:21'][0])
+        logger.debug('Parsed GetSuggestedEntitiesResponse:\n%s', get_suggested_entities_response)
+
+        # Combine entities from all responses into one list of all the known
+        # entities
         initial_entities = []
-        try:
-            entities = schemas.INITIAL_CLIENT_ENTITIES.parse(
-                # cgserp?
-                # data_dict['ds:21'][0]
-                # data_dict['ds:37'][0]
-                data_dict['ds:21'][0]
-            )
-        except ValueError as e:
-            logger.warning('Failed to parse initial client entities: {}'
-                           .format(e))
-        else:
-            initial_entities.extend(entities.entities)
-            initial_entities.extend(e.entity for e in itertools.chain(
-                entities.group1.entity, entities.group2.entity,
-                entities.group3.entity, entities.group4.entity,
-                entities.group5.entity
-            ))
+        initial_entities.extend(get_suggested_entities_response.entity)
+        initial_entities.extend(e.entity for e in itertools.chain(
+            get_suggested_entities_response.group1.entity,
+            get_suggested_entities_response.group2.entity,
+            get_suggested_entities_response.group3.entity,
+            get_suggested_entities_response.group4.entity,
+            get_suggested_entities_response.group5.entity,
+            get_suggested_entities_response.group6.entity
+        ))
 
-        return InitialData(initial_conv_states, self_entity, initial_entities,
-                           initial_conv_parts, _sync_timestamp)
+        # Create list of ConversationParticipant data to use as a fallback for
+        # entities that can't be found.
+        #all_participants = [
+        #    conversation_state.conversation.participant_data
+        #    for conversation_state in
+        #    sync_recent_conversations_response.conversation_state
+        #]
+        conv_part_list = []
+        for conversation_state in sync_recent_conversations_response.conversation_state:
+            conv_part_list.extend(conversation_state.conversation.participant_data)
+
+        sync_timestamp = parsers.from_timestamp(
+            sync_recent_conversations_response.sync_timestamp
+        )
+
+        return InitialData(
+            sync_recent_conversations_response.conversation_state,
+            get_self_info_response.self_entity, initial_entities,
+            conv_part_list, sync_timestamp,
+        )
 
     def _get_cookie(self, name):
         """Return a cookie for raise error if that cookie was not provided."""
@@ -302,7 +310,7 @@ class Client(object):
 
     @asyncio.coroutine
     def _on_push_data(self, submission):
-        """Parse ClientStateUpdate and call the appropriate events."""
+        """Parse StateUpdate messages and call the appropriate events."""
         for state_update in parsers.parse_submission(submission):
             if isinstance(state_update, dict) and 'client_id' in state_update:
                 # Hack to receive client ID:
@@ -310,9 +318,8 @@ class Client(object):
                 logger.info('Received new client_id: {}'
                             .format(self._client_id))
             else:
-                self._active_client_state = (
-                    state_update.state_update_header.active_client_state
-                )
+                header = state_update.state_update_header
+                self._active_client_state = header.active_client_state
                 yield from self.on_state_update.fire(state_update)
 
     # TODO: add better logging here and remove it from _base_request
@@ -379,17 +386,21 @@ class Client(object):
 
     def _get_request_header_pb(self):
         """Return populated ClientRequestHeader message."""
-        return hangouts_pb2.ClientRequestHeader(
-            client_version=hangouts_pb2.ClientClientVersion(
+        client_identifier = hangouts_pb2.ClientIdentifier(
+            header_id=self._header_id,
+        )
+        # resource is allowed to be null if it's not available yet (the Chrome
+        # client does this for the first getentitybyid call)
+        if self._client_id is not None:
+            client_identifier.resource = self._client_id
+        return hangouts_pb2.RequestHeader(
+            client_version=hangouts_pb2.ClientVersion(
                 client_id=hangouts_pb2.CLIENT_ID_WEB_GMAIL,
                 build_type=hangouts_pb2.BUILD_TYPE_PRODUCTION_WEB,
                 major_version=self._header_version,
                 version_timestamp=int(self._header_date),
             ),
-            client_identifier=hangouts_pb2.ClientClientIdentifier(
-                resource=self._client_id,
-                header_id=self._header_id,
-            ),
+            client_identifier=client_identifier,
             language_code='en',
         )
 
@@ -409,33 +420,22 @@ class Client(object):
 
         Raises hangups.NetworkError if the request fails.
 
-        Returns a ClientSyncAllNewEventsResponse.
+        Returns SyncAllNewEventsResponse.
         """
-        res = yield from self._request('conversations/syncallnewevents', [
-            self._get_request_header(),
-            # last_sync_timestamp
-            parsers.to_timestamp(timestamp),
-            [], None, [], False, [],
-            1048576  # max_response_size_bytes
-        ], use_json=False)
-        try:
-            res = schemas.CLIENT_SYNC_ALL_NEW_EVENTS_RESPONSE.parse(
-                javascript.loads(res.body.decode())
-            )
-        except ValueError as e:
-            raise exceptions.NetworkError('Response failed to parse: {}'
-                                          .format(e))
-        # can return 200 but still contain an error
-        status = res.response_header.status
-        if status != 1:
-            raise exceptions.NetworkError('Response status is \'{}\''
-                                          .format(status))
-        return res
+        request = hangouts_pb2.SyncAllNewEventsRequest(
+            request_header=self._get_request_header_pb(),
+            last_sync_timestamp=parsers.to_timestamp(timestamp),
+            max_response_size_bytes=1048576,
+        )
+        response = hangouts_pb2.SyncAllNewEventsResponse()
+        yield from self._pb_request('conversations/syncallnewevents', request,
+                                    response)
+        return response
 
     @asyncio.coroutine
     def sendchatmessage(
             self, conversation_id, segments, image_id=None,
-            otr_status=schemas.OffTheRecordStatus.ON_THE_RECORD
+            otr_status=hangouts_pb2.ON_THE_RECORD
     ):
         """Send a chat message to a conversation.
 
@@ -461,28 +461,23 @@ class Client(object):
             segment_pb = hangouts_pb2.Segment()
             pblite2.decode(segment_pb, segment_pblite)
             segments_pb.append(segment_pb)
-        expected_otr = (
-            hangouts_pb2.ON_THE_RECORD
-            if otr_status == schemas.OffTheRecordStatus.ON_THE_RECORD
-            else hangouts_pb2.OFF_THE_RECORD
-        )
 
         request = hangouts_pb2.SendChatMessageRequest(
             request_header=self._get_request_header_pb(),
-            message_content=hangouts_pb2.ClientMessageContent(
+            message_content=hangouts_pb2.MessageContent(
                 segment=segments_pb,
             ),
-            event_request_header=hangouts_pb2.ClientEventRequestHeader(
+            event_request_header=hangouts_pb2.EventRequestHeader(
                 conversation_id=hangouts_pb2.ConversationID(
                     id=conversation_id,
                 ),
                 client_generated_id=client_generated_id,
-                expected_otr=expected_otr,
+                expected_otr=otr_status,
             ),
         )
 
         if image_id is not None:
-            request.existing_media = hangouts_pb2.ClientExistingMedia(
+            request.existing_media = hangouts_pb2.ExistingMedia(
                 photo=hangouts_pb2.Photo(photo_id=image_id)
             )
 
@@ -534,24 +529,16 @@ class Client(object):
 
         Raises hangups.NetworkError if the request fails.
         """
-        res = yield from self._request('contacts/getentitybyid', [
-            self._get_request_header(),
-            None,
-            [[str(chat_id)] for chat_id in chat_id_list],
-        ], use_json=False)
-        try:
-            res = schemas.CLIENT_GET_ENTITY_BY_ID_RESPONSE.parse(
-                javascript.loads(res.body.decode())
-            )
-        except ValueError as e:
-            raise exceptions.NetworkError('Response failed to parse: {}'
-                                          .format(e))
-        # can return 200 but still contain an error
-        status = res.response_header.status
-        if status != 1:
-            raise exceptions.NetworkError('Response status is \'{}\''
-                                          .format(status))
-        return res
+        # TODO: change chat_id_list to gaia_id_list
+        request = hangouts_pb2.GetEntityByIdRequest(
+            request_header=self._get_request_header_pb(),
+            batch_lookup_spec=[hangouts_pb2.EntityLookupSpec(gaia_id=gaia_id)
+                               for gaia_id in chat_id_list],
+        )
+        response = hangouts_pb2.GetEntityByIdResponse()
+        yield from self._pb_request('contacts/getentitybyid', request,
+                                    response)
+        return response
 
     @asyncio.coroutine
     def setchatname(self, conversation_id, name):
@@ -586,33 +573,21 @@ class Client(object):
 
         Raises hangups.NetworkError if the request fails.
         """
-        res = yield from self._request('conversations/getconversation', [
-            self._get_request_header(),
-            [[conversation_id], [], []],  # conversationSpec
-            False,  # includeConversationMetadata
-            True,  # includeEvents
-            None,  # ???
-            max_events,  # maxEventsPerConversation
-            # eventContinuationToken (specifying timestamp is sufficient)
-            [
-                None,  # eventId
-                None,  # storageContinuationToken
-                parsers.to_timestamp(event_timestamp),  # eventTimestamp
-            ]
-        ], use_json=False)
-        try:
-            res = schemas.CLIENT_GET_CONVERSATION_RESPONSE.parse(
-                javascript.loads(res.body.decode())
-            )
-        except ValueError as e:
-            raise exceptions.NetworkError('Response failed to parse: {}'
-                                          .format(e))
-        # can return 200 but still contain an error
-        status = res.response_header.status
-        if status != 1:
-            raise exceptions.NetworkError('Response status is \'{}\''
-                                          .format(status))
-        return res
+        request = hangouts_pb2.GetConversationRequest(
+            request_header=self._get_request_header_pb(),
+            conversation_spec=hangouts_pb2.ConversationSpec(
+                conversation_id=hangouts_pb2.ConversationID(id=conversation_id)
+            ),
+            include_event=True,
+            max_events_per_conversation=max_events,
+            event_continuation_token=hangouts_pb2.EventContinuationToken(
+                event_timestamp=parsers.to_timestamp(event_timestamp)
+            ),
+        )
+        response = hangouts_pb2.GetConversationResponse()
+        yield from self._pb_request('conversations/getconversation', request,
+                                    response)
+        return response
 
     @asyncio.coroutine
     def upload_image(self, image_file, filename=None):
@@ -711,7 +686,7 @@ class Client(object):
                                           .format(res_status))
 
     @asyncio.coroutine
-    def settyping(self, conversation_id, typing=schemas.TypingStatus.TYPING):
+    def settyping(self, conversation_id, typing=hangouts_pb2.TYPING_STARTED):
         """Send typing notification.
 
         conversation_id must be a valid conversation ID.
@@ -722,7 +697,7 @@ class Client(object):
         res = yield from self._request('conversations/settyping', [
             self._get_request_header(),
             [conversation_id],
-            typing.value
+            typing
         ])
         res = json.loads(res.body.decode())
         res_status = res['response_header']['status']
@@ -832,15 +807,15 @@ class Client(object):
     def setconversationnotificationlevel(self, conversation_id, level):
         """Set the notification level of a conversation.
 
-        Pass schemas.ClientNotificationLevel.QUIET to disable notifications,
-        or schemas.ClientNotificationLevel.RING to enable them.
+        Pass hangouts_pb2.QUIET to disable notifications, or hangouts_pb2.RING
+        to enable them.
 
         Raises hangups.NetworkError if the request fails.
         """
         body = [
             self._get_request_header(),
             [conversation_id],
-            level.value
+            level
         ]
         res = yield from self._request(
             'conversations/setconversationnotificationlevel', body

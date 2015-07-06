@@ -30,6 +30,23 @@ def test_decode_repeated():
     pblite2.decode(test_message, [None, None, [1, 2, 3]])
     assert test_message.test_int_list == [1, 2, 3]
 
+def test_decode_enum():
+    enum_message = test_pblite2_pb2.EnumMessage()
+    pblite2.decode(enum_message, [1])
+    assert (enum_message.test_enum ==
+            test_pblite2_pb2.EnumMessage.TEST_1)
+
+def test_decode_enum_unknown():
+    # unknown enums get the default value
+    enum_message = test_pblite2_pb2.EnumMessage()
+    pblite2.decode(enum_message, [2])
+    assert enum_message.test_enum == 0
+
+#def test_decode_oneof_violation():
+#    # TODO: want this to fail?
+#    oneof_message = test_pblite2_pb2.OneOfMessage()
+#    pblite2.decode(oneof_message, [1, 2])
+
 def test_encode_no_fields():
     test_message = test_pblite2_pb2.TestMessage()
     assert pblite2.encode(test_message) == []
@@ -61,4 +78,3 @@ def test_encode_required_field():
     test_message = test_pblite2_pb2.RequiredMessage()
     # TODO
     #assert pblite2.encode(test_message) == [0]
-

@@ -22,25 +22,13 @@ enum ActiveClientState {
     OTHER_CLIENT_IS_ACTIVE = 2;
 }
 
-message ClientDoNotDisturbSetting {
+message DoNotDisturbSetting {
     optional bool do_not_disturb = 1;
     optional uint64 expiration_timestamp = 2;
 }
 
-message ClientNotificationSettings {
-    optional ClientDoNotDisturbSetting dnd_settings = 1;
-}
-
-message ClientStateUpdateHeader {
-    // TODO
-    optional ActiveClientState active_client_state = 1;
-    // unknown = 2
-    optional string request_trace_id = 3;
-    optional ClientNotificationSettings notification_settings = 4;
-    optional uint64 current_server_time = 5;
-    // archive settings? ([1]) = 6
-    // unknown = 7
-    // optional ID of the client causing the update (3767219427742586121) ? = 8
+message NotificationSettings {
+    optional DoNotDisturbSetting dnd_settings = 1;
 }
 
 // TODO: should be FocusType?
@@ -65,26 +53,14 @@ message UserID {
     optional string chat_id = 2;
 }
 
-message ClientSetFocusNotification {
-    optional ConversationID conversation_id = 1;
-    optional UserID user_id = 2;
-    optional uint64 timestamp = 3;
-    optional FocusStatus status = 4;
-    optional FocusDevice device = 5;
-}
-
-message ClientPresence {
+message Presence {
     optional bool reachable = 1;
     optional bool available = 2;
 }
 
-message ClientPresenceResult {
+message PresenceResult {
     optional UserID user_id = 1;
-    optional ClientPresence presence = 2;
-}
-
-message ClientPresenceNotification {
-    repeated ClientPresenceResult presence = 1;
+    optional Presence presence = 2;
 }
 
 enum TypingStatus {
@@ -94,59 +70,35 @@ enum TypingStatus {
     TYPING_STOPPED = 3;  // stopped typing with no inputted text
 }
 
-message ClientSetTypingNotification {
-    optional ConversationID conversation_id = 1;
-    optional UserID user_id = 2;
-    optional uint64 timestamp = 3;
-    optional TypingStatus status = 4;
-}
-
-message ClientClientIdentifier {
+message ClientIdentifier {
     optional string resource = 1; // (client_id in hangups)
     optional string header_id = 2; // unknown (header_id in hangups)
 }
 
-enum ClientPresenceState {
+enum ClientPresenceStateType {
     // TODO this all wrong
     PRESENCE_NONE = 0;
     PRESENCE_MOBILE = 1;
     PRESENCE_DESKTOP_IDLE = 2;
     PRESENCE_DESKTOP_ACTIVE = 3;
+    // unknown = 40;
 }
 
-message ClientClientPresenceState {
-    optional ClientClientIdentifier identifier = 1;
-    optional ClientPresenceState state = 2;
+message ClientPresenceState {
+    optional ClientIdentifier identifier = 1;
+    optional ClientPresenceStateType state = 2;
 }
 
-message ClientSelfPresenceNotification {
-    // status of other clients and mood
-    // TODO: might be totally wrong
-    optional ClientClientPresenceState client_presence_state = 1;
-
-    // TODO
-    // setting status = 6;
-    // [None, None, None, [[[[[0, 'testing', [0, 0, 0, 0]]]]], 4589237583327000]]
-    // clearing status:
-    // [None, None, None, [[[None]], 4589237668724000]]
-}
-
-message ClientWatermarkNotification {
-    optional UserID participant_id = 1;
-    optional ConversationID conversation_id = 2;
-    optional uint64 latest_read_timestamp = 3;
-}
-
-enum ClientNotificationLevel {
+enum NotificationLevel {
     NOTIFICATION_LEVEL_UNKNOWN = 0;
     QUIET = 10;
     RING = 30;
 }
 
-message ClientUserEventState {
+message UserEventState {
     optional UserID user_id = 1;
     optional string client_generated_id = 2;
-    optional ClientNotificationLevel notification_level = 3;
+    optional NotificationLevel notification_level = 3;
 }
 
 enum SegmentType {
@@ -184,30 +136,30 @@ message Attachment {
     optional EmbedItem embed_item = 1;
 }
 
-message ClientMessageContent {
+message MessageContent {
     repeated Segment segment = 1;
     repeated Attachment attachment = 2;
 }
 
-message ClientChatMessage {
+message ChatMessage {
     // always 0? = 1;
     // annotation (always None?) = 2;
-    optional ClientMessageContent message_content = 3;
+    optional MessageContent message_content = 3;
 }
 
-message ClientMembershipChange {
-
-}
-
-message ClientConversationRename {
+message MembershipChange {
 
 }
 
-message ClientHangoutEvent {
+message ConversationRename {
 
 }
 
-message ClientOTRModification {
+message HangoutEvent {
+
+}
+
+message OTRModification {
 
 }
 
@@ -217,22 +169,24 @@ enum OffTheRecordStatus {
     ON_THE_RECORD = 2;
 }
 
-message ClientEvent {
+message Event {
+    // Events are items that become part of a conversation's history.
+
     optional ConversationID conversation_id = 1;
     optional UserID sender_id = 2;
     optional uint64 timestamp = 3;
-    optional ClientUserEventState self_event_state = 4;
+    optional UserEventState self_event_state = 4;
     // TODO: probably a oneof in there somewhere
     // not used? = 5;
     // always 0? (expiration_timestamp?) = 6;
-    optional ClientChatMessage chat_message = 7;
+    optional ChatMessage chat_message = 7;
     // not used? = 8;
-    optional ClientMembershipChange membership_change = 9;
-    optional ClientConversationRename conversation_rename = 10;
-    optional ClientHangoutEvent hangout_event = 11;
+    optional MembershipChange membership_change = 9;
+    optional ConversationRename conversation_rename = 10;
+    optional HangoutEvent hangout_event = 11;
     optional string event_id = 12;
     optional bool advances_sort_timestamp = 13; // TODO: not sure about type
-    optional ClientOTRModification otr_modification = 14;
+    optional OTRModification otr_modification = 14;
     // 0, 1 or None? related to notifications? = 15;
     optional OffTheRecordStatus otr_status = 16;
     // always 1? (advances_sort_timestamp?) = 17;
@@ -242,39 +196,35 @@ message ClientEvent {
     // something to do with sending messages (['7-H0Z7-BCTg80ySBsfibNV', 4, None, 1435550921815004]) = 26;
 }
 
-message ClientEventNotification {
-    optional ClientEvent event = 1;
-}
-
 enum ConversationType {
     CONVERSATION_TYPE_UNKNOWN = 0;
     ONE_TO_ONE = 1;
     GROUP = 2;
 }
 
-message ClientUserReadState {
+message UserReadState {
     optional UserID participant_id = 1;
     optional uint64 latest_read_timestamp = 2; // TODO: always 0?
 }
 
-enum ClientConversationStatus {
+enum ConversationStatus {
     UNKNOWN_CONVERSATION_STATUS = 0;
     INVITED = 1;
     ACTIVE = 2;
     LEFT = 3;
 }
 
-enum ClientConversationView {
+enum ConversationView {
     UNKNOWN_CONVERSATION_VIEW = 0;
     INBOX_VIEW = 1;
     ARCHIVED_VIEW = 2;
 }
 
-message ClientUserConversationState {
-     optional ClientUserReadState self_read_state = 7;
-     optional ClientConversationStatus status = 8;
-     optional ClientNotificationLevel notification_level = 9;
-     repeated ClientConversationView view = 10;
+message UserConversationState {
+     optional UserReadState self_read_state = 7;
+     optional ConversationStatus status = 8;
+     optional NotificationLevel notification_level = 9;
+     repeated ConversationView view = 10;
      optional UserID inviter_id = 11;
      optional uint64 invite_timestamp = 12;
      optional uint64 sort_timestamp = 13;
@@ -282,7 +232,7 @@ message ClientUserConversationState {
      // unknown [[[1], 1]] = 17
 }
 
-message ClientConversationParticipantData {
+message ConversationParticipantData {
     optional UserID id = 1;
     optional string fallback_name = 2;
     // unknown (2) = 3;
@@ -290,142 +240,53 @@ message ClientConversationParticipantData {
     // unknown (2) = 6
 }
 
-message ClientConversation {
+message Conversation {
     optional ConversationID conversation_id = 1;
     optional ConversationType type = 2;
     optional string name = 3;
-    optional ClientUserConversationState self_conversation_state = 4;
-    repeated ClientUserReadState read_state = 8;
+    optional UserConversationState self_conversation_state = 4;
+    repeated UserReadState read_state = 8;
     // unknown (0) = 9;
     optional OffTheRecordStatus otr_status = 10;
     // unknown (1) = 11;
     repeated UserID current_participant = 13;
-    repeated ClientConversationParticipantData participant_data = 14;
+    repeated ConversationParticipantData participant_data = 14;
     // unknown ([1]) = 18;
     // unknown (0) = 19;
 }
 
-message ClientSetConversationNotificationLevelNotification {
-    optional ConversationID conversation_id = 1;
-    optional ClientNotificationLevel level = 2;
-    // unknown (0) = 3;
-    optional uint64 timestamp = 4;
-}
-
-message ClientEasterEgg {
+message EasterEgg {
     optional string message = 1;
 }
 
-message ClientEasterEggNotification {
-    optional UserID sender_id = 1;
-    optional ConversationID conversation_id = 2;
-    optional ClientEasterEgg easter_egg = 3;
-}
-
-enum ClientSetting {
+enum SettingType {
     SETTING_UNKNOWN = 0;
     SHOW_IN_CALL = 1;
     SHOW_DEVICE = 2;
     SHOW_LAST_SEEN = 6;
 }
 
-message ClientSettingsNotification { // 20
-    // TODO: need name for Foo?
-    message Foo {
-        optional ClientSetting setting = 1;
-        optional bool setting_value = 2;
-    }
-    // TODO: probably not repeated
-    repeated Foo foo = 1;
-}
-
-message ClientSetNotificationSettingNotification {
-    // TODO:
-    // "sounds for incoming messages" off: [None, [2, 1]]
-    // "sounds for incoming messages" on: [None, [1, 1]]
-    // "ring for incoming phone calls" off: [None, [1, 2]]
-    // "ring for incoming phone calls" on: [None, [1, 1]]
-}
-
-message ClientConversationViewModification {
-    optional ConversationID conversation_id = 1;
-    optional ClientConversationView old_view = 2;
-    optional ClientConversationView new_view = 3;
-    // archive:
-    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 1, 2]
-    // unarchive:
-    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 2, 1]
-
-}
-
-message ClientDeleteAction {
+message DeleteAction {
     optional uint64 delete_action_timestamp = 1;
     optional uint64 delete_upper_bound_timestamp = 2; // TODO: roughly 10 mins before
     // unknown (1) = 3;
 }
 
-message ClientDeleteActionNotification { // 15
-    // delete conversation:
-    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], [1435638391438133, 1435637794504105, 1]]
-    optional ConversationID conversation_id = 1;
-    optional ClientDeleteAction delete_action = 2;
-}
-
-enum ClientBlockState {
+enum BlockState {
     BLOCK_STATE_UNKNOWN = 0;
     BLOCK = 1;
     UNBLOCK = 2;
 }
 
-message ClientBlockStateChange {
+message BlockStateChange {
     optional UserID participant_id = 1;
-    optional ClientBlockState new_block_state = 2;
+    optional BlockState new_block_state = 2;
 }
 
-message ClientBlockNotification {
-    // block someone
-    // [[[['102610215878429116806', '102610215878429116806'], 1]]]
-    repeated ClientBlockStateChange block_state_change = 1;
-}
-
-enum ClientReplyToInviteType {
+enum ReplyToInviteType {
     REPLY_TO_INVITE_TYPE_UNKNOWN = 0;
     ACCEPT = 1;
     DECLINE = 2;
-}
-
-message ClientReplyToInviteNotification {
-    // TODO: untested
-    // [['UgwnHidpJTfc7G7BhUR4AaABAQ'], 1]
-    optional ConversationID conversation_id = 1;
-    optional ClientReplyToInviteType type = 2;
-}
-
-message ClientStateUpdate {
-    optional ClientStateUpdateHeader client_state_update_header = 1;
-    // only gets sent when the state of the conversation changes
-    optional ClientConversation client_conversation = 13;
-    // TODO: need to confirm this is a oneof
-    oneof client_state_update {
-        //UnimplementedMessage conversation_notification = 2; // always null?
-        ClientEventNotification event_notification = 3;
-        ClientSetFocusNotification focus_notification = 4;
-        ClientSetTypingNotification typing_notification = 5;
-        ClientSetConversationNotificationLevelNotification notification_level_notification = 6;
-        ClientReplyToInviteNotification reply_to_invite_notification = 7;
-        ClientWatermarkNotification watermark_notification = 8;
-        //UnimplementedMessage unknown_1 = 9;
-        //UnimplementedMessage settings_notification = 10;
-        ClientConversationViewModification view_modification = 11;
-        ClientEasterEggNotification easter_egg_notification = 12;
-        ClientSelfPresenceNotification self_presence_notification = 14;
-        ClientDeleteActionNotification delete_notification = 15;
-        ClientPresenceNotification presence_notification = 16;
-        ClientBlockNotification block_notification = 17;
-        //UnimplementedMessage invitation_watermark_notification = 18;
-        ClientSetNotificationSettingNotification notification_setting_notification = 19;
-        ClientSettingsNotification settings_notification = 20;
-    }
 }
 
 message Photo {
@@ -433,17 +294,19 @@ message Photo {
     optional bool delete_albumless_source_photo = 2; // TODO: never tested
 }
 
-message ClientExistingMedia {
+message ExistingMedia {
     optional Photo photo = 1;
 }
 
-message ClientEventRequestHeader {
+message EventRequestHeader {
     optional ConversationID conversation_id = 1;
     optional uint64 client_generated_id = 2;
     optional OffTheRecordStatus expected_otr = 3;
 }
 
 enum ClientId {
+    // Identifies the client.
+
     CLIENT_ID_UNKNOWN = 0;
     // Hangouts app for Android
     CLIENT_ID_ANDROID = 1;
@@ -460,6 +323,8 @@ enum ClientId {
 }
 
 enum ClientBuildType {
+    // Build type of the client.
+
     BUILD_TYPE_UNKNOWN = 0;
     // build type used by web apps
     BUILD_TYPE_PRODUCTION_WEB = 1;
@@ -468,7 +333,9 @@ enum ClientBuildType {
     BUILD_TYPE_PRODUCTION_APP = 3;
 }
 
-message ClientClientVersion {
+message ClientVersion {
+    // The client and device versions.
+
     optional ClientId client_id = 1;
     optional ClientBuildType build_type = 2;
     // client version string
@@ -481,26 +348,257 @@ message ClientClientVersion {
     optional string device_hardware = 6;
 }
 
-message ClientRequestHeader {
+message RequestHeader {
+    // Header for requests from the client to the server.
+
     // TODO: incomplete
-    optional ClientClientVersion client_version = 1;
-    optional ClientClientIdentifier client_identifier = 2;
+    optional ClientVersion client_version = 1;
+    optional ClientIdentifier client_identifier = 2;
     optional string language_code = 4;
 }
 
-enum ClientResponseStatus {
+enum ResponseStatus {
+    // Status of the response from the server to the client.
+
     RESPONSE_STATUS_UNKNOWN = 0;
     RESPONSE_STATUS_OK = 1;
     RESPONSE_STATUS_UNEXPECTED_ERROR = 3;
     RESPONSE_STATUS_INVALID_REQUEST = 4;
 }
 
-message ClientResponseHeader {
-    optional ClientResponseStatus status = 1;
+message ResponseHeader {
+    // Header for responses from the server to the client.
+
+    optional ResponseStatus status = 1;
     optional string error_description = 2;
     // unknown string = 3;
     optional string request_trace_id = 4;
     optional uint64 current_server_time = 5;
+}
+
+message Entity {
+    // presence? = 8;
+    optional UserID id = 9;
+    optional EntityProperties properties = 10;
+    // TODO
+}
+
+message EntityProperties {
+    optional ProfileType type = 1;
+    optional string display_name = 2;
+    optional string first_name = 3;
+    optional string photo_url = 4;
+    repeated string email = 5;
+    repeated string phone = 6;
+    optional bool in_users_domain = 10;
+    optional Gender gender = 11;
+    optional PhotoUrlStatus photo_url_status = 12;
+    optional string canonical_email = 15;
+}
+
+enum PhotoUrlStatus {
+    // TODO: incomplete
+    PHOTO_URL_STATUS_UNKNOWN = 0;
+    // unknown = 1;
+    PHOTO_URL_STATUS_USER_PHOTO = 2;
+}
+
+enum Gender {
+    GENDER_UNKNOWN = 0;
+    GENDER_MALE = 1;
+    GENDER_FEMALE = 2;
+}
+
+enum ProfileType {
+    PROFILE_TYPE_NONE = 0;
+    PROFILE_TYPE_ES_USER = 1;
+}
+
+message ConversationState {
+    // State of a conversation and recent events.
+
+    optional ConversationID conversation_id = 1;
+    optional Conversation conversation = 2;
+    repeated Event event = 3;
+    optional EventContinuationToken event_continuation_token = 5;
+}
+
+message EventContinuationToken {
+    // Token that allows retrieving more events from a position in a
+    // conversation. Specifying event_timestamp is sufficient.
+
+    optional string event_id = 1;
+    optional string storage_continuation_token = 2;
+    optional uint64 event_timestamp = 3;
+}
+
+message EntityLookupSpec {
+    optional string gaia_id = 1;
+    // TODO
+}
+
+// ----------------------------------------------------------------------------
+// State Update and Notifications
+// ----------------------------------------------------------------------------
+
+message StateUpdate {
+    // StateUpdate messages are pushed from the server to the client to notify
+    // it of state changes. Each StateUpdate includes one type of notification,
+    // and optionally includes a Conversation containing changes to that
+    // conversation.
+
+    optional StateUpdateHeader state_update_header = 1;
+    // only gets sent when the state of the conversation changes
+    // TODO: seems like this should be a notification, but it's not in the oneof
+    optional Conversation conversation = 13;
+    // TODO: need to confirm this is a oneof
+    oneof state_update {
+        //UnimplementedMessage conversation_notification = 2; // always null?
+        EventNotification event_notification = 3;
+        SetFocusNotification focus_notification = 4;
+        SetTypingNotification typing_notification = 5;
+        SetConversationNotificationLevelNotification notification_level_notification = 6;
+        ReplyToInviteNotification reply_to_invite_notification = 7;
+        WatermarkNotification watermark_notification = 8;
+        //UnimplementedMessage unknown_1 = 9;
+        //UnimplementedMessage settings_notification = 10;
+        // TODO: should be named as a notification?
+        ConversationViewModification view_modification = 11;
+        EasterEggNotification easter_egg_notification = 12;
+        SelfPresenceNotification self_presence_notification = 14;
+        DeleteActionNotification delete_notification = 15;
+        PresenceNotification presence_notification = 16;
+        BlockNotification block_notification = 17;
+        //UnimplementedMessage invitation_watermark_notification = 18;
+        SetNotificationSettingNotification notification_setting_notification = 19;
+        SettingsNotification settings_notification = 20;
+    }
+}
+
+message StateUpdateHeader {
+    // TODO
+    optional ActiveClientState active_client_state = 1;
+    // unknown = 2
+    optional string request_trace_id = 3;
+    optional NotificationSettings notification_settings = 4;
+    optional uint64 current_server_time = 5;
+    // archive settings? ([1]) = 6
+    // unknown = 7
+    // optional ID of the client causing the update (3767219427742586121) ? = 8
+}
+
+message BatchUpdate {
+    // List of StateUpdate messages pushed together in a batch.
+
+    optional string some_code = 1; // "cbu" (ClientBatchUpdate)
+    repeated StateUpdate state_update = 2;
+}
+
+message EventNotification {
+    optional Event event = 1;
+}
+
+message SetFocusNotification {
+    optional ConversationID conversation_id = 1;
+    optional UserID user_id = 2;
+    optional uint64 timestamp = 3;
+    optional FocusStatus status = 4;
+    optional FocusDevice device = 5;
+}
+
+message SetTypingNotification {
+    optional ConversationID conversation_id = 1;
+    optional UserID user_id = 2;
+    optional uint64 timestamp = 3;
+    optional TypingStatus status = 4;
+}
+
+message SetConversationNotificationLevelNotification {
+    optional ConversationID conversation_id = 1;
+    optional NotificationLevel level = 2;
+    // unknown (0) = 3;
+    optional uint64 timestamp = 4;
+}
+
+message ReplyToInviteNotification {
+    // TODO: untested
+    // [['UgwnHidpJTfc7G7BhUR4AaABAQ'], 1]
+    optional ConversationID conversation_id = 1;
+    optional ReplyToInviteType type = 2;
+}
+
+message WatermarkNotification {
+    optional UserID participant_id = 1;
+    optional ConversationID conversation_id = 2;
+    optional uint64 latest_read_timestamp = 3;
+}
+
+message ConversationViewModification {
+    optional ConversationID conversation_id = 1;
+    optional ConversationView old_view = 2;
+    optional ConversationView new_view = 3;
+    // archive:
+    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 1, 2]
+    // unarchive:
+    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 2, 1]
+}
+
+message EasterEggNotification {
+    optional UserID sender_id = 1;
+    optional ConversationID conversation_id = 2;
+    optional EasterEgg easter_egg = 3;
+}
+
+message SelfPresenceNotification {
+    // status of other clients and mood
+    // TODO: might be totally wrong
+    optional ClientPresenceState client_presence_state = 1;
+
+    // TODO
+    // setting status = 6;
+    // [None, None, None, [[[[[0, 'testing', [0, 0, 0, 0]]]]], 4589237583327000]]
+    // clearing status:
+    // [None, None, None, [[[None]], 4589237668724000]]
+}
+
+message DeleteActionNotification { // 15
+    // delete conversation:
+    // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], [1435638391438133, 1435637794504105, 1]]
+    optional ConversationID conversation_id = 1;
+    optional DeleteAction delete_action = 2;
+}
+
+message PresenceNotification {
+    repeated PresenceResult presence = 1;
+}
+
+message BlockNotification {
+    // block someone
+    // [[[['102610215878429116806', '102610215878429116806'], 1]]]
+    repeated BlockStateChange block_state_change = 1;
+}
+
+message SetNotificationSettingNotification {
+    // TODO:
+    // "sounds for incoming messages" off: [None, [2, 1]]
+    // "sounds for incoming messages" on: [None, [1, 1]]
+    // "ring for incoming phone calls" off: [None, [1, 2]]
+    // "ring for incoming phone calls" on: [None, [1, 1]]
+}
+
+message SettingsNotification { // 20
+    // TODO: need name for Foo?
+    message Foo {
+        optional SettingType setting = 1;
+        optional bool setting_value = 2;
+    }
+    // TODO: probably not repeated
+    repeated Foo foo = 1;
+}
+
+message ConversationSpec {
+    optional ConversationID conversation_id = 1;
+    // TODO
 }
 
 // ----------------------------------------------------------------------------
@@ -508,7 +606,7 @@ message ClientResponseHeader {
 // ----------------------------------------------------------------------------
 
 message AddUserRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -518,7 +616,7 @@ message AddUserResponse {
 }
 
 message CreateConversationRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -528,7 +626,7 @@ message CreateConversationResponse {
 }
 
 message DeleteConversationRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -538,37 +636,84 @@ message DeleteConversationResponse {
 }
 
 message GetConversationRequest {
-    optional ClientRequestHeader request_header = 1;
-    // TODO
+    optional RequestHeader request_header = 1;
+    optional ConversationSpec conversation_spec = 2;
+    // include_conversation_metadata? = 3;
+    optional bool include_event = 4;
+    // unknown = 5;
+    optional uint64 max_events_per_conversation = 6;
+    optional EventContinuationToken event_continuation_token = 7;
 }
 
 message GetConversationResponse {
+    optional string some_code = 1;  // cgcrp (ClientGetConversationResponseP)
+    optional ResponseHeader response_header = 2;
+    optional ConversationState conversation_state = 3;
     // TODO
-
 }
 
 message GetEntityByIdRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
+    // unknown = 2;
+    repeated EntityLookupSpec batch_lookup_spec = 3;
     // TODO
 }
 
 message GetEntityByIdResponse {
     // TODO
+    optional string some_code = 1;  // cgebirp (ClientGetEntityByIdResponseP)
+    optional ResponseHeader response_header = 2;
+    repeated Entity entity = 3;
+}
+
+message GetSuggestedEntitiesRequest {
+    optional RequestHeader request_header = 1;
+    // TODO
+}
+
+message GetSuggestedEntitiesResponse {
+    // TODO
+    optional string some_code = 1;  // cgserp (ClientGetSuggestedEntitiesResponseP)
+    optional ResponseHeader response_header = 2;
+    repeated Entity entity = 3;
+
+    // more entities in 5, 6, 7, 8, 9, 10
+    // TODO: wtf is with these extra entities
+    message EntityGroup {
+        // unknown 0 = 1;
+        // unknown code = 2;
+        repeated Foo entity = 3;
+        message Foo {
+            optional Entity entity = 1;
+        }
+    }
+    optional EntityGroup group1 = 5;
+    optional EntityGroup group2 = 6;
+    optional EntityGroup group3 = 7;
+    optional EntityGroup group4 = 8;
+    optional EntityGroup group5 = 9;
+    optional EntityGroup group6 = 10;
+
 
 }
 
 message GetSelfInfoRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
 message GetSelfInfoResponse {
-    // TODO
-
+    optional string some_code = 1;  // cgsirp (ClientGetSelfInfoResponseP)
+    optional ResponseHeader response_header = 2;
+    optional Entity self_entity = 3;
+    // phone number details = 8;
+    // list of boolean settings? = 9;
+    // another list of boolean settings? = 13;
+    // TODO: all kinds of extra stuff
 }
 
 message QueryPresenceRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -578,7 +723,7 @@ message QueryPresenceResponse {
 }
 
 message RemoveUserRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -588,7 +733,7 @@ message RemoveUserResponse {
 }
 
 message SearchEntitiesRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -599,21 +744,21 @@ message SearchEntitiesResponse {
 
 message SendChatMessageRequest {
     // TODO: incomplete
-    optional ClientRequestHeader request_header = 1;
-    optional ClientMessageContent message_content = 6;
-    optional ClientExistingMedia existing_media = 7;
-    optional ClientEventRequestHeader event_request_header = 8;
+    optional RequestHeader request_header = 1;
+    optional MessageContent message_content = 6;
+    optional ExistingMedia existing_media = 7;
+    optional EventRequestHeader event_request_header = 8;
 }
 
 message SendChatMessageResponse {
     optional string some_code = 1;  // cscmrp (ClientSendChatMessageResponseP)
-    optional ClientResponseHeader response_header = 2;
+    optional ResponseHeader response_header = 2;
     // unknown [] = 5;
-    optional ClientEvent created_event = 7;
+    optional Event created_event = 7;
 }
 
 message SendEasterEggRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -623,7 +768,7 @@ message SendEasterEggResponse {
 }
 
 message SetActiveClientRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // Whether to set the client as active (true) or inactive (false).
     optional bool is_active = 2;
     // 'email/resource'
@@ -635,11 +780,11 @@ message SetActiveClientRequest {
 
 message SetActiveClientResponse {
     optional string some_code = 1;  // csacrp (ClientSetActiveClientResponseP)
-    optional ClientResponseHeader response_header = 2;
+    optional ResponseHeader response_header = 2;
 }
 
 message SetChatNameRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -649,7 +794,7 @@ message SetChatNameResponse {
 }
 
 message SetConversationLevelRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -659,7 +804,7 @@ message SetConversationLevelResponse {
 }
 
 message SetPresenceRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -669,7 +814,7 @@ message SetPresenceResponse {
 }
 
 message SetTypingRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
@@ -679,27 +824,38 @@ message SetTypingResponse {
 }
 
 message SyncAllNewEventsRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
+    // timestamp after which to return all new events
+    optional uint64 last_sync_timestamp = 2;
+    optional uint64 max_response_size_bytes = 8;
     // TODO
 }
 
 message SyncAllNewEventsResponse {
+    optional string some_code = 1;  // csanerp (ClientSyncAllNewEventsResponseP)
+    optional ResponseHeader response_header = 2;
+    optional uint64 sync_timestamp = 3;
+    repeated ConversationState conversation_state = 4;
     // TODO
 
 }
 
 message SyncRecentConversationsRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 
 message SyncRecentConversationsResponse {
     // TODO
+    optional string some_code = 1;  // csrcrp (ClientSyncRecentConversationsResponseP)
+    optional ResponseHeader response_header = 2;
+    optional uint64 sync_timestamp = 3;
+    repeated ConversationState conversation_state = 4;
 
 }
 
 message UpdateWatermarkRequest {
-    optional ClientRequestHeader request_header = 1;
+    optional RequestHeader request_header = 1;
     // TODO
 }
 

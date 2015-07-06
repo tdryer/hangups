@@ -4,7 +4,7 @@ from collections import namedtuple
 import asyncio
 import logging
 
-from hangups import exceptions
+from hangups import exceptions, hangouts_pb2
 
 logger = logging.getLogger(__name__)
 DEFAULT_NAME = 'Unknown'
@@ -24,8 +24,8 @@ class User(object):
                  is_self):
         """Initialize a User."""
         self.id_ = user_id
-        self.full_name = full_name if full_name is not None else DEFAULT_NAME
-        self.first_name = (first_name if first_name is not None
+        self.full_name = full_name if full_name != '' else DEFAULT_NAME
+        self.first_name = (first_name if first_name != ''
                            else self.full_name.split()[0])
         self.photo_url = photo_url
         self.emails = emails
@@ -37,22 +37,25 @@ class User(object):
 
         If self_user_id is None, assume this is the self user.
         """
-        user_id = UserID(chat_id=entity.id_.chat_id,
-                         gaia_id=entity.id_.gaia_id)
+        user_id = UserID(chat_id=entity.id.chat_id,
+                         gaia_id=entity.id.gaia_id)
         return User(user_id, entity.properties.display_name,
                     entity.properties.first_name,
                     entity.properties.photo_url,
-                    entity.properties.emails,
+                    entity.properties.email,
                     (self_user_id == user_id) or (self_user_id is None))
 
     @staticmethod
     def from_conv_part_data(conv_part_data, self_user_id):
-        """Initialize from ClientConversationParticipantData.
+        """Initialize from ConversationParticipantData.
 
         If self_user_id is None, assume this is the self user.
         """
-        user_id = UserID(chat_id=conv_part_data.id_.chat_id,
-                         gaia_id=conv_part_data.id_.gaia_id)
+        assert isinstance(conv_part_data,
+                          hangouts_pb2.ConversationParticipantData)
+        user_id = UserID(chat_id=conv_part_data.id.chat_id,
+                         gaia_id=conv_part_data.id.gaia_id)
+        logging.debug('%s', conv_part_data)
         return User(user_id, conv_part_data.fallback_name, None, None, [],
                     (self_user_id == user_id) or (self_user_id is None))
 
@@ -67,13 +70,13 @@ def build_user_list(client, initial_data):
     """
 
     present_user_ids = {
-        UserID(chat_id=entity.id_.chat_id, gaia_id=entity.id_.gaia_id)
+        UserID(chat_id=entity.id.chat_id, gaia_id=entity.id.gaia_id)
         for entity in initial_data.entities + [initial_data.self_entity]
     }
     required_user_ids = set()
     for conv_state in initial_data.conversation_states:
         required_user_ids |= {
-            UserID(chat_id=part.id_.chat_id, gaia_id=part.id_.gaia_id)
+            UserID(chat_id=part.id.chat_id, gaia_id=part.id.gaia_id)
             for part in conv_state.conversation.participant_data
         }
     missing_user_ids = required_user_ids - present_user_ids
@@ -85,9 +88,9 @@ def build_user_list(client, initial_data):
             response = yield from client.getentitybyid(
                 [user_id.chat_id for user_id in missing_user_ids]
             )
-            missing_entities = response.entities
-            logger.debug('Received additional users: {}'
-                         .format(missing_entities))
+            missing_entities = list(response.entity)
+            logger.debug('Received additional user entities:\n%s',
+                         '\n'.join(str(entity) for entity in missing_entities))
         except exceptions.NetworkError as e:
             logger.warning('Failed to request missing users: {}'.format(e))
     return UserList(client, initial_data.self_entity,
@@ -117,6 +120,10 @@ class UserList(object):
         # Add each conversation participant as a new User if we didn't already
         # add them from an entity.
         for participant in conv_parts:
+            assert isinstance(participant,
+                              hangouts_pb2.ConversationParticipantData)
+            logger.debug('Creating User from ConversationParticipantData:\n%s',
+                         participant)
             self.add_user_from_conv_part(participant)
         logger.info('UserList initialized with {} user(s)'
                     .format(len(self._user_dict)))
@@ -141,6 +148,7 @@ class UserList(object):
 
     def add_user_from_conv_part(self, conv_part):
         """Add new User from ClientConversationParticipantData"""
+        assert isinstance(conv_part, hangouts_pb2.ConversationParticipantData)
         user_ = User.from_conv_part_data(conv_part, self._self_user.id_)
         if user_.id_ not in self._user_dict:
             logging.warning('Adding fallback User: {}'.format(user_))
@@ -149,8 +157,10 @@ class UserList(object):
 
     def _on_state_update(self, state_update):
         """Receive a ClientStateUpdate"""
-        if state_update.client_conversation is not None:
-            self._handle_client_conversation(state_update.client_conversation)
+        # TODO
+        pass
+        #if state_update.client_conversation is not None:
+        #    self._handle_client_conversation(state_update.client_conversation)
 
     def _handle_client_conversation(self, client_conversation):
         """Receive ClientConversation and update list of users"""
