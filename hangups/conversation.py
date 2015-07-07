@@ -156,7 +156,7 @@ class Conversation(object):
 
         Raises hangups.NetworkError if conversation cannot be renamed.
         """
-        yield from self._client.setchatname(self.id_, name)
+        yield from self._client.renameconversation(self.id_, name)
 
     @asyncio.coroutine
     def set_notification_level(self, level):

@@ -730,6 +730,16 @@ message RemoveUserResponse {
 
 }
 
+message RenameConversationRequest {
+    optional RequestHeader request_header = 1;
+    // TODO
+}
+
+message RenameConversationResponse {
+    // TODO
+
+}
+
 message SearchEntitiesRequest {
     optional RequestHeader request_header = 1;
     // TODO
@@ -779,16 +789,6 @@ message SetActiveClientRequest {
 message SetActiveClientResponse {
     optional string some_code = 1;  // csacrp (ClientSetActiveClientResponseP)
     optional ResponseHeader response_header = 2;
-}
-
-message SetChatNameRequest {
-    optional RequestHeader request_header = 1;
-    // TODO
-}
-
-message SetChatNameResponse {
-    // TODO
-
 }
 
 message SetConversationLevelRequest {

@@ -536,8 +536,8 @@ class Client(object):
         return response
 
     @asyncio.coroutine
-    def setchatname(self, conversation_id, name):
-        """Set the name of a conversation.
+    def renameconversation(self, conversation_id, name):
+        """Rename a conversation.
 
         Raises hangups.NetworkError if the request fails.
         """
