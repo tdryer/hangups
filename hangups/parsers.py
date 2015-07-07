@@ -87,13 +87,13 @@ TypingStatusMessage = namedtuple(
 
 
 def parse_typing_status_message(p):
-    """Return TypingStatusMessage from ClientSetTypingNotification.
+    """Return TypingStatusMessage from hangouts_pb2.SetTypingNotification.
 
     The same status may be sent multiple times consecutively, and when a
     message is sent the typing status will not change to stopped.
     """
     return TypingStatusMessage(
-        conv_id=p.conversation_id.id_,
+        conv_id=p.conversation_id.id,
         user_id=user.UserID(chat_id=p.user_id.chat_id,
                             gaia_id=p.user_id.gaia_id),
         timestamp=from_timestamp(p.timestamp),
@@ -106,15 +106,15 @@ WatermarkNotification = namedtuple(
 )
 
 
-def parse_watermark_notification(client_watermark_notification):
-    """Return WatermarkNotification from ClientWatermarkNotification."""
+def parse_watermark_notification(p):
+    """Return WatermarkNotification from hangouts_pb2.WatermarkNotification."""
     return WatermarkNotification(
-        conv_id=client_watermark_notification.conversation_id.id_,
+        conv_id=p.conversation_id.id,
         user_id=user.UserID(
-            chat_id=client_watermark_notification.participant_id.chat_id,
-            gaia_id=client_watermark_notification.participant_id.gaia_id,
+            chat_id=p.participant_id.chat_id,
+            gaia_id=p.participant_id.gaia_id,
         ),
         read_timestamp=from_timestamp(
-            client_watermark_notification.latest_read_timestamp
+            p.latest_read_timestamp
         ),
     )

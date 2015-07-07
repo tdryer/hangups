@@ -1,4 +1,5 @@
 from .version import __version__
+from .hangouts_pb2 import TYPING_STARTED, TYPING_PAUSED, TYPING_STOPPED
 from .client import Client
 from .user import UserList, build_user_list
 from .conversation import ConversationList

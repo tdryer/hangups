@@ -373,7 +373,7 @@ class StatusLineWidget(urwid.WidgetWrap):
         """Make users stop typing when they send a message."""
         if isinstance(conv_event, hangups.ChatMessageEvent):
             self._typing_statuses[conv_event.user_id] = (
-                hangups.TypingStatus.STOPPED
+                hangups.TYPING_STOPPED
             )
             self._update()
 
@@ -386,7 +386,7 @@ class StatusLineWidget(urwid.WidgetWrap):
         """Update status text."""
         typers = [self._conversation.get_user(user_id).first_name
                   for user_id, status in self._typing_statuses.items()
-                  if status == hangups.TypingStatus.TYPING]
+                  if status == hangups.TYPING_STARTED]
         if len(typers) > 0:
             typing_message = '{} {} typing...'.format(
                 ', '.join(sorted(typers)),
