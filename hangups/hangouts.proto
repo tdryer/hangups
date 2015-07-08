@@ -158,7 +158,15 @@ message HangoutEvent {
 }
 
 message OTRModification {
+    optional OffTheRecordStatus old_otr_status = 1;
+    optional OffTheRecordStatus new_otr_status = 2;
+    optional OffTheRecordToggle old_otr_toggle = 3;
+    optional OffTheRecordToggle new_otr_toggle = 4;
+}
 
+enum OffTheRecordToggle {
+    OFF_THE_RECORD_TOGGLE_ENABLED = 0;
+    OFF_THE_RECORD_TOGGLE_DISABLED = 1;
 }
 
 enum OffTheRecordStatus {
