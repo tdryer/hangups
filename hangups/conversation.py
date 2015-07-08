@@ -69,12 +69,13 @@ class Conversation(object):
 
     @staticmethod
     def _wrap_event(event_):
-        """Wrap ClientEvent in ConversationEvent subclass."""
-        if event_.chat_message is not None:
+        """Wrap hangouts_pb2.Event in ConversationEvent subclass."""
+        # TODO: should add a oneof for this
+        if event_.HasField('chat_message'):
             return conversation_event.ChatMessageEvent(event_)
-        elif event_.conversation_rename is not None:
+        elif event_.HasField('conversation_rename'):
             return conversation_event.RenameEvent(event_)
-        elif event_.membership_change is not None:
+        elif event_.HasField('membership_change'):
             return conversation_event.MembershipChangeEvent(event_)
         else:
             return conversation_event.ConversationEvent(event_)
