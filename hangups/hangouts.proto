@@ -145,12 +145,21 @@ message ChatMessage {
     optional MessageContent message_content = 3;
 }
 
-message MembershipChange {
+enum MembershipChangeType {
+    MEMBERSHIP_CHANGE_TYPE_JOIN = 1;
+    MEMBERSHIP_CHANGE_TYPE_LEAVE = 2;
+}
 
+message MembershipChange {
+    optional MembershipChangeType type = 1;
+    // unknown = 2;
+    repeated UserID participant_ids = 3;
+    // unknown (4) = 4;
 }
 
 message ConversationRename {
-
+    optional string new_name = 1;
+    optional string old_name = 2;
 }
 
 message HangoutEvent {

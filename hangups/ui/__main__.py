@@ -460,7 +460,7 @@ class MessageWidget(urwid.WidgetWrap):
             event_users = [conversation.get_user(user_id) for user_id
                            in conv_event.participant_ids]
             names = ', '.join([user.full_name for user in event_users])
-            if conv_event.type_ == hangups.MembershipChangeType.JOIN:
+            if conv_event.type_ == hangups.MEMBERSHIP_CHANGE_TYPE_JOIN:
                 text = ('{} added {} to the conversation'
                         .format(user.first_name, names))
             else:  # LEAVE

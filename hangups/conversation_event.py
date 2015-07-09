@@ -196,7 +196,7 @@ class MembershipChangeEvent(ConversationEvent):
     @property
     def type_(self):
         """The membership change type (MembershipChangeType)."""
-        return self._event.membership_change.type_
+        return self._event.membership_change.type
 
     @property
     def participant_ids(self):
