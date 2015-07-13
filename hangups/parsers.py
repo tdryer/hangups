@@ -97,7 +97,7 @@ def parse_typing_status_message(p):
         user_id=user.UserID(chat_id=p.user_id.chat_id,
                             gaia_id=p.user_id.gaia_id),
         timestamp=from_timestamp(p.timestamp),
-        status=p.status,
+        status=p.type,
     )
 
 

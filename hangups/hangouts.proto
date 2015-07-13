@@ -29,8 +29,7 @@ message NotificationSettings {
     optional DoNotDisturbSetting dnd_settings = 1;
 }
 
-// TODO: should be FocusType?
-enum FocusStatus {
+enum FocusType {
     UNKNOWN = 0;
     FOCUSED = 1;
     UNFOCUSED = 2;
@@ -46,14 +45,24 @@ message ConversationID {
     optional string id = 1;
 }
 
+// TODO: should be ParticipantId?
 message UserID {
     optional string gaia_id = 1;
     optional string chat_id = 2;
 }
 
+message DeviceStatus {
+    // TODO: desktop, mobile, tablet
+    optional bool unknown1 = 1;
+    optional bool unknown2 = 2;
+    optional bool unknown3 = 3;
+
+}
+
 message Presence {
     optional bool reachable = 1;
     optional bool available = 2;
+    optional DeviceStatus device_status = 6;
 }
 
 message PresenceResult {
@@ -61,7 +70,7 @@ message PresenceResult {
     optional Presence presence = 2;
 }
 
-enum TypingStatus {
+enum TypingType {
     TYPING_UNKNOWN = 0;
     TYPING_STARTED = 1;  // started typing
     TYPING_PAUSED = 2;  // stopped typing with inputted text
@@ -74,12 +83,11 @@ message ClientIdentifier {
 }
 
 enum ClientPresenceStateType {
-    // TODO this all wrong
-    PRESENCE_NONE = 0;
-    PRESENCE_MOBILE = 1;
-    PRESENCE_DESKTOP_IDLE = 2;
-    PRESENCE_DESKTOP_ACTIVE = 3;
-    // unknown = 40;
+    CLIENT_PRESENCE_STATE_UNKNOWN = 0;
+    CLIENT_PRESENCE_STATE_NONE = 1;
+    CLIENT_PRESENCE_STATE_DESKTOP_IDLE = 30;
+    CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE = 40;
+    // TODO
 }
 
 message ClientPresenceState {
@@ -274,13 +282,6 @@ message EasterEgg {
     optional string message = 1;
 }
 
-enum SettingType {
-    SETTING_UNKNOWN = 0;
-    SHOW_IN_CALL = 1;
-    SHOW_DEVICE = 2;
-    SHOW_LAST_SEEN = 6;
-}
-
 message DeleteAction {
     optional uint64 delete_action_timestamp = 1;
     optional uint64 delete_upper_bound_timestamp = 2; // TODO: roughly 10 mins before
@@ -452,6 +453,71 @@ message EntityLookupSpec {
     // TODO
 }
 
+enum ConfigurationBitType {
+    CONFIGURATION_BIT_TYPE_UNKNOWN = 0;
+    // TODO
+    // RICH_PRESENCE_ACTIVITY_PROMO_SHOWN
+    // RICH_PRESENCE_DEVICE_PROMO_SHOWN
+    // RICH_PRESENCE_LAST_SEEN_DESKTOP_PROMO_SHOWN
+    // RICH_PRESENCE_LAST_SEEN_MOBILE_PROMO_SHOWN
+    // RICH_PRESENCE_IN_CALL_STATE_PROMO_SHOWN
+    // RICH_PRESENCE_MOOD_PROMO_SHOWN
+    // GV_SMS_INTEGRATION_PROMO_SHOWN
+    // RICH_PRESENCE_LAST_SEEN_DESKTOP_PROMPT_SHOWN
+    // BUSINESS_FEATURES_ENABLED
+    // BUSINESS_FEATURES_PROMO_DISMISSED
+    // CONVERSATION_INVITE_SETTINGS_SET_TO_CUSTOM
+    // REPORT_ABUSE_NOTICE_ACKNOWLEDGED
+    // PHONE_VERIFICATION_MOBILE_PROMPT_SHOWN
+    // HANGOUT_P2P_NOTICE_ACKNOWLEDGED
+    // HANGOUT_P2P_ENABLED
+    // INVITE_NOTIFICATIONS_ENABLED
+    // DESKTOP_AUTO_EMOJI_CONVERSION_ENABLED
+    // ALLOWED_FOR_DOMAIN
+    // GMAIL_CHAT_ARCHIVE_ENABLED
+    // QUASAR_MARKETING_PROMO_DISMISSED
+    // GPLUS_SIGNUP_PROMO_DISMISSED
+    // GPLUS_UPGRADE_ALLOWED_FOR_DOMAIN
+    // CHAT_WITH_CIRCLES_ACCEPTED
+    // CHAT_WITH_CIRCLES_PROMO_DISMISSED
+    // PHOTO_SERVICE_REGISTERED
+    // GV_SMS_INTEGRATION_ENABLED
+    // CAN_OPT_INTO_GV_SMS_INTEGRATION
+    // BUSINESS_FEATURES_ELIGIBLE
+    // CAN_USE_GV_CALLER_ID_FEATURE
+}
+
+message ConfigurationBit {
+    optional ConfigurationBitType configuration_bit_type = 1;
+    optional bool value = 2;
+}
+
+enum RichPresenceType {
+    RP_TYPE_UNKNOWN = 0;
+    RP_IN_CALL_STATE = 1;
+    RP_DEVICE = 2;
+    RP_LAST_SEEN = 6;
+    // TODO
+    // RP_GLOBALLY_ENABLED
+    // RP_ACTIVITY
+    // RP_MOOD
+}
+
+message RichPresenceState {
+    repeated RichPresenceEnabledState get_rich_presence_enabled_state = 3;
+}
+
+message RichPresenceEnabledState {
+    optional RichPresenceType type = 1;
+    optional bool enabled = 2;
+}
+
+enum FieldMask {
+    FIELD_MASK_REACHABLE = 1;
+    FIELD_MASK_AVAILABLE = 2;
+    FIELD_MASK_DEVICE = 7;
+}
+
 // ----------------------------------------------------------------------------
 // State Update and Notifications
 // ----------------------------------------------------------------------------
@@ -486,7 +552,7 @@ message StateUpdate {
         BlockNotification block_notification = 17;
         //UnimplementedMessage invitation_watermark_notification = 18;
         SetNotificationSettingNotification notification_setting_notification = 19;
-        SettingsNotification settings_notification = 20;
+        RichPresenceEnabledStateNotification rich_presence_enabled_state_notification = 20;
     }
 }
 
@@ -517,7 +583,7 @@ message SetFocusNotification {
     optional ConversationID conversation_id = 1;
     optional UserID user_id = 2;
     optional uint64 timestamp = 3;
-    optional FocusStatus status = 4;
+    optional FocusType type = 4;
     optional FocusDevice device = 5;
 }
 
@@ -525,7 +591,7 @@ message SetTypingNotification {
     optional ConversationID conversation_id = 1;
     optional UserID user_id = 2;
     optional uint64 timestamp = 3;
-    optional TypingStatus status = 4;
+    optional TypingType type = 4;  // TODO: should be type
 }
 
 message SetConversationNotificationLevelNotification {
@@ -601,14 +667,8 @@ message SetNotificationSettingNotification {
     // "ring for incoming phone calls" on: [None, [1, 1]]
 }
 
-message SettingsNotification { // 20
-    // TODO: need name for Foo?
-    message Foo {
-        optional SettingType setting = 1;
-        optional bool setting_value = 2;
-    }
-    // TODO: probably not repeated
-    repeated Foo foo = 1;
+message RichPresenceEnabledStateNotification {
+    repeated RichPresenceEnabledState rich_presence_enabled_state = 1;
 }
 
 message ConversationSpec {
@@ -648,6 +708,18 @@ message DeleteConversationRequest {
 message DeleteConversationResponse {
     // TODO
 
+}
+
+message EasterEggRequest {
+    optional RequestHeader request_header = 1;
+    optional ConversationID conversation_id = 2;
+    optional EasterEgg easter_egg = 3;
+}
+
+message EasterEggResponse {
+    optional string some_code = 1;  // ceerp (ClientEasterEggResponseP)
+    optional ResponseHeader response_header = 2;
+    optional uint64 timestamp = 3;
 }
 
 message GetConversationRequest {
@@ -721,20 +793,21 @@ message GetSelfInfoResponse {
     optional string some_code = 1;  // cgsirp (ClientGetSelfInfoResponseP)
     optional ResponseHeader response_header = 2;
     optional Entity self_entity = 3;
-    // phone number details = 8;
-    // list of boolean settings? = 9;
-    // another list of boolean settings? = 13;
+    repeated ConfigurationBit configuration_bit = 9;
+    optional RichPresenceState rich_presence_state = 13;
     // TODO: all kinds of extra stuff
 }
 
 message QueryPresenceRequest {
     optional RequestHeader request_header = 1;
-    // TODO
+    repeated UserID user_id = 2;
+    repeated FieldMask field_mask = 3;
 }
 
 message QueryPresenceResponse {
-    // TODO
-
+    optional string some_code = 1;  // cqprp (ClientQueryPresenceResponseP)
+    optional ResponseHeader response_header = 2;
+    repeated PresenceResult presence_result = 3;
 }
 
 message RemoveUserRequest {
@@ -750,11 +823,15 @@ message RemoveUserResponse {
 message RenameConversationRequest {
     optional RequestHeader request_header = 1;
     // TODO
+    optional string new_name = 3;
+    optional EventRequestHeader event_request_header = 5;
 }
 
 message RenameConversationResponse {
     // TODO
-
+    optional string some_code = 1;  // crcrp (ClientRenameConversationResponseP)
+    optional ResponseHeader response_header = 2;
+    optional Event created_event = 5; // TODO: use json to check name?
 }
 
 message SearchEntitiesRequest {
@@ -780,16 +857,6 @@ message SendChatMessageResponse {
     optional ResponseHeader response_header = 2;
     // unknown [] = 5;
     optional Event created_event = 7;
-}
-
-message SendEasterEggRequest {
-    optional RequestHeader request_header = 1;
-    // TODO
-}
-
-message SendEasterEggResponse {
-    // TODO
-
 }
 
 message SetActiveClientRequest {
@@ -818,6 +885,19 @@ message SetConversationLevelResponse {
 
 }
 
+message SetFocusRequest {
+    optional RequestHeader request_header = 1;
+    optional ConversationID conversation_id = 2;
+    optional FocusType type = 3;
+    optional uint32 timeout_secs = 4;
+}
+
+message SetFocusResponse {
+    optional string some_code = 1;  // csfrp (ClientSetFocusResponseP)
+    optional ResponseHeader response_header = 2;
+    optional uint64 timestamp = 3;
+}
+
 message SetPresenceRequest {
     optional RequestHeader request_header = 1;
     // TODO
@@ -830,12 +910,14 @@ message SetPresenceResponse {
 
 message SetTypingRequest {
     optional RequestHeader request_header = 1;
-    // TODO
+    optional ConversationID conversation_id = 2;
+    optional TypingType type = 3;
 }
 
 message SetTypingResponse {
-    // TODO
-
+    optional string some_code = 1;  // cstrp (ClientSetTypingResponseP)
+    optional ResponseHeader response_header = 2;
+    optional uint64 timestamp = 3;
 }
 
 message SyncAllNewEventsRequest {
@@ -871,10 +953,11 @@ message SyncRecentConversationsResponse {
 
 message UpdateWatermarkRequest {
     optional RequestHeader request_header = 1;
-    // TODO
+    optional ConversationID conversation_id = 2;
+    optional uint64 last_read_timestamp = 3;
 }
 
 message UpdateWatermarkResponse {
-    // TODO
-
+    optional string some_code = 1;  // cuwrp (ClientUpdateWatermarkResponseP)
+    optional ResponseHeader response_header = 2;
 }
