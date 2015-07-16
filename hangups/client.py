@@ -747,29 +747,24 @@ class Client(object):
 
         Raises hangups.NetworkError if the request fails.
         """
-        res = yield from self._request('presence/setpresence', [
-            self._get_request_header(),
-            [
-                # timeout_secs timeout in seconds for this presence
-                720,
-                # client_presence_state:
-                # 40 => DESKTOP_ACTIVE
-                # 30 => DESKTOP_IDLE
-                # 1 => NONE
-                1 if online else 40,
-            ],
-            None,
-            None,
-            # True if going offline, False if coming online
-            [not online],
-            # UTF-8 smiley like 0x1f603
-            [mood],
-        ])
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
+        type_ = (hangouts_pb2.CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE if online
+                 else hangouts_pb2.CLIENT_PRESENCE_STATE_DESKTOP_IDLE)
+        request = hangouts_pb2.SetPresenceRequest(
+            request_header=self._get_request_header_pb(),
+            presence_state_setting=hangouts_pb2.PresenceStateSetting(
+                timeout_secs=720,
+                type=type_,
+            ),
+        )
+        if mood is not None:
+            segment = (
+                request.mood_setting.mood_message.mood_content.segment.add()
+            )
+            segment.type = hangouts_pb2.TEXT
+            segment.text = mood
+        response = hangouts_pb2.SetPresenceResponse()
+        yield from self._pb_request('presence/setpresence', request, response)
+        return response
 
     @asyncio.coroutine
     def querypresence(self, gaia_id):

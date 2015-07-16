@@ -63,6 +63,7 @@ message Presence {
     optional bool reachable = 1;
     optional bool available = 2;
     optional DeviceStatus device_status = 6;
+    optional MoodSetting mood_setting = 9;
 }
 
 message PresenceResult {
@@ -518,6 +519,48 @@ enum FieldMask {
     FIELD_MASK_DEVICE = 7;
 }
 
+message DesktopOffSetting {
+    // State of "desktop off" setting
+    optional bool desktop_off = 1;
+}
+
+message DesktopOffState {
+    // Whether Hangouts desktop is signed off or on
+    optional bool desktop_off = 1;
+}
+
+message DndSetting {
+    // Enable or disable do-not-disturb mode
+    // Not to be confused with DoNotDisturbSetting, which is the same thing but
+    // with an timestamp for expiration.
+    optional bool do_not_disturb = 1;
+    // do not disturb expiration, in seconds
+    optional uint64 timeout_secs = 2;
+}
+
+message PresenceStateSetting {
+    // Change the client presence state type
+    optional uint64 timeout_secs = 1;
+    optional ClientPresenceStateType type = 2;
+}
+
+message MoodMessage {
+    optional MoodContent mood_content = 1;
+}
+
+message MoodContent {
+    repeated Segment segment = 1;
+}
+
+message MoodSetting {
+    // Chat the user's mood message
+    optional MoodMessage mood_message = 1;
+}
+
+message MoodState {
+    optional MoodSetting mood_setting = 4;
+}
+
 // ----------------------------------------------------------------------------
 // State Update and Notifications
 // ----------------------------------------------------------------------------
@@ -632,14 +675,11 @@ message EasterEggNotification {
 
 message SelfPresenceNotification {
     // status of other clients and mood
-    // TODO: might be totally wrong
     optional ClientPresenceState client_presence_state = 1;
-
-    // TODO
-    // setting status = 6;
-    // [None, None, None, [[[[[0, 'testing', [0, 0, 0, 0]]]]], 4589237583327000]]
-    // clearing status:
-    // [None, None, None, [[[None]], 4589237668724000]]
+    optional DoNotDisturbSetting do_not_disturb_setting = 3;
+    optional DesktopOffSetting desktop_off_setting = 4;
+    optional DesktopOffState desktop_off_state = 5;
+    optional MoodState mood_state = 6;
 }
 
 message DeleteActionNotification { // 15
@@ -900,12 +940,16 @@ message SetFocusResponse {
 
 message SetPresenceRequest {
     optional RequestHeader request_header = 1;
-    // TODO
+    // One or more of the following field may be specified:
+    optional PresenceStateSetting presence_state_setting = 2;
+    optional DndSetting dnd_setting = 3;
+    optional DesktopOffSetting desktop_off_setting = 5;
+    optional MoodSetting mood_setting = 8;
 }
 
 message SetPresenceResponse {
-    // TODO
-
+    optional string some_code = 1;  // csprp (ClientSetPresenceResponseP)
+    optional ResponseHeader response_header = 2;
 }
 
 message SetTypingRequest {
