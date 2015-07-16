@@ -733,13 +733,15 @@ class Client(object):
 
         Raises hangups.NetworkError if the request fails.
         """
-        res = yield from self._request('contacts/searchentities', [
-            self._get_request_header(),
-            [],
-            search_string,
-            max_results
-        ])
-        return json.loads(res.body.decode())
+        request = hangouts_pb2.SearchEntitiesRequest(
+            request_header=self._get_request_header_pb(),
+            query=search_string,
+            max_count=max_results,
+        )
+        response = hangouts_pb2.SearchEntitiesResponse()
+        yield from self._pb_request('contacts/searchentities', request,
+                                    response)
+        return response
 
     @asyncio.coroutine
     def setpresence(self, online, mood=None):

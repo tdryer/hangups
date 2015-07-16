@@ -876,12 +876,14 @@ message RenameConversationResponse {
 
 message SearchEntitiesRequest {
     optional RequestHeader request_header = 1;
-    // TODO
+    optional string query = 3;
+    optional uint64 max_count = 4;
 }
 
 message SearchEntitiesResponse {
-    // TODO
-
+    optional string some_code = 1;  // cserp (ClientSearchEntitiesResponseP)
+    optional ResponseHeader response_header = 2;
+    repeated Entity entity = 3;
 }
 
 message SendChatMessageRequest {
