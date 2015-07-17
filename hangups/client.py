@@ -634,25 +634,28 @@ class Client(object):
     ###########################################################################
 
     @asyncio.coroutine
-    def removeuser(self, conversation_id):
+    def removeuser(self, conversation_id,
+                   otr_status=hangouts_pb2.ON_THE_RECORD):
         """Leave group conversation.
 
         conversation_id must be a valid conversation ID.
 
         Raises hangups.NetworkError if the request fails.
         """
-        res = yield from self._request('conversations/removeuser', [
-            self._get_request_header(),
-            None, None, None,
-            [
-                [conversation_id], self.get_client_generated_id(), 2
-            ],
-        ])
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
+        request = hangouts_pb2.RemoveUserRequest(
+            request_header=self._get_request_header_pb(),
+            event_request_header=hangouts_pb2.EventRequestHeader(
+                conversation_id=hangouts_pb2.ConversationID(
+                    id=conversation_id,
+                ),
+                client_generated_id=self.get_client_generated_id(),
+                expected_otr=otr_status,
+            ),
+        )
+        response = hangouts_pb2.RemoveUserResponse()
+        yield from self._pb_request('conversations/removeuser', request,
+                                    response)
+        return response
 
     @asyncio.coroutine
     def deleteconversation(self, conversation_id):

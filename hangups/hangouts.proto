@@ -161,9 +161,9 @@ enum MembershipChangeType {
 
 message MembershipChange {
     optional MembershipChangeType type = 1;
-    // unknown = 2;
+    // unknown [] = 2;
     repeated UserID participant_ids = 3;
-    // unknown (4) = 4;
+    // leave_reason (4, 2) = 4;
 }
 
 message ConversationRename {
@@ -852,12 +852,13 @@ message QueryPresenceResponse {
 
 message RemoveUserRequest {
     optional RequestHeader request_header = 1;
-    // TODO
+    optional EventRequestHeader event_request_header = 5;
 }
 
 message RemoveUserResponse {
-    // TODO
-
+    optional string some_code = 1;  // crurp (ClientRemoveUserResponseP)
+    optional ResponseHeader response_header = 2;
+    optional Event created_event = 5;
 }
 
 message RenameConversationRequest {
