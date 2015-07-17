@@ -661,25 +661,26 @@ class Client(object):
     def deleteconversation(self, conversation_id):
         """Delete one-to-one conversation.
 
+        One-to-one conversations are "sticky"; they can't actually be deleted.
+        This API clears the event history of the specified conversation up to
+        delete_upper_bound_timestamp, hiding it if no events remain.
+
         conversation_id must be a valid conversation ID.
 
         Raises hangups.NetworkError if the request fails.
         """
-        res = yield from self._request('conversations/deleteconversation', [
-            self._get_request_header(),
-            [conversation_id],
-            # Not sure what timestamp should be there, last time I have tried
-            # it Hangouts client in GMail sent something like now() - 5 hours
-            parsers.to_timestamp(
-                datetime.datetime.now(tz=datetime.timezone.utc)
-            ),
-            None, [],
-        ])
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
+        timestamp = parsers.to_timestamp(
+            datetime.datetime.now(tz=datetime.timezone.utc)
+        )
+        request = hangouts_pb2.DeleteConversationRequest(
+            request_header=self._get_request_header_pb(),
+            conversation_id=hangouts_pb2.ConversationID(id=conversation_id),
+            delete_upper_bound_timestamp=timestamp
+        )
+        response = hangouts_pb2.DeleteConversationResponse()
+        yield from self._pb_request('conversations/deleteconversation',
+                                    request, response)
+        return response
 
     @asyncio.coroutine
     def settyping(self, conversation_id, typing=hangouts_pb2.TYPING_STARTED):

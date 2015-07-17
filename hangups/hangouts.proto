@@ -283,12 +283,6 @@ message EasterEgg {
     optional string message = 1;
 }
 
-message DeleteAction {
-    optional uint64 delete_action_timestamp = 1;
-    optional uint64 delete_upper_bound_timestamp = 2; // TODO: roughly 10 mins before
-    // unknown (1) = 3;
-}
-
 enum BlockState {
     BLOCK_STATE_UNKNOWN = 0;
     BLOCK = 1;
@@ -561,6 +555,17 @@ message MoodState {
     optional MoodSetting mood_setting = 4;
 }
 
+enum DeleteType {
+    DELETE_TYPE_UNKNOWN = 0;
+    DELETE_TYPE_UPPER_BOUND = 1;
+}
+
+message DeleteAction {
+    optional uint64 delete_action_timestamp = 1;
+    optional uint64 delete_upper_bound_timestamp = 2;
+    optional DeleteType delete_type = 3;
+}
+
 // ----------------------------------------------------------------------------
 // State Update and Notifications
 // ----------------------------------------------------------------------------
@@ -742,12 +747,14 @@ message CreateConversationResponse {
 
 message DeleteConversationRequest {
     optional RequestHeader request_header = 1;
-    // TODO
+    optional ConversationID conversation_id = 2;
+    optional uint64 delete_upper_bound_timestamp = 3;
 }
 
 message DeleteConversationResponse {
-    // TODO
-
+    optional string some_code = 1;  // cdcr (ClientDeleteConversationResponse)
+    optional ResponseHeader response_header = 2;
+    optional DeleteAction delete_action = 3;
 }
 
 message EasterEggRequest {
