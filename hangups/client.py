@@ -817,22 +817,16 @@ class Client(object):
 
         Raises hangups.NetworkError if the request fails.
         """
-        body = [
-            self._get_request_header(),
-            [conversation_id],
-            level
-        ]
-        res = yield from self._request(
-            'conversations/setconversationnotificationlevel', body
+        request = hangouts_pb2.SetConversationNotificationLevelRequest(
+            request_header=self._get_request_header_pb(),
+            conversation_id=hangouts_pb2.ConversationID(id=conversation_id),
+            level=level,
         )
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            logger.warning(
-                'setconversationnotificationlevel returned status {}'
-                .format(res_status)
-            )
-            raise exceptions.NetworkError()
+        response = hangouts_pb2.SetConversationNotificationLevelResponse()
+        yield from self._pb_request(
+            'conversations/setconversationnotificationlevel', request, response
+        )
+        return response
 
     @asyncio.coroutine
     def easteregg(self, conversation_id, easteregg):

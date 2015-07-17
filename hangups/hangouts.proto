@@ -927,6 +927,18 @@ message SetConversationLevelResponse {
 
 }
 
+message SetConversationNotificationLevelRequest {
+    optional RequestHeader request_header = 1;
+    optional ConversationID conversation_id = 2;
+    optional NotificationLevel level = 3;
+}
+
+message SetConversationNotificationLevelResponse {
+    optional string some_code = 1;  // cscnlrp (ClientSetConversationNotificationLevelResponseP)
+    optional ResponseHeader response_header = 2;
+    optional uint64 timestamp = 3;
+}
+
 message SetFocusRequest {
     optional RequestHeader request_header = 1;
     optional ConversationID conversation_id = 2;
