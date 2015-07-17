@@ -852,34 +852,25 @@ class Client(object):
 
     @asyncio.coroutine
     def createconversation(self, chat_id_list, force_group=False):
-        """Create new conversation.
+        """Create new one-to-one or group conversation.
 
-        conversation_id must be a valid conversation ID.
-        chat_id_list is list of users which should be invited to conversation
-        (except from yourself).
-
-        New conversation ID is returned as res['conversation']['id']['id']
+        chat_id_list is list of other users to invite to the conversation.
 
         Raises hangups.NetworkError if the request fails.
         """
-        body = [
-            self._get_request_header(),
-            1 if len(chat_id_list) == 1 and not force_group else 2,
-            self.get_client_generated_id(),
-            None,
-            [[str(chat_id), None, None, "unknown", None, []]
-             for chat_id in chat_id_list]
-        ]
-
-        res = yield from self._request('conversations/createconversation',
-                                       body)
-        # can return 200 but still contain an error
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
-        return res
+        is_group = len(chat_id_list) > 1 or force_group
+        request = hangouts_pb2.CreateConversationRequest(
+            request_header=self._get_request_header_pb(),
+            type=hangouts_pb2.GROUP if is_group else hangouts_pb2.ONE_TO_ONE,
+            client_generated_id=self.get_client_generated_id(),
+            name="created by hangups",
+            invitee_id=[hangouts_pb2.InviteeID(gaia_id=chat_id)
+                        for chat_id in chat_id_list],
+        )
+        response = hangouts_pb2.CreateConversationResponse()
+        yield from self._pb_request('conversations/createconversation',
+                                    request, response)
+        return response
 
     @asyncio.coroutine
     def adduser(self, conversation_id, chat_id_list,
