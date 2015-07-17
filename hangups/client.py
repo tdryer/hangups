@@ -882,30 +882,27 @@ class Client(object):
         return res
 
     @asyncio.coroutine
-    def adduser(self, conversation_id, chat_id_list):
-        """Add user to existing conversation.
+    def adduser(self, conversation_id, chat_id_list,
+                otr_status=hangouts_pb2.ON_THE_RECORD):
+        """Add users to an existing group conversation.
 
         conversation_id must be a valid conversation ID.
         chat_id_list is list of users which should be invited to conversation.
 
         Raises hangups.NetworkError if the request fails.
         """
-        body = [
-            self._get_request_header(),
-            None,
-            [[str(chat_id), None, None, "unknown", None, []]
-             for chat_id in chat_id_list],
-            None,
-            [
-                [conversation_id], self.get_client_generated_id(), 2, None, 4
-            ]
-        ]
-
-        res = yield from self._request('conversations/adduser', body)
-        # can return 200 but still contain an error
-        res = json.loads(res.body.decode())
-        res_status = res['response_header']['status']
-        if res_status != 'OK':
-            raise exceptions.NetworkError('Unexpected status: {}'
-                                          .format(res_status))
-        return res
+        request = hangouts_pb2.AddUserRequest(
+            request_header=self._get_request_header_pb(),
+            invitee_id=[hangouts_pb2.InviteeID(gaia_id=chat_id)
+                        for chat_id in chat_id_list],
+            event_request_header=hangouts_pb2.EventRequestHeader(
+                conversation_id=hangouts_pb2.ConversationID(
+                    id=conversation_id,
+                ),
+                client_generated_id=self.get_client_generated_id(),
+                expected_otr=otr_status,
+            ),
+        )
+        response = hangouts_pb2.AddUserResponse()
+        yield from self._pb_request('conversations/adduser', request, response)
+        return response

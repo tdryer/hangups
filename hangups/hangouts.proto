@@ -566,6 +566,11 @@ message DeleteAction {
     optional DeleteType delete_type = 3;
 }
 
+message InviteeID {
+    optional string gaia_id = 1;
+    optional string fallback_name = 4;
+}
+
 // ----------------------------------------------------------------------------
 // State Update and Notifications
 // ----------------------------------------------------------------------------
@@ -727,12 +732,14 @@ message ConversationSpec {
 
 message AddUserRequest {
     optional RequestHeader request_header = 1;
-    // TODO
+    repeated InviteeID invitee_id = 3;
+    optional EventRequestHeader event_request_header = 5;
 }
 
 message AddUserResponse {
-    // TODO
-
+    optional string some_code = 1;  // caurp (ClientAddUserResponseP)
+    optional ResponseHeader response_header = 2;
+    optional Event created_event = 6;
 }
 
 message CreateConversationRequest {
