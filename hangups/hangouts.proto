@@ -983,18 +983,25 @@ message SyncAllNewEventsResponse {
 
 }
 
-message SyncRecentConversationsRequest {
-    optional RequestHeader request_header = 1;
+enum SyncFilter {
+    SYNC_FILTER_UNKNOWN = 0;
+    SYNC_FILTER_INBOX = 1;
+    SYNC_FILTER_ARCHIVED = 2;
     // TODO
 }
 
+message SyncRecentConversationsRequest {
+    optional RequestHeader request_header = 1;
+    optional uint64 max_conversations = 3;
+    optional uint64 max_events_per_conversation = 4;
+    repeated SyncFilter sync_filter = 5;
+}
+
 message SyncRecentConversationsResponse {
-    // TODO
     optional string some_code = 1;  // csrcrp (ClientSyncRecentConversationsResponseP)
     optional ResponseHeader response_header = 2;
     optional uint64 sync_timestamp = 3;
     repeated ConversationState conversation_state = 4;
-
 }
 
 message UpdateWatermarkRequest {

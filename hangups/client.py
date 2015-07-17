@@ -793,11 +793,20 @@ class Client(object):
         Similar to syncallnewevents, but appears to return a limited number of
         conversations (20) rather than all conversations in a given date range.
 
+        Can be used to retrieve archived conversations.
+
         Raises hangups.NetworkError if the request fails.
         """
-        res = yield from self._request('conversations/syncrecentconversations',
-                                       [self._get_request_header()])
-        return json.loads(res.body.decode())
+        request = hangouts_pb2.SyncRecentConversationsRequest(
+            request_header=self._get_request_header_pb(),
+            max_conversations=5,
+            max_events_per_conversation=2,
+            sync_filter=[hangouts_pb2.SYNC_FILTER_INBOX],
+        )
+        response = hangouts_pb2.SyncRecentConversationsResponse()
+        yield from self._pb_request('conversations/syncrecentconversations',
+                                    request, response)
+        return response
 
     @asyncio.coroutine
     def setconversationnotificationlevel(self, conversation_id, level):
