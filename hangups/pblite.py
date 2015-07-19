@@ -1,108 +1,118 @@
-"""pblite encoder and decoder for Protocol Buffer messages.
+"""Decoder and encoder for the pblite format.
 
-pblite (sometimes also known as protojson) is a way of encoding Protocol Buffer
-messages to arrays. Google uses this in Hangouts because JavaScript handles
-arrays better than bytes.
+pblite (sometimes also known as protojson) is a format for serializing Protocol
+Buffers into JavaScript objects. Messages are represented as arrays where the
+tag number of a value is given by its position in the array.
 
 Methods in this module assume encoding/decoding to JavaScript strings is done
-separately.
+separately (see hangups.javascript).
+
+Google's implementation for JavaScript is available in closure-library:
+    https://github.com/google/closure-library/tree/master/closure/goog/proto2
 """
 
 import logging
 
 from google.protobuf.descriptor import FieldDescriptor
-from google.protobuf.message import Message
 
 
 logger = logging.getLogger(__name__)
 
 
-# TODO: document/test error checking
-# TODO: catch oneof violations for encode/decode
-# TODO: reconsider whether passing pb_message to decode makes sense
-
-
-def decode(pb_message, pblite):
-    """Decode pblite to Protocol Buffer message."""
-    assert pblite is not None
-
-    # Reverse-engineering aid
-    known_field_numbers = [field.number for field
-                           in pb_message.DESCRIPTOR.fields]
-    for field_number, _ in enumerate(pblite, start=1):
-        if field_number not in known_field_numbers:
-            value = pblite[field_number - 1]
-            if value is not None:
-                logger.debug(
-                    'Message {} contains unknown field {} with value {}'
-                    .format(pb_message.__class__.__name__, field_number,
-                            repr(value))
-                )
-
-    for field in pb_message.DESCRIPTOR.fields:
+def _decode_field(message, field, value):
+    """Decode optional or required field."""
+    if field.type == FieldDescriptor.TYPE_MESSAGE:
+        decode(getattr(message, field.name), value)
+    else:
         try:
-            value = pblite[field.number - 1]
-        except IndexError:
-            value = None
+            setattr(message, field.name, value)
+        except (ValueError, TypeError) as e:
+            # ValueError: invalid enum value or negative unsigned int value
+            # TypeError: mismatched type
+            logger.warning('Message %r ignoring field %s: %s',
+                           message.__class__.__name__, field.name, e)
+
+
+def _decode_repeated_field(message, field, value_list):
+    """Decode repeated field."""
+    if field.type == FieldDescriptor.TYPE_MESSAGE:
+        for value in value_list:
+            decode(getattr(message, field.name).add(), value)
+    else:
+        try:
+            for value in value_list:
+                getattr(message, field.name).append(value)
+        except (ValueError, TypeError) as e:
+            # ValueError: invalid enum value or negative unsigned int value
+            # TypeError: mismatched type
+            logger.warning('Message %r ignoring repeated field %s: %s',
+                           message.__class__.__name__, field.name, e)
+            # Ignore any values already decoded by clearing list
+            message.ClearField(field.name)
+
+
+def decode(message, pblite):
+    """Decode pblite to Protocol Buffer message.
+
+    This method is permissive of decoding errors and will log them as warnings
+    and continue decoding where possible.
+
+    Args:
+        message: protocol buffer message instance to decode into.
+        pblite: list representing a pblite-serialized message.
+    """
+    if not isinstance(pblite, list):
+        logger.warning('Ignoring invalid message: expected list, got %r',
+                       type(pblite))
+        return
+    for field_number, value in enumerate(pblite, start=1):
         if value is None:
-            pass  # Use default value for field
-        elif field.label == FieldDescriptor.LABEL_REPEATED:
-            if field.type == FieldDescriptor.TYPE_MESSAGE:
-                # value is repeated message
-                for repeated_value in value:
-                    decode(getattr(pb_message, field.name).add(),
-                           repeated_value)
-            else:
-                # value is repeated scalar
-                getattr(pb_message, field.name).extend(value)
+            continue
+        try:
+            field = message.DESCRIPTOR.fields_by_number[field_number]
+        except KeyError:
+            # If the tag number is unknown, log a message to aid
+            # reverse-engineering the missing field in the message.
+            logger.debug('Message %r contains unknown field %s with value %r',
+                         message.__class__.__name__, field_number, value)
+            continue
+        if field.label == FieldDescriptor.LABEL_REPEATED:
+            _decode_repeated_field(message, field, value)
         else:
-            if field.type == FieldDescriptor.TYPE_MESSAGE:
-                # value is optional message
-                decode(getattr(pb_message, field.name), value)
-            else:
-                # value is optional scalar
-                # TODO: handle invalid type here and other places
-                try:
-                    setattr(pb_message, field.name, value)
-                except TypeError as e:
-                    logger.warning(
-                        'Message {} ignoring field {} with invalid type: {}'
-                        .format(pb_message.__class__.__name__, field.name, e)
-                    )
-                except ValueError as e:
-                    logger.warning(
-                        'Message {} ignoring field {} with unknown value: {}'
-                        .format(pb_message.__class__.__name__, field.name,
-                                repr(value))
-                    )
+            _decode_field(message, field, value)
 
 
-def encode(pb):
-    """Encode Protocol Buffer message to pblite."""
-    assert isinstance(pb, Message)
+def encode(message):
+    """Encode Protocol Buffer message to pblite.
+
+    Args:
+        message: protocol buffer message to encode.
+
+    Raises:
+        ValueError: one or more required fields in message are not set.
+
+    Returns:
+        list representing a pblite-serialized message.
+    """
+    if not message.IsInitialized():
+        raise ValueError('Can not encode message: one or more required fields '
+                         'are not set')
     pblite = []
     # ListFields only returns fields that are set, so use this to only encode
     # necessary fields
-    for field_descriptor, field_value in pb.ListFields():
+    for field_descriptor, field_value in message.ListFields():
         if field_descriptor.label == FieldDescriptor.LABEL_REPEATED:
             if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:
-                # value is repeated message
                 encoded_value = [encode(item) for item in field_value]
             else:
-                # value is repeated scalar
                 encoded_value = list(field_value)
         else:
             if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:
-                # value is optional message
                 encoded_value = encode(field_value)
             else:
-                # value is optional scalar
                 encoded_value = field_value
-
-        # add any necessary padding to the list
+        # Add any necessary padding to the list
         required_padding = max(field_descriptor.number - len(pblite), 0)
         pblite.extend([None] * required_padding)
-
         pblite[field_descriptor.number - 1] = encoded_value
-
     return pblite

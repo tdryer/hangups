@@ -19,15 +19,15 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='hangups/test/test_pblite.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n\x1ehangups/test/test_pblite.proto\"[\n\x0b\x45numMessage\x12(\n\ttest_enum\x18\x01 \x01(\x0e\x32\x15.EnumMessage.TestEnum\"\"\n\x08TestEnum\x12\n\n\x06TEST_0\x10\x00\x12\n\n\x06TEST_1\x10\x01\"B\n\x0cOneOfMessage\x12\x0f\n\x05int_1\x18\x01 \x01(\x05H\x00\x12\x0f\n\x05int_2\x18\x02 \x01(\x05H\x00\x42\x10\n\x0eone_of_message\"#\n\x0f\x45mbeddedMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\"\x93\x01\n\x0bTestMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\x12*\n\x10\x65mbedded_message\x18\x02 \x01(\x0b\x32\x10.EmbeddedMessage\x12\x15\n\rtest_int_list\x18\x03 \x03(\x05\x12/\n\x15\x65mbedded_message_list\x18\x04 \x03(\x0b\x32\x10.EmbeddedMessage\"\'\n\x0fRequiredMessage\x12\x14\n\x0crequired_int\x18\x01 \x02(\x05')
+  serialized_pb=_b('\n\x1ehangups/test/test_pblite.proto\"0\n\x13TestRequiredMessage\x12\x19\n\x11test_required_int\x18\x01 \x02(\x05\"\xb7\x03\n\x0bTestMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\x12\x19\n\x11test_repeated_int\x18\x02 \x03(\x05\x12\x13\n\x0btest_string\x18\x03 \x01(\t\x12\x1c\n\x14test_repeated_string\x18\x04 \x03(\t\x12(\n\ttest_enum\x18\x05 \x01(\x0e\x32\x15.TestMessage.TestEnum\x12\x31\n\x12test_repeated_enum\x18\x06 \x03(\x0e\x32\x15.TestMessage.TestEnum\x12;\n\x15test_embedded_message\x18\x07 \x01(\x0b\x32\x1c.TestMessage.EmbeddedMessage\x12\x44\n\x1etest_repeated_embedded_message\x18\x08 \x03(\x0b\x32\x1c.TestMessage.EmbeddedMessage\x1a,\n\x0f\x45mbeddedMessage\x12\x19\n\x11test_embedded_int\x18\x01 \x01(\x05\":\n\x08TestEnum\x12\n\n\x06TEST_0\x10\x00\x12\n\n\x06TEST_1\x10\x01\x12\n\n\x06TEST_2\x10\x02\x12\n\n\x06TEST_3\x10\x03')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
-_ENUMMESSAGE_TESTENUM = _descriptor.EnumDescriptor(
+_TESTMESSAGE_TESTENUM = _descriptor.EnumDescriptor(
   name='TestEnum',
-  full_name='EnumMessage.TestEnum',
+  full_name='TestMessage.TestEnum',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -39,180 +39,32 @@ _ENUMMESSAGE_TESTENUM = _descriptor.EnumDescriptor(
       name='TEST_1', index=1, number=1,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TEST_2', index=2, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TEST_3', index=3, number=3,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=91,
-  serialized_end=125,
+  serialized_start=466,
+  serialized_end=524,
 )
-_sym_db.RegisterEnumDescriptor(_ENUMMESSAGE_TESTENUM)
+_sym_db.RegisterEnumDescriptor(_TESTMESSAGE_TESTENUM)
 
 
-_ENUMMESSAGE = _descriptor.Descriptor(
-  name='EnumMessage',
-  full_name='EnumMessage',
+_TESTREQUIREDMESSAGE = _descriptor.Descriptor(
+  name='TestRequiredMessage',
+  full_name='TestRequiredMessage',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='test_enum', full_name='EnumMessage.test_enum', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _ENUMMESSAGE_TESTENUM,
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=34,
-  serialized_end=125,
-)
-
-
-_ONEOFMESSAGE = _descriptor.Descriptor(
-  name='OneOfMessage',
-  full_name='OneOfMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='int_1', full_name='OneOfMessage.int_1', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='int_2', full_name='OneOfMessage.int_2', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='one_of_message', full_name='OneOfMessage.one_of_message',
-      index=0, containing_type=None, fields=[]),
-  ],
-  serialized_start=127,
-  serialized_end=193,
-)
-
-
-_EMBEDDEDMESSAGE = _descriptor.Descriptor(
-  name='EmbeddedMessage',
-  full_name='EmbeddedMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='test_int', full_name='EmbeddedMessage.test_int', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=195,
-  serialized_end=230,
-)
-
-
-_TESTMESSAGE = _descriptor.Descriptor(
-  name='TestMessage',
-  full_name='TestMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='test_int', full_name='TestMessage.test_int', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='embedded_message', full_name='TestMessage.embedded_message', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='test_int_list', full_name='TestMessage.test_int_list', index=2,
-      number=3, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='embedded_message_list', full_name='TestMessage.embedded_message_list', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=233,
-  serialized_end=380,
-)
-
-
-_REQUIREDMESSAGE = _descriptor.Descriptor(
-  name='RequiredMessage',
-  full_name='RequiredMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='required_int', full_name='RequiredMessage.required_int', index=0,
+      name='test_required_int', full_name='TestRequiredMessage.test_required_int', index=0,
       number=1, type=5, cpp_type=1, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -230,60 +82,151 @@ _REQUIREDMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=382,
-  serialized_end=421,
+  serialized_start=34,
+  serialized_end=82,
 )
 
-_ENUMMESSAGE.fields_by_name['test_enum'].enum_type = _ENUMMESSAGE_TESTENUM
-_ENUMMESSAGE_TESTENUM.containing_type = _ENUMMESSAGE
-_ONEOFMESSAGE.oneofs_by_name['one_of_message'].fields.append(
-  _ONEOFMESSAGE.fields_by_name['int_1'])
-_ONEOFMESSAGE.fields_by_name['int_1'].containing_oneof = _ONEOFMESSAGE.oneofs_by_name['one_of_message']
-_ONEOFMESSAGE.oneofs_by_name['one_of_message'].fields.append(
-  _ONEOFMESSAGE.fields_by_name['int_2'])
-_ONEOFMESSAGE.fields_by_name['int_2'].containing_oneof = _ONEOFMESSAGE.oneofs_by_name['one_of_message']
-_TESTMESSAGE.fields_by_name['embedded_message'].message_type = _EMBEDDEDMESSAGE
-_TESTMESSAGE.fields_by_name['embedded_message_list'].message_type = _EMBEDDEDMESSAGE
-DESCRIPTOR.message_types_by_name['EnumMessage'] = _ENUMMESSAGE
-DESCRIPTOR.message_types_by_name['OneOfMessage'] = _ONEOFMESSAGE
-DESCRIPTOR.message_types_by_name['EmbeddedMessage'] = _EMBEDDEDMESSAGE
+
+_TESTMESSAGE_EMBEDDEDMESSAGE = _descriptor.Descriptor(
+  name='EmbeddedMessage',
+  full_name='TestMessage.EmbeddedMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='test_embedded_int', full_name='TestMessage.EmbeddedMessage.test_embedded_int', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=420,
+  serialized_end=464,
+)
+
+_TESTMESSAGE = _descriptor.Descriptor(
+  name='TestMessage',
+  full_name='TestMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='test_int', full_name='TestMessage.test_int', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='test_repeated_int', full_name='TestMessage.test_repeated_int', index=1,
+      number=2, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='test_string', full_name='TestMessage.test_string', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='test_repeated_string', full_name='TestMessage.test_repeated_string', index=3,
+      number=4, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='test_enum', full_name='TestMessage.test_enum', index=4,
+      number=5, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='test_repeated_enum', full_name='TestMessage.test_repeated_enum', index=5,
+      number=6, type=14, cpp_type=8, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='test_embedded_message', full_name='TestMessage.test_embedded_message', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='test_repeated_embedded_message', full_name='TestMessage.test_repeated_embedded_message', index=7,
+      number=8, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_TESTMESSAGE_EMBEDDEDMESSAGE, ],
+  enum_types=[
+    _TESTMESSAGE_TESTENUM,
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=85,
+  serialized_end=524,
+)
+
+_TESTMESSAGE_EMBEDDEDMESSAGE.containing_type = _TESTMESSAGE
+_TESTMESSAGE.fields_by_name['test_enum'].enum_type = _TESTMESSAGE_TESTENUM
+_TESTMESSAGE.fields_by_name['test_repeated_enum'].enum_type = _TESTMESSAGE_TESTENUM
+_TESTMESSAGE.fields_by_name['test_embedded_message'].message_type = _TESTMESSAGE_EMBEDDEDMESSAGE
+_TESTMESSAGE.fields_by_name['test_repeated_embedded_message'].message_type = _TESTMESSAGE_EMBEDDEDMESSAGE
+_TESTMESSAGE_TESTENUM.containing_type = _TESTMESSAGE
+DESCRIPTOR.message_types_by_name['TestRequiredMessage'] = _TESTREQUIREDMESSAGE
 DESCRIPTOR.message_types_by_name['TestMessage'] = _TESTMESSAGE
-DESCRIPTOR.message_types_by_name['RequiredMessage'] = _REQUIREDMESSAGE
 
-EnumMessage = _reflection.GeneratedProtocolMessageType('EnumMessage', (_message.Message,), dict(
-  DESCRIPTOR = _ENUMMESSAGE,
+TestRequiredMessage = _reflection.GeneratedProtocolMessageType('TestRequiredMessage', (_message.Message,), dict(
+  DESCRIPTOR = _TESTREQUIREDMESSAGE,
   __module__ = 'hangups.test.test_pblite_pb2'
-  # @@protoc_insertion_point(class_scope:EnumMessage)
+  # @@protoc_insertion_point(class_scope:TestRequiredMessage)
   ))
-_sym_db.RegisterMessage(EnumMessage)
-
-OneOfMessage = _reflection.GeneratedProtocolMessageType('OneOfMessage', (_message.Message,), dict(
-  DESCRIPTOR = _ONEOFMESSAGE,
-  __module__ = 'hangups.test.test_pblite_pb2'
-  # @@protoc_insertion_point(class_scope:OneOfMessage)
-  ))
-_sym_db.RegisterMessage(OneOfMessage)
-
-EmbeddedMessage = _reflection.GeneratedProtocolMessageType('EmbeddedMessage', (_message.Message,), dict(
-  DESCRIPTOR = _EMBEDDEDMESSAGE,
-  __module__ = 'hangups.test.test_pblite_pb2'
-  # @@protoc_insertion_point(class_scope:EmbeddedMessage)
-  ))
-_sym_db.RegisterMessage(EmbeddedMessage)
+_sym_db.RegisterMessage(TestRequiredMessage)
 
 TestMessage = _reflection.GeneratedProtocolMessageType('TestMessage', (_message.Message,), dict(
+
+  EmbeddedMessage = _reflection.GeneratedProtocolMessageType('EmbeddedMessage', (_message.Message,), dict(
+    DESCRIPTOR = _TESTMESSAGE_EMBEDDEDMESSAGE,
+    __module__ = 'hangups.test.test_pblite_pb2'
+    # @@protoc_insertion_point(class_scope:TestMessage.EmbeddedMessage)
+    ))
+  ,
   DESCRIPTOR = _TESTMESSAGE,
   __module__ = 'hangups.test.test_pblite_pb2'
   # @@protoc_insertion_point(class_scope:TestMessage)
   ))
 _sym_db.RegisterMessage(TestMessage)
-
-RequiredMessage = _reflection.GeneratedProtocolMessageType('RequiredMessage', (_message.Message,), dict(
-  DESCRIPTOR = _REQUIREDMESSAGE,
-  __module__ = 'hangups.test.test_pblite_pb2'
-  # @@protoc_insertion_point(class_scope:RequiredMessage)
-  ))
-_sym_db.RegisterMessage(RequiredMessage)
+_sym_db.RegisterMessage(TestMessage.EmbeddedMessage)
 
 
 # @@protoc_insertion_point(module_scope)
