@@ -171,8 +171,20 @@ message ConversationRename {
     optional string old_name = 2;
 }
 
-message HangoutEvent {
+enum HangoutEventType {
+    HANGOUT_EVENT_TYPE_UNKNOWN = 0;
+    HANGOUT_EVENT_TYPE_START = 1;
+    HANGOUT_EVENT_TYPE_END = 2;
+    HANGOUT_EVENT_TYPE_JOIN = 3;
+    HANGOUT_EVENT_TYPE_LEAVE = 4;
+    HANGOUT_EVENT_TYPE_COMING_SOON = 5;
+    HANGOUT_EVENT_TYPE_ONGOING = 6;
+}
 
+message HangoutEvent {
+    optional HangoutEventType event_type = 1;
+    repeated UserID participant_id = 2;
+    // unknown 1 = 7;
 }
 
 message OTRModification {
@@ -193,6 +205,20 @@ enum OffTheRecordStatus {
     ON_THE_RECORD = 2;
 }
 
+enum SourceType {
+    SOURCE_TYPE_UNKNOWN = 0;
+}
+
+enum EventType {
+    EVENT_TYPE_UNKNOWN = 0;
+    EVENT_TYPE_REGULAR_CHAT_MESSAGE = 1;
+    EVENT_TYPE_ADD_USER = 4;
+    EVENT_TYPE_REMOVE_USER = 5;
+    EVENT_TYPE_CONVERSATION_RENAME = 6;
+    EVENT_TYPE_HANGOUT = 7;
+    EVENT_TYPE_OTR_MODIFICATION = 9;
+}
+
 message Event {
     // Events are items that become part of a conversation's history.
 
@@ -200,24 +226,22 @@ message Event {
     optional UserID sender_id = 2;
     optional uint64 timestamp = 3;
     optional UserEventState self_event_state = 4;
-    // TODO: probably a oneof in there somewhere
-    // not used? = 5;
-    // always 0? (expiration_timestamp?) = 6;
+    optional SourceType source_type = 6;
+    // TODO: some of these are probably in a oneof
     optional ChatMessage chat_message = 7;
-    // not used? = 8;
     optional MembershipChange membership_change = 9;
     optional ConversationRename conversation_rename = 10;
     optional HangoutEvent hangout_event = 11;
     optional string event_id = 12;
-    optional bool advances_sort_timestamp = 13; // TODO: not sure about type
+    optional uint64 expiration_timestamp = 13;
     optional OTRModification otr_modification = 14;
-    // 0, 1 or None? related to notifications? = 15;
+    optional bool advances_sort_timestamp = 15;
     optional OffTheRecordStatus otr_status = 16;
-    // always 1? (advances_sort_timestamp?) = 17;
+    optional bool persisted = 17;
     // unknown ([1]) = 20;
-    // unknown (1) = 23;
+    optional EventType event_type = 23;
     // unknown timestamp = 24;
-    // something to do with sending messages (['7-H0Z7-BCTg80ySBsfibNV', 4, None, 1435550921815004]) = 26;
+    // unknown sending messages (['7-H0Z7-BCTg80ySBsfibNV', 4, None, 1435550921815004]) = 26;
 }
 
 enum ConversationType {
@@ -511,6 +535,9 @@ message ConfigurationBit {
 enum RichPresenceType {
     RP_TYPE_UNKNOWN = 0;
     RP_IN_CALL_STATE = 1;
+    // unknown = 3;
+    // unknown = 4;
+    // unknown = 5;
     RP_DEVICE = 2;
     RP_LAST_SEEN = 6;
     // TODO
