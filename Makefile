@@ -1,9 +1,21 @@
 # Makefile for compiling Protocol Buffers
 
-all: hangups/test/test_pblite_pb2.py hangups/hangouts_pb2.py
+proto = hangups/hangouts.proto
+proto_py = hangups/hangouts_pb2.py
+proto_doc = docs/proto.rst
+test_proto = hangups/test/test_pblite.proto
+test_proto_py = hangups/test/test_pblite_pb2.py
 
-hangups/test/test_pblite_pb2.py: hangups/test/test_pblite.proto
-	protoc --python_out . hangups/test/test_pblite.proto
+all: $(proto_py) $(test_proto_py) $(proto_doc)
 
-hangups/hangouts_pb2.py: hangups/hangouts.proto
-	protoc --python_out . hangups/hangouts.proto
+$(proto_py): $(proto)
+	protoc --python_out . $(proto)
+
+$(test_proto_py): $(test_proto)
+	protoc --python_out . $(test_proto)
+
+$(proto_doc): $(proto)
+	python docs/generate_proto_docs.py $(proto) > $(proto_doc)
+
+clean:
+	rm -f $(proto_py) $(proto_doc) $(test_proto_py)

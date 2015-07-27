@@ -14,10 +14,11 @@ major exception that "Client" prefixes have been removed.
 // proto2 is required because we need to be able to serialize default values:
 syntax = "proto2";
 
+// Describes which Hangouts client is active.
 enum ActiveClientState {
-    NO_ACTIVE_CLIENT = 0;
-    IS_ACTIVE_CLIENT = 1;
-    OTHER_CLIENT_IS_ACTIVE = 2;
+    NO_ACTIVE_CLIENT = 0;       // No client is active.
+    IS_ACTIVE_CLIENT = 1;       // This client is active.
+    OTHER_CLIENT_IS_ACTIVE = 2; // Another client is active.
 }
 
 message DoNotDisturbSetting {
@@ -427,7 +428,7 @@ message ResponseHeader {
 
     optional ResponseStatus status = 1;
     optional string error_description = 2;
-    // unknown string = 3;
+    optional string debug_url = 3;
     optional string request_trace_id = 4;
     optional uint64 current_server_time = 5;
 }

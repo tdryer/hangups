@@ -32,6 +32,7 @@ Documentation Contents
 
    installation
    user_guide
+   protocol
 
 Indices and tables
 ------------------
