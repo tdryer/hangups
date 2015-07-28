@@ -369,6 +369,11 @@ class Client(object):
                    for cookie in required_cookies}
         params = {
             'key': self._api_key,
+            # The alt parameter specifies the "alternative representation
+            # type"; the desired response format. Valid options are: 'json'
+            # (JSON), 'protojson' (pblite), and 'proto' (binary Protocol
+            # Buffer). 'proto' requires an extra header
+            # 'X-Goog-Encode-Response-If-Executable: base64'.
             'alt': 'json' if use_json else 'protojson',
         }
         res = yield from http_utils.fetch(
