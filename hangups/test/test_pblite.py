@@ -128,6 +128,18 @@ def test_decode_repeated_message_wrong_type():
         ],
     )
 
+def test_decode_ignore_first_item():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        'ignored',
+        1,
+        [3, 4],
+    ], ignore_first_item=True)
+    assert message == test_pblite_pb2.TestMessage(
+        test_int=1,
+        test_repeated_int=[3, 4],
+    )
+
 ###############################################################################
 # pblite.encode
 ###############################################################################

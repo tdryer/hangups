@@ -49,7 +49,7 @@ def _parse_payload(payload):
         # This is a BatchUpdate containing StateUpdate messages
         batch_update = hangouts_pb2.BatchUpdate()
         # TODO: error handling
-        pblite.decode(batch_update, payload)
+        pblite.decode(batch_update, payload, ignore_first_item=True)
         for state_update in batch_update.state_update:
             logger.debug('Received StateUpdate:\n%s', state_update)
             yield state_update

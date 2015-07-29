@@ -238,7 +238,8 @@ class Client(object):
 
         # Parse GetSelfInfoResponse
         get_self_info_response = hangouts_pb2.GetSelfInfoResponse()
-        pblite.decode(get_self_info_response, data_dict['ds:20'][0])
+        pblite.decode(get_self_info_response, data_dict['ds:20'][0],
+                      ignore_first_item=True)
         logger.debug('Parsed GetSelfInfoResponse:\n%s', get_self_info_response)
 
         # Parse SyncRecentConversationsResponse
@@ -246,7 +247,7 @@ class Client(object):
             hangouts_pb2.SyncRecentConversationsResponse()
         )
         pblite.decode(sync_recent_conversations_response,
-                      data_dict['ds:19'][0])
+                      data_dict['ds:19'][0], ignore_first_item=True)
         # TODO: this might be too much data to log
         #logger.debug('Parsed SyncRecentConversationsResponse:\n%s',
         #             sync_recent_conversations_response)
@@ -255,7 +256,8 @@ class Client(object):
         # This gives us entities for the user's contacts, but doesn't include
         # users not in contacts.
         get_suggested_entities_response = hangouts_pb2.GetSuggestedEntitiesResponse()
-        pblite.decode(get_suggested_entities_response, data_dict['ds:21'][0])
+        pblite.decode(get_suggested_entities_response, data_dict['ds:21'][0],
+                     ignore_first_item=True)
         logger.debug('Parsed GetSuggestedEntitiesResponse:\n%s', get_suggested_entities_response)
 
         # Combine entities from all responses into one list of all the known
@@ -330,7 +332,8 @@ class Client(object):
         content_type = 'application/json+protobuf'
         res = yield from self._base_request(url, content_type, body,
                                             use_json=False)
-        pblite.decode(response_pb, javascript.loads(res.body.decode()))
+        pblite.decode(response_pb, javascript.loads(res.body.decode()),
+                      ignore_first_item=True)
         logger.debug(response_pb)
         status = response_pb.response_header.status
         description = response_pb.response_header.error_description

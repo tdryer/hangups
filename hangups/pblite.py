@@ -51,20 +51,30 @@ def _decode_repeated_field(message, field, value_list):
             message.ClearField(field.name)
 
 
-def decode(message, pblite):
+def decode(message, pblite, ignore_first_item=False):
     """Decode pblite to Protocol Buffer message.
 
     This method is permissive of decoding errors and will log them as warnings
     and continue decoding where possible.
 
+    The first element of the outer pblite list must often be ignored using the
+    ignore_first_item parameter because it contains an abbreviation of the name
+    of the protobuf message (eg.  cscmrp for ClientSendChatMessageResponseP)
+    that's not part of the protobuf.
+
     Args:
         message: protocol buffer message instance to decode into.
         pblite: list representing a pblite-serialized message.
+        ignore_first_item: If True, ignore the item at index 0 in the pblite
+            list, making the item at index 1 correspond to field 1 in the
+            message.
     """
     if not isinstance(pblite, list):
         logger.warning('Ignoring invalid message: expected list, got %r',
                        type(pblite))
         return
+    if ignore_first_item:
+        pblite = pblite[1:]
     for field_number, value in enumerate(pblite, start=1):
         if value is None:
             continue

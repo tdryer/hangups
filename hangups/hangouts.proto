@@ -658,6 +658,13 @@ message InviteeID {
   optional string fallback_name = 4;
 }
 
+enum SyncFilter {
+  SYNC_FILTER_UNKNOWN = 0;
+  SYNC_FILTER_INBOX = 1;
+  SYNC_FILTER_ARCHIVED = 2;
+  // TODO
+}
+
 // ----------------------------------------------------------------------------
 // State Update and Notifications
 // ----------------------------------------------------------------------------
@@ -711,8 +718,7 @@ message StateUpdateHeader {
 message BatchUpdate {
   // List of StateUpdate messages pushed together in a batch.
 
-  optional string some_code = 1; // "cbu" (ClientBatchUpdate)
-  repeated StateUpdate state_update = 2;
+  repeated StateUpdate state_update = 1;
 }
 
 message EventNotification {
@@ -824,9 +830,8 @@ message AddUserRequest {
 }
 
 message AddUserResponse {
-  optional string some_code = 1;  // caurp (ClientAddUserResponseP)
-  optional ResponseHeader response_header = 2;
-  optional Event created_event = 6;
+  optional ResponseHeader response_header = 1;
+  optional Event created_event = 5;
 }
 
 message CreateConversationRequest {
@@ -838,10 +843,9 @@ message CreateConversationRequest {
 }
 
 message CreateConversationResponse {
-  optional string some_code = 1;  // cccrp (ClientCreateConversationResponseP)
-  optional ResponseHeader response_header = 2;
-  optional Conversation conversation = 3;
-  optional bool new_conversation_created = 8;
+  optional ResponseHeader response_header = 1;
+  optional Conversation conversation = 2;
+  optional bool new_conversation_created = 7;
 }
 
 message DeleteConversationRequest {
@@ -851,9 +855,8 @@ message DeleteConversationRequest {
 }
 
 message DeleteConversationResponse {
-  optional string some_code = 1;  // cdcr (ClientDeleteConversationResponse)
-  optional ResponseHeader response_header = 2;
-  optional DeleteAction delete_action = 3;
+  optional ResponseHeader response_header = 1;
+  optional DeleteAction delete_action = 2;
 }
 
 message EasterEggRequest {
@@ -863,9 +866,8 @@ message EasterEggRequest {
 }
 
 message EasterEggResponse {
-  optional string some_code = 1;  // ceerp (ClientEasterEggResponseP)
-  optional ResponseHeader response_header = 2;
-  optional uint64 timestamp = 3;
+  optional ResponseHeader response_header = 1;
+  optional uint64 timestamp = 2;
 }
 
 message GetConversationRequest {
@@ -879,9 +881,8 @@ message GetConversationRequest {
 }
 
 message GetConversationResponse {
-  optional string some_code = 1;  // cgcrp (ClientGetConversationResponseP)
-  optional ResponseHeader response_header = 2;
-  optional ConversationState conversation_state = 3;
+  optional ResponseHeader response_header = 1;
+  optional ConversationState conversation_state = 2;
   // TODO
 }
 
@@ -894,9 +895,8 @@ message GetEntityByIdRequest {
 
 message GetEntityByIdResponse {
   // TODO
-  optional string some_code = 1;  // cgebirp (ClientGetEntityByIdResponseP)
-  optional ResponseHeader response_header = 2;
-  repeated Entity entity = 3;
+  optional ResponseHeader response_header = 1;
+  repeated Entity entity = 2;
 }
 
 message GetSuggestedEntitiesRequest {
@@ -906,11 +906,10 @@ message GetSuggestedEntitiesRequest {
 
 message GetSuggestedEntitiesResponse {
   // TODO
-  optional string some_code = 1;  // cgserp (ClientGetSuggestedEntitiesResponseP)
-  optional ResponseHeader response_header = 2;
-  repeated Entity entity = 3;
+  optional ResponseHeader response_header = 1;
+  repeated Entity entity = 2;
 
-  // more entities in 5, 6, 7, 8, 9, 10
+  // more entities in 4, 5, 6, 7, 8, 9
   // TODO: wtf is with these extra entities
   message EntityGroup {
     // unknown 0 = 1;
@@ -920,12 +919,12 @@ message GetSuggestedEntitiesResponse {
       optional Entity entity = 1;
     }
   }
-  optional EntityGroup group1 = 5;
-  optional EntityGroup group2 = 6;
-  optional EntityGroup group3 = 7;
-  optional EntityGroup group4 = 8;
-  optional EntityGroup group5 = 9;
-  optional EntityGroup group6 = 10;
+  optional EntityGroup group1 = 4;
+  optional EntityGroup group2 = 5;
+  optional EntityGroup group3 = 6;
+  optional EntityGroup group4 = 7;
+  optional EntityGroup group5 = 8;
+  optional EntityGroup group6 = 9;
 }
 
 message GetSelfInfoRequest {
@@ -934,11 +933,10 @@ message GetSelfInfoRequest {
 }
 
 message GetSelfInfoResponse {
-  optional string some_code = 1;  // cgsirp (ClientGetSelfInfoResponseP)
-  optional ResponseHeader response_header = 2;
-  optional Entity self_entity = 3;
-  repeated ConfigurationBit configuration_bit = 9;
-  optional RichPresenceState rich_presence_state = 13;
+  optional ResponseHeader response_header = 1;
+  optional Entity self_entity = 2;
+  repeated ConfigurationBit configuration_bit = 8;
+  optional RichPresenceState rich_presence_state = 12;
   // TODO: all kinds of extra stuff
 }
 
@@ -949,9 +947,8 @@ message QueryPresenceRequest {
 }
 
 message QueryPresenceResponse {
-  optional string some_code = 1;  // cqprp (ClientQueryPresenceResponseP)
-  optional ResponseHeader response_header = 2;
-  repeated PresenceResult presence_result = 3;
+  optional ResponseHeader response_header = 1;
+  repeated PresenceResult presence_result = 2;
 }
 
 message RemoveUserRequest {
@@ -960,9 +957,8 @@ message RemoveUserRequest {
 }
 
 message RemoveUserResponse {
-  optional string some_code = 1;  // crurp (ClientRemoveUserResponseP)
-  optional ResponseHeader response_header = 2;
-  optional Event created_event = 5;
+  optional ResponseHeader response_header = 1;
+  optional Event created_event = 4;
 }
 
 message RenameConversationRequest {
@@ -974,9 +970,8 @@ message RenameConversationRequest {
 
 message RenameConversationResponse {
   // TODO
-  optional string some_code = 1;  // crcrp (ClientRenameConversationResponseP)
-  optional ResponseHeader response_header = 2;
-  optional Event created_event = 5; // TODO: use json to check name?
+  optional ResponseHeader response_header = 1;
+  optional Event created_event = 4; // TODO: use json to check name?
 }
 
 message SearchEntitiesRequest {
@@ -986,9 +981,8 @@ message SearchEntitiesRequest {
 }
 
 message SearchEntitiesResponse {
-  optional string some_code = 1;  // cserp (ClientSearchEntitiesResponseP)
-  optional ResponseHeader response_header = 2;
-  repeated Entity entity = 3;
+  optional ResponseHeader response_header = 1;
+  repeated Entity entity = 2;
 }
 
 message SendChatMessageRequest {
@@ -1000,10 +994,9 @@ message SendChatMessageRequest {
 }
 
 message SendChatMessageResponse {
-  optional string some_code = 1;  // cscmrp (ClientSendChatMessageResponseP)
-  optional ResponseHeader response_header = 2;
-  // unknown [] = 5;
-  optional Event created_event = 7;
+  optional ResponseHeader response_header = 1;
+  // unknown [] = 4;
+  optional Event created_event = 6;
 }
 
 message SetActiveClientRequest {
@@ -1018,8 +1011,7 @@ message SetActiveClientRequest {
 }
 
 message SetActiveClientResponse {
-  optional string some_code = 1;  // csacrp (ClientSetActiveClientResponseP)
-  optional ResponseHeader response_header = 2;
+  optional ResponseHeader response_header = 1;
 }
 
 message SetConversationLevelRequest {
@@ -1038,9 +1030,8 @@ message SetConversationNotificationLevelRequest {
 }
 
 message SetConversationNotificationLevelResponse {
-  optional string some_code = 1;  // cscnlrp (ClientSetConversationNotificationLevelResponseP)
-  optional ResponseHeader response_header = 2;
-  optional uint64 timestamp = 3;
+  optional ResponseHeader response_header = 1;
+  optional uint64 timestamp = 2;
 }
 
 message SetFocusRequest {
@@ -1051,9 +1042,8 @@ message SetFocusRequest {
 }
 
 message SetFocusResponse {
-  optional string some_code = 1;  // csfrp (ClientSetFocusResponseP)
-  optional ResponseHeader response_header = 2;
-  optional uint64 timestamp = 3;
+  optional ResponseHeader response_header = 1;
+  optional uint64 timestamp = 2;
 }
 
 message SetPresenceRequest {
@@ -1066,8 +1056,7 @@ message SetPresenceRequest {
 }
 
 message SetPresenceResponse {
-  optional string some_code = 1;  // csprp (ClientSetPresenceResponseP)
-  optional ResponseHeader response_header = 2;
+  optional ResponseHeader response_header = 1;
 }
 
 message SetTypingRequest {
@@ -1077,9 +1066,8 @@ message SetTypingRequest {
 }
 
 message SetTypingResponse {
-  optional string some_code = 1;  // cstrp (ClientSetTypingResponseP)
-  optional ResponseHeader response_header = 2;
-  optional uint64 timestamp = 3;
+  optional ResponseHeader response_header = 1;
+  optional uint64 timestamp = 2;
 }
 
 message SyncAllNewEventsRequest {
@@ -1091,17 +1079,9 @@ message SyncAllNewEventsRequest {
 }
 
 message SyncAllNewEventsResponse {
-  optional string some_code = 1;  // csanerp (ClientSyncAllNewEventsResponseP)
-  optional ResponseHeader response_header = 2;
-  optional uint64 sync_timestamp = 3;
-  repeated ConversationState conversation_state = 4;
-  // TODO
-}
-
-enum SyncFilter {
-  SYNC_FILTER_UNKNOWN = 0;
-  SYNC_FILTER_INBOX = 1;
-  SYNC_FILTER_ARCHIVED = 2;
+  optional ResponseHeader response_header = 1;
+  optional uint64 sync_timestamp = 2;
+  repeated ConversationState conversation_state = 3;
   // TODO
 }
 
@@ -1113,10 +1093,9 @@ message SyncRecentConversationsRequest {
 }
 
 message SyncRecentConversationsResponse {
-  optional string some_code = 1;  // csrcrp (ClientSyncRecentConversationsResponseP)
-  optional ResponseHeader response_header = 2;
-  optional uint64 sync_timestamp = 3;
-  repeated ConversationState conversation_state = 4;
+  optional ResponseHeader response_header = 1;
+  optional uint64 sync_timestamp = 2;
+  repeated ConversationState conversation_state = 3;
 }
 
 message UpdateWatermarkRequest {
@@ -1126,6 +1105,5 @@ message UpdateWatermarkRequest {
 }
 
 message UpdateWatermarkResponse {
-  optional string some_code = 1;  // cuwrp (ClientUpdateWatermarkResponseP)
-  optional ResponseHeader response_header = 2;
+  optional ResponseHeader response_header = 1;
 }

@@ -624,12 +624,11 @@ Field                         Type                    Label    Description
 BatchUpdate
 -----------
 
-==================== ============== ======== =========================
-Field                Type           Label    Description              
-==================== ============== ======== =========================
-:code:`some_code`    string         optional "cbu" (ClientBatchUpdate)
-:code:`state_update` `StateUpdate`_ repeated                          
-==================== ============== ======== =========================
+==================== ============== ======== ===========
+Field                Type           Label    Description
+==================== ============== ======== ===========
+:code:`state_update` `StateUpdate`_ repeated            
+==================== ============== ======== ===========
 
 EventNotification
 -----------------
@@ -800,13 +799,12 @@ Field                        Type                  Label    Description
 AddUserResponse
 ---------------
 
-======================= ================= ======== ==============================
-Field                   Type              Label    Description                   
-======================= ================= ======== ==============================
-:code:`some_code`       string            optional caurp (ClientAddUserResponseP)
-:code:`response_header` `ResponseHeader`_ optional                               
-:code:`created_event`   `Event`_          optional                               
-======================= ================= ======== ==============================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`created_event`   `Event`_          optional            
+======================= ================= ======== ===========
 
 CreateConversationRequest
 -------------------------
@@ -824,14 +822,13 @@ Field                       Type                Label    Description
 CreateConversationResponse
 --------------------------
 
-================================ ================= ======== =========================================
-Field                            Type              Label    Description                              
-================================ ================= ======== =========================================
-:code:`some_code`                string            optional cccrp (ClientCreateConversationResponseP)
-:code:`response_header`          `ResponseHeader`_ optional                                          
-:code:`conversation`             `Conversation`_   optional                                          
-:code:`new_conversation_created` bool              optional                                          
-================================ ================= ======== =========================================
+================================ ================= ======== ===========
+Field                            Type              Label    Description
+================================ ================= ======== ===========
+:code:`response_header`          `ResponseHeader`_ optional            
+:code:`conversation`             `Conversation`_   optional            
+:code:`new_conversation_created` bool              optional            
+================================ ================= ======== ===========
 
 DeleteConversationRequest
 -------------------------
@@ -847,13 +844,12 @@ Field                                Type              Label    Description
 DeleteConversationResponse
 --------------------------
 
-======================= ================= ======== =======================================
-Field                   Type              Label    Description                            
-======================= ================= ======== =======================================
-:code:`some_code`       string            optional cdcr (ClientDeleteConversationResponse)
-:code:`response_header` `ResponseHeader`_ optional                                        
-:code:`delete_action`   `DeleteAction`_   optional                                        
-======================= ================= ======== =======================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`delete_action`   `DeleteAction`_   optional            
+======================= ================= ======== ===========
 
 EasterEggRequest
 ----------------
@@ -869,13 +865,12 @@ Field                   Type              Label    Description
 EasterEggResponse
 -----------------
 
-======================= ================= ======== ================================
-Field                   Type              Label    Description                     
-======================= ================= ======== ================================
-:code:`some_code`       string            optional ceerp (ClientEasterEggResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                 
-:code:`timestamp`       uint64            optional                                 
-======================= ================= ======== ================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`timestamp`       uint64            optional            
+======================= ================= ======== ===========
 
 GetConversationRequest
 ----------------------
@@ -893,13 +888,12 @@ Field                               Type                      Label    Descripti
 GetConversationResponse
 -----------------------
 
-========================== ==================== ======== ======================================
-Field                      Type                 Label    Description                           
-========================== ==================== ======== ======================================
-:code:`some_code`          string               optional cgcrp (ClientGetConversationResponseP)
-:code:`response_header`    `ResponseHeader`_    optional                                       
-:code:`conversation_state` `ConversationState`_ optional TODO                                  
-========================== ==================== ======== ======================================
+========================== ==================== ======== ===========
+Field                      Type                 Label    Description
+========================== ==================== ======== ===========
+:code:`response_header`    `ResponseHeader`_    optional            
+:code:`conversation_state` `ConversationState`_ optional TODO       
+========================== ==================== ======== ===========
 
 GetEntityByIdRequest
 --------------------
@@ -917,8 +911,7 @@ GetEntityByIdResponse
 ======================= ================= ======== ===========
 Field                   Type              Label    Description
 ======================= ================= ======== ===========
-:code:`some_code`       string            optional TODO       
-:code:`response_header` `ResponseHeader`_ optional            
+:code:`response_header` `ResponseHeader`_ optional TODO       
 :code:`entity`          `Entity`_         repeated            
 ======================= ================= ======== ===========
 
@@ -937,8 +930,7 @@ GetSuggestedEntitiesResponse
 ======================= =========================================== ======== ===========
 Field                   Type                                        Label    Description
 ======================= =========================================== ======== ===========
-:code:`some_code`       string                                      optional TODO       
-:code:`response_header` `ResponseHeader`_                           optional            
+:code:`response_header` `ResponseHeader`_                           optional TODO       
 :code:`entity`          `Entity`_                                   repeated            
 :code:`group1`          `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
 :code:`group2`          `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
@@ -951,7 +943,7 @@ Field                   Type                                        Label    Des
 GetSuggestedEntitiesResponse.EntityGroup
 ----------------------------------------
 
-more entities in 5, 6, 7, 8, 9, 10
+more entities in 4, 5, 6, 7, 8, 9
 TODO: wtf is with these extra entities
 
 ============== =============================================== ======== ================================
@@ -981,15 +973,14 @@ Field                  Type             Label    Description
 GetSelfInfoResponse
 -------------------
 
-=========================== ==================== ======== ===================================
-Field                       Type                 Label    Description                        
-=========================== ==================== ======== ===================================
-:code:`some_code`           string               optional cgsirp (ClientGetSelfInfoResponseP)
-:code:`response_header`     `ResponseHeader`_    optional                                    
-:code:`self_entity`         `Entity`_            optional                                    
-:code:`configuration_bit`   `ConfigurationBit`_  repeated                                    
-:code:`rich_presence_state` `RichPresenceState`_ optional TODO: all kinds of extra stuff     
-=========================== ==================== ======== ===================================
+=========================== ==================== ======== ==============================
+Field                       Type                 Label    Description                   
+=========================== ==================== ======== ==============================
+:code:`response_header`     `ResponseHeader`_    optional                               
+:code:`self_entity`         `Entity`_            optional                               
+:code:`configuration_bit`   `ConfigurationBit`_  repeated                               
+:code:`rich_presence_state` `RichPresenceState`_ optional TODO: all kinds of extra stuff
+=========================== ==================== ======== ==============================
 
 QueryPresenceRequest
 --------------------
@@ -1005,13 +996,12 @@ Field                  Type             Label    Description
 QueryPresenceResponse
 ---------------------
 
-======================= ================= ======== ====================================
-Field                   Type              Label    Description                         
-======================= ================= ======== ====================================
-:code:`some_code`       string            optional cqprp (ClientQueryPresenceResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                     
-:code:`presence_result` `PresenceResult`_ repeated                                     
-======================= ================= ======== ====================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`presence_result` `PresenceResult`_ repeated            
+======================= ================= ======== ===========
 
 RemoveUserRequest
 -----------------
@@ -1026,13 +1016,12 @@ Field                        Type                  Label    Description
 RemoveUserResponse
 ------------------
 
-======================= ================= ======== =================================
-Field                   Type              Label    Description                      
-======================= ================= ======== =================================
-:code:`some_code`       string            optional crurp (ClientRemoveUserResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                  
-:code:`created_event`   `Event`_          optional                                  
-======================= ================= ======== =================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`created_event`   `Event`_          optional            
+======================= ================= ======== ===========
 
 RenameConversationRequest
 -------------------------
@@ -1051,8 +1040,7 @@ RenameConversationResponse
 ======================= ================= ======== =============================
 Field                   Type              Label    Description                  
 ======================= ================= ======== =============================
-:code:`some_code`       string            optional TODO                         
-:code:`response_header` `ResponseHeader`_ optional                              
+:code:`response_header` `ResponseHeader`_ optional TODO                         
 :code:`created_event`   `Event`_          optional TODO: use json to check name?
 ======================= ================= ======== =============================
 
@@ -1070,13 +1058,12 @@ Field                  Type             Label    Description
 SearchEntitiesResponse
 ----------------------
 
-======================= ================= ======== =====================================
-Field                   Type              Label    Description                          
-======================= ================= ======== =====================================
-:code:`some_code`       string            optional cserp (ClientSearchEntitiesResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                      
-:code:`entity`          `Entity`_         repeated                                      
-======================= ================= ======== =====================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`entity`          `Entity`_         repeated            
+======================= ================= ======== ===========
 
 SendChatMessageRequest
 ----------------------
@@ -1093,13 +1080,12 @@ Field                        Type                  Label    Description
 SendChatMessageResponse
 -----------------------
 
-======================= ================= ======== =======================================
-Field                   Type              Label    Description                            
-======================= ================= ======== =======================================
-:code:`some_code`       string            optional cscmrp (ClientSendChatMessageResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                        
-:code:`created_event`   `Event`_          optional unknown [] = 5;                        
-======================= ================= ======== =======================================
+======================= ================= ======== ===============
+Field                   Type              Label    Description    
+======================= ================= ======== ===============
+:code:`response_header` `ResponseHeader`_ optional                
+:code:`created_event`   `Event`_          optional unknown [] = 4;
+======================= ================= ======== ===============
 
 SetActiveClientRequest
 ----------------------
@@ -1116,12 +1102,11 @@ Field                  Type             Label    Description
 SetActiveClientResponse
 -----------------------
 
-======================= ================= ======== =======================================
-Field                   Type              Label    Description                            
-======================= ================= ======== =======================================
-:code:`some_code`       string            optional csacrp (ClientSetActiveClientResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                        
-======================= ================= ======== =======================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+======================= ================= ======== ===========
 
 SetConversationLevelRequest
 ---------------------------
@@ -1154,13 +1139,12 @@ Field                   Type                 Label    Description
 SetConversationNotificationLevelResponse
 ----------------------------------------
 
-======================= ================= ======== =========================================================
-Field                   Type              Label    Description                                              
-======================= ================= ======== =========================================================
-:code:`some_code`       string            optional cscnlrp (ClientSetConversationNotificationLevelResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                                          
-:code:`timestamp`       uint64            optional                                                          
-======================= ================= ======== =========================================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`timestamp`       uint64            optional            
+======================= ================= ======== ===========
 
 SetFocusRequest
 ---------------
@@ -1177,13 +1161,12 @@ Field                   Type              Label    Description
 SetFocusResponse
 ----------------
 
-======================= ================= ======== ===============================
-Field                   Type              Label    Description                    
-======================= ================= ======== ===============================
-:code:`some_code`       string            optional csfrp (ClientSetFocusResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                
-:code:`timestamp`       uint64            optional                                
-======================= ================= ======== ===============================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`timestamp`       uint64            optional            
+======================= ================= ======== ===========
 
 SetPresenceRequest
 ------------------
@@ -1201,12 +1184,11 @@ Field                          Type                    Label    Description
 SetPresenceResponse
 -------------------
 
-======================= ================= ======== ==================================
-Field                   Type              Label    Description                       
-======================= ================= ======== ==================================
-:code:`some_code`       string            optional csprp (ClientSetPresenceResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                   
-======================= ================= ======== ==================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+======================= ================= ======== ===========
 
 SetTypingRequest
 ----------------
@@ -1222,13 +1204,12 @@ Field                   Type              Label    Description
 SetTypingResponse
 -----------------
 
-======================= ================= ======== ================================
-Field                   Type              Label    Description                     
-======================= ================= ======== ================================
-:code:`some_code`       string            optional cstrp (ClientSetTypingResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                 
-:code:`timestamp`       uint64            optional                                 
-======================= ================= ======== ================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+:code:`timestamp`       uint64            optional            
+======================= ================= ======== ===========
 
 SyncAllNewEventsRequest
 -----------------------
@@ -1244,14 +1225,13 @@ Field                           Type             Label    Description
 SyncAllNewEventsResponse
 ------------------------
 
-========================== ==================== ======== =========================================
-Field                      Type                 Label    Description                              
-========================== ==================== ======== =========================================
-:code:`some_code`          string               optional csanerp (ClientSyncAllNewEventsResponseP)
-:code:`response_header`    `ResponseHeader`_    optional                                          
-:code:`sync_timestamp`     uint64               optional                                          
-:code:`conversation_state` `ConversationState`_ repeated TODO                                     
-========================== ==================== ======== =========================================
+========================== ==================== ======== ===========
+Field                      Type                 Label    Description
+========================== ==================== ======== ===========
+:code:`response_header`    `ResponseHeader`_    optional            
+:code:`sync_timestamp`     uint64               optional            
+:code:`conversation_state` `ConversationState`_ repeated TODO       
+========================== ==================== ======== ===========
 
 SyncRecentConversationsRequest
 ------------------------------
@@ -1268,14 +1248,13 @@ Field                               Type             Label    Description
 SyncRecentConversationsResponse
 -------------------------------
 
-========================== ==================== ======== ===============================================
-Field                      Type                 Label    Description                                    
-========================== ==================== ======== ===============================================
-:code:`some_code`          string               optional csrcrp (ClientSyncRecentConversationsResponseP)
-:code:`response_header`    `ResponseHeader`_    optional                                                
-:code:`sync_timestamp`     uint64               optional                                                
-:code:`conversation_state` `ConversationState`_ repeated                                                
-========================== ==================== ======== ===============================================
+========================== ==================== ======== ===========
+Field                      Type                 Label    Description
+========================== ==================== ======== ===========
+:code:`response_header`    `ResponseHeader`_    optional            
+:code:`sync_timestamp`     uint64               optional            
+:code:`conversation_state` `ConversationState`_ repeated            
+========================== ==================== ======== ===========
 
 UpdateWatermarkRequest
 ----------------------
@@ -1291,12 +1270,11 @@ Field                       Type              Label    Description
 UpdateWatermarkResponse
 -----------------------
 
-======================= ================= ======== ======================================
-Field                   Type              Label    Description                           
-======================= ================= ======== ======================================
-:code:`some_code`       string            optional cuwrp (ClientUpdateWatermarkResponseP)
-:code:`response_header` `ResponseHeader`_ optional                                       
-======================= ================= ======== ======================================
+======================= ================= ======== ===========
+Field                   Type              Label    Description
+======================= ================= ======== ===========
+:code:`response_header` `ResponseHeader`_ optional            
+======================= ================= ======== ===========
 
 ActiveClientState
 -----------------
