@@ -156,11 +156,13 @@ def generate_message_doc(message_descriptor, locations, path, name_prefix=''):
             type_str = make_link(field.type_name.lstrip('.'))
         row_tuples.append((
             make_code(field.name),
+            field.number,
             type_str,
             LABEL_TO_STR[field.label],
             textwrap.fill(get_comment_from_location(field_location), INFINITY),
         ))
-    print_table(('Field', 'Type', 'Label', 'Description'), row_tuples)
+    print_table(('Field', 'Number', 'Type', 'Label', 'Description'),
+                row_tuples)
 
     # Generate nested messages
     nested_types = enumerate(message_descriptor.nested_type)
