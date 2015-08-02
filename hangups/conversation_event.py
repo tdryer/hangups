@@ -141,24 +141,21 @@ class ChatMessageEvent(ConversationEvent):
             raw_attachments = []
         attachments = []
         for attachment in raw_attachments:
-            if attachment.embed_item.type == [249]:  # PLUS_PHOTO
-                # Try to parse an image message. Image messages contain no
-                # message segments, and thus have no automatic textual
-                # fallback.
-                try:
-                    attachments.append(
-                        attachment.embed_item.data['27639957'][0][3]
-                    )
-                except (KeyError, TypeError, IndexError):
-                    logger.warning(
-                        'Failed to parse PLUS_PHOTO attachment: {}'
-                        .format(attachment)
-                    )
-            elif attachment.embed_item.type == [340, 335, 0]:
-                pass  # Google Maps URL that's already in the text.
-            else:
-                logger.warning('Ignoring unknown chat message attachment: {}'
-                               .format(attachment))
+            for embed_item_type in attachment.embed_item.type:
+                known_types = [
+                    hangouts_pb2.ITEM_TYPE_PLUS_PHOTO,
+                    hangouts_pb2.ITEM_TYPE_PLACE_V2,
+                    hangouts_pb2.ITEM_TYPE_PLACE,
+                    hangouts_pb2.ITEM_TYPE_THING,
+                ]
+                if embed_item_type not in known_types:
+                    logger.warning('Received chat message attachment with '
+                                   'unknown embed type: %r', embed_item_type)
+
+            if attachment.embed_item.HasField('plus_photo'):
+                attachments.append(
+                    attachment.embed_item.plus_photo.thumbnail.image_url
+                )
         return attachments
 
 

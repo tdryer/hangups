@@ -11,6 +11,7 @@ Google's implementation for JavaScript is available in closure-library:
     https://github.com/google/closure-library/tree/master/closure/goog/proto2
 """
 
+import itertools
 import logging
 
 from google.protobuf.descriptor import FieldDescriptor
@@ -75,7 +76,18 @@ def decode(message, pblite, ignore_first_item=False):
         return
     if ignore_first_item:
         pblite = pblite[1:]
-    for field_number, value in enumerate(pblite, start=1):
+    # If the last item of the list is a dict, use it as additional field/value
+    # mappings. This seems to be an optimization added for dealing with really
+    # high field numbers.
+    if len(pblite) > 0 and isinstance(pblite[-1], dict):
+        extra_fields = {int(field_number): value for field_number, value
+                        in pblite[-1].items()}
+        pblite = pblite[:-1]
+    else:
+        extra_fields = {}
+    fields_values = itertools.chain(enumerate(pblite, start=1),
+                                    extra_fields.items())
+    for field_number, value in fields_values:
         if value is None:
             continue
         try:

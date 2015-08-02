@@ -140,6 +140,21 @@ def test_decode_ignore_first_item():
         test_repeated_int=[3, 4],
     )
 
+def test_decode_dict():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        1,
+        {
+            '7': [2],
+        },
+    ])
+    assert message == test_pblite_pb2.TestMessage(
+        test_int=1,
+        test_embedded_message=test_pblite_pb2.TestMessage.EmbeddedMessage(
+            test_embedded_int=2,
+        ),
+    )
+
 ###############################################################################
 # pblite.encode
 ###############################################################################

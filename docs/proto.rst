@@ -137,17 +137,66 @@ Field              Number Type           Label    Description
 :code:`link_data`  4      `LinkData`_    optional                                                              
 ================== ====== ============== ======== =============================================================
 
+PlusPhoto
+---------
+
+Google Plus photo that can be embedded in a chat message.
+
+============================ ====== ====================== ======== =============================
+Field                        Number Type                   Label    Description                  
+============================ ====== ====================== ======== =============================
+:code:`thumbnail`            1      `PlusPhoto.Thumbnail`_ optional Thumbnail.                   
+:code:`owner_obfuscated_id`  2      string                 optional Owner obfuscated ID.         
+:code:`album_id`             3      string                 optional Album ID.                    
+:code:`photo_id`             4      string                 optional Photo ID.                    
+:code:`url`                  6      string                 optional URL of full-sized image.     
+:code:`original_content_url` 10     string                 optional URL of image thumbnail.      
+:code:`media_type`           13     `PlusPhoto.MediaType`_ optional The media type.              
+:code:`stream_id`            14     string                 repeated List of stream ID parameters.
+============================ ====== ====================== ======== =============================
+
+PlusPhoto.Thumbnail
+-------------------
+
+Metadata for displaying an image thumbnail.
+
+================= ====== ====== ======== =========================================================================
+Field             Number Type   Label    Description                                                              
+================= ====== ====== ======== =========================================================================
+:code:`url`       1      string optional URL to navigate to when thumbnail is selected (a Google Plus album page).
+:code:`image_url` 4      string optional URL of thumbnail image.                                                  
+:code:`width_px`  10     uint64 optional Image width in pixels.                                                   
+:code:`height_px` 11     uint64 optional Image height in pixels.                                                  
+================= ====== ====== ======== =========================================================================
+
+PlusPhoto.MediaType
+-------------------
+
+Media type.
+
+========================== ====== ===========
+Name                       Number Description
+========================== ====== ===========
+:code:`MEDIA_TYPE_UNKNOWN` 0                 
+:code:`MEDIA_TYPE_PHOTO`   1                 
+========================== ====== ===========
+
 EmbedItem
 ---------
 
-============ ====== ====== ======== =============================
-Field        Number Type   Label    Description                  
-============ ====== ====== ======== =============================
-:code:`type` 1      uint64 repeated 249 (PLUS_PHOTO), 340, 335, 0
-============ ====== ====== ======== =============================
+An item of some type embedded in a chat message.
+
+================== ======== ============ ======== ============================================
+Field              Number   Type         Label    Description                                 
+================== ======== ============ ======== ============================================
+:code:`type`       1        `ItemType`_  repeated List of embedded item types in this message.
+:code:`plus_photo` 27639957 `PlusPhoto`_ optional Embedded Google Plus photo.                 
+================== ======== ============ ======== ============================================
 
 Attachment
 ----------
+
+An attachment for a chat message.
 
 ================== ====== ============ ======== ===========
 Field              Number Type         Label    Description
@@ -157,6 +206,8 @@ Field              Number Type         Label    Description
 
 MessageContent
 --------------
+
+Chat message content.
 
 ================== ====== ============= ======== ===========
 Field              Number Type          Label    Description
@@ -219,26 +270,28 @@ Field                  Number Type                  Label    Description
 Event
 -----
 
-=============================== ====== ===================== ======== ===========================================
-Field                           Number Type                  Label    Description                                
-=============================== ====== ===================== ======== ===========================================
-:code:`conversation_id`         1      `ConversationID`_     optional                                            
-:code:`sender_id`               2      `UserID`_             optional                                            
-:code:`timestamp`               3      uint64                optional                                            
-:code:`self_event_state`        4      `UserEventState`_     optional                                            
-:code:`source_type`             6      `SourceType`_         optional                                            
-:code:`chat_message`            7      `ChatMessage`_        optional TODO: some of these are probably in a oneof
-:code:`membership_change`       9      `MembershipChange`_   optional                                            
-:code:`conversation_rename`     10     `ConversationRename`_ optional                                            
-:code:`hangout_event`           11     `HangoutEvent`_       optional                                            
-:code:`event_id`                12     string                optional                                            
-:code:`expiration_timestamp`    13     uint64                optional                                            
-:code:`otr_modification`        14     `OTRModification`_    optional                                            
-:code:`advances_sort_timestamp` 15     bool                  optional                                            
-:code:`otr_status`              16     `OffTheRecordStatus`_ optional                                            
-:code:`persisted`               17     bool                  optional                                            
-:code:`event_type`              23     `EventType`_          optional unknown ([1]) = 20;                        
-=============================== ====== ===================== ======== ===========================================
+Event that becomes part of a conversation's history.
+
+=============================== ====== ===================== ======== ===========
+Field                           Number Type                  Label    Description
+=============================== ====== ===================== ======== ===========
+:code:`conversation_id`         1      `ConversationID`_     optional            
+:code:`sender_id`               2      `UserID`_             optional            
+:code:`timestamp`               3      uint64                optional            
+:code:`self_event_state`        4      `UserEventState`_     optional            
+:code:`source_type`             6      `SourceType`_         optional            
+:code:`chat_message`            7      `ChatMessage`_        optional            
+:code:`membership_change`       9      `MembershipChange`_   optional            
+:code:`conversation_rename`     10     `ConversationRename`_ optional            
+:code:`hangout_event`           11     `HangoutEvent`_       optional            
+:code:`event_id`                12     string                optional            
+:code:`expiration_timestamp`    13     uint64                optional            
+:code:`otr_modification`        14     `OTRModification`_    optional            
+:code:`advances_sort_timestamp` 15     bool                  optional            
+:code:`otr_status`              16     `OffTheRecordStatus`_ optional            
+:code:`persisted`               17     bool                  optional            
+:code:`event_type`              23     `EventType`_          optional            
+=============================== ====== ===================== ======== ===========
 
 UserReadState
 -------------
@@ -301,18 +354,20 @@ Field                    Number Type               Label    Description
 Conversation
 ------------
 
-=============================== ====== ============================== ======== =====================================
-Field                           Number Type                           Label    Description                          
-=============================== ====== ============================== ======== =====================================
-:code:`conversation_id`         1      `ConversationID`_              optional                                      
-:code:`type`                    2      `ConversationType`_            optional                                      
-:code:`name`                    3      string                         optional                                      
-:code:`self_conversation_state` 4      `UserConversationState`_       optional                                      
-:code:`read_state`              8      `UserReadState`_               repeated                                      
-:code:`otr_status`              10     `OffTheRecordStatus`_          optional unknown (0) = 9;                     
-:code:`current_participant`     13     `UserID`_                      repeated unknown (1) = 11;                    
-:code:`participant_data`        14     `ConversationParticipantData`_ repeated unknown ([1]) = 18; unknown (0) = 19;
-=============================== ====== ============================== ======== =====================================
+A conversation between two or more users.
+
+=============================== ====== ============================== ======== ===========
+Field                           Number Type                           Label    Description
+=============================== ====== ============================== ======== ===========
+:code:`conversation_id`         1      `ConversationID`_              optional            
+:code:`type`                    2      `ConversationType`_            optional            
+:code:`name`                    3      string                         optional            
+:code:`self_conversation_state` 4      `UserConversationState`_       optional            
+:code:`read_state`              8      `UserReadState`_               repeated            
+:code:`otr_status`              10     `OffTheRecordStatus`_          optional            
+:code:`current_participant`     13     `UserID`_                      repeated            
+:code:`participant_data`        14     `ConversationParticipantData`_ repeated            
+=============================== ====== ============================== ======== ===========
 
 EasterEgg
 ---------
@@ -404,12 +459,14 @@ Field                       Number Type              Label    Description
 Entity
 ------
 
-================== ====== =================== ======== ==============
-Field              Number Type                Label    Description   
-================== ====== =================== ======== ==============
-:code:`id`         9      `UserID`_           optional presence? = 8;
-:code:`properties` 10     `EntityProperties`_ optional TODO          
-================== ====== =================== ======== ==============
+A user that can participate in conversations.
+
+================== ====== =================== ======== ===========
+Field              Number Type                Label    Description
+================== ====== =================== ======== ===========
+:code:`id`         9      `UserID`_           optional            
+:code:`properties` 10     `EntityProperties`_ optional            
+================== ====== =================== ======== ===========
 
 EntityProperties
 ----------------
@@ -444,13 +501,13 @@ Field                            Number Type                      Label    Descr
 EventContinuationToken
 ----------------------
 
-================================== ====== ====== ======== ===========
-Field                              Number Type   Label    Description
-================================== ====== ====== ======== ===========
-:code:`event_id`                   1      string optional            
-:code:`storage_continuation_token` 2      string optional            
-:code:`event_timestamp`            3      uint64 optional            
-================================== ====== ====== ======== ===========
+================================== ====== ====== ======== ========================================================
+Field                              Number Type   Label    Description                                             
+================================== ====== ====== ======== ========================================================
+:code:`event_id`                   1      string optional                                                         
+:code:`storage_continuation_token` 2      string optional TODO: this should be bytes, and pblite base64-encodes it
+:code:`event_timestamp`            3      uint64 optional                                                         
+================================== ====== ====== ======== ========================================================
 
 EntityLookupSpec
 ----------------
@@ -588,41 +645,50 @@ Field                 Number Type   Label    Description
 StateUpdate
 -----------
 
-================================================ ====== =============================================== ======== ===================================================================================================================================
-Field                                            Number Type                                            Label    Description                                                                                                                        
-================================================ ====== =============================================== ======== ===================================================================================================================================
-:code:`state_update_header`                      1      `StateUpdateHeader`_                            optional                                                                                                                                    
-:code:`conversation`                             13     `Conversation`_                                 optional only gets sent when the state of the conversation changes TODO: seems like this should be a notification, but it's not in the oneof
-:code:`event_notification`                       3      `EventNotification`_                            optional UnimplementedMessage conversation_notification = 2; // always null?                                                                
-:code:`focus_notification`                       4      `SetFocusNotification`_                         optional                                                                                                                                    
-:code:`typing_notification`                      5      `SetTypingNotification`_                        optional                                                                                                                                    
-:code:`notification_level_notification`          6      `SetConversationNotificationLevelNotification`_ optional                                                                                                                                    
-:code:`reply_to_invite_notification`             7      `ReplyToInviteNotification`_                    optional                                                                                                                                    
-:code:`watermark_notification`                   8      `WatermarkNotification`_                        optional                                                                                                                                    
-:code:`view_modification`                        11     `ConversationViewModification`_                 optional UnimplementedMessage unknown_1 = 9; UnimplementedMessage settings_notification = 10;  TODO: should be named as a notification?     
-:code:`easter_egg_notification`                  12     `EasterEggNotification`_                        optional                                                                                                                                    
-:code:`self_presence_notification`               14     `SelfPresenceNotification`_                     optional                                                                                                                                    
-:code:`delete_notification`                      15     `DeleteActionNotification`_                     optional                                                                                                                                    
-:code:`presence_notification`                    16     `PresenceNotification`_                         optional                                                                                                                                    
-:code:`block_notification`                       17     `BlockNotification`_                            optional                                                                                                                                    
-:code:`notification_setting_notification`        19     `SetNotificationSettingNotification`_           optional UnimplementedMessage invitation_watermark_notification = 18;                                                                       
-:code:`rich_presence_enabled_state_notification` 20     `RichPresenceEnabledStateNotification`_         optional                                                                                                                                    
-================================================ ====== =============================================== ======== ===================================================================================================================================
+Pushed from the server to the client to notify it of state changes. Includes
+exactly one type of notification, and optionally updates the attributes of a
+conversation.
+
+================================================ ====== =============================================== ======== ====================================================================================
+Field                                            Number Type                                            Label    Description                                                                         
+================================================ ====== =============================================== ======== ====================================================================================
+:code:`state_update_header`                      1      `StateUpdateHeader`_                            optional                                                                                     
+:code:`conversation`                             13     `Conversation`_                                 optional If set, includes conversation attributes that have been updated by the notification.
+:code:`event_notification`                       3      `EventNotification`_                            optional                                                                                     
+:code:`focus_notification`                       4      `SetFocusNotification`_                         optional                                                                                     
+:code:`typing_notification`                      5      `SetTypingNotification`_                        optional                                                                                     
+:code:`notification_level_notification`          6      `SetConversationNotificationLevelNotification`_ optional                                                                                     
+:code:`reply_to_invite_notification`             7      `ReplyToInviteNotification`_                    optional                                                                                     
+:code:`watermark_notification`                   8      `WatermarkNotification`_                        optional                                                                                     
+:code:`view_modification`                        11     `ConversationViewModification`_                 optional TODO: rename to ViewModificationNotification?                                       
+:code:`easter_egg_notification`                  12     `EasterEggNotification`_                        optional                                                                                     
+:code:`self_presence_notification`               14     `SelfPresenceNotification`_                     optional                                                                                     
+:code:`delete_notification`                      15     `DeleteActionNotification`_                     optional                                                                                     
+:code:`presence_notification`                    16     `PresenceNotification`_                         optional                                                                                     
+:code:`block_notification`                       17     `BlockNotification`_                            optional                                                                                     
+:code:`notification_setting_notification`        19     `SetNotificationSettingNotification`_           optional                                                                                     
+:code:`rich_presence_enabled_state_notification` 20     `RichPresenceEnabledStateNotification`_         optional                                                                                     
+================================================ ====== =============================================== ======== ====================================================================================
 
 StateUpdateHeader
 -----------------
 
-============================= ====== ======================= ======== ================================================================================================================
-Field                         Number Type                    Label    Description                                                                                                     
-============================= ====== ======================= ======== ================================================================================================================
-:code:`active_client_state`   1      `ActiveClientState`_    optional TODO                                                                                                            
-:code:`request_trace_id`      3      string                  optional unknown = 2                                                                                                     
-:code:`notification_settings` 4      `NotificationSettings`_ optional                                                                                                                 
-:code:`current_server_time`   5      uint64                  optional archive settings? ([1]) = 6 unknown = 7 optional ID of the client causing the update (3767219427742586121) ? = 8
-============================= ====== ======================= ======== ================================================================================================================
+Header for StateUpdate messages.
+
+============================= ====== ======================= ======== ===========
+Field                         Number Type                    Label    Description
+============================= ====== ======================= ======== ===========
+:code:`active_client_state`   1      `ActiveClientState`_    optional            
+:code:`request_trace_id`      3      string                  optional            
+:code:`notification_settings` 4      `NotificationSettings`_ optional            
+:code:`current_server_time`   5      uint64                  optional            
+============================= ====== ======================= ======== ===========
 
 BatchUpdate
 -----------
+
+List of StateUpdate messages to allow pushing multiple notifications from
+the server to the client simultaneously.
 
 ==================== ====== ============== ======== ===========
 Field                Number Type           Label    Description
@@ -1357,6 +1423,20 @@ Name               Number Description
 :code:`LINK`       2                 
 ================== ====== ===========
 
+ItemType
+--------
+
+A type of embedded item.
+
+============================ ====== ==================
+Name                         Number Description       
+============================ ====== ==================
+:code:`ITEM_TYPE_THING`      0                        
+:code:`ITEM_TYPE_PLUS_PHOTO` 249    Google Plus photo.
+:code:`ITEM_TYPE_PLACE_V2`   340                      
+:code:`ITEM_TYPE_PLACE`      335                      
+============================ ====== ==================
+
 MembershipChangeType
 --------------------
 
@@ -1576,45 +1656,48 @@ Name                         Number Description
 ConfigurationBitType
 --------------------
 
-========================================= ====== ==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
-Name                                      Number Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-========================================= ====== ==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN`    0      TODO RICH_PRESENCE_ACTIVITY_PROMO_SHOWN RICH_PRESENCE_DEVICE_PROMO_SHOWN RICH_PRESENCE_LAST_SEEN_DESKTOP_PROMO_SHOWN RICH_PRESENCE_LAST_SEEN_MOBILE_PROMO_SHOWN RICH_PRESENCE_IN_CALL_STATE_PROMO_SHOWN RICH_PRESENCE_MOOD_PROMO_SHOWN GV_SMS_INTEGRATION_PROMO_SHOWN RICH_PRESENCE_LAST_SEEN_DESKTOP_PROMPT_SHOWN BUSINESS_FEATURES_ENABLED BUSINESS_FEATURES_PROMO_DISMISSED CONVERSATION_INVITE_SETTINGS_SET_TO_CUSTOM REPORT_ABUSE_NOTICE_ACKNOWLEDGED PHONE_VERIFICATION_MOBILE_PROMPT_SHOWN HANGOUT_P2P_NOTICE_ACKNOWLEDGED HANGOUT_P2P_ENABLED INVITE_NOTIFICATIONS_ENABLED DESKTOP_AUTO_EMOJI_CONVERSION_ENABLED ALLOWED_FOR_DOMAIN GMAIL_CHAT_ARCHIVE_ENABLED QUASAR_MARKETING_PROMO_DISMISSED GPLUS_SIGNUP_PROMO_DISMISSED GPLUS_UPGRADE_ALLOWED_FOR_DOMAIN CHAT_WITH_CIRCLES_ACCEPTED CHAT_WITH_CIRCLES_PROMO_DISMISSED PHOTO_SERVICE_REGISTERED GV_SMS_INTEGRATION_ENABLED CAN_OPT_INTO_GV_SMS_INTEGRATION BUSINESS_FEATURES_ELIGIBLE CAN_USE_GV_CALLER_ID_FEATURE
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_1`  1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_2`  2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_3`  3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_4`  4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_5`  5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_6`  6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_7`  7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_8`  8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_9`  9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_10` 10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_11` 11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_12` 12                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_13` 13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_14` 14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_15` 15                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_16` 16                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_17` 17                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_18` 18                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_19` 19                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_20` 20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_21` 21                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_22` 22                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_23` 23                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_24` 24                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_25` 25                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_26` 26                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_27` 27                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_28` 28                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_29` 29                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_30` 30                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_31` 31                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_32` 32                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_33` 33                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_34` 34                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-========================================= ====== ==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+A type of binary configuration option.
+
+========================================= ====== ===========
+Name                                      Number Description
+========================================= ====== ===========
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN`    0                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_1`  1                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_2`  2                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_3`  3                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_4`  4                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_5`  5                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_6`  6                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_7`  7                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_8`  8                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_9`  9                 
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_10` 10                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_11` 11                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_12` 12                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_13` 13                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_14` 14                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_15` 15                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_16` 16                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_17` 17                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_18` 18                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_19` 19                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_20` 20                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_21` 21                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_22` 22                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_23` 23                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_24` 24                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_25` 25                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_26` 26                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_27` 27                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_28` 28                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_29` 29                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_30` 30                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_31` 31                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_32` 32                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_33` 33                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_34` 34                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_35` 35                
+========================================= ====== ===========
 
 RichPresenceType
 ----------------

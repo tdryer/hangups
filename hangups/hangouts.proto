@@ -133,16 +133,78 @@ message Segment {
   optional LinkData link_data = 4;
 }
 
-message EmbedItem {
-  repeated uint64 type = 1; // 249 (PLUS_PHOTO), 340, 335, 0
-  // TODO: this could be a problem
-  // data (can be a dict)
+// A type of embedded item.
+enum ItemType {
+
+  ITEM_TYPE_THING = 0;
+  // Google Plus photo.
+  ITEM_TYPE_PLUS_PHOTO = 249;
+  ITEM_TYPE_PLACE_V2 = 340;
+  ITEM_TYPE_PLACE = 335;
 }
 
+// Google Plus photo that can be embedded in a chat message.
+message PlusPhoto {
+
+  // Metadata for displaying an image thumbnail.
+  message Thumbnail {
+
+    // URL to navigate to when thumbnail is selected (a Google Plus album
+    // page).
+    optional string url = 1;
+    // URL of thumbnail image.
+    optional string image_url = 4;
+    // Image width in pixels.
+    optional uint64 width_px = 10;
+    // Image height in pixels.
+    optional uint64 height_px = 11;
+  }
+
+  // Media type.
+  enum MediaType {
+    MEDIA_TYPE_UNKNOWN = 0;
+    MEDIA_TYPE_PHOTO = 1;
+  }
+
+  // Thumbnail.
+  optional Thumbnail thumbnail = 1;
+  // Owner obfuscated ID.
+  optional string owner_obfuscated_id = 2;
+  // Album ID.
+  optional string album_id = 3;
+  // Photo ID.
+  optional string photo_id = 4;
+  // URL of full-sized image.
+  optional string url = 6;
+  // URL of image thumbnail.
+  optional string original_content_url = 10;
+  // The media type.
+  optional MediaType media_type = 13;
+  // List of stream ID parameters.
+  repeated string stream_id = 14;
+
+}
+
+// An item of some type embedded in a chat message.
+message EmbedItem {
+
+  // List of embedded item types in this message.
+  repeated ItemType type = 1;
+
+  // Embedded Google Plus photo.
+  optional PlusPhoto plus_photo = 27639957;
+
+  // TODO:
+  // 35825640 (maps)
+  // 39748951 (maps)
+}
+
+// An attachment for a chat message.
 message Attachment {
   optional EmbedItem embed_item = 1;
 }
 
+// Chat message content.
 message MessageContent {
   repeated Segment segment = 1;
   repeated Attachment attachment = 2;
@@ -219,15 +281,16 @@ enum EventType {
   EVENT_TYPE_OTR_MODIFICATION = 9;
 }
 
+// Event that becomes part of a conversation's history.
 message Event {
-  // Events are items that become part of a conversation's history.
-
   optional ConversationID conversation_id = 1;
   optional UserID sender_id = 2;
   optional uint64 timestamp = 3;
   optional UserEventState self_event_state = 4;
   optional SourceType source_type = 6;
+
   // TODO: some of these are probably in a oneof
+
   optional ChatMessage chat_message = 7;
   optional MembershipChange membership_change = 9;
   optional ConversationRename conversation_rename = 10;
@@ -238,8 +301,11 @@ message Event {
   optional bool advances_sort_timestamp = 15;
   optional OffTheRecordStatus otr_status = 16;
   optional bool persisted = 17;
+
   // unknown ([1]) = 20;
+
   optional EventType event_type = 23;
+
   // unknown timestamp = 24;
   // unknown sending messages (['7-H0Z7-BCTg80ySBsfibNV', 4, None, 1435550921815004]) = 26;
 }
@@ -309,17 +375,23 @@ message ConversationParticipantData {
   // unknown (2, 3) = 6
 }
 
+// A conversation between two or more users.
 message Conversation {
   optional ConversationID conversation_id = 1;
   optional ConversationType type = 2;
   optional string name = 3;
   optional UserConversationState self_conversation_state = 4;
   repeated UserReadState read_state = 8;
+
   // unknown (0) = 9;
+
   optional OffTheRecordStatus otr_status = 10;
+
   // unknown (1) = 11;
+
   repeated UserID current_participant = 13;
   repeated ConversationParticipantData participant_data = 14;
+
   // unknown ([1]) = 18;
   // unknown (0) = 19;
 }
@@ -432,11 +504,14 @@ message ResponseHeader {
   optional uint64 current_server_time = 5;
 }
 
+// A user that can participate in conversations.
 message Entity {
+
+  // TODO
   // presence? = 8;
+
   optional UserID id = 9;
   optional EntityProperties properties = 10;
-  // TODO
 }
 
 message EntityProperties {
@@ -487,6 +562,7 @@ message EventContinuationToken {
   // conversation. Specifying event_timestamp is sufficient.
 
   optional string event_id = 1;
+  // TODO: this should be bytes, and pblite base64-encodes it
   optional string storage_continuation_token = 2;
   optional uint64 event_timestamp = 3;
 }
@@ -496,7 +572,9 @@ message EntityLookupSpec {
   // TODO
 }
 
+// A type of binary configuration option.
 enum ConfigurationBitType {
+
   // TODO
   // RICH_PRESENCE_ACTIVITY_PROMO_SHOWN
   // RICH_PRESENCE_DEVICE_PROMO_SHOWN
@@ -527,6 +605,7 @@ enum ConfigurationBitType {
   // CAN_OPT_INTO_GV_SMS_INTEGRATION
   // BUSINESS_FEATURES_ELIGIBLE
   // CAN_USE_GV_CALLER_ID_FEATURE
+
   CONFIGURATION_BIT_TYPE_UNKNOWN = 0;
   CONFIGURATION_BIT_TYPE_UNKNOWN_1 = 1;
   CONFIGURATION_BIT_TYPE_UNKNOWN_2 = 2;
@@ -562,6 +641,7 @@ enum ConfigurationBitType {
   CONFIGURATION_BIT_TYPE_UNKNOWN_32 = 32;
   CONFIGURATION_BIT_TYPE_UNKNOWN_33 = 33;
   CONFIGURATION_BIT_TYPE_UNKNOWN_34 = 34;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_35 = 35;
 }
 
 message ConfigurationBit {
@@ -669,55 +749,66 @@ enum SyncFilter {
 // State Update and Notifications
 // ----------------------------------------------------------------------------
 
+// Pushed from the server to the client to notify it of state changes. Includes
+// exactly one type of notification, and optionally updates the attributes of a
+// conversation.
 message StateUpdate {
-  // StateUpdate messages are pushed from the server to the client to notify
-  // it of state changes. Each StateUpdate includes one type of notification,
-  // and optionally includes a Conversation containing changes to that
-  // conversation.
 
   optional StateUpdateHeader state_update_header = 1;
-  // only gets sent when the state of the conversation changes
-  // TODO: seems like this should be a notification, but it's not in the oneof
+
+  // If set, includes conversation attributes that have been updated by the
+  // notification.
   optional Conversation conversation = 13;
-  // TODO: need to confirm this is a oneof
+
   oneof state_update {
+
     //UnimplementedMessage conversation_notification = 2; // always null?
+
     EventNotification event_notification = 3;
     SetFocusNotification focus_notification = 4;
     SetTypingNotification typing_notification = 5;
     SetConversationNotificationLevelNotification notification_level_notification = 6;
     ReplyToInviteNotification reply_to_invite_notification = 7;
     WatermarkNotification watermark_notification = 8;
+
     //UnimplementedMessage unknown_1 = 9;
     //UnimplementedMessage settings_notification = 10;
-    // TODO: should be named as a notification?
+
+    // TODO: rename to ViewModificationNotification?
     ConversationViewModification view_modification = 11;
     EasterEggNotification easter_egg_notification = 12;
     SelfPresenceNotification self_presence_notification = 14;
     DeleteActionNotification delete_notification = 15;
     PresenceNotification presence_notification = 16;
     BlockNotification block_notification = 17;
+
     //UnimplementedMessage invitation_watermark_notification = 18;
+
     SetNotificationSettingNotification notification_setting_notification = 19;
     RichPresenceEnabledStateNotification rich_presence_enabled_state_notification = 20;
   }
 }
 
+// Header for StateUpdate messages.
 message StateUpdateHeader {
   // TODO
+
   optional ActiveClientState active_client_state = 1;
+
   // unknown = 2
+
   optional string request_trace_id = 3;
   optional NotificationSettings notification_settings = 4;
   optional uint64 current_server_time = 5;
+
   // archive settings? ([1]) = 6
   // unknown = 7
   // optional ID of the client causing the update (3767219427742586121) ? = 8
 }
 
+// List of StateUpdate messages to allow pushing multiple notifications from
+// the server to the client simultaneously.
 message BatchUpdate {
-  // List of StateUpdate messages pushed together in a batch.
-
   repeated StateUpdate state_update = 1;
 }
 
