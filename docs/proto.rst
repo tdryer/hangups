@@ -45,13 +45,16 @@ Field           Number Type   Label    Description
 DeviceStatus
 ------------
 
-================ ====== ==== ======== =============================
-Field            Number Type Label    Description                  
-================ ====== ==== ======== =============================
-:code:`unknown1` 1      bool optional TODO: desktop, mobile, tablet
-:code:`unknown2` 2      bool optional                              
-:code:`unknown3` 3      bool optional                              
-================ ====== ==== ======== =============================
+Indicates whether Hangouts is active (running in the foreground) on
+different types of devices.
+
+=============== ====== ==== ======== ======================================
+Field           Number Type Label    Description                           
+=============== ====== ==== ======== ======================================
+:code:`mobile`  1      bool optional True if a mobile phone is active.     
+:code:`desktop` 2      bool optional True if a desktop or laptop is active.
+:code:`tablet`  3      bool optional True if a tablet is active.           
+=============== ====== ==== ======== ======================================
 
 Presence
 --------
