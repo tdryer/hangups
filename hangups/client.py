@@ -473,7 +473,7 @@ class Client(object):
                 segment=segments_pb,
             ),
             event_request_header=hangouts_pb2.EventRequestHeader(
-                conversation_id=hangouts_pb2.ConversationID(
+                conversation_id=hangouts_pb2.ConversationId(
                     id=conversation_id,
                 ),
                 client_generated_id=self.get_client_generated_id(),
@@ -517,7 +517,7 @@ class Client(object):
         """
         request = hangouts_pb2.UpdateWatermarkRequest(
             request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationID(id=conv_id),
+            conversation_id=hangouts_pb2.ConversationId(id=conv_id),
             last_read_timestamp=parsers.to_timestamp(read_timestamp),
         )
         response = hangouts_pb2.UpdateWatermarkResponse()
@@ -553,7 +553,7 @@ class Client(object):
             request_header=self._get_request_header_pb(),
             new_name=name,
             event_request_header=hangouts_pb2.EventRequestHeader(
-                conversation_id=hangouts_pb2.ConversationID(
+                conversation_id=hangouts_pb2.ConversationId(
                     id=conversation_id,
                 ),
                 client_generated_id=self.get_client_generated_id(),
@@ -578,7 +578,7 @@ class Client(object):
         request = hangouts_pb2.GetConversationRequest(
             request_header=self._get_request_header_pb(),
             conversation_spec=hangouts_pb2.ConversationSpec(
-                conversation_id=hangouts_pb2.ConversationID(id=conversation_id)
+                conversation_id=hangouts_pb2.ConversationId(id=conversation_id)
             ),
             include_event=True,
             max_events_per_conversation=max_events,
@@ -653,7 +653,7 @@ class Client(object):
         request = hangouts_pb2.RemoveUserRequest(
             request_header=self._get_request_header_pb(),
             event_request_header=hangouts_pb2.EventRequestHeader(
-                conversation_id=hangouts_pb2.ConversationID(
+                conversation_id=hangouts_pb2.ConversationId(
                     id=conversation_id,
                 ),
                 client_generated_id=self.get_client_generated_id(),
@@ -682,7 +682,7 @@ class Client(object):
         )
         request = hangouts_pb2.DeleteConversationRequest(
             request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationID(id=conversation_id),
+            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
             delete_upper_bound_timestamp=timestamp
         )
         response = hangouts_pb2.DeleteConversationResponse()
@@ -701,7 +701,7 @@ class Client(object):
         """
         request = hangouts_pb2.SetTypingRequest(
             request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationID(id=conversation_id),
+            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
             type=typing,
         )
         response = hangouts_pb2.SetTypingResponse()
@@ -730,7 +730,7 @@ class Client(object):
         """
         request = hangouts_pb2.SetFocusRequest(
             request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationID(id=conversation_id),
+            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
             type=hangouts_pb2.FOCUSED,
             timeout_secs=20,
         )
@@ -788,7 +788,7 @@ class Client(object):
         """
         request = hangouts_pb2.QueryPresenceRequest(
             request_header=self._get_request_header_pb(),
-            user_id=[hangouts_pb2.UserID(gaia_id=gaia_id)],
+            participant_id=[hangouts_pb2.ParticipantId(gaia_id=gaia_id)],
             field_mask=[hangouts_pb2.FIELD_MASK_REACHABLE,
                         hangouts_pb2.FIELD_MASK_AVAILABLE,
                         hangouts_pb2.FIELD_MASK_DEVICE],
@@ -831,7 +831,7 @@ class Client(object):
         """
         request = hangouts_pb2.SetConversationNotificationLevelRequest(
             request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationID(id=conversation_id),
+            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
             level=level,
         )
         response = hangouts_pb2.SetConversationNotificationLevelResponse()
@@ -850,7 +850,7 @@ class Client(object):
         """
         request = hangouts_pb2.EasterEggRequest(
             request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationID(id=conversation_id),
+            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
             easter_egg=hangouts_pb2.EasterEgg(message=easteregg),
         )
         response = hangouts_pb2.EasterEggResponse()
@@ -895,7 +895,7 @@ class Client(object):
             invitee_id=[hangouts_pb2.InviteeID(gaia_id=chat_id)
                         for chat_id in chat_id_list],
             event_request_header=hangouts_pb2.EventRequestHeader(
-                conversation_id=hangouts_pb2.ConversationID(
+                conversation_id=hangouts_pb2.ConversationId(
                     id=conversation_id,
                 ),
                 client_generated_id=self.get_client_generated_id(),

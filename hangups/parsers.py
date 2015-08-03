@@ -94,8 +94,8 @@ def parse_typing_status_message(p):
     """
     return TypingStatusMessage(
         conv_id=p.conversation_id.id,
-        user_id=user.UserID(chat_id=p.user_id.chat_id,
-                            gaia_id=p.user_id.gaia_id),
+        user_id=user.UserID(chat_id=p.sender_id.chat_id,
+                            gaia_id=p.sender_id.gaia_id),
         timestamp=from_timestamp(p.timestamp),
         status=p.type,
     )
@@ -111,8 +111,8 @@ def parse_watermark_notification(p):
     return WatermarkNotification(
         conv_id=p.conversation_id.id,
         user_id=user.UserID(
-            chat_id=p.participant_id.chat_id,
-            gaia_id=p.participant_id.gaia_id,
+            chat_id=p.sender_id.chat_id,
+            gaia_id=p.sender_id.gaia_id,
         ),
         read_timestamp=from_timestamp(
             p.latest_read_timestamp

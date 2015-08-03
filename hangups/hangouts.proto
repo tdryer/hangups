@@ -42,13 +42,17 @@ enum FocusDevice {
   MOBILE = 300;
 }
 
-message ConversationID {
+// Identifies a conversation.
+message ConversationId {
+  // Unique identifier for a conversation.
   optional string id = 1;
 }
 
-// TODO: should be ParticipantId?
-message UserID {
+// Identifies a user.
+message ParticipantId {
+  // Unique identifier for a user's Google account.
   optional string gaia_id = 1;
+  // Seems to always be the same as gaia_id.
   optional string chat_id = 2;
 }
 
@@ -67,7 +71,7 @@ message Presence {
 }
 
 message PresenceResult {
-  optional UserID user_id = 1;
+  optional ParticipantId user_id = 1;
   optional Presence presence = 2;
 }
 
@@ -103,7 +107,7 @@ enum NotificationLevel {
 }
 
 message UserEventState {
-  optional UserID user_id = 1;
+  optional ParticipantId user_id = 1;
   optional string client_generated_id = 2;
   optional NotificationLevel notification_level = 3;
 }
@@ -224,7 +228,7 @@ enum MembershipChangeType {
 message MembershipChange {
   optional MembershipChangeType type = 1;
   // unknown [] = 2;
-  repeated UserID participant_ids = 3;
+  repeated ParticipantId participant_ids = 3;
   // leave_reason (4, 2) = 4;
 }
 
@@ -245,7 +249,7 @@ enum HangoutEventType {
 
 message HangoutEvent {
   optional HangoutEventType event_type = 1;
-  repeated UserID participant_id = 2;
+  repeated ParticipantId participant_id = 2;
   // unknown 1 = 7;
 }
 
@@ -283,8 +287,8 @@ enum EventType {
 
 // Event that becomes part of a conversation's history.
 message Event {
-  optional ConversationID conversation_id = 1;
-  optional UserID sender_id = 2;
+  optional ConversationId conversation_id = 1;
+  optional ParticipantId sender_id = 2;
   optional uint64 timestamp = 3;
   optional UserEventState self_event_state = 4;
   optional SourceType source_type = 6;
@@ -317,7 +321,7 @@ enum ConversationType {
 }
 
 message UserReadState {
-  optional UserID participant_id = 1;
+  optional ParticipantId participant_id = 1;
   optional uint64 latest_read_timestamp = 2; // TODO: always 0?
 }
 
@@ -354,7 +358,7 @@ message UserConversationState {
    optional ConversationStatus status = 8;
    optional NotificationLevel notification_level = 9;
    repeated ConversationView view = 10;
-   optional UserID inviter_id = 11;
+   optional ParticipantId inviter_id = 11;
    optional uint64 invite_timestamp = 12;
    optional uint64 sort_timestamp = 13;
    optional uint64 active_timestamp = 14; // when conversation became active?
@@ -367,7 +371,7 @@ enum ParticipantType {
 }
 
 message ConversationParticipantData {
-  optional UserID id = 1;
+  optional ParticipantId id = 1;
   optional string fallback_name = 2;
   optional ParticipantType participant_type = 5;
   // TODO: one of these is invitation_status and the other is new_invitation_status
@@ -377,7 +381,7 @@ message ConversationParticipantData {
 
 // A conversation between two or more users.
 message Conversation {
-  optional ConversationID conversation_id = 1;
+  optional ConversationId conversation_id = 1;
   optional ConversationType type = 2;
   optional string name = 3;
   optional UserConversationState self_conversation_state = 4;
@@ -389,7 +393,7 @@ message Conversation {
 
   // unknown (1) = 11;
 
-  repeated UserID current_participant = 13;
+  repeated ParticipantId current_participant = 13;
   repeated ConversationParticipantData participant_data = 14;
 
   // unknown ([1]) = 18;
@@ -407,7 +411,7 @@ enum BlockState {
 }
 
 message BlockStateChange {
-  optional UserID participant_id = 1;
+  optional ParticipantId participant_id = 1;
   optional BlockState new_block_state = 2;
 }
 
@@ -427,7 +431,7 @@ message ExistingMedia {
 }
 
 message EventRequestHeader {
-  optional ConversationID conversation_id = 1;
+  optional ConversationId conversation_id = 1;
   optional uint64 client_generated_id = 2;
   optional OffTheRecordStatus expected_otr = 3;
 }
@@ -510,7 +514,7 @@ message Entity {
   // TODO
   // presence? = 8;
 
-  optional UserID id = 9;
+  optional ParticipantId id = 9;
   optional EntityProperties properties = 10;
 }
 
@@ -551,7 +555,7 @@ enum ProfileType {
 message ConversationState {
   // State of a conversation and recent events.
 
-  optional ConversationID conversation_id = 1;
+  optional ConversationId conversation_id = 1;
   optional Conversation conversation = 2;
   repeated Event event = 3;
   optional EventContinuationToken event_continuation_token = 5;
@@ -817,22 +821,22 @@ message EventNotification {
 }
 
 message SetFocusNotification {
-  optional ConversationID conversation_id = 1;
-  optional UserID user_id = 2;
+  optional ConversationId conversation_id = 1;
+  optional ParticipantId sender_id = 2;
   optional uint64 timestamp = 3;
   optional FocusType type = 4;
   optional FocusDevice device = 5;
 }
 
 message SetTypingNotification {
-  optional ConversationID conversation_id = 1;
-  optional UserID user_id = 2;
+  optional ConversationId conversation_id = 1;
+  optional ParticipantId sender_id = 2;
   optional uint64 timestamp = 3;
-  optional TypingType type = 4;  // TODO: should be type
+  optional TypingType type = 4;
 }
 
 message SetConversationNotificationLevelNotification {
-  optional ConversationID conversation_id = 1;
+  optional ConversationId conversation_id = 1;
   optional NotificationLevel level = 2;
   // unknown (0) = 3;
   optional uint64 timestamp = 4;
@@ -841,18 +845,18 @@ message SetConversationNotificationLevelNotification {
 message ReplyToInviteNotification {
   // TODO: untested
   // [['UgwnHidpJTfc7G7BhUR4AaABAQ'], 1]
-  optional ConversationID conversation_id = 1;
+  optional ConversationId conversation_id = 1;
   optional ReplyToInviteType type = 2;
 }
 
 message WatermarkNotification {
-  optional UserID participant_id = 1;
-  optional ConversationID conversation_id = 2;
+  optional ParticipantId sender_id = 1;
+  optional ConversationId conversation_id = 2;
   optional uint64 latest_read_timestamp = 3;
 }
 
 message ConversationViewModification {
-  optional ConversationID conversation_id = 1;
+  optional ConversationId conversation_id = 1;
   optional ConversationView old_view = 2;
   optional ConversationView new_view = 3;
   // archive:
@@ -862,8 +866,8 @@ message ConversationViewModification {
 }
 
 message EasterEggNotification {
-  optional UserID sender_id = 1;
-  optional ConversationID conversation_id = 2;
+  optional ParticipantId sender_id = 1;
+  optional ConversationId conversation_id = 2;
   optional EasterEgg easter_egg = 3;
 }
 
@@ -879,7 +883,7 @@ message SelfPresenceNotification {
 message DeleteActionNotification { // 15
   // delete conversation:
   // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], [1435638391438133, 1435637794504105, 1]]
-  optional ConversationID conversation_id = 1;
+  optional ConversationId conversation_id = 1;
   optional DeleteAction delete_action = 2;
 }
 
@@ -906,7 +910,7 @@ message RichPresenceEnabledStateNotification {
 }
 
 message ConversationSpec {
-  optional ConversationID conversation_id = 1;
+  optional ConversationId conversation_id = 1;
   // TODO
 }
 
@@ -941,7 +945,7 @@ message CreateConversationResponse {
 
 message DeleteConversationRequest {
   optional RequestHeader request_header = 1;
-  optional ConversationID conversation_id = 2;
+  optional ConversationId conversation_id = 2;
   optional uint64 delete_upper_bound_timestamp = 3;
 }
 
@@ -952,7 +956,7 @@ message DeleteConversationResponse {
 
 message EasterEggRequest {
   optional RequestHeader request_header = 1;
-  optional ConversationID conversation_id = 2;
+  optional ConversationId conversation_id = 2;
   optional EasterEgg easter_egg = 3;
 }
 
@@ -1033,7 +1037,7 @@ message GetSelfInfoResponse {
 
 message QueryPresenceRequest {
   optional RequestHeader request_header = 1;
-  repeated UserID user_id = 2;
+  repeated ParticipantId participant_id = 2;
   repeated FieldMask field_mask = 3;
 }
 
@@ -1116,7 +1120,7 @@ message SetConversationLevelResponse {
 
 message SetConversationNotificationLevelRequest {
   optional RequestHeader request_header = 1;
-  optional ConversationID conversation_id = 2;
+  optional ConversationId conversation_id = 2;
   optional NotificationLevel level = 3;
 }
 
@@ -1127,7 +1131,7 @@ message SetConversationNotificationLevelResponse {
 
 message SetFocusRequest {
   optional RequestHeader request_header = 1;
-  optional ConversationID conversation_id = 2;
+  optional ConversationId conversation_id = 2;
   optional FocusType type = 3;
   optional uint32 timeout_secs = 4;
 }
@@ -1152,7 +1156,7 @@ message SetPresenceResponse {
 
 message SetTypingRequest {
   optional RequestHeader request_header = 1;
-  optional ConversationID conversation_id = 2;
+  optional ConversationId conversation_id = 2;
   optional TypingType type = 3;
 }
 
@@ -1191,7 +1195,7 @@ message SyncRecentConversationsResponse {
 
 message UpdateWatermarkRequest {
   optional RequestHeader request_header = 1;
-  optional ConversationID conversation_id = 2;
+  optional ConversationId conversation_id = 2;
   optional uint64 last_read_timestamp = 3;
 }
 
