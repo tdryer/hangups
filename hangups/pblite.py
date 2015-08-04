@@ -93,10 +93,13 @@ def decode(message, pblite, ignore_first_item=False):
         try:
             field = message.DESCRIPTOR.fields_by_number[field_number]
         except KeyError:
-            # If the tag number is unknown, log a message to aid
-            # reverse-engineering the missing field in the message.
-            logger.debug('Message %r contains unknown field %s with value %r',
-                         message.__class__.__name__, field_number, value)
+            # If the tag number is unknown and the value is non-trivial, log a
+            # message to aid reverse-engineering the missing field in the
+            # message.
+            if value not in [[], '', 0]:
+                logger.debug('Message %r contains unknown field %s with value '
+                             '%r', message.__class__.__name__, field_number,
+                             value)
             continue
         if field.label == FieldDescriptor.LABEL_REPEATED:
             _decode_repeated_field(message, field, value)

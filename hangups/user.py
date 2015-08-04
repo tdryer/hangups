@@ -55,7 +55,6 @@ class User(object):
                           hangouts_pb2.ConversationParticipantData)
         user_id = UserID(chat_id=conv_part_data.id.chat_id,
                          gaia_id=conv_part_data.id.gaia_id)
-        logging.debug('%s', conv_part_data)
         return User(user_id, conv_part_data.fallback_name, None, None, [],
                     (self_user_id == user_id) or (self_user_id is None))
 
