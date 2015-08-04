@@ -514,11 +514,11 @@ message ResponseHeader {
 
 // A user that can participate in conversations.
 message Entity {
-
-  // TODO
-  // presence? = 8;
-
+  // The user's ID.
   optional ParticipantId id = 9;
+  // Optional user presence status.
+  optional Presence presence = 8;
+  // Optional user properties.
   optional EntityProperties properties = 10;
 }
 

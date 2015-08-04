@@ -466,12 +466,13 @@ Entity
 
 A user that can participate in conversations.
 
-================== ====== =================== ======== ===========
-Field              Number Type                Label    Description
-================== ====== =================== ======== ===========
-:code:`id`         9      `ParticipantId`_    optional            
-:code:`properties` 10     `EntityProperties`_ optional            
-================== ====== =================== ======== ===========
+================== ====== =================== ======== ==============================
+Field              Number Type                Label    Description                   
+================== ====== =================== ======== ==============================
+:code:`id`         9      `ParticipantId`_    optional The user's ID.                
+:code:`presence`   8      `Presence`_         optional Optional user presence status.
+:code:`properties` 10     `EntityProperties`_ optional Optional user properties.     
+================== ====== =================== ======== ==============================
 
 EntityProperties
 ----------------
