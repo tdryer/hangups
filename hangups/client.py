@@ -319,72 +319,71 @@ class Client(object):
                 self._active_client_state = header.active_client_state
                 yield from self.on_state_update.fire(state_update)
 
-    # TODO: add better logging here and remove it from _base_request
     @asyncio.coroutine
     def _pb_request(self, endpoint, request_pb, response_pb):
-        """Make chat API request with protobuf request/response.
+        """Send a Protocol Buffer formatted chat API request.
 
-        Raises hangups.NetworkError if the request fails.
+        Args:
+            endpoint (str): The chat API endpoint to use.
+            request_pb: The request body as a Protocol Buffer message.
+            response_pb: The response body as a Protocol Buffer message.
+
+        Raises:
+            NetworkError: If the request fails.
         """
-        url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
-        body = json.dumps(pblite.encode(request_pb))
-        logger.debug(body)
-        content_type = 'application/json+protobuf'
-        res = yield from self._base_request(url, content_type, body,
-                                            use_json=False)
+        logger.debug('Sending Protocol Buffer request %s:\n%s', endpoint,
+                     request_pb)
+        res = yield from self._base_request(
+            'https://clients6.google.com/chat/v1/{}'.format(endpoint),
+            'application/json+protobuf',  # The request body is pblite.
+            'protojson',  # The response should be pblite.
+            json.dumps(pblite.encode(request_pb))
+        )
         pblite.decode(response_pb, javascript.loads(res.body.decode()),
                       ignore_first_item=True)
-        logger.debug(response_pb)
+        logger.debug('Received Protocol Buffer response:\n%s', response_pb)
         status = response_pb.response_header.status
-        description = response_pb.response_header.error_description
         if status != hangouts_pb2.RESPONSE_STATUS_OK:
+            description = response_pb.response_header.error_description
             raise exceptions.NetworkError(
                 'Request failed with status {}: \'{}\''
                 .format(status, description)
             )
 
-    # TODO: remove this
     @asyncio.coroutine
-    def _request(self, endpoint, body_json, use_json=True):
-        """Make chat API request.
+    def _base_request(self, url, content_type, response_type, data):
+        """Send a generic authenticated POST request.
 
-        Raises hangups.NetworkError if the request fails.
+        Args:
+            url (str): URL of request.
+            content_type (str): Request content type.
+            response_type (str): The desired response format. Valid options
+                are: 'json' (JSON), 'protojson' (pblite), and 'proto' (binary
+                Protocol Buffer). 'proto' requires manually setting an extra
+                header 'X-Goog-Encode-Response-If-Executable: base64'.
+            data (str): Request body data.
+
+        Returns:
+            FetchResponse: Response containing HTTP code, cookies, and body.
+
+        Raises:
+            NetworkError: If the request fails.
         """
-        url = 'https://clients6.google.com/chat/v1/{}'.format(endpoint)
-        res = yield from self._base_request(
-            url, 'application/json+protobuf', json.dumps(body_json),
-            use_json=use_json
-        )
-        return res
-
-    @asyncio.coroutine
-    def _base_request(self, url, content_type, data, use_json=True):
-        """Make API request.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        headers = channel.get_authorization_headers(
-            self._get_cookie('SAPISID')
-        )
+        sapisid_cookie = self._get_cookie('SAPISID')
+        headers = channel.get_authorization_headers(sapisid_cookie)
         headers['content-type'] = content_type
         required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
         cookies = {cookie: self._get_cookie(cookie)
                    for cookie in required_cookies}
         params = {
             'key': self._api_key,
-            # The alt parameter specifies the "alternative representation
-            # type"; the desired response format. Valid options are: 'json'
-            # (JSON), 'protojson' (pblite), and 'proto' (binary Protocol
-            # Buffer). 'proto' requires an extra header
-            # 'X-Goog-Encode-Response-If-Executable: base64'.
-            'alt': 'json' if use_json else 'protojson',
+            # "alternative representation type" (desired response format).
+            'alt': response_type,
         }
         res = yield from http_utils.fetch(
             'post', url, headers=headers, cookies=cookies, params=params,
             data=data, connector=self._connector
         )
-        logger.debug('Response to request for {} was {}:\n{}'
-                     .format(url, res.code, res.body))
         return res
 
     def _get_request_header_pb(self):
@@ -612,6 +611,7 @@ class Client(object):
         res1 = yield from self._base_request(
             IMAGE_UPLOAD_URL,
             'application/x-www-form-urlencoded;charset=UTF-8',
+            'json',
             json.dumps({
                 "protocolVersion": "0.8",
                 "createSessionRequest": {
@@ -630,7 +630,7 @@ class Client(object):
 
         # Upload image data and get image ID
         res2 = yield from self._base_request(
-            upload_url, 'application/octet-stream', image_data
+            upload_url, 'application/octet-stream', 'json', image_data
         )
         return (json.loads(res2.body.decode())['sessionStatus']
                 ['additionalInfo']
