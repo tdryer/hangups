@@ -264,11 +264,15 @@ message OTRModification {
   optional OffTheRecordToggle new_otr_toggle = 4;
 }
 
+// Whether the OTR toggle is available to the user.
 enum OffTheRecordToggle {
-  OFF_THE_RECORD_TOGGLE_ENABLED = 0;
-  OFF_THE_RECORD_TOGGLE_DISABLED = 1;
+  OFF_THE_RECORD_TOGGLE_UNKNOWN = 0;
+  OFF_THE_RECORD_TOGGLE_ENABLED = 1;
+  OFF_THE_RECORD_TOGGLE_DISABLED = 2;
 }
 
+// Whether an event or conversation is "on the record" (history enabled) or
+// "off the record" (history disabled).
 enum OffTheRecordStatus {
   OFF_THE_RECORD_STATUS_UNKNOWN = 0;
   OFF_THE_RECORD = 1;
@@ -314,7 +318,9 @@ message Event {
 
   optional EventType event_type = 23;
 
-  // "event_version" timestamp = 24;
+  // Event version timestamp.
+  optional uint64 event_version = 24;
+
   // unknown sending messages (['7-H0Z7-BCTg80ySBsfibNV', 4, None, 1435550921815004]) = 26;
 }
 
@@ -374,12 +380,28 @@ enum ParticipantType {
   PARTICIPANT_TYPE_GAIA = 2;
 }
 
+enum InvitationStatus {
+  INVITATION_STATUS_UNKNOWN = 0;
+  INVITATION_STATUS_PENDING = 1;
+  INVITATION_STATUS_ACCEPTED = 2;
+}
+
 message ConversationParticipantData {
   optional ParticipantId id = 1;
   optional string fallback_name = 2;
+  optional InvitationStatus invitation_status = 3;
   optional ParticipantType participant_type = 5;
-  // "invitation_status" (2, 1) = 3;
-  // "new_invitation_status" (2, 3) = 6;
+  optional InvitationStatus new_invitation_status = 6;
+}
+
+enum ForceHistory {
+  FORCE_HISTORY_UNKNOWN = 0;
+  FORCE_HISTORY_NO = 1;
+}
+
+enum NetworkType {
+  NETWORK_TYPE_UNKNOWN = 0;
+  NETWORK_TYPE_BABEL = 1;
 }
 
 // A conversation between two or more users.
@@ -390,17 +412,19 @@ message Conversation {
   optional UserConversationState self_conversation_state = 4;
   repeated UserReadState read_state = 8;
 
-  // "has_active_hangout" (0) = 9;
+  // True if the conversation has an active Hangout.
+  optional bool has_active_hangout = 9;
 
+  // The conversation's "off the record" status.
   optional OffTheRecordStatus otr_status = 10;
 
-  // "otr_toggle" (1) = 11;
+  // Whether the OTR toggle is available to the user for this conversation.
+  optional OffTheRecordToggle otr_toggle = 11;
 
   repeated ParticipantId current_participant = 13;
   repeated ConversationParticipantData participant_data = 14;
-  // "fork_on_external_invite" = 17
-  // "network_type" ([1]) = 18;
-  // "force_history_state" (0) = 19;
+  repeated NetworkType network_type = 18;
+  optional ForceHistory force_history_state = 19;
 }
 
 message EasterEgg {

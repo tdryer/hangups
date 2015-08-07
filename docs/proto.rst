@@ -277,26 +277,27 @@ Event
 
 Event that becomes part of a conversation's history.
 
-=============================== ====== ===================== ======== ===========
-Field                           Number Type                  Label    Description
-=============================== ====== ===================== ======== ===========
-:code:`conversation_id`         1      `ConversationId`_     optional            
-:code:`sender_id`               2      `ParticipantId`_      optional            
-:code:`timestamp`               3      uint64                optional            
-:code:`self_event_state`        4      `UserEventState`_     optional            
-:code:`source_type`             6      `SourceType`_         optional            
-:code:`chat_message`            7      `ChatMessage`_        optional            
-:code:`membership_change`       9      `MembershipChange`_   optional            
-:code:`conversation_rename`     10     `ConversationRename`_ optional            
-:code:`hangout_event`           11     `HangoutEvent`_       optional            
-:code:`event_id`                12     string                optional            
-:code:`expiration_timestamp`    13     uint64                optional            
-:code:`otr_modification`        14     `OTRModification`_    optional            
-:code:`advances_sort_timestamp` 15     bool                  optional            
-:code:`otr_status`              16     `OffTheRecordStatus`_ optional            
-:code:`persisted`               17     bool                  optional            
-:code:`event_type`              23     `EventType`_          optional            
-=============================== ====== ===================== ======== ===========
+=============================== ====== ===================== ======== ========================
+Field                           Number Type                  Label    Description             
+=============================== ====== ===================== ======== ========================
+:code:`conversation_id`         1      `ConversationId`_     optional                         
+:code:`sender_id`               2      `ParticipantId`_      optional                         
+:code:`timestamp`               3      uint64                optional                         
+:code:`self_event_state`        4      `UserEventState`_     optional                         
+:code:`source_type`             6      `SourceType`_         optional                         
+:code:`chat_message`            7      `ChatMessage`_        optional                         
+:code:`membership_change`       9      `MembershipChange`_   optional                         
+:code:`conversation_rename`     10     `ConversationRename`_ optional                         
+:code:`hangout_event`           11     `HangoutEvent`_       optional                         
+:code:`event_id`                12     string                optional                         
+:code:`expiration_timestamp`    13     uint64                optional                         
+:code:`otr_modification`        14     `OTRModification`_    optional                         
+:code:`advances_sort_timestamp` 15     bool                  optional                         
+:code:`otr_status`              16     `OffTheRecordStatus`_ optional                         
+:code:`persisted`               17     bool                  optional                         
+:code:`event_type`              23     `EventType`_          optional                         
+:code:`event_version`           24     uint64                optional Event version timestamp.
+=============================== ====== ===================== ======== ========================
 
 UserReadState
 -------------
@@ -348,31 +349,37 @@ Field                          Number Type                    Label    Descripti
 ConversationParticipantData
 ---------------------------
 
-======================== ====== ================== ======== =====================================================================================================================
-Field                    Number Type               Label    Description                                                                                                          
-======================== ====== ================== ======== =====================================================================================================================
-:code:`id`               1      `ParticipantId`_   optional                                                                                                                      
-:code:`fallback_name`    2      string             optional                                                                                                                      
-:code:`participant_type` 5      `ParticipantType`_ optional TODO: one of these is invitation_status and the other is new_invitation_status unknown (2, 1) = 3; unknown (2, 3) = 6
-======================== ====== ================== ======== =====================================================================================================================
+============================= ====== =================== ======== ===========
+Field                         Number Type                Label    Description
+============================= ====== =================== ======== ===========
+:code:`id`                    1      `ParticipantId`_    optional            
+:code:`fallback_name`         2      string              optional            
+:code:`invitation_status`     3      `InvitationStatus`_ optional            
+:code:`participant_type`      5      `ParticipantType`_  optional            
+:code:`new_invitation_status` 6      `InvitationStatus`_ optional            
+============================= ====== =================== ======== ===========
 
 Conversation
 ------------
 
 A conversation between two or more users.
 
-=============================== ====== ============================== ======== ===========
-Field                           Number Type                           Label    Description
-=============================== ====== ============================== ======== ===========
-:code:`conversation_id`         1      `ConversationId`_              optional            
-:code:`type`                    2      `ConversationType`_            optional            
-:code:`name`                    3      string                         optional            
-:code:`self_conversation_state` 4      `UserConversationState`_       optional            
-:code:`read_state`              8      `UserReadState`_               repeated            
-:code:`otr_status`              10     `OffTheRecordStatus`_          optional            
-:code:`current_participant`     13     `ParticipantId`_               repeated            
-:code:`participant_data`        14     `ConversationParticipantData`_ repeated            
-=============================== ====== ============================== ======== ===========
+=============================== ====== ============================== ======== ======================================================================
+Field                           Number Type                           Label    Description                                                           
+=============================== ====== ============================== ======== ======================================================================
+:code:`conversation_id`         1      `ConversationId`_              optional                                                                       
+:code:`type`                    2      `ConversationType`_            optional                                                                       
+:code:`name`                    3      string                         optional                                                                       
+:code:`self_conversation_state` 4      `UserConversationState`_       optional                                                                       
+:code:`read_state`              8      `UserReadState`_               repeated                                                                       
+:code:`has_active_hangout`      9      bool                           optional True if the conversation has an active Hangout.                       
+:code:`otr_status`              10     `OffTheRecordStatus`_          optional The conversation's "off the record" status.                           
+:code:`otr_toggle`              11     `OffTheRecordToggle`_          optional Whether the OTR toggle is available to the user for this conversation.
+:code:`current_participant`     13     `ParticipantId`_               repeated                                                                       
+:code:`participant_data`        14     `ConversationParticipantData`_ repeated                                                                       
+:code:`network_type`            18     `NetworkType`_                 repeated                                                                       
+:code:`force_history_state`     19     `ForceHistory`_                optional                                                                       
+=============================== ====== ============================== ======== ======================================================================
 
 EasterEgg
 ---------
@@ -1471,15 +1478,21 @@ Name                                   Number Description
 OffTheRecordToggle
 ------------------
 
+Whether the OTR toggle is available to the user.
+
 ====================================== ====== ===========
 Name                                   Number Description
 ====================================== ====== ===========
-:code:`OFF_THE_RECORD_TOGGLE_ENABLED`  0                 
-:code:`OFF_THE_RECORD_TOGGLE_DISABLED` 1                 
+:code:`OFF_THE_RECORD_TOGGLE_UNKNOWN`  0                 
+:code:`OFF_THE_RECORD_TOGGLE_ENABLED`  1                 
+:code:`OFF_THE_RECORD_TOGGLE_DISABLED` 2                 
 ====================================== ====== ===========
 
 OffTheRecordStatus
 ------------------
+
+Whether an event or conversation is "on the record" (history enabled) or
+"off the record" (history disabled).
 
 ===================================== ====== ===========
 Name                                  Number Description
@@ -1566,6 +1579,37 @@ Name                             Number Description
 :code:`PARTICIPANT_TYPE_UNKNOWN` 0                 
 :code:`PARTICIPANT_TYPE_GAIA`    2                 
 ================================ ====== ===========
+
+InvitationStatus
+----------------
+
+================================== ====== ===========
+Name                               Number Description
+================================== ====== ===========
+:code:`INVITATION_STATUS_UNKNOWN`  0                 
+:code:`INVITATION_STATUS_PENDING`  1                 
+:code:`INVITATION_STATUS_ACCEPTED` 2                 
+================================== ====== ===========
+
+ForceHistory
+------------
+
+============================= ====== ===========
+Name                          Number Description
+============================= ====== ===========
+:code:`FORCE_HISTORY_UNKNOWN` 0                 
+:code:`FORCE_HISTORY_NO`      1                 
+============================= ====== ===========
+
+NetworkType
+-----------
+
+============================ ====== ===========
+Name                         Number Description
+============================ ====== ===========
+:code:`NETWORK_TYPE_UNKNOWN` 0                 
+:code:`NETWORK_TYPE_BABEL`   1                 
+============================ ====== ===========
 
 BlockState
 ----------
