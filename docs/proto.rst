@@ -191,12 +191,13 @@ EmbedItem
 
 An item of some type embedded in a chat message.
 
-================== ======== ============ ======== ============================================
-Field              Number   Type         Label    Description                                 
-================== ======== ============ ======== ============================================
-:code:`type`       1        `ItemType`_  repeated List of embedded item types in this message.
-:code:`plus_photo` 27639957 `PlusPhoto`_ optional Embedded Google Plus photo.                 
-================== ======== ============ ======== ============================================
+================== ======== ============ ======== ================================================================
+Field              Number   Type         Label    Description                                                     
+================== ======== ============ ======== ================================================================
+:code:`type`       1        `ItemType`_  repeated List of embedded item types in this message.                    
+:code:`id`         2        string       optional For photos this is not given, for maps, it's the URL of the map.
+:code:`plus_photo` 27639957 `PlusPhoto`_ optional Embedded Google Plus photo.                                     
+================== ======== ============ ======== ================================================================
 
 Attachment
 ----------
@@ -295,6 +296,7 @@ Field                           Number Type                  Label    Descriptio
 :code:`advances_sort_timestamp` 15     bool                  optional                         
 :code:`otr_status`              16     `OffTheRecordStatus`_ optional                         
 :code:`persisted`               17     bool                  optional                         
+:code:`medium_type`             20     `DeliveryMedium`_     optional                         
 :code:`event_type`              23     `EventType`_          optional                         
 :code:`event_version`           24     uint64                optional Event version timestamp.
 =============================== ====== ===================== ======== ========================
@@ -572,11 +574,12 @@ Field               Number Type Label    Description
 DesktopOffState
 ---------------
 
-=================== ====== ==== ======== ============================================
-Field               Number Type Label    Description                                 
-=================== ====== ==== ======== ============================================
-:code:`desktop_off` 1      bool optional Whether Hangouts desktop is signed off or on
-=================== ====== ==== ======== ============================================
+=================== ====== ====== ======== ============================================
+Field               Number Type   Label    Description                                 
+=================== ====== ====== ======== ============================================
+:code:`desktop_off` 1      bool   optional Whether Hangouts desktop is signed off or on
+:code:`version`     2      uint64 optional                                             
+=================== ====== ====== ======== ============================================
 
 DndSetting
 ----------
@@ -1057,7 +1060,9 @@ Field                       Number Type                 Label    Description
 =========================== ====== ==================== ======== ==============================
 :code:`response_header`     1      `ResponseHeader`_    optional                               
 :code:`self_entity`         2      `Entity`_            optional                               
+:code:`desktop_off_setting` 6      `DesktopOffSetting`_ optional                               
 :code:`configuration_bit`   8      `ConfigurationBit`_  repeated                               
+:code:`desktop_off_state`   9      `DesktopOffState`_   optional                               
 :code:`rich_presence_state` 12     `RichPresenceState`_ optional TODO: all kinds of extra stuff
 =========================== ====== ==================== ======== ==============================
 

@@ -199,6 +199,9 @@ message EmbedItem {
   // List of embedded item types in this message.
   repeated ItemType type = 1;
 
+  // For photos this is not given, for maps, it's the URL of the map.
+  optional string id = 2;
+
   // Embedded Google Plus photo.
   optional PlusPhoto plus_photo = 27639957;
 
@@ -313,9 +316,7 @@ message Event {
   optional bool advances_sort_timestamp = 15;
   optional OffTheRecordStatus otr_status = 16;
   optional bool persisted = 17;
-
-  // unknown ([1]) = 20;
-
+  optional DeliveryMedium medium_type = 20;
   optional EventType event_type = 23;
 
   // Event version timestamp.
@@ -719,6 +720,7 @@ message DesktopOffSetting {
 message DesktopOffState {
   // Whether Hangouts desktop is signed off or on
   optional bool desktop_off = 1;
+  optional uint64 version = 2;
 }
 
 message DndSetting {
@@ -1057,7 +1059,9 @@ message GetSelfInfoRequest {
 message GetSelfInfoResponse {
   optional ResponseHeader response_header = 1;
   optional Entity self_entity = 2;
+  optional DesktopOffSetting desktop_off_setting = 6;
   repeated ConfigurationBit configuration_bit = 8;
+  optional DesktopOffState desktop_off_state = 9;
   optional RichPresenceState rich_presence_state = 12;
   // TODO: all kinds of extra stuff
 }
