@@ -1,10 +1,11 @@
 """Parser for long-polling responses from the talkgadget API."""
 
-import logging
 from collections import namedtuple
 import datetime
+import json
+import logging
 
-from hangups import javascript, user, hangouts_pb2, pblite
+from hangups import user, hangouts_pb2, pblite
 
 
 logger = logging.getLogger(__name__)
@@ -29,18 +30,18 @@ def _get_submission_payloads(submission):
     connection was closed while something happened, there can be multiple
     payloads.
     """
-    for sub in javascript.loads(submission):
+    for sub in json.loads(submission):
 
         if sub[1][0] != 'noop':
             # TODO: can we use json here instead?
-            wrapper = javascript.loads(sub[1][0]['p'])
+            wrapper = json.loads(sub[1][0]['p'])
             # pylint: disable=invalid-sequence-index
             if '3' in wrapper and '2' in wrapper['3']:
                 client_id = wrapper['3']['2']
                 # Hack to pass the client ID back to Client
                 yield {'client_id': client_id}
             if '2' in wrapper:
-                yield javascript.loads(wrapper['2']['2'])
+                yield json.loads(wrapper['2']['2'])
 
 
 def _parse_payload(payload):

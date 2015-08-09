@@ -7,11 +7,12 @@ Engine Channel.
 import aiohttp
 import asyncio
 import hashlib
+import json
 import logging
 import re
 import time
 
-from hangups import javascript, http_utils, event, exceptions
+from hangups import http_utils, event, exceptions
 
 logger = logging.getLogger(__name__)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
@@ -122,7 +123,7 @@ def _parse_sid_response(res):
 
     Returns (SID, gsessionid) tuple.
     """
-    res = javascript.loads(list(PushDataParser().get_submissions(res))[0])
+    res = json.loads(list(PushDataParser().get_submissions(res))[0])
     sid = res[0][1][1]
     gsessionid = res[1][1][0]['gsid']
     return (sid, gsessionid)
