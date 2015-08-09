@@ -240,7 +240,7 @@ class Channel(object):
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params={
                 'VER': 8,
-                'RID': 81187,
+                'RID': 81187,  # request identifier
                 'ctype': 'hangouts',  # client type
             }
         )
@@ -268,10 +268,10 @@ class Channel(object):
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params={
                 'VER': 8,
-                'RID': 81188,
+                'RID': 81188,  # request identifier
                 'ctype': 'hangouts',  # client type
                 'gsessionid': self._gsessionid_param,
-                'SID': self._sid_param,
+                'SID': self._sid_param,  # session ID
             },
             data={
                 'count': 3,
@@ -304,9 +304,9 @@ class Channel(object):
         params = {
             'VER': 8,
             'gsessionid': self._gsessionid_param,
-            'RID': 'rpc',
+            'RID': 'rpc',  # request identifier
             't': 1,  # trial
-            'SID': self._sid_param,
+            'SID': self._sid_param,  # session ID
             'CI': 0,
             'ctype': 'hangouts',  # client type
             'TYPE': 'xmlhttp',
