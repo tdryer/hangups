@@ -1,7 +1,10 @@
 """Support for reading messages from the long-polling channel.
 
 Hangouts receives events using a system that appears very close to an App
-Engine Channel.
+Engine Channel. The source for the JavaScript client appears to be available in
+closure-library as "webchannel":
+    https://github.com/google/closure-library/tree/master/closure/goog/labs/
+    net/webchannel
 """
 
 import aiohttp
@@ -310,7 +313,7 @@ class Channel(object):
             'SID': self._sid_param,  # session ID
             'CI': 0,
             'ctype': 'hangouts',  # client type
-            'TYPE': 'xmlhttp',
+            'TYPE': 'xmlhttp',  # type of request
         }
         headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
