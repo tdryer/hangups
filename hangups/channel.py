@@ -5,6 +5,11 @@ Engine Channel. The source for the JavaScript client appears to be available in
 closure-library as "webchannel":
     https://github.com/google/closure-library/tree/master/closure/goog/labs/
     net/webchannel
+
+Protocol documentation for BrowserChannel (an older variant of WebChannel) is
+available here:
+    https://web.archive.org/web/20121226064550/http://code.google.com/p/
+    libevent-browserchannel-server/wiki/BrowserChannelProtocol
 """
 
 import aiohttp
@@ -243,7 +248,7 @@ class Channel(object):
             cookies=self._cookies, data='count=0', connector=self._connector,
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params={
-                'VER': 8,
+                'VER': 8,  # channel protocol version
                 'RID': 81187,  # request identifier
                 'ctype': 'hangouts',  # client type
             }
@@ -271,7 +276,7 @@ class Channel(object):
             cookies=self._cookies, connector=self._connector,
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params={
-                'VER': 8,
+                'VER': 8,  # channel protocol version
                 'RID': 81188,  # request identifier
                 'ctype': 'hangouts',  # client type
                 'gsessionid': self._gsessionid_param,
@@ -306,12 +311,12 @@ class Channel(object):
         Raises hangups.NetworkError or UnknownSIDError.
         """
         params = {
-            'VER': 8,
+            'VER': 8,  # channel protocol version
             'gsessionid': self._gsessionid_param,
             'RID': 'rpc',  # request identifier
             't': 1,  # trial
             'SID': self._sid_param,  # session ID
-            'CI': 0,
+            'CI': 0,  # 0 if streaming/chunked requests should be used
             'ctype': 'hangouts',  # client type
             'TYPE': 'xmlhttp',  # type of request
         }
