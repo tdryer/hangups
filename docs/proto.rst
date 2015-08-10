@@ -81,12 +81,12 @@ Field            Number Type             Label    Description
 ClientIdentifier
 ----------------
 
-================= ====== ====== ======== ==============================
-Field             Number Type   Label    Description                   
-================= ====== ====== ======== ==============================
-:code:`resource`  1      string optional (client_id in hangups)        
-:code:`header_id` 2      string optional unknown (header_id in hangups)
-================= ====== ====== ======== ==============================
+================= ====== ====== ======== ===============================
+Field             Number Type   Label    Description                    
+================= ====== ====== ======== ===============================
+:code:`resource`  1      string optional (client_id in hangups).        
+:code:`header_id` 2      string optional unknown (header_id in hangups).
+================= ====== ====== ======== ===============================
 
 ClientPresenceState
 -------------------
@@ -133,14 +133,17 @@ Field               Number Type   Label    Description
 Segment
 -------
 
-================== ====== ============== ======== =============================================================
-Field              Number Type           Label    Description                                                  
-================== ====== ============== ======== =============================================================
-:code:`type`       1      `SegmentType`_ required Hangouts for Chrome misbehaves if this field isn't serialized
-:code:`text`       2      string         optional may be empty for linebreaks                                  
-:code:`formatting` 3      `Formatting`_  optional                                                              
-:code:`link_data`  4      `LinkData`_    optional                                                              
-================== ====== ============== ======== =============================================================
+A segment of a message. Message are broken into segments that may be of
+different types and have different formatting.
+
+================== ====== ============== ======== ===========================================================================================
+Field              Number Type           Label    Description                                                                                
+================== ====== ============== ======== ===========================================================================================
+:code:`type`       1      `SegmentType`_ required Note: This field is required because Hangouts for Chrome misbehaves if it isn't serialized.
+:code:`text`       2      string         optional The segment text. For line breaks, may either be empty or contain new line character.      
+:code:`formatting` 3      `Formatting`_  optional Formatting for this segment.                                                               
+:code:`link_data`  4      `LinkData`_    optional Link data for this segment, if it is a link.                                               
+================== ====== ============== ======== ===========================================================================================
 
 PlusPhoto
 ---------
@@ -225,21 +228,23 @@ Field              Number Type          Label    Description
 ChatMessage
 -----------
 
-======================= ====== ================= ======== =============================================
-Field                   Number Type              Label    Description                                  
-======================= ====== ================= ======== =============================================
-:code:`message_content` 3      `MessageContent`_ optional always 0? = 1; annotation (always None?) = 2;
-======================= ====== ================= ======== =============================================
+A chat message in a conversation.
+
+======================= ====== ================= ======== ======================
+Field                   Number Type              Label    Description           
+======================= ====== ================= ======== ======================
+:code:`message_content` 3      `MessageContent`_ optional The message's content.
+======================= ====== ================= ======== ======================
 
 MembershipChange
 ----------------
 
-======================= ====== ======================= ======== ===============
-Field                   Number Type                    Label    Description    
-======================= ====== ======================= ======== ===============
-:code:`type`            1      `MembershipChangeType`_ optional                
-:code:`participant_ids` 3      `ParticipantId`_        repeated unknown [] = 2;
-======================= ====== ======================= ======== ===============
+======================= ====== ======================= ======== ===========
+Field                   Number Type                    Label    Description
+======================= ====== ======================= ======== ===========
+:code:`type`            1      `MembershipChangeType`_ optional            
+:code:`participant_ids` 3      `ParticipantId`_        repeated            
+======================= ====== ======================= ======== ===========
 
 ConversationRename
 ------------------
@@ -254,12 +259,12 @@ Field            Number Type   Label    Description
 HangoutEvent
 ------------
 
-====================== ====== =================== ======== ==============
-Field                  Number Type                Label    Description   
-====================== ====== =================== ======== ==============
-:code:`event_type`     1      `HangoutEventType`_ optional               
-:code:`participant_id` 2      `ParticipantId`_    repeated unknown 1 = 7;
-====================== ====== =================== ======== ==============
+====================== ====== =================== ======== ===========
+Field                  Number Type                Label    Description
+====================== ====== =================== ======== ===========
+:code:`event_type`     1      `HangoutEventType`_ optional            
+:code:`participant_id` 2      `ParticipantId`_    repeated            
+====================== ====== =================== ======== ===========
 
 OTRModification
 ---------------
@@ -278,38 +283,38 @@ Event
 
 Event that becomes part of a conversation's history.
 
-=============================== ====== ===================== ======== ========================
-Field                           Number Type                  Label    Description             
-=============================== ====== ===================== ======== ========================
-:code:`conversation_id`         1      `ConversationId`_     optional                         
-:code:`sender_id`               2      `ParticipantId`_      optional                         
-:code:`timestamp`               3      uint64                optional                         
-:code:`self_event_state`        4      `UserEventState`_     optional                         
-:code:`source_type`             6      `SourceType`_         optional                         
-:code:`chat_message`            7      `ChatMessage`_        optional                         
-:code:`membership_change`       9      `MembershipChange`_   optional                         
-:code:`conversation_rename`     10     `ConversationRename`_ optional                         
-:code:`hangout_event`           11     `HangoutEvent`_       optional                         
-:code:`event_id`                12     string                optional                         
-:code:`expiration_timestamp`    13     uint64                optional                         
-:code:`otr_modification`        14     `OTRModification`_    optional                         
-:code:`advances_sort_timestamp` 15     bool                  optional                         
-:code:`otr_status`              16     `OffTheRecordStatus`_ optional                         
-:code:`persisted`               17     bool                  optional                         
-:code:`medium_type`             20     `DeliveryMedium`_     optional                         
-:code:`event_type`              23     `EventType`_          optional                         
-:code:`event_version`           24     uint64                optional Event version timestamp.
-=============================== ====== ===================== ======== ========================
+=============================== ====== ===================== ======== =============================================
+Field                           Number Type                  Label    Description                                  
+=============================== ====== ===================== ======== =============================================
+:code:`conversation_id`         1      `ConversationId`_     optional ID of the conversation this event belongs to.
+:code:`sender_id`               2      `ParticipantId`_      optional ID of the user that sent this event.         
+:code:`timestamp`               3      uint64                optional Timestamp when the event occurred.           
+:code:`self_event_state`        4      `UserEventState`_     optional                                              
+:code:`source_type`             6      `SourceType`_         optional                                              
+:code:`chat_message`            7      `ChatMessage`_        optional                                              
+:code:`membership_change`       9      `MembershipChange`_   optional                                              
+:code:`conversation_rename`     10     `ConversationRename`_ optional                                              
+:code:`hangout_event`           11     `HangoutEvent`_       optional                                              
+:code:`event_id`                12     string                optional Unique ID for the event.                     
+:code:`expiration_timestamp`    13     uint64                optional                                              
+:code:`otr_modification`        14     `OTRModification`_    optional                                              
+:code:`advances_sort_timestamp` 15     bool                  optional                                              
+:code:`otr_status`              16     `OffTheRecordStatus`_ optional                                              
+:code:`persisted`               17     bool                  optional                                              
+:code:`medium_type`             20     `DeliveryMedium`_     optional                                              
+:code:`event_type`              23     `EventType`_          optional The event's type.                            
+:code:`event_version`           24     uint64                optional Event version timestamp.                     
+=============================== ====== ===================== ======== =============================================
 
 UserReadState
 -------------
 
-============================= ====== ================ ======== ===============
-Field                         Number Type             Label    Description    
-============================= ====== ================ ======== ===============
-:code:`participant_id`        1      `ParticipantId`_ optional                
-:code:`latest_read_timestamp` 2      uint64           optional TODO: always 0?
-============================= ====== ================ ======== ===============
+============================= ====== ================ ======== ===========
+Field                         Number Type             Label    Description
+============================= ====== ================ ======== ===========
+:code:`participant_id`        1      `ParticipantId`_ optional            
+:code:`latest_read_timestamp` 2      uint64           optional            
+============================= ====== ================ ======== ===========
 
 DeliveryMedium
 --------------
@@ -333,20 +338,20 @@ Field                   Number Type              Label    Description
 UserConversationState
 ---------------------
 
-============================== ====== ======================= ======== ================================
-Field                          Number Type                    Label    Description                     
-============================== ====== ======================= ======== ================================
-:code:`client_generated_id`    2      string                  optional                                 
-:code:`self_read_state`        7      `UserReadState`_        optional                                 
-:code:`status`                 8      `ConversationStatus`_   optional                                 
-:code:`notification_level`     9      `NotificationLevel`_    optional                                 
-:code:`view`                   10     `ConversationView`_     repeated                                 
-:code:`inviter_id`             11     `ParticipantId`_        optional                                 
-:code:`invite_timestamp`       12     uint64                  optional                                 
-:code:`sort_timestamp`         13     uint64                  optional                                 
-:code:`active_timestamp`       14     uint64                  optional when conversation became active?
-:code:`delivery_medium_option` 17     `DeliveryMediumOption`_ repeated                                 
-============================== ====== ======================= ======== ================================
+============================== ====== ======================= ======== ===========
+Field                          Number Type                    Label    Description
+============================== ====== ======================= ======== ===========
+:code:`client_generated_id`    2      string                  optional            
+:code:`self_read_state`        7      `UserReadState`_        optional            
+:code:`status`                 8      `ConversationStatus`_   optional            
+:code:`notification_level`     9      `NotificationLevel`_    optional            
+:code:`view`                   10     `ConversationView`_     repeated            
+:code:`inviter_id`             11     `ParticipantId`_        optional            
+:code:`invite_timestamp`       12     uint64                  optional            
+:code:`sort_timestamp`         13     uint64                  optional            
+:code:`active_timestamp`       14     uint64                  optional            
+:code:`delivery_medium_option` 17     `DeliveryMediumOption`_ repeated            
+============================== ====== ======================= ======== ===========
 
 ConversationParticipantData
 ---------------------------
@@ -405,12 +410,12 @@ Field                   Number Type             Label    Description
 Photo
 -----
 
-===================================== ====== ====== ======== ==================
-Field                                 Number Type   Label    Description       
-===================================== ====== ====== ======== ==================
-:code:`photo_id`                      1      string optional                   
-:code:`delete_albumless_source_photo` 2      bool   optional TODO: never tested
-===================================== ====== ====== ======== ==================
+===================================== ====== ====== ======== ===========
+Field                                 Number Type   Label    Description
+===================================== ====== ====== ======== ===========
+:code:`photo_id`                      1      string optional            
+:code:`delete_albumless_source_photo` 2      bool   optional            
+===================================== ====== ====== ======== ===========
 
 ExistingMedia
 -------------
@@ -435,30 +440,36 @@ Field                       Number Type                  Label    Description
 ClientVersion
 -------------
 
-========================= ====== ================== ======== ==============================================
-Field                     Number Type               Label    Description                                   
-========================= ====== ================== ======== ==============================================
-:code:`client_id`         1      `ClientId`_        optional                                               
-:code:`build_type`        2      `ClientBuildType`_ optional                                               
-:code:`major_version`     3      string             optional client version string                         
-:code:`version_timestamp` 4      uint64             optional not a timestamp in iOS/Android                
-:code:`device_os_version` 5      string             optional OS version string, only used by native apps   
-:code:`device_hardware`   6      string             optional device hardware name, only used by native apps
-========================= ====== ================== ======== ==============================================
+The client and device version.
+
+========================= ====== ================== ======== =======================================
+Field                     Number Type               Label    Description                            
+========================= ====== ================== ======== =======================================
+:code:`client_id`         1      `ClientId`_        optional Identifies the client.                 
+:code:`build_type`        2      `ClientBuildType`_ optional The client build type.                 
+:code:`major_version`     3      string             optional Client version.                        
+:code:`version_timestamp` 4      uint64             optional Client version timestamp.              
+:code:`device_os_version` 5      string             optional OS version string (for native apps).   
+:code:`device_hardware`   6      string             optional Device hardware name (for native apps).
+========================= ====== ================== ======== =======================================
 
 RequestHeader
 -------------
 
-========================= ====== =================== ======== ================
-Field                     Number Type                Label    Description     
-========================= ====== =================== ======== ================
-:code:`client_version`    1      `ClientVersion`_    optional TODO: incomplete
-:code:`client_identifier` 2      `ClientIdentifier`_ optional                 
-:code:`language_code`     4      string              optional                 
-========================= ====== =================== ======== ================
+Header for requests from the client to the server.
+
+========================= ====== =================== ======== ===========
+Field                     Number Type                Label    Description
+========================= ====== =================== ======== ===========
+:code:`client_version`    1      `ClientVersion`_    optional            
+:code:`client_identifier` 2      `ClientIdentifier`_ optional            
+:code:`language_code`     4      string              optional            
+========================= ====== =================== ======== ===========
 
 ResponseHeader
 --------------
+
+Header for responses from the server to the client.
 
 =========================== ====== ================= ======== ===========
 Field                       Number Type              Label    Description
@@ -504,6 +515,8 @@ Field                    Number Type              Label    Description
 ConversationState
 -----------------
 
+State of a conversation and recent events.
+
 ================================ ====== ========================= ======== ===========
 Field                            Number Type                      Label    Description
 ================================ ====== ========================= ======== ===========
@@ -516,13 +529,16 @@ Field                            Number Type                      Label    Descr
 EventContinuationToken
 ----------------------
 
-================================== ====== ====== ======== ========================================================
-Field                              Number Type   Label    Description                                             
-================================== ====== ====== ======== ========================================================
-:code:`event_id`                   1      string optional                                                         
-:code:`storage_continuation_token` 2      string optional TODO: this should be bytes, and pblite base64-encodes it
-:code:`event_timestamp`            3      uint64 optional                                                         
-================================== ====== ====== ======== ========================================================
+Token that allows retrieving more events from a position in a conversation.
+Specifying event_timestamp is sufficient.
+
+================================== ====== ====== ======== ===========
+Field                              Number Type   Label    Description
+================================== ====== ====== ======== ===========
+:code:`event_id`                   1      string optional            
+:code:`storage_continuation_token` 2      string optional            
+:code:`event_timestamp`            3      uint64 optional            
+================================== ====== ====== ======== ===========
 
 EntityLookupSpec
 ----------------
@@ -530,7 +546,7 @@ EntityLookupSpec
 =============== ====== ====== ======== ===========
 Field           Number Type   Label    Description
 =============== ====== ====== ======== ===========
-:code:`gaia_id` 1      string optional TODO       
+:code:`gaia_id` 1      string optional            
 =============== ====== ====== ======== ===========
 
 ConfigurationBit
@@ -565,41 +581,41 @@ Field           Number Type                Label    Description
 DesktopOffSetting
 -----------------
 
-=================== ====== ==== ======== ==============================
-Field               Number Type Label    Description                   
-=================== ====== ==== ======== ==============================
-:code:`desktop_off` 1      bool optional State of "desktop off" setting
-=================== ====== ==== ======== ==============================
+=================== ====== ==== ======== ===============================
+Field               Number Type Label    Description                    
+=================== ====== ==== ======== ===============================
+:code:`desktop_off` 1      bool optional State of "desktop off" setting.
+=================== ====== ==== ======== ===============================
 
 DesktopOffState
 ---------------
 
-=================== ====== ====== ======== ============================================
-Field               Number Type   Label    Description                                 
-=================== ====== ====== ======== ============================================
-:code:`desktop_off` 1      bool   optional Whether Hangouts desktop is signed off or on
-:code:`version`     2      uint64 optional                                             
-=================== ====== ====== ======== ============================================
+=================== ====== ====== ======== =============================================
+Field               Number Type   Label    Description                                  
+=================== ====== ====== ======== =============================================
+:code:`desktop_off` 1      bool   optional Whether Hangouts desktop is signed off or on.
+:code:`version`     2      uint64 optional                                              
+=================== ====== ====== ======== =============================================
 
 DndSetting
 ----------
 
-====================== ====== ====== ======== ================================================================================================================================================
-Field                  Number Type   Label    Description                                                                                                                                     
-====================== ====== ====== ======== ================================================================================================================================================
-:code:`do_not_disturb` 1      bool   optional Enable or disable do-not-disturb mode Not to be confused with DoNotDisturbSetting, which is the same thing but with an timestamp for expiration.
-:code:`timeout_secs`   2      uint64 optional do not disturb expiration, in seconds                                                                                                           
-====================== ====== ====== ======== ================================================================================================================================================
+====================== ====== ====== ======== =================================================================================================================================================
+Field                  Number Type   Label    Description                                                                                                                                      
+====================== ====== ====== ======== =================================================================================================================================================
+:code:`do_not_disturb` 1      bool   optional Enable or disable do-not-disturb mode. Not to be confused with DoNotDisturbSetting, which is the same thing but with an timestamp for expiration.
+:code:`timeout_secs`   2      uint64 optional Do not disturb expiration in seconds.                                                                                                            
+====================== ====== ====== ======== =================================================================================================================================================
 
 PresenceStateSetting
 --------------------
 
-==================== ====== ========================== ======== =====================================
-Field                Number Type                       Label    Description                          
-==================== ====== ========================== ======== =====================================
-:code:`timeout_secs` 1      uint64                     optional Change the client presence state type
-:code:`type`         2      `ClientPresenceStateType`_ optional                                      
-==================== ====== ========================== ======== =====================================
+==================== ====== ========================== ======== ===========
+Field                Number Type                       Label    Description
+==================== ====== ========================== ======== ===========
+:code:`timeout_secs` 1      uint64                     optional            
+:code:`type`         2      `ClientPresenceStateType`_ optional            
+==================== ====== ========================== ======== ===========
 
 MoodMessage
 -----------
@@ -622,11 +638,13 @@ Field           Number Type       Label    Description
 MoodSetting
 -----------
 
-==================== ====== ============== ======== ============================
-Field                Number Type           Label    Description                 
-==================== ====== ============== ======== ============================
-:code:`mood_message` 1      `MoodMessage`_ optional Chat the user's mood message
-==================== ====== ============== ======== ============================
+The user's mood message.
+
+==================== ====== ============== ======== ===========
+Field                Number Type           Label    Description
+==================== ====== ============== ======== ===========
+:code:`mood_message` 1      `MoodMessage`_ optional            
+==================== ====== ============== ======== ===========
 
 MoodState
 ---------
@@ -676,7 +694,7 @@ Field                                            Number Type                    
 :code:`notification_level_notification`          6      `SetConversationNotificationLevelNotification`_ optional                                                                                     
 :code:`reply_to_invite_notification`             7      `ReplyToInviteNotification`_                    optional                                                                                     
 :code:`watermark_notification`                   8      `WatermarkNotification`_                        optional                                                                                     
-:code:`view_modification`                        11     `ConversationViewModification`_                 optional TODO: rename to ViewModificationNotification?                                       
+:code:`view_modification`                        11     `ConversationViewModification`_                 optional                                                                                     
 :code:`easter_egg_notification`                  12     `EasterEggNotification`_                        optional                                                                                     
 :code:`self_presence_notification`               14     `SelfPresenceNotification`_                     optional                                                                                     
 :code:`delete_notification`                      15     `DeleteActionNotification`_                     optional                                                                                     
@@ -749,23 +767,23 @@ Field                   Number Type              Label    Description
 SetConversationNotificationLevelNotification
 --------------------------------------------
 
-======================= ====== ==================== ======== ================
-Field                   Number Type                 Label    Description     
-======================= ====== ==================== ======== ================
-:code:`conversation_id` 1      `ConversationId`_    optional                 
-:code:`level`           2      `NotificationLevel`_ optional                 
-:code:`timestamp`       4      uint64               optional unknown (0) = 3;
-======================= ====== ==================== ======== ================
+======================= ====== ==================== ======== ===========
+Field                   Number Type                 Label    Description
+======================= ====== ==================== ======== ===========
+:code:`conversation_id` 1      `ConversationId`_    optional            
+:code:`level`           2      `NotificationLevel`_ optional            
+:code:`timestamp`       4      uint64               optional            
+======================= ====== ==================== ======== ===========
 
 ReplyToInviteNotification
 -------------------------
 
-======================= ====== ==================== ======== ==================================================
-Field                   Number Type                 Label    Description                                       
-======================= ====== ==================== ======== ==================================================
-:code:`conversation_id` 1      `ConversationId`_    optional TODO: untested [['UgwnHidpJTfc7G7BhUR4AaABAQ'], 1]
-:code:`type`            2      `ReplyToInviteType`_ optional                                                   
-======================= ====== ==================== ======== ==================================================
+======================= ====== ==================== ======== ===========
+Field                   Number Type                 Label    Description
+======================= ====== ==================== ======== ===========
+:code:`conversation_id` 1      `ConversationId`_    optional            
+:code:`type`            2      `ReplyToInviteType`_ optional            
+======================= ====== ==================== ======== ===========
 
 WatermarkNotification
 ---------------------
@@ -781,13 +799,13 @@ Field                         Number Type              Label    Description
 ConversationViewModification
 ----------------------------
 
-======================= ====== =================== ======== =================================================================================================
-Field                   Number Type                Label    Description                                                                                      
-======================= ====== =================== ======== =================================================================================================
-:code:`conversation_id` 1      `ConversationId`_   optional                                                                                                  
-:code:`old_view`        2      `ConversationView`_ optional                                                                                                  
-:code:`new_view`        3      `ConversationView`_ optional archive: [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 1, 2] unarchive: [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 2, 1]
-======================= ====== =================== ======== =================================================================================================
+======================= ====== =================== ======== ===========
+Field                   Number Type                Label    Description
+======================= ====== =================== ======== ===========
+:code:`conversation_id` 1      `ConversationId`_   optional            
+:code:`old_view`        2      `ConversationView`_ optional            
+:code:`new_view`        3      `ConversationView`_ optional            
+======================= ====== =================== ======== ===========
 
 EasterEggNotification
 ---------------------
@@ -803,25 +821,27 @@ Field                   Number Type              Label    Description
 SelfPresenceNotification
 ------------------------
 
-============================== ====== ====================== ======== ================================
-Field                          Number Type                   Label    Description                     
-============================== ====== ====================== ======== ================================
-:code:`client_presence_state`  1      `ClientPresenceState`_ optional status of other clients and mood
-:code:`do_not_disturb_setting` 3      `DoNotDisturbSetting`_ optional                                 
-:code:`desktop_off_setting`    4      `DesktopOffSetting`_   optional                                 
-:code:`desktop_off_state`      5      `DesktopOffState`_     optional                                 
-:code:`mood_state`             6      `MoodState`_           optional                                 
-============================== ====== ====================== ======== ================================
+Notifies the status of other clients and mood.
+
+============================== ====== ====================== ======== ===========
+Field                          Number Type                   Label    Description
+============================== ====== ====================== ======== ===========
+:code:`client_presence_state`  1      `ClientPresenceState`_ optional            
+:code:`do_not_disturb_setting` 3      `DoNotDisturbSetting`_ optional            
+:code:`desktop_off_setting`    4      `DesktopOffSetting`_   optional            
+:code:`desktop_off_state`      5      `DesktopOffState`_     optional            
+:code:`mood_state`             6      `MoodState`_           optional            
+============================== ====== ====================== ======== ===========
 
 DeleteActionNotification
 ------------------------
 
-======================= ====== ================= ======== ==============================================================================================
-Field                   Number Type              Label    Description                                                                                   
-======================= ====== ================= ======== ==============================================================================================
-:code:`conversation_id` 1      `ConversationId`_ optional delete conversation: [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], [1435638391438133, 1435637794504105, 1]]
-:code:`delete_action`   2      `DeleteAction`_   optional                                                                                               
-======================= ====== ================= ======== ==============================================================================================
+======================= ====== ================= ======== ===========
+Field                   Number Type              Label    Description
+======================= ====== ================= ======== ===========
+:code:`conversation_id` 1      `ConversationId`_ optional            
+:code:`delete_action`   2      `DeleteAction`_   optional            
+======================= ====== ================= ======== ===========
 
 PresenceNotification
 --------------------
@@ -835,11 +855,11 @@ Field            Number Type              Label    Description
 BlockNotification
 -----------------
 
-========================== ====== =================== ======== =========================================================================
-Field                      Number Type                Label    Description                                                              
-========================== ====== =================== ======== =========================================================================
-:code:`block_state_change` 1      `BlockStateChange`_ repeated block someone [[[['102610215878429116806', '102610215878429116806'], 1]]]
-========================== ====== =================== ======== =========================================================================
+========================== ====== =================== ======== ===========
+Field                      Number Type                Label    Description
+========================== ====== =================== ======== ===========
+:code:`block_state_change` 1      `BlockStateChange`_ repeated            
+========================== ====== =================== ======== ===========
 
 SetNotificationSettingNotification
 ----------------------------------
@@ -864,7 +884,7 @@ ConversationSpec
 ======================= ====== ================= ======== ===========
 Field                   Number Type              Label    Description
 ======================= ====== ================= ======== ===========
-:code:`conversation_id` 1      `ConversationId`_ optional TODO       
+:code:`conversation_id` 1      `ConversationId`_ optional            
 ======================= ====== ================= ======== ===========
 
 AddUserRequest
@@ -957,15 +977,15 @@ Field                   Number Type              Label    Description
 GetConversationRequest
 ----------------------
 
-=================================== ====== ========================= ======== ===================================
-Field                               Number Type                      Label    Description                        
-=================================== ====== ========================= ======== ===================================
-:code:`request_header`              1      `RequestHeader`_          optional                                    
-:code:`conversation_spec`           2      `ConversationSpec`_       optional                                    
-:code:`include_event`               4      bool                      optional include_conversation_metadata? = 3;
-:code:`max_events_per_conversation` 6      uint64                    optional unknown = 5;                       
-:code:`event_continuation_token`    7      `EventContinuationToken`_ optional                                    
-=================================== ====== ========================= ======== ===================================
+=================================== ====== ========================= ======== ===========
+Field                               Number Type                      Label    Description
+=================================== ====== ========================= ======== ===========
+:code:`request_header`              1      `RequestHeader`_          optional            
+:code:`conversation_spec`           2      `ConversationSpec`_       optional            
+:code:`include_event`               4      bool                      optional            
+:code:`max_events_per_conversation` 6      uint64                    optional            
+:code:`event_continuation_token`    7      `EventContinuationToken`_ optional            
+=================================== ====== ========================= ======== ===========
 
 GetConversationResponse
 -----------------------
@@ -974,18 +994,18 @@ GetConversationResponse
 Field                      Number Type                 Label    Description
 ========================== ====== ==================== ======== ===========
 :code:`response_header`    1      `ResponseHeader`_    optional            
-:code:`conversation_state` 2      `ConversationState`_ optional TODO       
+:code:`conversation_state` 2      `ConversationState`_ optional            
 ========================== ====== ==================== ======== ===========
 
 GetEntityByIdRequest
 --------------------
 
-========================= ====== =================== ======== ============
-Field                     Number Type                Label    Description 
-========================= ====== =================== ======== ============
-:code:`request_header`    1      `RequestHeader`_    optional             
-:code:`batch_lookup_spec` 3      `EntityLookupSpec`_ repeated unknown = 2;
-========================= ====== =================== ======== ============
+========================= ====== =================== ======== ===========
+Field                     Number Type                Label    Description
+========================= ====== =================== ======== ===========
+:code:`request_header`    1      `RequestHeader`_    optional            
+:code:`batch_lookup_spec` 3      `EntityLookupSpec`_ repeated            
+========================= ====== =================== ======== ===========
 
 GetEntityByIdResponse
 ---------------------
@@ -993,7 +1013,7 @@ GetEntityByIdResponse
 ======================= ====== ================= ======== ===========
 Field                   Number Type              Label    Description
 ======================= ====== ================= ======== ===========
-:code:`response_header` 1      `ResponseHeader`_ optional TODO       
+:code:`response_header` 1      `ResponseHeader`_ optional            
 :code:`entity`          2      `Entity`_         repeated            
 ======================= ====== ================= ======== ===========
 
@@ -1003,7 +1023,7 @@ GetSuggestedEntitiesRequest
 ====================== ====== ================ ======== ===========
 Field                  Number Type             Label    Description
 ====================== ====== ================ ======== ===========
-:code:`request_header` 1      `RequestHeader`_ optional TODO       
+:code:`request_header` 1      `RequestHeader`_ optional            
 ====================== ====== ================ ======== ===========
 
 GetSuggestedEntitiesResponse
@@ -1012,7 +1032,7 @@ GetSuggestedEntitiesResponse
 ======================= ====== =========================================== ======== ===========
 Field                   Number Type                                        Label    Description
 ======================= ====== =========================================== ======== ===========
-:code:`response_header` 1      `ResponseHeader`_                           optional TODO       
+:code:`response_header` 1      `ResponseHeader`_                           optional            
 :code:`entity`          2      `Entity`_                                   repeated            
 :code:`group1`          4      `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
 :code:`group2`          5      `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
@@ -1025,14 +1045,11 @@ Field                   Number Type                                        Label
 GetSuggestedEntitiesResponse.EntityGroup
 ----------------------------------------
 
-more entities in 4, 5, 6, 7, 8, 9
-TODO: wtf is with these extra entities
-
-============== ====== =============================================== ======== ================================
-Field          Number Type                                            Label    Description                     
-============== ====== =============================================== ======== ================================
-:code:`entity` 3      `GetSuggestedEntitiesResponse.EntityGroup.Foo`_ repeated unknown 0 = 1; unknown code = 2;
-============== ====== =============================================== ======== ================================
+============== ====== =============================================== ======== ===========
+Field          Number Type                                            Label    Description
+============== ====== =============================================== ======== ===========
+:code:`entity` 3      `GetSuggestedEntitiesResponse.EntityGroup.Foo`_ repeated            
+============== ====== =============================================== ======== ===========
 
 GetSuggestedEntitiesResponse.EntityGroup.Foo
 --------------------------------------------
@@ -1049,22 +1066,22 @@ GetSelfInfoRequest
 ====================== ====== ================ ======== ===========
 Field                  Number Type             Label    Description
 ====================== ====== ================ ======== ===========
-:code:`request_header` 1      `RequestHeader`_ optional TODO       
+:code:`request_header` 1      `RequestHeader`_ optional            
 ====================== ====== ================ ======== ===========
 
 GetSelfInfoResponse
 -------------------
 
-=========================== ====== ==================== ======== ==============================
-Field                       Number Type                 Label    Description                   
-=========================== ====== ==================== ======== ==============================
-:code:`response_header`     1      `ResponseHeader`_    optional                               
-:code:`self_entity`         2      `Entity`_            optional                               
-:code:`desktop_off_setting` 6      `DesktopOffSetting`_ optional                               
-:code:`configuration_bit`   8      `ConfigurationBit`_  repeated                               
-:code:`desktop_off_state`   9      `DesktopOffState`_   optional                               
-:code:`rich_presence_state` 12     `RichPresenceState`_ optional TODO: all kinds of extra stuff
-=========================== ====== ==================== ======== ==============================
+=========================== ====== ==================== ======== ===========
+Field                       Number Type                 Label    Description
+=========================== ====== ==================== ======== ===========
+:code:`response_header`     1      `ResponseHeader`_    optional            
+:code:`self_entity`         2      `Entity`_            optional            
+:code:`desktop_off_setting` 6      `DesktopOffSetting`_ optional            
+:code:`configuration_bit`   8      `ConfigurationBit`_  repeated            
+:code:`desktop_off_state`   9      `DesktopOffState`_   optional            
+:code:`rich_presence_state` 12     `RichPresenceState`_ optional            
+=========================== ====== ==================== ======== ===========
 
 QueryPresenceRequest
 --------------------
@@ -1114,19 +1131,19 @@ RenameConversationRequest
 Field                        Number Type                  Label    Description
 ============================ ====== ===================== ======== ===========
 :code:`request_header`       1      `RequestHeader`_      optional            
-:code:`new_name`             3      string                optional TODO       
+:code:`new_name`             3      string                optional            
 :code:`event_request_header` 5      `EventRequestHeader`_ optional            
 ============================ ====== ===================== ======== ===========
 
 RenameConversationResponse
 --------------------------
 
-======================= ====== ================= ======== =============================
-Field                   Number Type              Label    Description                  
-======================= ====== ================= ======== =============================
-:code:`response_header` 1      `ResponseHeader`_ optional TODO                         
-:code:`created_event`   4      `Event`_          optional TODO: use json to check name?
-======================= ====== ================= ======== =============================
+======================= ====== ================= ======== ===========
+Field                   Number Type              Label    Description
+======================= ====== ================= ======== ===========
+:code:`response_header` 1      `ResponseHeader`_ optional            
+:code:`created_event`   4      `Event`_          optional            
+======================= ====== ================= ======== ===========
 
 SearchEntitiesRequest
 ---------------------
@@ -1152,36 +1169,36 @@ Field                   Number Type              Label    Description
 SendChatMessageRequest
 ----------------------
 
-============================ ====== ===================== ======== ================
-Field                        Number Type                  Label    Description     
-============================ ====== ===================== ======== ================
-:code:`request_header`       1      `RequestHeader`_      optional TODO: incomplete
-:code:`message_content`      6      `MessageContent`_     optional                 
-:code:`existing_media`       7      `ExistingMedia`_      optional                 
-:code:`event_request_header` 8      `EventRequestHeader`_ optional                 
-============================ ====== ===================== ======== ================
+============================ ====== ===================== ======== ===========
+Field                        Number Type                  Label    Description
+============================ ====== ===================== ======== ===========
+:code:`request_header`       1      `RequestHeader`_      optional            
+:code:`message_content`      6      `MessageContent`_     optional            
+:code:`existing_media`       7      `ExistingMedia`_      optional            
+:code:`event_request_header` 8      `EventRequestHeader`_ optional            
+============================ ====== ===================== ======== ===========
 
 SendChatMessageResponse
 -----------------------
 
-======================= ====== ================= ======== ===============
-Field                   Number Type              Label    Description    
-======================= ====== ================= ======== ===============
-:code:`response_header` 1      `ResponseHeader`_ optional                
-:code:`created_event`   6      `Event`_          optional unknown [] = 4;
-======================= ====== ================= ======== ===============
+======================= ====== ================= ======== ===========
+Field                   Number Type              Label    Description
+======================= ====== ================= ======== ===========
+:code:`response_header` 1      `ResponseHeader`_ optional            
+:code:`created_event`   6      `Event`_          optional            
+======================= ====== ================= ======== ===========
 
 SetActiveClientRequest
 ----------------------
 
-====================== ====== ================ ======== ===============================================================
-Field                  Number Type             Label    Description                                                    
-====================== ====== ================ ======== ===============================================================
-:code:`request_header` 1      `RequestHeader`_ optional                                                                
-:code:`is_active`      2      bool             optional Whether to set the client as active (true) or inactive (false).
-:code:`full_jid`       3      string           optional 'email/resource'                                               
-:code:`timeout_secs`   4      uint64           optional Timeout in seconds for client to remain active.                
-====================== ====== ================ ======== ===============================================================
+====================== ====== ================ ======== ================================================
+Field                  Number Type             Label    Description                                     
+====================== ====== ================ ======== ================================================
+:code:`request_header` 1      `RequestHeader`_ optional                                                 
+:code:`is_active`      2      bool             optional Whether to set the client as active or inactive.
+:code:`full_jid`       3      string           optional 'email/resource'.                               
+:code:`timeout_secs`   4      uint64           optional Timeout in seconds for client to remain active. 
+====================== ====== ================ ======== ================================================
 
 SetActiveClientResponse
 -----------------------
@@ -1198,16 +1215,17 @@ SetConversationLevelRequest
 ====================== ====== ================ ======== ===========
 Field                  Number Type             Label    Description
 ====================== ====== ================ ======== ===========
-:code:`request_header` 1      `RequestHeader`_ optional TODO       
+:code:`request_header` 1      `RequestHeader`_ optional            
 ====================== ====== ================ ======== ===========
 
 SetConversationLevelResponse
 ----------------------------
 
-===== ====== ==== ===== ===========
-Field Number Type Label Description
-===== ====== ==== ===== ===========
-===== ====== ==== ===== ===========
+======================= ====== ================= ======== ===========
+Field                   Number Type              Label    Description
+======================= ====== ================= ======== ===========
+:code:`response_header` 1      `ResponseHeader`_ optional            
+======================= ====== ================= ======== ===========
 
 SetConversationNotificationLevelRequest
 ---------------------------------------
@@ -1255,15 +1273,17 @@ Field                   Number Type              Label    Description
 SetPresenceRequest
 ------------------
 
-============================== ====== ======================= ======== ====================================================
-Field                          Number Type                    Label    Description                                         
-============================== ====== ======================= ======== ====================================================
-:code:`request_header`         1      `RequestHeader`_        optional                                                     
-:code:`presence_state_setting` 2      `PresenceStateSetting`_ optional One or more of the following field may be specified:
-:code:`dnd_setting`            3      `DndSetting`_           optional                                                     
-:code:`desktop_off_setting`    5      `DesktopOffSetting`_    optional                                                     
-:code:`mood_setting`           8      `MoodSetting`_          optional                                                     
-============================== ====== ======================= ======== ====================================================
+Allows setting one or more of the included presence-related settings.
+
+============================== ====== ======================= ======== ===========
+Field                          Number Type                    Label    Description
+============================== ====== ======================= ======== ===========
+:code:`request_header`         1      `RequestHeader`_        optional            
+:code:`presence_state_setting` 2      `PresenceStateSetting`_ optional            
+:code:`dnd_setting`            3      `DndSetting`_           optional            
+:code:`desktop_off_setting`    5      `DesktopOffSetting`_    optional            
+:code:`mood_setting`           8      `MoodSetting`_          optional            
+============================== ====== ======================= ======== ===========
 
 SetPresenceResponse
 -------------------
@@ -1298,13 +1318,13 @@ Field                   Number Type              Label    Description
 SyncAllNewEventsRequest
 -----------------------
 
-=============================== ====== ================ ======== ==============================================
-Field                           Number Type             Label    Description                                   
-=============================== ====== ================ ======== ==============================================
-:code:`request_header`          1      `RequestHeader`_ optional                                               
-:code:`last_sync_timestamp`     2      uint64           optional timestamp after which to return all new events
-:code:`max_response_size_bytes` 8      uint64           optional TODO                                          
-=============================== ====== ================ ======== ==============================================
+=============================== ====== ================ ======== ===============================================
+Field                           Number Type             Label    Description                                    
+=============================== ====== ================ ======== ===============================================
+:code:`request_header`          1      `RequestHeader`_ optional                                                
+:code:`last_sync_timestamp`     2      uint64           optional Timestamp after which to return all new events.
+:code:`max_response_size_bytes` 8      uint64           optional                                                
+=============================== ====== ================ ======== ===============================================
 
 SyncAllNewEventsResponse
 ------------------------
@@ -1314,7 +1334,7 @@ Field                      Number Type                 Label    Description
 ========================== ====== ==================== ======== ===========
 :code:`response_header`    1      `ResponseHeader`_    optional            
 :code:`sync_timestamp`     2      uint64               optional            
-:code:`conversation_state` 3      `ConversationState`_ repeated TODO       
+:code:`conversation_state` 3      `ConversationState`_ repeated            
 ========================== ====== ==================== ======== ===========
 
 SyncRecentConversationsRequest
@@ -1416,7 +1436,7 @@ Name                                         Number Description
 :code:`CLIENT_PRESENCE_STATE_UNKNOWN`        0                 
 :code:`CLIENT_PRESENCE_STATE_NONE`           1                 
 :code:`CLIENT_PRESENCE_STATE_DESKTOP_IDLE`   30                
-:code:`CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE` 40     TODO       
+:code:`CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE` 40                
 ============================================ ====== ===========
 
 NotificationLevel
@@ -1433,13 +1453,13 @@ Name                               Number Description
 SegmentType
 -----------
 
-=============================== ====== ===========
-Name                            Number Description
-=============================== ====== ===========
-:code:`SEGMENT_TYPE_TEXT`       0                 
-:code:`SEGMENT_TYPE_LINE_BREAK` 1                 
-:code:`SEGMENT_TYPE_LINK`       2                 
-=============================== ====== ===========
+=============================== ====== ============================
+Name                            Number Description                 
+=============================== ====== ============================
+:code:`SEGMENT_TYPE_TEXT`       0      Segment is text.            
+:code:`SEGMENT_TYPE_LINE_BREAK` 1      Segment is a line break.    
+:code:`SEGMENT_TYPE_LINK`       2      Segment is hyperlinked text.
+=============================== ====== ============================
 
 ItemType
 --------
@@ -1640,30 +1660,30 @@ ClientId
 
 Identifies the client.
 
-============================= ====== =====================================
-Name                          Number Description                          
-============================= ====== =====================================
-:code:`CLIENT_ID_UNKNOWN`     0                                           
-:code:`CLIENT_ID_ANDROID`     1      Hangouts app for Android             
-:code:`CLIENT_ID_IOS`         2      Hangouts app for iOS                 
-:code:`CLIENT_ID_CHROME`      3      Hangouts Chrome extension            
-:code:`CLIENT_ID_WEB_GPLUS`   5      Hangouts web interface in Google Plus
-:code:`CLIENT_ID_WEB_GMAIL`   6      Hangouts web interface in Gmail      
-:code:`CLIENT_ID_ULTRAVIOLET` 13     Hangouts Chrome app ("ultraviolet")  
-============================= ====== =====================================
+============================= ====== ======================================
+Name                          Number Description                           
+============================= ====== ======================================
+:code:`CLIENT_ID_UNKNOWN`     0                                            
+:code:`CLIENT_ID_ANDROID`     1      Hangouts app for Android.             
+:code:`CLIENT_ID_IOS`         2      Hangouts app for iOS.                 
+:code:`CLIENT_ID_CHROME`      3      Hangouts Chrome extension.            
+:code:`CLIENT_ID_WEB_GPLUS`   5      Hangouts web interface in Google Plus.
+:code:`CLIENT_ID_WEB_GMAIL`   6      Hangouts web interface in Gmail.      
+:code:`CLIENT_ID_ULTRAVIOLET` 13     Hangouts Chrome app ("ultraviolet").  
+============================= ====== ======================================
 
 ClientBuildType
 ---------------
 
 Build type of the client.
 
-================================= ====== =======================================================================================
-Name                              Number Description                                                                            
-================================= ====== =======================================================================================
-:code:`BUILD_TYPE_UNKNOWN`        0                                                                                             
-:code:`BUILD_TYPE_PRODUCTION_WEB` 1      build type used by web apps                                                            
-:code:`BUILD_TYPE_PRODUCTION_APP` 3      built type used by native apps hangups used to use this, but web apps seem to use 1 now
-================================= ====== =======================================================================================
+================================= ====== ===========
+Name                              Number Description
+================================= ====== ===========
+:code:`BUILD_TYPE_UNKNOWN`        0                 
+:code:`BUILD_TYPE_PRODUCTION_WEB` 1      Web app.   
+:code:`BUILD_TYPE_PRODUCTION_APP` 3      Native app.
+================================= ====== ===========
 
 ResponseStatus
 --------------
@@ -1682,15 +1702,15 @@ Name                                     Number Description
 PhotoUrlStatus
 --------------
 
-Status of EntityProperties.photo_url
+Status of EntityProperties.photo_url.
 
-==================================== ====== ====================================
-Name                                 Number Description                         
-==================================== ====== ====================================
-:code:`PHOTO_URL_STATUS_UNKNOWN`     0                                          
-:code:`PHOTO_URL_STATUS_PLACEHOLDER` 1      photo_url is a placeholder          
-:code:`PHOTO_URL_STATUS_USER_PHOTO`  2      photo_url is a photo set by the user
-==================================== ====== ====================================
+==================================== ====== ===============================
+Name                                 Number Description                    
+==================================== ====== ===============================
+:code:`PHOTO_URL_STATUS_UNKNOWN`     0                                     
+:code:`PHOTO_URL_STATUS_PLACEHOLDER` 1      URL is a placeholder.          
+:code:`PHOTO_URL_STATUS_USER_PHOTO`  2      URL is a photo set by the user.
+==================================== ====== ===============================
 
 Gender
 ------
@@ -1803,6 +1823,6 @@ Name                         Number Description
 ============================ ====== ===========
 :code:`SYNC_FILTER_UNKNOWN`  0                 
 :code:`SYNC_FILTER_INBOX`    1                 
-:code:`SYNC_FILTER_ARCHIVED` 2      TODO       
+:code:`SYNC_FILTER_ARCHIVED` 2                 
 ============================ ====== ===========
 

@@ -93,8 +93,10 @@ enum TypingType {
 }
 
 message ClientIdentifier {
-  optional string resource = 1; // (client_id in hangups)
-  optional string header_id = 2; // unknown (header_id in hangups)
+  // (client_id in hangups).
+  optional string resource = 1;
+  // unknown (header_id in hangups).
+  optional string header_id = 2;
 }
 
 enum ClientPresenceStateType {
@@ -102,6 +104,7 @@ enum ClientPresenceStateType {
   CLIENT_PRESENCE_STATE_NONE = 1;
   CLIENT_PRESENCE_STATE_DESKTOP_IDLE = 30;
   CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE = 40;
+
   // TODO
 }
 
@@ -125,8 +128,11 @@ message UserEventState {
 }
 
 enum SegmentType {
+  // Segment is text.
   SEGMENT_TYPE_TEXT = 0;
+  // Segment is a line break.
   SEGMENT_TYPE_LINE_BREAK = 1;
+  // Segment is hyperlinked text.
   SEGMENT_TYPE_LINK = 2;
 }
 
@@ -141,11 +147,18 @@ message LinkData {
   optional string link_target = 1;
 }
 
+// A segment of a message. Message are broken into segments that may be of
+// different types and have different formatting.
 message Segment {
-  // Hangouts for Chrome misbehaves if this field isn't serialized
+  // Note: This field is required because Hangouts for Chrome misbehaves if it
+  // isn't serialized.
   required SegmentType type = 1;
-  optional string text = 2; // may be empty for linebreaks
+  // The segment text. For line breaks, may either be empty or contain new line
+  // character.
+  optional string text = 2;
+  // Formatting for this segment.
   optional Formatting formatting = 3;
+  // Link data for this segment, if it is a link.
   optional LinkData link_data = 4;
 }
 
@@ -202,13 +215,10 @@ message PlusPhoto {
 
 // An item of some type embedded in a chat message.
 message EmbedItem {
-
   // List of embedded item types in this message.
   repeated ItemType type = 1;
-
   // For photos this is not given, for maps, it's the URL of the map.
   optional string id = 2;
-
   // Embedded Google Plus photo.
   optional PlusPhoto plus_photo = 27639957;
 
@@ -228,10 +238,14 @@ message MessageContent {
   repeated Attachment attachment = 2;
 }
 
+// A chat message in a conversation.
 message ChatMessage {
+  // The message's content.
+  optional MessageContent message_content = 3;
+
+  // TODO:
   // always 0? = 1;
   // annotation (always None?) = 2;
-  optional MessageContent message_content = 3;
 }
 
 enum MembershipChangeType {
@@ -241,8 +255,10 @@ enum MembershipChangeType {
 
 message MembershipChange {
   optional MembershipChangeType type = 1;
-  // unknown [] = 2;
   repeated ParticipantId participant_ids = 3;
+
+  // TODO:
+  // unknown [] = 2;
   // leave_reason (4, 2) = 4;
 }
 
@@ -264,6 +280,8 @@ enum HangoutEventType {
 message HangoutEvent {
   optional HangoutEventType event_type = 1;
   repeated ParticipantId participant_id = 2;
+
+  // TODO:
   // unknown 1 = 7;
 }
 
@@ -305,18 +323,19 @@ enum EventType {
 
 // Event that becomes part of a conversation's history.
 message Event {
+  // ID of the conversation this event belongs to.
   optional ConversationId conversation_id = 1;
+  // ID of the user that sent this event.
   optional ParticipantId sender_id = 2;
+  // Timestamp when the event occurred.
   optional uint64 timestamp = 3;
   optional UserEventState self_event_state = 4;
   optional SourceType source_type = 6;
-
-  // TODO: some of these are probably in a oneof
-
   optional ChatMessage chat_message = 7;
   optional MembershipChange membership_change = 9;
   optional ConversationRename conversation_rename = 10;
   optional HangoutEvent hangout_event = 11;
+  // Unique ID for the event.
   optional string event_id = 12;
   optional uint64 expiration_timestamp = 13;
   optional OTRModification otr_modification = 14;
@@ -324,11 +343,13 @@ message Event {
   optional OffTheRecordStatus otr_status = 16;
   optional bool persisted = 17;
   optional DeliveryMedium medium_type = 20;
+  // The event's type.
   optional EventType event_type = 23;
-
   // Event version timestamp.
   optional uint64 event_version = 24;
 
+  // TODO: some of these fields are probably in a oneof
+  // TODO:
   // unknown sending messages (['7-H0Z7-BCTg80ySBsfibNV', 4, None, 1435550921815004]) = 26;
 }
 
@@ -342,7 +363,9 @@ enum ConversationType {
 
 message UserReadState {
   optional ParticipantId participant_id = 1;
-  optional uint64 latest_read_timestamp = 2; // TODO: always 0?
+  optional uint64 latest_read_timestamp = 2;
+
+  // TODO: is latest_read_timestamp always 0?
 }
 
 enum ConversationStatus {
@@ -386,7 +409,7 @@ message UserConversationState {
    optional ParticipantId inviter_id = 11;
    optional uint64 invite_timestamp = 12;
    optional uint64 sort_timestamp = 13;
-   optional uint64 active_timestamp = 14; // when conversation became active?
+   optional uint64 active_timestamp = 14;
    repeated DeliveryMediumOption delivery_medium_option = 17;
 }
 
@@ -426,16 +449,12 @@ message Conversation {
   optional string name = 3;
   optional UserConversationState self_conversation_state = 4;
   repeated UserReadState read_state = 8;
-
   // True if the conversation has an active Hangout.
   optional bool has_active_hangout = 9;
-
   // The conversation's "off the record" status.
   optional OffTheRecordStatus otr_status = 10;
-
   // Whether the OTR toggle is available to the user for this conversation.
   optional OffTheRecordToggle otr_toggle = 11;
-
   repeated ParticipantId current_participant = 13;
   repeated ConversationParticipantData participant_data = 14;
   repeated NetworkType network_type = 18;
@@ -465,7 +484,9 @@ enum ReplyToInviteType {
 
 message Photo {
   optional string photo_id = 1;
-  optional bool delete_albumless_source_photo = 2; // TODO: never tested
+  optional bool delete_albumless_source_photo = 2;
+
+  // TODO: test delete_albumless_source_photo
 }
 
 message ExistingMedia {
@@ -481,52 +502,52 @@ message EventRequestHeader {
 // Identifies the client.
 enum ClientId {
   CLIENT_ID_UNKNOWN = 0;
-  // Hangouts app for Android
+  // Hangouts app for Android.
   CLIENT_ID_ANDROID = 1;
-  // Hangouts app for iOS
+  // Hangouts app for iOS.
   CLIENT_ID_IOS = 2;
-  // Hangouts Chrome extension
+  // Hangouts Chrome extension.
   CLIENT_ID_CHROME = 3;
-  // Hangouts web interface in Google Plus
+  // Hangouts web interface in Google Plus.
   CLIENT_ID_WEB_GPLUS = 5;
-  // Hangouts web interface in Gmail
+  // Hangouts web interface in Gmail.
   CLIENT_ID_WEB_GMAIL = 6;
-  // Hangouts Chrome app ("ultraviolet")
+  // Hangouts Chrome app ("ultraviolet").
   CLIENT_ID_ULTRAVIOLET = 13;
 }
 
 // Build type of the client.
 enum ClientBuildType {
   BUILD_TYPE_UNKNOWN = 0;
-  // build type used by web apps
+  // Web app.
   BUILD_TYPE_PRODUCTION_WEB = 1;
-  // built type used by native apps
-  // hangups used to use this, but web apps seem to use 1 now
+  // Native app.
   BUILD_TYPE_PRODUCTION_APP = 3;
 }
 
+// The client and device version.
 message ClientVersion {
-  // The client and device versions.
-
+  // Identifies the client.
   optional ClientId client_id = 1;
+  // The client build type.
   optional ClientBuildType build_type = 2;
-  // client version string
+  // Client version.
   optional string major_version = 3;
-  // not a timestamp in iOS/Android
+  // Client version timestamp.
   optional uint64 version_timestamp = 4;
-  // OS version string, only used by native apps
+  // OS version string (for native apps).
   optional string device_os_version = 5;
-  // device hardware name, only used by native apps
+  // Device hardware name (for native apps).
   optional string device_hardware = 6;
 }
 
+// Header for requests from the client to the server.
 message RequestHeader {
-  // Header for requests from the client to the server.
-
-  // TODO: incomplete
   optional ClientVersion client_version = 1;
   optional ClientIdentifier client_identifier = 2;
   optional string language_code = 4;
+
+  // TODO: incomplete
 }
 
 // Status of the response from the server to the client.
@@ -537,9 +558,8 @@ enum ResponseStatus {
   RESPONSE_STATUS_INVALID_REQUEST = 4;
 }
 
+// Header for responses from the server to the client.
 message ResponseHeader {
-  // Header for responses from the server to the client.
-
   optional ResponseStatus status = 1;
   optional string error_description = 2;
   optional string debug_url = 3;
@@ -570,12 +590,12 @@ message EntityProperties {
   optional string canonical_email = 15;
 }
 
-// Status of EntityProperties.photo_url
+// Status of EntityProperties.photo_url.
 enum PhotoUrlStatus {
   PHOTO_URL_STATUS_UNKNOWN = 0;
-  // photo_url is a placeholder
+  // URL is a placeholder.
   PHOTO_URL_STATUS_PLACEHOLDER = 1;
-  // photo_url is a photo set by the user
+  // URL is a photo set by the user.
   PHOTO_URL_STATUS_USER_PHOTO = 2;
 }
 
@@ -590,27 +610,28 @@ enum ProfileType {
   PROFILE_TYPE_ES_USER = 1;
 }
 
+// State of a conversation and recent events.
 message ConversationState {
-  // State of a conversation and recent events.
-
   optional ConversationId conversation_id = 1;
   optional Conversation conversation = 2;
   repeated Event event = 3;
   optional EventContinuationToken event_continuation_token = 5;
 }
 
+// Token that allows retrieving more events from a position in a conversation.
+// Specifying event_timestamp is sufficient.
 message EventContinuationToken {
-  // Token that allows retrieving more events from a position in a
-  // conversation. Specifying event_timestamp is sufficient.
-
   optional string event_id = 1;
-  // TODO: this should be bytes, and pblite base64-encodes it
   optional string storage_continuation_token = 2;
   optional uint64 event_timestamp = 3;
+
+  // TODO: storage_continuation_token should be bytes, and pblite
+  // base64-encodes it
 }
 
 message EntityLookupSpec {
   optional string gaia_id = 1;
+
   // TODO
 }
 
@@ -724,27 +745,26 @@ enum FieldMask {
 }
 
 message DesktopOffSetting {
-  // State of "desktop off" setting
+  // State of "desktop off" setting.
   optional bool desktop_off = 1;
 }
 
 message DesktopOffState {
-  // Whether Hangouts desktop is signed off or on
+  // Whether Hangouts desktop is signed off or on.
   optional bool desktop_off = 1;
   optional uint64 version = 2;
 }
 
 message DndSetting {
-  // Enable or disable do-not-disturb mode
-  // Not to be confused with DoNotDisturbSetting, which is the same thing but
-  // with an timestamp for expiration.
+  // Enable or disable do-not-disturb mode. Not to be confused with
+  // DoNotDisturbSetting, which is the same thing but with an timestamp for
+  // expiration.
   optional bool do_not_disturb = 1;
-  // do not disturb expiration, in seconds
+  // Do not disturb expiration in seconds.
   optional uint64 timeout_secs = 2;
 }
 
 message PresenceStateSetting {
-  // Change the client presence state type
   optional uint64 timeout_secs = 1;
   optional ClientPresenceStateType type = 2;
 }
@@ -757,8 +777,8 @@ message MoodContent {
   repeated Segment segment = 1;
 }
 
+// The user's mood message.
 message MoodSetting {
-  // Chat the user's mood message
   optional MoodMessage mood_message = 1;
 }
 
@@ -786,6 +806,7 @@ enum SyncFilter {
   SYNC_FILTER_UNKNOWN = 0;
   SYNC_FILTER_INBOX = 1;
   SYNC_FILTER_ARCHIVED = 2;
+
   // TODO
 }
 
@@ -819,6 +840,7 @@ message StateUpdate {
     //UnimplementedMessage settings_notification = 10;
 
     // TODO: rename to ViewModificationNotification?
+
     ConversationViewModification view_modification = 11;
     EasterEggNotification easter_egg_notification = 12;
     SelfPresenceNotification self_presence_notification = 14;
@@ -835,16 +857,13 @@ message StateUpdate {
 
 // Header for StateUpdate messages.
 message StateUpdateHeader {
-  // TODO
-
   optional ActiveClientState active_client_state = 1;
-
-  // unknown = 2
-
   optional string request_trace_id = 3;
   optional NotificationSettings notification_settings = 4;
   optional uint64 current_server_time = 5;
 
+  // TODO:
+  // unknown = 2
   // archive settings? ([1]) = 6
   // unknown = 7
   // optional ID of the client causing the update (3767219427742586121) ? = 8
@@ -878,15 +897,17 @@ message SetTypingNotification {
 message SetConversationNotificationLevelNotification {
   optional ConversationId conversation_id = 1;
   optional NotificationLevel level = 2;
-  // unknown (0) = 3;
   optional uint64 timestamp = 4;
+
+  // TODO:
+  // unknown (0) = 3;
 }
 
 message ReplyToInviteNotification {
-  // TODO: untested
-  // [['UgwnHidpJTfc7G7BhUR4AaABAQ'], 1]
   optional ConversationId conversation_id = 1;
   optional ReplyToInviteType type = 2;
+
+  // TODO: untested
 }
 
 message WatermarkNotification {
@@ -899,10 +920,6 @@ message ConversationViewModification {
   optional ConversationId conversation_id = 1;
   optional ConversationView old_view = 2;
   optional ConversationView new_view = 3;
-  // archive:
-  // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 1, 2]
-  // unarchive:
-  // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], 2, 1]
 }
 
 message EasterEggNotification {
@@ -911,8 +928,8 @@ message EasterEggNotification {
   optional EasterEgg easter_egg = 3;
 }
 
+// Notifies the status of other clients and mood.
 message SelfPresenceNotification {
-  // status of other clients and mood
   optional ClientPresenceState client_presence_state = 1;
   optional DoNotDisturbSetting do_not_disturb_setting = 3;
   optional DesktopOffSetting desktop_off_setting = 4;
@@ -920,9 +937,7 @@ message SelfPresenceNotification {
   optional MoodState mood_state = 6;
 }
 
-message DeleteActionNotification { // 15
-  // delete conversation:
-  // [['Ugz6j8W5_JUj9ltNeEl4AaABAQ'], [1435638391438133, 1435637794504105, 1]]
+message DeleteActionNotification {
   optional ConversationId conversation_id = 1;
   optional DeleteAction delete_action = 2;
 }
@@ -932,13 +947,11 @@ message PresenceNotification {
 }
 
 message BlockNotification {
-  // block someone
-  // [[[['102610215878429116806', '102610215878429116806'], 1]]]
   repeated BlockStateChange block_state_change = 1;
 }
 
 message SetNotificationSettingNotification {
-  // TODO:
+  // TODO: implement me
   // "sounds for incoming messages" off: [None, [2, 1]]
   // "sounds for incoming messages" on: [None, [1, 1]]
   // "ring for incoming phone calls" off: [None, [1, 2]]
@@ -951,6 +964,7 @@ message RichPresenceEnabledStateNotification {
 
 message ConversationSpec {
   optional ConversationId conversation_id = 1;
+
   // TODO
 }
 
@@ -1008,51 +1022,59 @@ message EasterEggResponse {
 message GetConversationRequest {
   optional RequestHeader request_header = 1;
   optional ConversationSpec conversation_spec = 2;
-  // include_conversation_metadata? = 3;
   optional bool include_event = 4;
-  // unknown = 5;
   optional uint64 max_events_per_conversation = 6;
   optional EventContinuationToken event_continuation_token = 7;
+
+  // TODO:
+  // include_conversation_metadata? = 3;
+  // unknown = 5;
 }
 
 message GetConversationResponse {
   optional ResponseHeader response_header = 1;
   optional ConversationState conversation_state = 2;
+
   // TODO
 }
 
 message GetEntityByIdRequest {
   optional RequestHeader request_header = 1;
-  // unknown = 2;
   repeated EntityLookupSpec batch_lookup_spec = 3;
+
   // TODO
+  // unknown = 2;
 }
 
 message GetEntityByIdResponse {
-  // TODO
   optional ResponseHeader response_header = 1;
   repeated Entity entity = 2;
+
+  // TODO
 }
 
 message GetSuggestedEntitiesRequest {
   optional RequestHeader request_header = 1;
+
   // TODO
 }
 
 message GetSuggestedEntitiesResponse {
-  // TODO
   optional ResponseHeader response_header = 1;
   repeated Entity entity = 2;
 
   // more entities in 4, 5, 6, 7, 8, 9
-  // TODO: wtf is with these extra entities
+  // TODO: not exactly sure what's going on here
+
   message EntityGroup {
-    // unknown 0 = 1;
-    // unknown code = 2;
     repeated Foo entity = 3;
     message Foo {
       optional Entity entity = 1;
     }
+
+    // TODO:
+    // unknown 0 = 1;
+    // unknown code = 2;
   }
   optional EntityGroup group1 = 4;
   optional EntityGroup group2 = 5;
@@ -1064,6 +1086,7 @@ message GetSuggestedEntitiesResponse {
 
 message GetSelfInfoRequest {
   optional RequestHeader request_header = 1;
+
   // TODO
 }
 
@@ -1074,6 +1097,7 @@ message GetSelfInfoResponse {
   repeated ConfigurationBit configuration_bit = 8;
   optional DesktopOffState desktop_off_state = 9;
   optional RichPresenceState rich_presence_state = 12;
+
   // TODO: all kinds of extra stuff
 }
 
@@ -1100,15 +1124,17 @@ message RemoveUserResponse {
 
 message RenameConversationRequest {
   optional RequestHeader request_header = 1;
-  // TODO
   optional string new_name = 3;
   optional EventRequestHeader event_request_header = 5;
+
+  // TODO
 }
 
 message RenameConversationResponse {
-  // TODO
   optional ResponseHeader response_header = 1;
-  optional Event created_event = 4; // TODO: use json to check name?
+  optional Event created_event = 4;
+
+  // TODO: use json to check field names?
 }
 
 message SearchEntitiesRequest {
@@ -1123,27 +1149,32 @@ message SearchEntitiesResponse {
 }
 
 message SendChatMessageRequest {
-  // TODO: incomplete
   optional RequestHeader request_header = 1;
   optional MessageContent message_content = 6;
   optional ExistingMedia existing_media = 7;
   optional EventRequestHeader event_request_header = 8;
+
+  // TODO: incomplete
 }
 
 message SendChatMessageResponse {
   optional ResponseHeader response_header = 1;
-  // unknown [] = 4;
   optional Event created_event = 6;
+
+  // TODO:
+  // unknown [] = 4;
 }
 
 message SetActiveClientRequest {
   optional RequestHeader request_header = 1;
-  // Whether to set the client as active (true) or inactive (false).
+  // Whether to set the client as active or inactive.
   optional bool is_active = 2;
-  // 'email/resource'
+  // 'email/resource'.
   optional string full_jid = 3;
   // Timeout in seconds for client to remain active.
   optional uint64 timeout_secs = 4;
+
+  // TODO:
   // unknown (true) = 5;
 }
 
@@ -1153,11 +1184,14 @@ message SetActiveClientResponse {
 
 message SetConversationLevelRequest {
   optional RequestHeader request_header = 1;
-  // TODO
+
+  // TODO: implement me
 }
 
 message SetConversationLevelResponse {
-  // TODO
+  optional ResponseHeader response_header = 1;
+
+  // TODO: implement me
 }
 
 message SetConversationNotificationLevelRequest {
@@ -1183,9 +1217,9 @@ message SetFocusResponse {
   optional uint64 timestamp = 2;
 }
 
+// Allows setting one or more of the included presence-related settings.
 message SetPresenceRequest {
   optional RequestHeader request_header = 1;
-  // One or more of the following field may be specified:
   optional PresenceStateSetting presence_state_setting = 2;
   optional DndSetting dnd_setting = 3;
   optional DesktopOffSetting desktop_off_setting = 5;
@@ -1209,9 +1243,10 @@ message SetTypingResponse {
 
 message SyncAllNewEventsRequest {
   optional RequestHeader request_header = 1;
-  // timestamp after which to return all new events
+  // Timestamp after which to return all new events.
   optional uint64 last_sync_timestamp = 2;
   optional uint64 max_response_size_bytes = 8;
+
   // TODO
 }
 
@@ -1219,6 +1254,7 @@ message SyncAllNewEventsResponse {
   optional ResponseHeader response_header = 1;
   optional uint64 sync_timestamp = 2;
   repeated ConversationState conversation_state = 3;
+
   // TODO
 }
 
