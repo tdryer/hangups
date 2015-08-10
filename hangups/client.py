@@ -143,13 +143,15 @@ class Client(object):
         frequently, and it will only make a request when necessary.
         """
         is_active = (self._active_client_state ==
-                     hangouts_pb2.IS_ACTIVE_CLIENT)
+                     hangouts_pb2.ACTIVE_CLIENT_STATE_IS_ACTIVE)
         timed_out = (time.time() - self._last_active_secs >
                      SETACTIVECLIENT_LIMIT_SECS)
         if not is_active or timed_out:
             # Update these immediately so if the function is called again
             # before the API request finishes, we don't start extra requests.
-            self._active_client_state = hangouts_pb2.IS_ACTIVE_CLIENT
+            self._active_client_state = (
+                hangouts_pb2.ACTIVE_CLIENT_STATE_IS_ACTIVE
+            )
             self._last_active_secs = time.time()
             try:
                 yield from self.setactiveclient(True, ACTIVE_TIMEOUT_SECS)
@@ -441,7 +443,7 @@ class Client(object):
     @asyncio.coroutine
     def sendchatmessage(
             self, conversation_id, segments, image_id=None,
-            otr_status=hangouts_pb2.ON_THE_RECORD
+            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD
     ):
         """Send a chat message to a conversation.
 
@@ -542,8 +544,10 @@ class Client(object):
         return response
 
     @asyncio.coroutine
-    def renameconversation(self, conversation_id, name,
-                           otr_status=hangouts_pb2.ON_THE_RECORD):
+    def renameconversation(
+        self, conversation_id, name,
+        otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD
+    ):
         """Rename a conversation.
 
         Raises hangups.NetworkError if the request fails.
@@ -642,8 +646,10 @@ class Client(object):
     ###########################################################################
 
     @asyncio.coroutine
-    def removeuser(self, conversation_id,
-                   otr_status=hangouts_pb2.ON_THE_RECORD):
+    def removeuser(
+        self, conversation_id,
+        otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD
+    ):
         """Leave group conversation.
 
         conversation_id must be a valid conversation ID.
@@ -691,7 +697,8 @@ class Client(object):
         return response
 
     @asyncio.coroutine
-    def settyping(self, conversation_id, typing=hangouts_pb2.TYPING_STARTED):
+    def settyping(self, conversation_id,
+                  typing=hangouts_pb2.TYPING_TYPE_STARTED):
         """Send typing notification.
 
         conversation_id must be a valid conversation ID.
@@ -731,7 +738,7 @@ class Client(object):
         request = hangouts_pb2.SetFocusRequest(
             request_header=self._get_request_header_pb(),
             conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
-            type=hangouts_pb2.FOCUSED,
+            type=hangouts_pb2.FOCUS_TYPE_FOCUSED,
             timeout_secs=20,
         )
         response = hangouts_pb2.SetFocusResponse()
@@ -774,7 +781,7 @@ class Client(object):
             segment = (
                 request.mood_setting.mood_message.mood_content.segment.add()
             )
-            segment.type = hangouts_pb2.TEXT
+            segment.type = hangouts_pb2.SEGMENT_TYPE_TEXT
             segment.text = mood
         response = hangouts_pb2.SetPresenceResponse()
         yield from self._pb_request('presence/setpresence', request, response)
@@ -824,8 +831,8 @@ class Client(object):
     def setconversationnotificationlevel(self, conversation_id, level):
         """Set the notification level of a conversation.
 
-        Pass hangouts_pb2.QUIET to disable notifications, or hangouts_pb2.RING
-        to enable them.
+        Pass hangouts_pb2.NOTIFICATION_LEVEL_QUIET to disable notifications, or
+        hangouts_pb2.NOTIFICATION_LEVEL_RING to enable them.
 
         Raises hangups.NetworkError if the request fails.
         """
@@ -869,7 +876,8 @@ class Client(object):
         is_group = len(chat_id_list) > 1 or force_group
         request = hangouts_pb2.CreateConversationRequest(
             request_header=self._get_request_header_pb(),
-            type=hangouts_pb2.GROUP if is_group else hangouts_pb2.ONE_TO_ONE,
+            type=(hangouts_pb2.CONVERSATION_TYPE_GROUP if is_group else
+                  hangouts_pb2.CONVERSATION_TYPE_ONE_TO_ONE),
             client_generated_id=self.get_client_generated_id(),
             name="created by hangups",
             invitee_id=[hangouts_pb2.InviteeID(gaia_id=chat_id)
@@ -882,7 +890,7 @@ class Client(object):
 
     @asyncio.coroutine
     def adduser(self, conversation_id, chat_id_list,
-                otr_status=hangouts_pb2.ON_THE_RECORD):
+                otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD):
         """Add users to an existing group conversation.
 
         conversation_id must be a valid conversation ID.

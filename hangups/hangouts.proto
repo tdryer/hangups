@@ -16,9 +16,12 @@ syntax = "proto2";
 
 // Describes which Hangouts client is active.
 enum ActiveClientState {
-  NO_ACTIVE_CLIENT = 0;       // No client is active.
-  IS_ACTIVE_CLIENT = 1;       // This client is active.
-  OTHER_CLIENT_IS_ACTIVE = 2; // Another client is active.
+  // No client is active.
+  ACTIVE_CLIENT_STATE_NO_ACTIVE = 0;
+  // This is the active client.
+  ACTIVE_CLIENT_STATE_IS_ACTIVE = 1;
+  // Other client is active.
+  ACTIVE_CLIENT_STATE_OTHER_ACTIVE = 2;
 }
 
 message DoNotDisturbSetting {
@@ -31,15 +34,15 @@ message NotificationSettings {
 }
 
 enum FocusType {
-  UNKNOWN = 0;
-  FOCUSED = 1;
-  UNFOCUSED = 2;
+  FOCUS_TYPE_UNKNOWN = 0;
+  FOCUS_TYPE_FOCUSED = 1;
+  FOCUS_TYPE_UNFOCUSED = 2;
 }
 
 enum FocusDevice {
-  UNSPECIFIED = 0;
-  DESKTOP = 20;
-  MOBILE = 300;
+  FOCUS_DEVICE_UNSPECIFIED = 0;
+  FOCUS_DEVICE_DESKTOP = 20;
+  FOCUS_DEVICE_MOBILE = 300;
 }
 
 // Identifies a conversation.
@@ -80,10 +83,13 @@ message PresenceResult {
 }
 
 enum TypingType {
-  TYPING_UNKNOWN = 0;
-  TYPING_STARTED = 1;  // started typing
-  TYPING_PAUSED = 2;  // stopped typing with inputted text
-  TYPING_STOPPED = 3;  // stopped typing with no inputted text
+  TYPING_TYPE_UNKNOWN = 0;
+  // Started typing.
+  TYPING_TYPE_STARTED = 1;
+  // Stopped typing with inputted text.
+  TYPING_TYPE_PAUSED = 2;
+  // Stopped typing with no inputted text.
+  TYPING_TYPE_STOPPED = 3;
 }
 
 message ClientIdentifier {
@@ -106,8 +112,10 @@ message ClientPresenceState {
 
 enum NotificationLevel {
   NOTIFICATION_LEVEL_UNKNOWN = 0;
-  QUIET = 10;
-  RING = 30;
+  // Notifications are disabled.
+  NOTIFICATION_LEVEL_QUIET = 10;
+  // Notifications are enabled.
+  NOTIFICATION_LEVEL_RING = 30;
 }
 
 message UserEventState {
@@ -117,9 +125,9 @@ message UserEventState {
 }
 
 enum SegmentType {
-  TEXT = 0;
-  LINE_BREAK = 1;
-  LINK = 2;
+  SEGMENT_TYPE_TEXT = 0;
+  SEGMENT_TYPE_LINE_BREAK = 1;
+  SEGMENT_TYPE_LINK = 2;
 }
 
 message Formatting {
@@ -143,7 +151,6 @@ message Segment {
 
 // A type of embedded item.
 enum ItemType {
-
   ITEM_TYPE_THING = 0;
   // Google Plus photo.
   ITEM_TYPE_PLUS_PHOTO = 249;
@@ -274,12 +281,12 @@ enum OffTheRecordToggle {
   OFF_THE_RECORD_TOGGLE_DISABLED = 2;
 }
 
-// Whether an event or conversation is "on the record" (history enabled) or
-// "off the record" (history disabled).
 enum OffTheRecordStatus {
   OFF_THE_RECORD_STATUS_UNKNOWN = 0;
-  OFF_THE_RECORD = 1;
-  ON_THE_RECORD = 2;
+  // Conversation is off-the-record (history disabled).
+  OFF_THE_RECORD_STATUS_OFF_THE_RECORD = 1;
+  // Conversation is on-the-record (history enabled).
+  OFF_THE_RECORD_STATUS_ON_THE_RECORD = 2;
 }
 
 enum SourceType {
@@ -327,8 +334,10 @@ message Event {
 
 enum ConversationType {
   CONVERSATION_TYPE_UNKNOWN = 0;
-  ONE_TO_ONE = 1;
-  GROUP = 2;
+  // Conversation is one-to-one (only 2 participants).
+  CONVERSATION_TYPE_ONE_TO_ONE = 1;
+  // Conversation is group (any number of participants).
+  CONVERSATION_TYPE_GROUP = 2;
 }
 
 message UserReadState {
@@ -337,16 +346,21 @@ message UserReadState {
 }
 
 enum ConversationStatus {
-  UNKNOWN_CONVERSATION_STATUS = 0;
-  INVITED = 1;
-  ACTIVE = 2;
-  LEFT = 3;
+  CONVERSATION_STATUS_UNKNOWN = 0;
+  // User is invited to conversation.
+  CONVERSATION_STATUS_INVITED = 1;
+  // User is participating in conversation.
+  CONVERSATION_STATUS_ACTIVE = 2;
+  // User has left conversation.
+  CONVERSATION_STATUS_LEFT = 3;
 }
 
 enum ConversationView {
-  UNKNOWN_CONVERSATION_VIEW = 0;
-  INBOX_VIEW = 1;
-  ARCHIVED_VIEW = 2;
+  CONVERSATION_VIEW_UNKNOWN = 0;
+  // Conversation is in inbox.
+  CONVERSATION_VIEW_INBOX = 1;
+  // Conversation has been archived.
+  CONVERSATION_VIEW_ARCHIVED = 2;
 }
 
 enum DeliveryMediumType {
@@ -434,8 +448,8 @@ message EasterEgg {
 
 enum BlockState {
   BLOCK_STATE_UNKNOWN = 0;
-  BLOCK = 1;
-  UNBLOCK = 2;
+  BLOCK_STATE_BLOCK = 1;
+  BLOCK_STATE_UNBLOCK = 2;
 }
 
 message BlockStateChange {
@@ -445,8 +459,8 @@ message BlockStateChange {
 
 enum ReplyToInviteType {
   REPLY_TO_INVITE_TYPE_UNKNOWN = 0;
-  ACCEPT = 1;
-  DECLINE = 2;
+  REPLY_TO_INVITE_TYPE_ACCEPT = 1;
+  REPLY_TO_INVITE_TYPE_DECLINE = 2;
 }
 
 message Photo {
@@ -464,9 +478,8 @@ message EventRequestHeader {
   optional OffTheRecordStatus expected_otr = 3;
 }
 
+// Identifies the client.
 enum ClientId {
-  // Identifies the client.
-
   CLIENT_ID_UNKNOWN = 0;
   // Hangouts app for Android
   CLIENT_ID_ANDROID = 1;
@@ -482,9 +495,8 @@ enum ClientId {
   CLIENT_ID_ULTRAVIOLET = 13;
 }
 
+// Build type of the client.
 enum ClientBuildType {
-  // Build type of the client.
-
   BUILD_TYPE_UNKNOWN = 0;
   // build type used by web apps
   BUILD_TYPE_PRODUCTION_WEB = 1;
@@ -517,9 +529,8 @@ message RequestHeader {
   optional string language_code = 4;
 }
 
+// Status of the response from the server to the client.
 enum ResponseStatus {
-  // Status of the response from the server to the client.
-
   RESPONSE_STATUS_UNKNOWN = 0;
   RESPONSE_STATUS_OK = 1;
   RESPONSE_STATUS_UNEXPECTED_ERROR = 3;
@@ -559,9 +570,8 @@ message EntityProperties {
   optional string canonical_email = 15;
 }
 
+// Status of EntityProperties.photo_url
 enum PhotoUrlStatus {
-  // Status of EntityProperties.photo_url
-
   PHOTO_URL_STATUS_UNKNOWN = 0;
   // photo_url is a placeholder
   PHOTO_URL_STATUS_PLACEHOLDER = 1;
@@ -682,19 +692,20 @@ message ConfigurationBit {
 }
 
 enum RichPresenceType {
-  RP_TYPE_UNKNOWN = 0;
-  RP_IN_CALL_STATE = 1;
+  RICH_PRESENCE_TYPE_UNKNOWN = 0;
+  RICH_PRESENCE_TYPE_IN_CALL_STATE = 1;
 
   // TODO
-  // RP_GLOBALLY_ENABLED
-  // RP_ACTIVITY
-  // RP_MOOD
-  RP_UNKNOWN_3 = 3;
-  RP_UNKNOWN_4 = 4;
-  RP_UNKNOWN_5 = 5;
+  // RICH_PRESENCE_TYPE_GLOBALLY_ENABLED
+  // RICH_PRESENCE_TYPE_ACTIVITY
+  // RICH_PRESENCE_TYPE_MOOD
 
-  RP_DEVICE = 2;
-  RP_LAST_SEEN = 6;
+  RICH_PRESENCE_TYPE_UNKNOWN_3 = 3;
+  RICH_PRESENCE_TYPE_UNKNOWN_4 = 4;
+  RICH_PRESENCE_TYPE_UNKNOWN_5 = 5;
+
+  RICH_PRESENCE_TYPE_DEVICE = 2;
+  RICH_PRESENCE_TYPE_LAST_SEEN = 6;
 }
 
 message RichPresenceState {

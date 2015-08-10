@@ -1365,47 +1365,47 @@ ActiveClientState
 
 Describes which Hangouts client is active.
 
-============================== ====== =========================
-Name                           Number Description              
-============================== ====== =========================
-:code:`NO_ACTIVE_CLIENT`       0      No client is active.     
-:code:`IS_ACTIVE_CLIENT`       1      This client is active.   
-:code:`OTHER_CLIENT_IS_ACTIVE` 2      Another client is active.
-============================== ====== =========================
+======================================== ====== ==========================
+Name                                     Number Description               
+======================================== ====== ==========================
+:code:`ACTIVE_CLIENT_STATE_NO_ACTIVE`    0      No client is active.      
+:code:`ACTIVE_CLIENT_STATE_IS_ACTIVE`    1      This is the active client.
+:code:`ACTIVE_CLIENT_STATE_OTHER_ACTIVE` 2      Other client is active.   
+======================================== ====== ==========================
 
 FocusType
 ---------
 
-================= ====== ===========
-Name              Number Description
-================= ====== ===========
-:code:`UNKNOWN`   0                 
-:code:`FOCUSED`   1                 
-:code:`UNFOCUSED` 2                 
-================= ====== ===========
+============================ ====== ===========
+Name                         Number Description
+============================ ====== ===========
+:code:`FOCUS_TYPE_UNKNOWN`   0                 
+:code:`FOCUS_TYPE_FOCUSED`   1                 
+:code:`FOCUS_TYPE_UNFOCUSED` 2                 
+============================ ====== ===========
 
 FocusDevice
 -----------
 
-=================== ====== ===========
-Name                Number Description
-=================== ====== ===========
-:code:`UNSPECIFIED` 0                 
-:code:`DESKTOP`     20                
-:code:`MOBILE`      300               
-=================== ====== ===========
+================================ ====== ===========
+Name                             Number Description
+================================ ====== ===========
+:code:`FOCUS_DEVICE_UNSPECIFIED` 0                 
+:code:`FOCUS_DEVICE_DESKTOP`     20                
+:code:`FOCUS_DEVICE_MOBILE`      300               
+================================ ====== ===========
 
 TypingType
 ----------
 
-====================== ====== ====================================
-Name                   Number Description                         
-====================== ====== ====================================
-:code:`TYPING_UNKNOWN` 0                                          
-:code:`TYPING_STARTED` 1      started typing                      
-:code:`TYPING_PAUSED`  2      stopped typing with inputted text   
-:code:`TYPING_STOPPED` 3      stopped typing with no inputted text
-====================== ====== ====================================
+=========================== ====== =====================================
+Name                        Number Description                          
+=========================== ====== =====================================
+:code:`TYPING_TYPE_UNKNOWN` 0                                           
+:code:`TYPING_TYPE_STARTED` 1      Started typing.                      
+:code:`TYPING_TYPE_PAUSED`  2      Stopped typing with inputted text.   
+:code:`TYPING_TYPE_STOPPED` 3      Stopped typing with no inputted text.
+=========================== ====== =====================================
 
 ClientPresenceStateType
 -----------------------
@@ -1422,24 +1422,24 @@ Name                                         Number Description
 NotificationLevel
 -----------------
 
-================================== ====== ===========
-Name                               Number Description
-================================== ====== ===========
-:code:`NOTIFICATION_LEVEL_UNKNOWN` 0                 
-:code:`QUIET`                      10                
-:code:`RING`                       30                
-================================== ====== ===========
+================================== ====== ===========================
+Name                               Number Description                
+================================== ====== ===========================
+:code:`NOTIFICATION_LEVEL_UNKNOWN` 0                                 
+:code:`NOTIFICATION_LEVEL_QUIET`   10     Notifications are disabled.
+:code:`NOTIFICATION_LEVEL_RING`    30     Notifications are enabled. 
+================================== ====== ===========================
 
 SegmentType
 -----------
 
-================== ====== ===========
-Name               Number Description
-================== ====== ===========
-:code:`TEXT`       0                 
-:code:`LINE_BREAK` 1                 
-:code:`LINK`       2                 
-================== ====== ===========
+=============================== ====== ===========
+Name                            Number Description
+=============================== ====== ===========
+:code:`SEGMENT_TYPE_TEXT`       0                 
+:code:`SEGMENT_TYPE_LINE_BREAK` 1                 
+:code:`SEGMENT_TYPE_LINK`       2                 
+=============================== ====== ===========
 
 ItemType
 --------
@@ -1496,16 +1496,13 @@ Name                                   Number Description
 OffTheRecordStatus
 ------------------
 
-Whether an event or conversation is "on the record" (history enabled) or
-"off the record" (history disabled).
-
-===================================== ====== ===========
-Name                                  Number Description
-===================================== ====== ===========
-:code:`OFF_THE_RECORD_STATUS_UNKNOWN` 0                 
-:code:`OFF_THE_RECORD`                1                 
-:code:`ON_THE_RECORD`                 2                 
-===================================== ====== ===========
+============================================ ====== ==================================================
+Name                                         Number Description                                       
+============================================ ====== ==================================================
+:code:`OFF_THE_RECORD_STATUS_UNKNOWN`        0                                                        
+:code:`OFF_THE_RECORD_STATUS_OFF_THE_RECORD` 1      Conversation is off-the-record (history disabled).
+:code:`OFF_THE_RECORD_STATUS_ON_THE_RECORD`  2      Conversation is on-the-record (history enabled).  
+============================================ ====== ==================================================
 
 SourceType
 ----------
@@ -1534,36 +1531,36 @@ Name                                    Number Description
 ConversationType
 ----------------
 
-================================= ====== ===========
-Name                              Number Description
-================================= ====== ===========
-:code:`CONVERSATION_TYPE_UNKNOWN` 0                 
-:code:`ONE_TO_ONE`                1                 
-:code:`GROUP`                     2                 
-================================= ====== ===========
+==================================== ====== ===================================================
+Name                                 Number Description                                        
+==================================== ====== ===================================================
+:code:`CONVERSATION_TYPE_UNKNOWN`    0                                                         
+:code:`CONVERSATION_TYPE_ONE_TO_ONE` 1      Conversation is one-to-one (only 2 participants).  
+:code:`CONVERSATION_TYPE_GROUP`      2      Conversation is group (any number of participants).
+==================================== ====== ===================================================
 
 ConversationStatus
 ------------------
 
-=================================== ====== ===========
-Name                                Number Description
-=================================== ====== ===========
-:code:`UNKNOWN_CONVERSATION_STATUS` 0                 
-:code:`INVITED`                     1                 
-:code:`ACTIVE`                      2                 
-:code:`LEFT`                        3                 
-=================================== ====== ===========
+=================================== ====== ======================================
+Name                                Number Description                           
+=================================== ====== ======================================
+:code:`CONVERSATION_STATUS_UNKNOWN` 0                                            
+:code:`CONVERSATION_STATUS_INVITED` 1      User is invited to conversation.      
+:code:`CONVERSATION_STATUS_ACTIVE`  2      User is participating in conversation.
+:code:`CONVERSATION_STATUS_LEFT`    3      User has left conversation.           
+=================================== ====== ======================================
 
 ConversationView
 ----------------
 
-================================= ====== ===========
-Name                              Number Description
-================================= ====== ===========
-:code:`UNKNOWN_CONVERSATION_VIEW` 0                 
-:code:`INBOX_VIEW`                1                 
-:code:`ARCHIVED_VIEW`             2                 
-================================= ====== ===========
+================================== ====== ===============================
+Name                               Number Description                    
+================================== ====== ===============================
+:code:`CONVERSATION_VIEW_UNKNOWN`  0                                     
+:code:`CONVERSATION_VIEW_INBOX`    1      Conversation is in inbox.      
+:code:`CONVERSATION_VIEW_ARCHIVED` 2      Conversation has been archived.
+================================== ====== ===============================
 
 DeliveryMediumType
 ------------------
@@ -1623,8 +1620,8 @@ BlockState
 Name                        Number Description
 =========================== ====== ===========
 :code:`BLOCK_STATE_UNKNOWN` 0                 
-:code:`BLOCK`               1                 
-:code:`UNBLOCK`             2                 
+:code:`BLOCK_STATE_BLOCK`   1                 
+:code:`BLOCK_STATE_UNBLOCK` 2                 
 =========================== ====== ===========
 
 ReplyToInviteType
@@ -1634,12 +1631,14 @@ ReplyToInviteType
 Name                                 Number Description
 ==================================== ====== ===========
 :code:`REPLY_TO_INVITE_TYPE_UNKNOWN` 0                 
-:code:`ACCEPT`                       1                 
-:code:`DECLINE`                      2                 
+:code:`REPLY_TO_INVITE_TYPE_ACCEPT`  1                 
+:code:`REPLY_TO_INVITE_TYPE_DECLINE` 2                 
 ==================================== ====== ===========
 
 ClientId
 --------
+
+Identifies the client.
 
 ============================= ====== =====================================
 Name                          Number Description                          
@@ -1656,6 +1655,8 @@ Name                          Number Description
 ClientBuildType
 ---------------
 
+Build type of the client.
+
 ================================= ====== =======================================================================================
 Name                              Number Description                                                                            
 ================================= ====== =======================================================================================
@@ -1666,6 +1667,8 @@ Name                              Number Description
 
 ResponseStatus
 --------------
+
+Status of the response from the server to the client.
 
 ======================================== ====== ===========
 Name                                     Number Description
@@ -1678,6 +1681,8 @@ Name                                     Number Description
 
 PhotoUrlStatus
 --------------
+
+Status of EntityProperties.photo_url
 
 ==================================== ====== ====================================
 Name                                 Number Description                         
@@ -1757,17 +1762,17 @@ Name                                      Number Description
 RichPresenceType
 ----------------
 
-======================== ====== ============================================
-Name                     Number Description                                 
-======================== ====== ============================================
-:code:`RP_TYPE_UNKNOWN`  0                                                  
-:code:`RP_IN_CALL_STATE` 1                                                  
-:code:`RP_UNKNOWN_3`     3      TODO RP_GLOBALLY_ENABLED RP_ACTIVITY RP_MOOD
-:code:`RP_UNKNOWN_4`     4                                                  
-:code:`RP_UNKNOWN_5`     5                                                  
-:code:`RP_DEVICE`        2                                                  
-:code:`RP_LAST_SEEN`     6                                                  
-======================== ====== ============================================
+======================================== ====== ===========
+Name                                     Number Description
+======================================== ====== ===========
+:code:`RICH_PRESENCE_TYPE_UNKNOWN`       0                 
+:code:`RICH_PRESENCE_TYPE_IN_CALL_STATE` 1                 
+:code:`RICH_PRESENCE_TYPE_UNKNOWN_3`     3                 
+:code:`RICH_PRESENCE_TYPE_UNKNOWN_4`     4                 
+:code:`RICH_PRESENCE_TYPE_UNKNOWN_5`     5                 
+:code:`RICH_PRESENCE_TYPE_DEVICE`        2                 
+:code:`RICH_PRESENCE_TYPE_LAST_SEEN`     6                 
+======================================== ====== ===========
 
 FieldMask
 ---------

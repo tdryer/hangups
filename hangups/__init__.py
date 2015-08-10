@@ -1,7 +1,7 @@
 from .version import __version__
 # TODO just import *?
 from .hangouts_pb2 import (
-    TYPING_STARTED, TYPING_PAUSED, TYPING_STOPPED,
+    TYPING_TYPE_STARTED, TYPING_TYPE_PAUSED, TYPING_TYPE_STOPPED,
     MEMBERSHIP_CHANGE_TYPE_LEAVE, MEMBERSHIP_CHANGE_TYPE_JOIN
 )
 from .client import Client

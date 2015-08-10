@@ -58,9 +58,9 @@ class ChatMessageSegment(object):
         if segment_type is not None:
             self.type_ = segment_type
         elif link_target is not None:
-            self.type_ = hangouts_pb2.LINK
+            self.type_ = hangouts_pb2.SEGMENT_TYPE_LINK
         else:
-            self.type_ = hangouts_pb2.TEXT
+            self.type_ = hangouts_pb2.SEGMENT_TYPE_TEXT
         self.text = text
         self.is_bold = is_bold
         self.is_italic = is_italic
@@ -115,11 +115,11 @@ class ChatMessageEvent(ConversationEvent):
         """A textual representation of the message."""
         lines = ['']
         for segment in self.segments:
-            if segment.type_ == hangouts_pb2.TEXT:
+            if segment.type_ == hangouts_pb2.SEGMENT_TYPE_TEXT:
                 lines[-1] += segment.text
-            elif segment.type_ == hangouts_pb2.LINK:
+            elif segment.type_ == hangouts_pb2.SEGMENT_TYPE_LINK:
                 lines[-1] += segment.text
-            elif segment.type_ == hangouts_pb2.LINE_BREAK:
+            elif segment.type_ == hangouts_pb2.SEGMENT_TYPE_LINE_BREAK:
                 lines.append('')
             else:
                 logger.warning('Ignoring unknown chat message segment type: {}'

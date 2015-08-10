@@ -115,8 +115,9 @@ class Conversation(object):
         """
         with (yield from self._send_message_lock):
             # Send messages with OTR status matching the conversation's status.
-            otr_status = (hangouts_pb2.OFF_THE_RECORD if self.is_off_the_record
-                          else hangouts_pb2.ON_THE_RECORD)
+            otr_status = (hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
+                          if self.is_off_the_record else
+                          hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD)
             if image_file:
                 try:
                     image_id = yield from self._client.upload_image(image_file)
@@ -138,8 +139,10 @@ class Conversation(object):
 
         Raises hangups.NetworkError if conversation cannot be left.
         """
+        is_group_conversation = (self._conversation.type_ ==
+                                 hangouts_pb2.CONVERSATION_TYPE_GROUP)
         try:
-            if self._conversation.type_ == hangouts_pb2.GROUP:
+            if is_group_conversation:
                 yield from self._client.removeuser(self.id_)
             else:
                 yield from self._client.deleteconversation(self.id_)
@@ -163,8 +166,8 @@ class Conversation(object):
     def set_notification_level(self, level):
         """Set the notification level of the conversation.
 
-        Pass hangouts_pb2.QUIET to disable notifications, or hangouts_pb2.RING
-        to enable them.
+        Pass hangouts_pb2.NOTIFICATION_LEVEL_QUIET to disable notifications, or
+        hangouts_pb2.NOTIFICATION_LEVEL_RING to enable them.
 
         Raises hangups.NetworkError if the request fails.
         """
@@ -172,7 +175,7 @@ class Conversation(object):
                                                                  level)
 
     @asyncio.coroutine
-    def set_typing(self, typing=hangouts_pb2.TYPING_STARTED):
+    def set_typing(self, typing=hangouts_pb2.TYPING_TYPE_STARTED):
         """Set typing status.
 
         TODO: Add rate-limiting to avoid unnecessary requests.
@@ -337,20 +340,20 @@ class Conversation(object):
     @property
     def is_archived(self):
         """True if this conversation has been archived."""
-        return (hangouts_pb2.ARCHIVED_VIEW in
+        return (hangouts_pb2.CONVERSATION_VIEW_ARCHIVED in
                 self._conversation.self_conversation_state.view)
 
     @property
     def is_quiet(self):
         """True if notification level for this conversation is quiet."""
         level = self._conversation.self_conversation_state.notification_level
-        return level == hangouts_pb2.QUIET
+        return level == hangouts_pb2.NOTIFICATION_LEVEL_QUIET
 
     @property
     def is_off_the_record(self):
         """True if conversation is off the record (history is disabled)."""
         status = self._conversation.otr_status
-        return status == hangouts_pb2.OFF_THE_RECORD
+        return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
 
 
 class ConversationList(object):
