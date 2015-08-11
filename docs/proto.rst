@@ -3,12 +3,16 @@
 DoNotDisturbSetting
 -------------------
 
-============================ ====== ====== ======== ===========
-Field                        Number Type   Label    Description
-============================ ====== ====== ======== ===========
-:code:`do_not_disturb`       1      bool   optional            
-:code:`expiration_timestamp` 2      uint64 optional            
-============================ ====== ====== ======== ===========
+The state of do-not-disturb mode. Not to be confused with DndSetting, which
+is used to change the state of do-not-disturb mode.
+
+============================ ====== ====== ======== =================================================================================================
+Field                        Number Type   Label    Description                                                                                      
+============================ ====== ====== ======== =================================================================================================
+:code:`do_not_disturb`       1      bool   optional Whether do-not-disturb mode is enabled.                                                          
+:code:`expiration_timestamp` 2      uint64 optional Timestamp when do-not-disturb mode expires.                                                      
+:code:`version`              3      uint64 optional Timestamp when this setting was applied. Not present when this message comes from a notification.
+============================ ====== ====== ======== =================================================================================================
 
 NotificationSettings
 --------------------
@@ -600,12 +604,16 @@ Field               Number Type   Label    Description
 DndSetting
 ----------
 
-====================== ====== ====== ======== =================================================================================================================================================
-Field                  Number Type   Label    Description                                                                                                                                      
-====================== ====== ====== ======== =================================================================================================================================================
-:code:`do_not_disturb` 1      bool   optional Enable or disable do-not-disturb mode. Not to be confused with DoNotDisturbSetting, which is the same thing but with an timestamp for expiration.
-:code:`timeout_secs`   2      uint64 optional Do not disturb expiration in seconds.                                                                                                            
-====================== ====== ====== ======== =================================================================================================================================================
+Enable or disable do-not-disturb mode. Not to be confused with
+DoNotDisturbSetting, which is used to indicate the state of do-not-disturb
+mode.
+
+====================== ====== ====== ======== =================================================
+Field                  Number Type   Label    Description                                      
+====================== ====== ====== ======== =================================================
+:code:`do_not_disturb` 1      bool   optional Whether to enable or disable do-not-disturb mode.
+:code:`timeout_secs`   2      uint64 optional Do not disturb expiration in seconds.            
+====================== ====== ====== ======== =================================================
 
 PresenceStateSetting
 --------------------
@@ -675,6 +683,78 @@ Field                 Number Type   Label    Description
 :code:`gaia_id`       1      string optional            
 :code:`fallback_name` 4      string optional            
 ===================== ====== ====== ======== ===========
+
+Country
+-------
+
+Describes a user's country.
+
+==================== ====== ====== ======== ===================================
+Field                Number Type   Label    Description                        
+==================== ====== ====== ======== ===================================
+:code:`region_code`  1      string optional Abbreviated region code (eg. "CA").
+:code:`country_code` 2      uint64 optional Country's calling code (eg. "1").  
+==================== ====== ====== ======== ===================================
+
+DesktopSoundSetting
+-------------------
+
+Sound settings in the desktop Hangouts client.
+
+================================ ====== ============= ======== ============================================
+Field                            Number Type          Label    Description                                 
+================================ ====== ============= ======== ============================================
+:code:`desktop_sound_state`      1      `SoundState`_ optional Whether to play sound for incoming messages.
+:code:`desktop_ring_sound_state` 2      `SoundState`_ optional Whether to ring for incoming calls.         
+================================ ====== ============= ======== ============================================
+
+PhoneData
+---------
+
+=============================== ====== ======================= ======== ===========
+Field                           Number Type                    Label    Description
+=============================== ====== ======================= ======== ===========
+:code:`phone`                   1      `Phone`_                repeated            
+:code:`caller_id_settings_mask` 3      `CallerIdSettingsMask`_ optional            
+=============================== ====== ======================= ======== ===========
+
+Phone
+-----
+
+============================== ====== ============================= ======== ===========
+Field                          Number Type                          Label    Description
+============================== ====== ============================= ======== ===========
+:code:`phoneNumber`            1      `PhoneNumber`_                optional            
+:code:`google_voice`           2      bool                          optional            
+:code:`verification_status`    3      `PhoneVerificationStatus`_    optional            
+:code:`discoverable`           4      bool                          optional            
+:code:`discoverability_status` 5      `PhoneDiscoverabilityStatus`_ optional            
+:code:`primary`                6      bool                          optional            
+============================== ====== ============================= ======== ===========
+
+I18nData
+--------
+
+============================ ====== ======================== ======== ===========
+Field                        Number Type                     Label    Description
+============================ ====== ======================== ======== ===========
+:code:`national_number`      1      string                   optional            
+:code:`international_number` 2      string                   optional            
+:code:`country_code`         3      uint64                   optional            
+:code:`region_code`          4      string                   optional            
+:code:`is_valid`             5      bool                     optional            
+:code:`validation_result`    6      `PhoneValidationResult`_ optional            
+============================ ====== ======================== ======== ===========
+
+PhoneNumber
+-----------
+
+================= ====== =========== ======== ============================================
+Field             Number Type        Label    Description                                 
+================= ====== =========== ======== ============================================
+:code:`e164`      1      string      optional Phone number as string (eg. "+15551234567").
+:code:`i18n_data` 2      `I18nData`_ optional                                             
+================= ====== =========== ======== ============================================
 
 StateUpdate
 -----------
@@ -864,10 +944,11 @@ Field                      Number Type                Label    Description
 SetNotificationSettingNotification
 ----------------------------------
 
-===== ====== ==== ===== ===========
-Field Number Type Label Description
-===== ====== ==== ===== ===========
-===== ====== ==== ===== ===========
+============================= ====== ====================== ======== ===========
+Field                         Number Type                   Label    Description
+============================= ====== ====================== ======== ===========
+:code:`desktop_sound_setting` 2      `DesktopSoundSetting`_ optional            
+============================= ====== ====================== ======== ===========
 
 RichPresenceEnabledStateNotification
 ------------------------------------
@@ -1072,16 +1153,22 @@ Field                  Number Type             Label    Description
 GetSelfInfoResponse
 -------------------
 
-=========================== ====== ==================== ======== ===========
-Field                       Number Type                 Label    Description
-=========================== ====== ==================== ======== ===========
-:code:`response_header`     1      `ResponseHeader`_    optional            
-:code:`self_entity`         2      `Entity`_            optional            
-:code:`desktop_off_setting` 6      `DesktopOffSetting`_ optional            
-:code:`configuration_bit`   8      `ConfigurationBit`_  repeated            
-:code:`desktop_off_state`   9      `DesktopOffState`_   optional            
-:code:`rich_presence_state` 12     `RichPresenceState`_ optional            
-=========================== ====== ==================== ======== ===========
+============================= ====== ====================== ======== ===========
+Field                         Number Type                   Label    Description
+============================= ====== ====================== ======== ===========
+:code:`response_header`       1      `ResponseHeader`_      optional            
+:code:`self_entity`           2      `Entity`_              optional            
+:code:`is_known_minor`        3      bool                   optional            
+:code:`dnd_state`             5      `DoNotDisturbSetting`_ optional            
+:code:`desktop_off_setting`   6      `DesktopOffSetting`_   optional            
+:code:`phone_data`            7      `PhoneData`_           optional            
+:code:`configuration_bit`     8      `ConfigurationBit`_    repeated            
+:code:`desktop_off_state`     9      `DesktopOffState`_     optional            
+:code:`google_plus_user`      10     bool                   optional            
+:code:`desktop_sound_setting` 11     `DesktopSoundSetting`_ optional            
+:code:`rich_presence_state`   12     `RichPresenceState`_   optional            
+:code:`default_country`       19     `Country`_             optional            
+============================= ====== ====================== ======== ===========
 
 QueryPresenceRequest
 --------------------
@@ -1825,4 +1912,54 @@ Name                         Number Description
 :code:`SYNC_FILTER_INBOX`    1                 
 :code:`SYNC_FILTER_ARCHIVED` 2                 
 ============================ ====== ===========
+
+SoundState
+----------
+
+=========================== ====== ===========
+Name                        Number Description
+=========================== ====== ===========
+:code:`SOUND_STATE_UNKNOWN` 0                 
+:code:`SOUND_STATE_ON`      1                 
+:code:`SOUND_STATE_OFF`     2                 
+=========================== ====== ===========
+
+CallerIdSettingsMask
+--------------------
+
+======================================== ====== ===========
+Name                                     Number Description
+======================================== ====== ===========
+:code:`CALLER_ID_SETTINGS_MASK_UNKNOWN`  0                 
+:code:`CALLER_ID_SETTINGS_MASK_PROVIDED` 1                 
+======================================== ====== ===========
+
+PhoneVerificationStatus
+-----------------------
+
+========================================== ====== ===========
+Name                                       Number Description
+========================================== ====== ===========
+:code:`PHONE_VERIFICATION_STATUS_UNKNOWN`  0                 
+:code:`PHONE_VERIFICATION_STATUS_VERIFIED` 1                 
+========================================== ====== ===========
+
+PhoneDiscoverabilityStatus
+--------------------------
+
+================================================================== ====== ===========
+Name                                                               Number Description
+================================================================== ====== ===========
+:code:`PHONE_DISCOVERABILITY_STATUS_UNKNOWN`                       0                 
+:code:`PHONE_DISCOVERABILITY_STATUS_OPTED_IN_BUT_NOT_DISCOVERABLE` 2                 
+================================================================== ====== ===========
+
+PhoneValidationResult
+---------------------
+
+=========================================== ====== ===========
+Name                                        Number Description
+=========================================== ====== ===========
+:code:`PHONE_VALIDATION_RESULT_IS_POSSIBLE` 0                 
+=========================================== ====== ===========
 

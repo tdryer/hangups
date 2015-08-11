@@ -24,9 +24,16 @@ enum ActiveClientState {
   ACTIVE_CLIENT_STATE_OTHER_ACTIVE = 2;
 }
 
+// The state of do-not-disturb mode. Not to be confused with DndSetting, which
+// is used to change the state of do-not-disturb mode.
 message DoNotDisturbSetting {
+  // Whether do-not-disturb mode is enabled.
   optional bool do_not_disturb = 1;
+  // Timestamp when do-not-disturb mode expires.
   optional uint64 expiration_timestamp = 2;
+  // Timestamp when this setting was applied. Not present when this message
+  // comes from a notification.
+  optional uint64 version = 3;
 }
 
 message NotificationSettings {
@@ -755,10 +762,11 @@ message DesktopOffState {
   optional uint64 version = 2;
 }
 
+// Enable or disable do-not-disturb mode. Not to be confused with
+// DoNotDisturbSetting, which is used to indicate the state of do-not-disturb
+// mode.
 message DndSetting {
-  // Enable or disable do-not-disturb mode. Not to be confused with
-  // DoNotDisturbSetting, which is the same thing but with an timestamp for
-  // expiration.
+  // Whether to enable or disable do-not-disturb mode.
   optional bool do_not_disturb = 1;
   // Do not disturb expiration in seconds.
   optional uint64 timeout_secs = 2;
@@ -808,6 +816,76 @@ enum SyncFilter {
   SYNC_FILTER_ARCHIVED = 2;
 
   // TODO
+}
+
+// Describes a user's country.
+message Country {
+  // Abbreviated region code (eg. "CA").
+  optional string region_code = 1;
+  // Country's calling code (eg. "1").
+  optional uint64 country_code = 2;
+}
+
+enum SoundState {
+  SOUND_STATE_UNKNOWN = 0;
+  SOUND_STATE_ON = 1;
+  SOUND_STATE_OFF = 2;
+}
+
+// Sound settings in the desktop Hangouts client.
+message DesktopSoundSetting {
+  // Whether to play sound for incoming messages.
+  optional SoundState desktop_sound_state = 1;
+  // Whether to ring for incoming calls.
+  optional SoundState desktop_ring_sound_state = 2;
+}
+
+enum CallerIdSettingsMask {
+  CALLER_ID_SETTINGS_MASK_UNKNOWN = 0;
+  CALLER_ID_SETTINGS_MASK_PROVIDED = 1;
+}
+
+message PhoneData {
+  repeated Phone phone = 1;
+  optional CallerIdSettingsMask caller_id_settings_mask = 3;
+}
+
+enum PhoneVerificationStatus {
+  PHONE_VERIFICATION_STATUS_UNKNOWN = 0;
+  PHONE_VERIFICATION_STATUS_VERIFIED = 1;
+}
+
+enum PhoneDiscoverabilityStatus {
+  PHONE_DISCOVERABILITY_STATUS_UNKNOWN = 0;
+  PHONE_DISCOVERABILITY_STATUS_OPTED_IN_BUT_NOT_DISCOVERABLE = 2;
+}
+
+message Phone {
+  optional PhoneNumber phoneNumber = 1;
+  optional bool google_voice = 2;
+  optional PhoneVerificationStatus verification_status = 3;
+  optional bool discoverable = 4;
+  optional PhoneDiscoverabilityStatus discoverability_status = 5;
+  optional bool primary = 6;
+}
+
+enum PhoneValidationResult {
+  PHONE_VALIDATION_RESULT_IS_POSSIBLE = 0;
+}
+
+message I18nData {
+  optional string national_number = 1;
+  optional string international_number = 2;
+  optional uint64 country_code = 3;
+  optional string region_code = 4;
+  optional bool is_valid = 5;
+  optional PhoneValidationResult validation_result = 6;
+}
+
+message PhoneNumber {
+  // Phone number as string (eg. "+15551234567").
+  optional string e164 = 1;
+  optional I18nData i18n_data = 2;
 }
 
 // ----------------------------------------------------------------------------
@@ -951,11 +1029,10 @@ message BlockNotification {
 }
 
 message SetNotificationSettingNotification {
-  // TODO: implement me
-  // "sounds for incoming messages" off: [None, [2, 1]]
-  // "sounds for incoming messages" on: [None, [1, 1]]
-  // "ring for incoming phone calls" off: [None, [1, 2]]
-  // "ring for incoming phone calls" on: [None, [1, 1]]
+  optional DesktopSoundSetting desktop_sound_setting = 2;
+
+  // TODO
+  // convert text to emoji setting
 }
 
 message RichPresenceEnabledStateNotification {
@@ -1093,12 +1170,25 @@ message GetSelfInfoRequest {
 message GetSelfInfoResponse {
   optional ResponseHeader response_header = 1;
   optional Entity self_entity = 2;
+  optional bool is_known_minor = 3;
+  optional DoNotDisturbSetting dnd_state = 5;
   optional DesktopOffSetting desktop_off_setting = 6;
+  optional PhoneData phone_data = 7;
   repeated ConfigurationBit configuration_bit = 8;
   optional DesktopOffState desktop_off_state = 9;
+  optional bool google_plus_user = 10;
+  optional DesktopSoundSetting desktop_sound_setting = 11;
   optional RichPresenceState rich_presence_state = 12;
+  optional Country default_country = 19;
 
-  // TODO: all kinds of extra stuff
+  // TODO:
+  // client_presence? = 4;
+  // babel_user? = 13;
+  // desktop_availability_sharing_enabled? = 14;
+  // unknown = 16;
+  // bool google_plus_mobile_user = 15;
+  // unknown = 18;
+  // unknown = 22;
 }
 
 message QueryPresenceRequest {
