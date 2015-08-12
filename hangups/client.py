@@ -479,6 +479,10 @@ class Client(object):
                 ),
                 client_generated_id=self.get_client_generated_id(),
                 expected_otr=otr_status,
+                delivery_medium=hangouts_pb2.DeliveryMedium(
+                    medium_type=hangouts_pb2.DELIVERY_MEDIUM_BABEL,
+                ),
+                event_type=hangouts_pb2.EVENT_TYPE_REGULAR_CHAT_MESSAGE,
             ),
         )
 

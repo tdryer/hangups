@@ -321,11 +321,17 @@ enum SourceType {
 enum EventType {
   EVENT_TYPE_UNKNOWN = 0;
   EVENT_TYPE_REGULAR_CHAT_MESSAGE = 1;
+  EVENT_TYPE_SMS = 2;
+  EVENT_TYPE_VOICEMAIL = 3;
   EVENT_TYPE_ADD_USER = 4;
   EVENT_TYPE_REMOVE_USER = 5;
   EVENT_TYPE_CONVERSATION_RENAME = 6;
   EVENT_TYPE_HANGOUT = 7;
+  EVENT_TYPE_PHONE_CALL = 8;
   EVENT_TYPE_OTR_MODIFICATION = 9;
+  EVENT_TYPE_PLAN_MUTATION = 10;
+  EVENT_TYPE_MMS = 11;
+  EVENT_TYPE_DEPRECATED_12 = 12;
 }
 
 // Event that becomes part of a conversation's history.
@@ -396,10 +402,15 @@ enum ConversationView {
 enum DeliveryMediumType {
   DELIVERY_MEDIUM_UNKNOWN = 0;
   DELIVERY_MEDIUM_BABEL = 1;
+  DELIVERY_MEDIUM_GOOGLE_VOICE = 2;
+  DELIVERY_MEDIUM_LOCAL_SMS = 3;
 }
 
 message DeliveryMedium {
   optional DeliveryMediumType medium_type = 1;
+
+  // TODO: add this for sending google voice messages?
+  //optional Phone phone = 2;
 }
 
 message DeliveryMediumOption {
@@ -504,6 +515,8 @@ message EventRequestHeader {
   optional ConversationId conversation_id = 1;
   optional uint64 client_generated_id = 2;
   optional OffTheRecordStatus expected_otr = 3;
+  optional DeliveryMedium delivery_medium = 4;
+  optional EventType event_type = 5;
 }
 
 // Identifies the client.
@@ -861,7 +874,7 @@ enum PhoneDiscoverabilityStatus {
 }
 
 message Phone {
-  optional PhoneNumber phoneNumber = 1;
+  optional PhoneNumber phone_number = 1;
   optional bool google_voice = 2;
   optional PhoneVerificationStatus verification_status = 3;
   optional bool discoverable = 4;

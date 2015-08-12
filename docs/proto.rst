@@ -439,6 +439,8 @@ Field                       Number Type                  Label    Description
 :code:`conversation_id`     1      `ConversationId`_     optional            
 :code:`client_generated_id` 2      uint64                optional            
 :code:`expected_otr`        3      `OffTheRecordStatus`_ optional            
+:code:`delivery_medium`     4      `DeliveryMedium`_     optional            
+:code:`event_type`          5      `EventType`_          optional            
 =========================== ====== ===================== ======== ===========
 
 ClientVersion
@@ -724,7 +726,7 @@ Phone
 ============================== ====== ============================= ======== ===========
 Field                          Number Type                          Label    Description
 ============================== ====== ============================= ======== ===========
-:code:`phoneNumber`            1      `PhoneNumber`_                optional            
+:code:`phone_number`           1      `PhoneNumber`_                optional            
 :code:`google_voice`           2      bool                          optional            
 :code:`verification_status`    3      `PhoneVerificationStatus`_    optional            
 :code:`discoverable`           4      bool                          optional            
@@ -1628,11 +1630,17 @@ Name                                    Number Description
 ======================================= ====== ===========
 :code:`EVENT_TYPE_UNKNOWN`              0                 
 :code:`EVENT_TYPE_REGULAR_CHAT_MESSAGE` 1                 
+:code:`EVENT_TYPE_SMS`                  2                 
+:code:`EVENT_TYPE_VOICEMAIL`            3                 
 :code:`EVENT_TYPE_ADD_USER`             4                 
 :code:`EVENT_TYPE_REMOVE_USER`          5                 
 :code:`EVENT_TYPE_CONVERSATION_RENAME`  6                 
 :code:`EVENT_TYPE_HANGOUT`              7                 
+:code:`EVENT_TYPE_PHONE_CALL`           8                 
 :code:`EVENT_TYPE_OTR_MODIFICATION`     9                 
+:code:`EVENT_TYPE_PLAN_MUTATION`        10                
+:code:`EVENT_TYPE_MMS`                  11                
+:code:`EVENT_TYPE_DEPRECATED_12`        12                
 ======================================= ====== ===========
 
 ConversationType
@@ -1672,12 +1680,14 @@ Name                               Number Description
 DeliveryMediumType
 ------------------
 
-=============================== ====== ===========
-Name                            Number Description
-=============================== ====== ===========
-:code:`DELIVERY_MEDIUM_UNKNOWN` 0                 
-:code:`DELIVERY_MEDIUM_BABEL`   1                 
-=============================== ====== ===========
+==================================== ====== ===========
+Name                                 Number Description
+==================================== ====== ===========
+:code:`DELIVERY_MEDIUM_UNKNOWN`      0                 
+:code:`DELIVERY_MEDIUM_BABEL`        1                 
+:code:`DELIVERY_MEDIUM_GOOGLE_VOICE` 2                 
+:code:`DELIVERY_MEDIUM_LOCAL_SMS`    3                 
+==================================== ====== ===========
 
 ParticipantType
 ---------------
