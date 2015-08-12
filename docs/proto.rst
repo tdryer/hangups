@@ -282,6 +282,17 @@ Field                  Number Type                  Label    Description
 :code:`new_otr_toggle` 4      `OffTheRecordToggle`_ optional            
 ====================== ====== ===================== ======== ===========
 
+HashModifier
+------------
+
+================= ====== ====== ======== ===========
+Field             Number Type   Label    Description
+================= ====== ====== ======== ===========
+:code:`update_id` 1      string optional            
+:code:`hash_diff` 2      uint64 optional            
+:code:`version`   4      uint64 optional            
+================= ====== ====== ======== ===========
+
 Event
 -----
 
@@ -308,6 +319,7 @@ Field                           Number Type                  Label    Descriptio
 :code:`medium_type`             20     `DeliveryMedium`_     optional                                              
 :code:`event_type`              23     `EventType`_          optional The event's type.                            
 :code:`event_version`           24     uint64                optional Event version timestamp.                     
+:code:`hash_modifier`           26     `HashModifier`_       optional                                              
 =============================== ====== ===================== ======== =============================================
 
 UserReadState

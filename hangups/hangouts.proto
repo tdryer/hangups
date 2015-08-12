@@ -334,6 +334,12 @@ enum EventType {
   EVENT_TYPE_DEPRECATED_12 = 12;
 }
 
+message HashModifier {
+  optional string update_id = 1;
+  optional uint64 hash_diff = 2;
+  optional uint64 version = 4;
+}
+
 // Event that becomes part of a conversation's history.
 message Event {
   // ID of the conversation this event belongs to.
@@ -360,10 +366,7 @@ message Event {
   optional EventType event_type = 23;
   // Event version timestamp.
   optional uint64 event_version = 24;
-
-  // TODO: some of these fields are probably in a oneof
-  // TODO:
-  // unknown sending messages (['7-H0Z7-BCTg80ySBsfibNV', 4, None, 1435550921815004]) = 26;
+  optional HashModifier hash_modifier = 26;
 }
 
 enum ConversationType {
