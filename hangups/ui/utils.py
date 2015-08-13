@@ -8,7 +8,7 @@ def get_conv_name(conv, truncate=False, show_unread=False):
 
     If the conversation has a custom name, use the custom name. Otherwise, for
     one-to-one conversations, the name is the full name of the other user. For
-    group conversations, the name is a comma-separated list of first names. If
+    group conversations, the name is a comma-separated list of full names. If
     the group conversation is empty, the name is "Empty Conversation".
 
     If truncate is true, only show up to two names in a group conversation.
@@ -30,7 +30,7 @@ def get_conv_name(conv, truncate=False, show_unread=False):
             (user for user in conv.users if not user.is_self),
             key=lambda user: user.id_
         )
-        names = [user.first_name for user in participants]
+        names = [user.full_name for user in participants]
         if len(participants) == 0:
             return "Empty Conversation" + postfix
         if len(participants) == 1:
