@@ -491,7 +491,6 @@ class Client(object):
                 photo=hangouts_pb2.Photo(photo_id=image_id)
             )
 
-        logger.debug(request)
         response = hangouts_pb2.SendChatMessageResponse()
         yield from self._pb_request('conversations/sendchatmessage', request,
                                     response)
