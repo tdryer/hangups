@@ -267,12 +267,12 @@ class Client(object):
         initial_entities = []
         initial_entities.extend(get_suggested_entities_response.entity)
         initial_entities.extend(e.entity for e in itertools.chain(
-            get_suggested_entities_response.group1.entity,
-            get_suggested_entities_response.group2.entity,
-            get_suggested_entities_response.group3.entity,
-            get_suggested_entities_response.group4.entity,
-            get_suggested_entities_response.group5.entity,
-            get_suggested_entities_response.group6.entity
+            get_suggested_entities_response.favorites.contact,
+            get_suggested_entities_response.contacts_you_hangout_with.contact,
+            get_suggested_entities_response.other_contacts_on_hangouts.contact,
+            get_suggested_entities_response.other_contacts.contact,
+            get_suggested_entities_response.dismissed_contacts.contact,
+            get_suggested_entities_response.pinned_favorites.contact
         ))
 
         # Create list of ConversationParticipant data to use as a fallback for

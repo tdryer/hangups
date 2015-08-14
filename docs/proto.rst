@@ -387,22 +387,23 @@ Conversation
 
 A conversation between two or more users.
 
-=============================== ====== ============================== ======== ======================================================================
-Field                           Number Type                           Label    Description                                                           
-=============================== ====== ============================== ======== ======================================================================
-:code:`conversation_id`         1      `ConversationId`_              optional                                                                       
-:code:`type`                    2      `ConversationType`_            optional                                                                       
-:code:`name`                    3      string                         optional                                                                       
-:code:`self_conversation_state` 4      `UserConversationState`_       optional                                                                       
-:code:`read_state`              8      `UserReadState`_               repeated                                                                       
-:code:`has_active_hangout`      9      bool                           optional True if the conversation has an active Hangout.                       
-:code:`otr_status`              10     `OffTheRecordStatus`_          optional The conversation's "off the record" status.                           
-:code:`otr_toggle`              11     `OffTheRecordToggle`_          optional Whether the OTR toggle is available to the user for this conversation.
-:code:`current_participant`     13     `ParticipantId`_               repeated                                                                       
-:code:`participant_data`        14     `ConversationParticipantData`_ repeated                                                                       
-:code:`network_type`            18     `NetworkType`_                 repeated                                                                       
-:code:`force_history_state`     19     `ForceHistory`_                optional                                                                       
-=============================== ====== ============================== ======== ======================================================================
+====================================== ====== ============================== ======== ======================================================================
+Field                                  Number Type                           Label    Description                                                           
+====================================== ====== ============================== ======== ======================================================================
+:code:`conversation_id`                1      `ConversationId`_              optional                                                                       
+:code:`type`                           2      `ConversationType`_            optional                                                                       
+:code:`name`                           3      string                         optional                                                                       
+:code:`self_conversation_state`        4      `UserConversationState`_       optional                                                                       
+:code:`read_state`                     8      `UserReadState`_               repeated                                                                       
+:code:`has_active_hangout`             9      bool                           optional True if the conversation has an active Hangout.                       
+:code:`otr_status`                     10     `OffTheRecordStatus`_          optional The conversation's "off the record" status.                           
+:code:`otr_toggle`                     11     `OffTheRecordToggle`_          optional Whether the OTR toggle is available to the user for this conversation.
+:code:`conversation_history_supported` 12     bool                           optional                                                                       
+:code:`current_participant`            13     `ParticipantId`_               repeated                                                                       
+:code:`participant_data`               14     `ConversationParticipantData`_ repeated                                                                       
+:code:`network_type`                   18     `NetworkType`_                 repeated                                                                       
+:code:`force_history_state`            19     `ForceHistory`_                optional                                                                       
+====================================== ====== ============================== ======== ======================================================================
 
 EasterEgg
 ---------
@@ -504,13 +505,26 @@ Entity
 
 A user that can participate in conversations.
 
-================== ====== =================== ======== ==============================
-Field              Number Type                Label    Description                   
-================== ====== =================== ======== ==============================
-:code:`id`         9      `ParticipantId`_    optional The user's ID.                
-:code:`presence`   8      `Presence`_         optional Optional user presence status.
-:code:`properties` 10     `EntityProperties`_ optional Optional user properties.     
-================== ====== =================== ======== ==============================
+============================== ====== ========================== ======== ==============================
+Field                          Number Type                       Label    Description                   
+============================== ====== ========================== ======== ==============================
+:code:`id`                     9      `ParticipantId`_           optional The user's ID.                
+:code:`presence`               8      `Presence`_                optional Optional user presence status.
+:code:`properties`             10     `EntityProperties`_        optional Optional user properties.     
+:code:`entity_type`            13     `ParticipantType`_         optional                               
+:code:`had_past_hangout_state` 16     `Entity.PastHangoutState`_ optional                               
+============================== ====== ========================== ======== ==============================
+
+Entity.PastHangoutState
+-----------------------
+
+=========================================== ====== ===========
+Name                                        Number Description
+=========================================== ====== ===========
+:code:`PAST_HANGOUT_STATE_UNKNOWN`          0                 
+:code:`PAST_HANGOUT_STATE_HAD_PAST_HANGOUT` 1                 
+:code:`PAST_HANGOUT_STATE_NO_PAST_HANGOUT`  2                 
+=========================================== ====== ===========
 
 EntityProperties
 ----------------
@@ -769,6 +783,37 @@ Field             Number Type        Label    Description
 :code:`e164`      1      string      optional Phone number as string (eg. "+15551234567").
 :code:`i18n_data` 2      `I18nData`_ optional                                             
 ================= ====== =========== ======== ============================================
+
+SuggestedContactGroupHash
+-------------------------
+
+=================== ====== ====== ======== ============================================
+Field               Number Type   Label    Description                                 
+=================== ====== ====== ======== ============================================
+:code:`max_results` 1      uint64 optional Number of results to return from this group.
+:code:`hash`        2      bytes  optional A 4-byte hash.                              
+=================== ====== ====== ======== ============================================
+
+SuggestedContact
+----------------
+
+========================= ====== =================== ======== ===========
+Field                     Number Type                Label    Description
+========================= ====== =================== ======== ===========
+:code:`entity`            1      `Entity`_           optional            
+:code:`invitation_status` 2      `InvitationStatus`_ optional            
+========================= ====== =================== ======== ===========
+
+SuggestedContactGroup
+---------------------
+
+==================== ====== =================== ======== ==============
+Field                Number Type                Label    Description   
+==================== ====== =================== ======== ==============
+:code:`hash_matched` 1      bool                optional               
+:code:`hash`         2      string              optional A 4-byte hash.
+:code:`contact`      3      `SuggestedContact`_ repeated               
+==================== ====== =================== ======== ==============
 
 StateUpdate
 -----------
@@ -1115,45 +1160,33 @@ Field                   Number Type              Label    Description
 GetSuggestedEntitiesRequest
 ---------------------------
 
-====================== ====== ================ ======== ===========
-Field                  Number Type             Label    Description
-====================== ====== ================ ======== ===========
-:code:`request_header` 1      `RequestHeader`_ optional            
-====================== ====== ================ ======== ===========
+================================== ====== ============================ ======== ===========
+Field                              Number Type                         Label    Description
+================================== ====== ============================ ======== ===========
+:code:`request_header`             1      `RequestHeader`_             optional            
+:code:`favorites`                  8      `SuggestedContactGroupHash`_ optional            
+:code:`contacts_you_hangout_with`  9      `SuggestedContactGroupHash`_ optional            
+:code:`other_contacts_on_hangouts` 10     `SuggestedContactGroupHash`_ optional            
+:code:`other_contacts`             11     `SuggestedContactGroupHash`_ optional            
+:code:`dismissed_contacts`         12     `SuggestedContactGroupHash`_ optional            
+:code:`pinned_favorites`           13     `SuggestedContactGroupHash`_ optional            
+================================== ====== ============================ ======== ===========
 
 GetSuggestedEntitiesResponse
 ----------------------------
 
-======================= ====== =========================================== ======== ===========
-Field                   Number Type                                        Label    Description
-======================= ====== =========================================== ======== ===========
-:code:`response_header` 1      `ResponseHeader`_                           optional            
-:code:`entity`          2      `Entity`_                                   repeated            
-:code:`group1`          4      `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
-:code:`group2`          5      `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
-:code:`group3`          6      `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
-:code:`group4`          7      `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
-:code:`group5`          8      `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
-:code:`group6`          9      `GetSuggestedEntitiesResponse.EntityGroup`_ optional            
-======================= ====== =========================================== ======== ===========
-
-GetSuggestedEntitiesResponse.EntityGroup
-----------------------------------------
-
-============== ====== =============================================== ======== ===========
-Field          Number Type                                            Label    Description
-============== ====== =============================================== ======== ===========
-:code:`entity` 3      `GetSuggestedEntitiesResponse.EntityGroup.Foo`_ repeated            
-============== ====== =============================================== ======== ===========
-
-GetSuggestedEntitiesResponse.EntityGroup.Foo
---------------------------------------------
-
-============== ====== ========= ======== ===========
-Field          Number Type      Label    Description
-============== ====== ========= ======== ===========
-:code:`entity` 1      `Entity`_ optional            
-============== ====== ========= ======== ===========
+================================== ====== ======================== ======== ===========
+Field                              Number Type                     Label    Description
+================================== ====== ======================== ======== ===========
+:code:`response_header`            1      `ResponseHeader`_        optional            
+:code:`entity`                     2      `Entity`_                repeated            
+:code:`favorites`                  4      `SuggestedContactGroup`_ optional            
+:code:`contacts_you_hangout_with`  5      `SuggestedContactGroup`_ optional            
+:code:`other_contacts_on_hangouts` 6      `SuggestedContactGroup`_ optional            
+:code:`other_contacts`             7      `SuggestedContactGroup`_ optional            
+:code:`dismissed_contacts`         8      `SuggestedContactGroup`_ optional            
+:code:`pinned_favorites`           9      `SuggestedContactGroup`_ optional            
+================================== ====== ======================== ======== ===========
 
 GetSelfInfoRequest
 ------------------

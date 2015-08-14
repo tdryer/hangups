@@ -476,6 +476,7 @@ message Conversation {
   optional OffTheRecordStatus otr_status = 10;
   // Whether the OTR toggle is available to the user for this conversation.
   optional OffTheRecordToggle otr_toggle = 11;
+  optional bool conversation_history_supported = 12;
   repeated ParticipantId current_participant = 13;
   repeated ConversationParticipantData participant_data = 14;
   repeated NetworkType network_type = 18;
@@ -598,6 +599,17 @@ message Entity {
   optional Presence presence = 8;
   // Optional user properties.
   optional EntityProperties properties = 10;
+  optional ParticipantType entity_type = 13;
+  enum PastHangoutState {
+    PAST_HANGOUT_STATE_UNKNOWN = 0;
+    PAST_HANGOUT_STATE_HAD_PAST_HANGOUT = 1;
+    PAST_HANGOUT_STATE_NO_PAST_HANGOUT = 2;
+  }
+  optional PastHangoutState had_past_hangout_state = 16;
+
+  // TODO:
+  // unknown 1 = 15;
+  // unknown 2 = 17;
 }
 
 message EntityProperties {
@@ -904,6 +916,27 @@ message PhoneNumber {
   optional I18nData i18n_data = 2;
 }
 
+message SuggestedContactGroupHash {
+  // Number of results to return from this group.
+  optional uint64 max_results = 1;
+  // A 4-byte hash.
+  optional bytes hash = 2;
+}
+
+message SuggestedContact {
+  optional Entity entity = 1;
+  optional InvitationStatus invitation_status = 2;
+}
+
+message SuggestedContactGroup {
+  optional bool hash_matched = 1;
+  // A 4-byte hash.
+  optional string hash = 2;
+  repeated SuggestedContact contact = 3;
+
+  // TODO: hash should be bytes type
+}
+
 // ----------------------------------------------------------------------------
 // State Update and Notifications
 // ----------------------------------------------------------------------------
@@ -1148,33 +1181,31 @@ message GetEntityByIdResponse {
 
 message GetSuggestedEntitiesRequest {
   optional RequestHeader request_header = 1;
+  optional SuggestedContactGroupHash favorites = 8;
+  optional SuggestedContactGroupHash contacts_you_hangout_with = 9;
+  optional SuggestedContactGroupHash other_contacts_on_hangouts = 10;
+  optional SuggestedContactGroupHash other_contacts = 11;
+  optional SuggestedContactGroupHash dismissed_contacts = 12;
+  optional SuggestedContactGroupHash pinned_favorites = 13;
 
-  // TODO
+  // TODO: possible other fields:
+  // unknown bytes = 2;
+  // unknown bytes = 3;
+  // unknown int/enum = 4;
+  // unknown bool = 5;
+  // repeated ParticipantId unknown = 6;
+  // unknown bool = 7;
 }
 
 message GetSuggestedEntitiesResponse {
   optional ResponseHeader response_header = 1;
   repeated Entity entity = 2;
-
-  // more entities in 4, 5, 6, 7, 8, 9
-  // TODO: not exactly sure what's going on here
-
-  message EntityGroup {
-    repeated Foo entity = 3;
-    message Foo {
-      optional Entity entity = 1;
-    }
-
-    // TODO:
-    // unknown 0 = 1;
-    // unknown code = 2;
-  }
-  optional EntityGroup group1 = 4;
-  optional EntityGroup group2 = 5;
-  optional EntityGroup group3 = 6;
-  optional EntityGroup group4 = 7;
-  optional EntityGroup group5 = 8;
-  optional EntityGroup group6 = 9;
+  optional SuggestedContactGroup favorites = 4;
+  optional SuggestedContactGroup contacts_you_hangout_with = 5;
+  optional SuggestedContactGroup other_contacts_on_hangouts = 6;
+  optional SuggestedContactGroup other_contacts = 7;
+  optional SuggestedContactGroup dismissed_contacts = 8;
+  optional SuggestedContactGroup pinned_favorites = 9;
 }
 
 message GetSelfInfoRequest {
