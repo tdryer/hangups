@@ -174,8 +174,9 @@ enum ItemType {
   ITEM_TYPE_THING = 0;
   // Google Plus photo.
   ITEM_TYPE_PLUS_PHOTO = 249;
-  ITEM_TYPE_PLACE_V2 = 340;
   ITEM_TYPE_PLACE = 335;
+  // Google Map place.
+  ITEM_TYPE_PLACE_V2 = 340;
 }
 
 // Google Plus photo that can be embedded in a chat message.
@@ -220,6 +221,23 @@ message PlusPhoto {
 
 }
 
+// Place that can be embedded in a chat message via Google Maps.
+message Place {
+
+  // Representative image of a place.
+  message RepresentativeImage {
+    // URL of image.
+    optional string url = 2;
+  }
+
+  // Google Maps URL pointing to the map coordinates.
+  optional string url = 1;
+  // Name of map location.
+  optional string name = 3;
+  // Representative image of the place (map with pin).
+  optional RepresentativeImage representative_image = 185;
+}
+
 // An item of some type embedded in a chat message.
 message EmbedItem {
   // List of embedded item types in this message.
@@ -228,10 +246,8 @@ message EmbedItem {
   optional string id = 2;
   // Embedded Google Plus photo.
   optional PlusPhoto plus_photo = 27639957;
-
-  // TODO:
-  // 35825640 (maps)
-  // 39748951 (maps)
+  // Embedded Google Map of a place.
+  optional Place place = 35825640;
 }
 
 // An attachment for a chat message.
@@ -289,7 +305,8 @@ message HangoutEvent {
   repeated ParticipantId participant_id = 2;
 
   // TODO:
-  // unknown 1 = 7;
+  // unknown 7 = 1;
+  // unknown 3 = 25;
 }
 
 message OTRModification {

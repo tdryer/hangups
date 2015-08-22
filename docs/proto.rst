@@ -193,6 +193,30 @@ Name                       Number Description
 :code:`MEDIA_TYPE_PHOTO`   1                 
 ========================== ====== ===========
 
+Place
+-----
+
+Place that can be embedded in a chat message via Google Maps.
+
+============================ ====== ============================ ======== =================================================
+Field                        Number Type                         Label    Description                                      
+============================ ====== ============================ ======== =================================================
+:code:`url`                  1      string                       optional Google Maps URL pointing to the map coordinates. 
+:code:`name`                 3      string                       optional Name of map location.                            
+:code:`representative_image` 185    `Place.RepresentativeImage`_ optional Representative image of the place (map with pin).
+============================ ====== ============================ ======== =================================================
+
+Place.RepresentativeImage
+-------------------------
+
+Representative image of a place.
+
+=========== ====== ====== ======== =============
+Field       Number Type   Label    Description  
+=========== ====== ====== ======== =============
+:code:`url` 2      string optional URL of image.
+=========== ====== ====== ======== =============
+
 EmbedItem
 ---------
 
@@ -204,6 +228,7 @@ Field              Number   Type         Label    Description
 :code:`type`       1        `ItemType`_  repeated List of embedded item types in this message.                    
 :code:`id`         2        string       optional For photos this is not given, for maps, it's the URL of the map.
 :code:`plus_photo` 27639957 `PlusPhoto`_ optional Embedded Google Plus photo.                                     
+:code:`place`      35825640 `Place`_     optional Embedded Google Map of a place.                                 
 ================== ======== ============ ======== ================================================================
 
 Attachment
@@ -1605,8 +1630,8 @@ Name                         Number Description
 ============================ ====== ==================
 :code:`ITEM_TYPE_THING`      0                        
 :code:`ITEM_TYPE_PLUS_PHOTO` 249    Google Plus photo.
-:code:`ITEM_TYPE_PLACE_V2`   340                      
 :code:`ITEM_TYPE_PLACE`      335                      
+:code:`ITEM_TYPE_PLACE_V2`   340    Google Map place. 
 ============================ ====== ==================
 
 MembershipChangeType
