@@ -107,6 +107,7 @@ class Client(object):
         """
         initial_data = yield from self._initialize_chat()
         self._channel = channel.Channel(self._cookies, self._connector)
+
         @asyncio.coroutine
         def _on_connect():
             """Wrapper to fire on_connect with initial_data."""
@@ -256,10 +257,13 @@ class Client(object):
         # Parse GetSuggestedEntitiesResponse
         # This gives us entities for the user's contacts, but doesn't include
         # users not in contacts.
-        get_suggested_entities_response = hangouts_pb2.GetSuggestedEntitiesResponse()
+        get_suggested_entities_response = (
+            hangouts_pb2.GetSuggestedEntitiesResponse()
+        )
         pblite.decode(get_suggested_entities_response, data_dict['ds:21'][0],
-                     ignore_first_item=True)
-        logger.debug('Parsed GetSuggestedEntitiesResponse:\n%s', get_suggested_entities_response)
+                      ignore_first_item=True)
+        logger.debug('Parsed GetSuggestedEntitiesResponse:\n%s',
+                     get_suggested_entities_response)
 
         # Combine entities from all responses into one list of all the known
         # entities
@@ -277,18 +281,16 @@ class Client(object):
         # Create list of ConversationParticipant data to use as a fallback for
         # entities that can't be found.
         conv_part_list = []
-        for conversation_state in sync_recent_conversations_response.conversation_state:
-            conv_part_list.extend(conversation_state.conversation.participant_data)
+        conv_states = sync_recent_conversations_response.conversation_state
+        for conv_state in conv_states:
+            conv_part_list.extend(conv_state.conversation.participant_data)
 
         sync_timestamp = parsers.from_timestamp(
             sync_recent_conversations_response.sync_timestamp
         )
 
-        return InitialData(
-            sync_recent_conversations_response.conversation_state,
-            get_self_info_response.self_entity, initial_entities,
-            conv_part_list, sync_timestamp,
-        )
+        return InitialData(conv_states, get_self_info_response.self_entity,
+                           initial_entities, conv_part_list, sync_timestamp)
 
     def _get_cookie(self, name):
         """Return a cookie for raise error if that cookie was not provided."""
@@ -442,8 +444,7 @@ class Client(object):
     @asyncio.coroutine
     def sendchatmessage(
             self, conversation_id, segments, image_id=None,
-            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD
-    ):
+            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD):
         """Send a chat message to a conversation.
 
         conversation_id must be a valid conversation ID. segments must be a
@@ -547,9 +548,8 @@ class Client(object):
 
     @asyncio.coroutine
     def renameconversation(
-        self, conversation_id, name,
-        otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD
-    ):
+            self, conversation_id, name,
+            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD):
         """Rename a conversation.
 
         Raises hangups.NetworkError if the request fails.
@@ -649,9 +649,8 @@ class Client(object):
 
     @asyncio.coroutine
     def removeuser(
-        self, conversation_id,
-        otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD
-    ):
+            self, conversation_id,
+            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD):
         """Leave group conversation.
 
         conversation_id must be a valid conversation ID.
