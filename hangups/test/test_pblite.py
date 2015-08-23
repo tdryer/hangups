@@ -21,6 +21,8 @@ def test_decode():
         [2, 3],
         [1],
         [[2], [3]],
+        'AA==',
+        ['AAE=', 'AAEC'],
     ])
     assert message == test_pblite_pb2.TestMessage(
         test_int=1,
@@ -41,6 +43,8 @@ def test_decode():
                 test_embedded_int=3,
             ),
         ],
+        test_bytes=b'\x00',
+        test_repeated_bytes=[b'\x00\x01', b'\x00\x01\x02'],
     )
 
 def test_decode_unserialized_fields():
@@ -128,6 +132,34 @@ def test_decode_repeated_message_wrong_type():
         ],
     )
 
+def test_decode_bytes_wrong_type():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None, None, None, None, None, None, None, None, 1,
+    ])
+    assert message == test_pblite_pb2.TestMessage()
+
+def test_decode_bytes_invalid_value():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None, None, None, None, None, None, None, None, 'A?==',
+    ])
+    assert message == test_pblite_pb2.TestMessage()
+
+def test_decode_repeated_bytes_wrong_type():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None, None, None, None, None, None, None, None, None, [1],
+    ])
+    assert message == test_pblite_pb2.TestMessage()
+
+def test_decode_repeated_bytes_invalid_value():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None, None, None, None, None, None, None, None, None, ['A?=='],
+    ])
+    assert message == test_pblite_pb2.TestMessage()
+
 def test_decode_ignore_first_item():
     message = test_pblite_pb2.TestMessage()
     pblite.decode(message, [
@@ -179,6 +211,8 @@ def test_encode():
                 test_embedded_int=3,
             ),
         ],
+        test_bytes=b'\x00',
+        test_repeated_bytes=[b'\x00\x01', b'\x00\x01\x02'],
     )
     assert pblite.encode(message) == [
         1,
@@ -189,6 +223,8 @@ def test_encode():
         [2, 3],
         [1],
         [[2], [3]],
+        'AA==',
+        ['AAE=', 'AAEC'],
     ]
 
 def test_encode_no_fields():

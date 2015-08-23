@@ -29,4 +29,7 @@ message TestMessage {
   }
   optional EmbeddedMessage test_embedded_message = 7;
   repeated EmbeddedMessage test_repeated_embedded_message = 8;
+
+  optional bytes test_bytes = 9;
+  repeated bytes test_repeated_bytes = 10;
 }

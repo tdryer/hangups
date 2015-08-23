@@ -674,11 +674,8 @@ message ConversationState {
 // Specifying event_timestamp is sufficient.
 message EventContinuationToken {
   optional string event_id = 1;
-  optional string storage_continuation_token = 2;
+  optional bytes storage_continuation_token = 2;
   optional uint64 event_timestamp = 3;
-
-  // TODO: storage_continuation_token should be bytes, and pblite
-  // base64-encodes it
 }
 
 message EntityLookupSpec {
@@ -948,10 +945,8 @@ message SuggestedContact {
 message SuggestedContactGroup {
   optional bool hash_matched = 1;
   // A 4-byte hash.
-  optional string hash = 2;
+  optional bytes hash = 2;
   repeated SuggestedContact contact = 3;
-
-  // TODO: hash should be bytes type
 }
 
 // ----------------------------------------------------------------------------

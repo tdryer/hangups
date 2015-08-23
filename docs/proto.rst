@@ -593,7 +593,7 @@ Specifying event_timestamp is sufficient.
 Field                              Number Type   Label    Description
 ================================== ====== ====== ======== ===========
 :code:`event_id`                   1      string optional            
-:code:`storage_continuation_token` 2      string optional            
+:code:`storage_continuation_token` 2      bytes  optional            
 :code:`event_timestamp`            3      uint64 optional            
 ================================== ====== ====== ======== ===========
 
@@ -836,7 +836,7 @@ SuggestedContactGroup
 Field                Number Type                Label    Description   
 ==================== ====== =================== ======== ==============
 :code:`hash_matched` 1      bool                optional               
-:code:`hash`         2      string              optional A 4-byte hash.
+:code:`hash`         2      bytes               optional A 4-byte hash.
 :code:`contact`      3      `SuggestedContact`_ repeated               
 ==================== ====== =================== ======== ==============
 

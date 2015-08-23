@@ -11,6 +11,7 @@ Google's implementation for JavaScript is available in closure-library:
     https://github.com/google/closure-library/tree/master/closure/goog/proto2
 """
 
+import base64
 import itertools
 import logging
 
@@ -26,9 +27,12 @@ def _decode_field(message, field, value):
         decode(getattr(message, field.name), value)
     else:
         try:
+            if field.type == FieldDescriptor.TYPE_BYTES:
+                value = base64.b64decode(value)
             setattr(message, field.name, value)
         except (ValueError, TypeError) as e:
-            # ValueError: invalid enum value or negative unsigned int value
+            # ValueError: invalid enum value, negative unsigned int value, or
+            # invalid base64
             # TypeError: mismatched type
             logger.warning('Message %r ignoring field %s: %s',
                            message.__class__.__name__, field.name, e)
@@ -42,9 +46,12 @@ def _decode_repeated_field(message, field, value_list):
     else:
         try:
             for value in value_list:
+                if field.type == FieldDescriptor.TYPE_BYTES:
+                    value = base64.b64decode(value)
                 getattr(message, field.name).append(value)
         except (ValueError, TypeError) as e:
-            # ValueError: invalid enum value or negative unsigned int value
+            # ValueError: invalid enum value, negative unsigned int value, or
+            # invalid base64
             # TypeError: mismatched type
             logger.warning('Message %r ignoring repeated field %s: %s',
                            message.__class__.__name__, field.name, e)
@@ -129,11 +136,16 @@ def encode(message):
         if field_descriptor.label == FieldDescriptor.LABEL_REPEATED:
             if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:
                 encoded_value = [encode(item) for item in field_value]
+            elif field_descriptor.type == FieldDescriptor.TYPE_BYTES:
+                encoded_value = [base64.b64encode(val).decode()
+                                 for val in field_value]
             else:
                 encoded_value = list(field_value)
         else:
             if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:
                 encoded_value = encode(field_value)
+            elif field_descriptor.type == FieldDescriptor.TYPE_BYTES:
+                encoded_value = base64.b64encode(field_value).decode()
             else:
                 encoded_value = field_value
         # Add any necessary padding to the list

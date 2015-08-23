@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='hangups/test/test_pblite.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n\x1ehangups/test/test_pblite.proto\"0\n\x13TestRequiredMessage\x12\x19\n\x11test_required_int\x18\x01 \x02(\x05\"\xb7\x03\n\x0bTestMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\x12\x19\n\x11test_repeated_int\x18\x02 \x03(\x05\x12\x13\n\x0btest_string\x18\x03 \x01(\t\x12\x1c\n\x14test_repeated_string\x18\x04 \x03(\t\x12(\n\ttest_enum\x18\x05 \x01(\x0e\x32\x15.TestMessage.TestEnum\x12\x31\n\x12test_repeated_enum\x18\x06 \x03(\x0e\x32\x15.TestMessage.TestEnum\x12;\n\x15test_embedded_message\x18\x07 \x01(\x0b\x32\x1c.TestMessage.EmbeddedMessage\x12\x44\n\x1etest_repeated_embedded_message\x18\x08 \x03(\x0b\x32\x1c.TestMessage.EmbeddedMessage\x1a,\n\x0f\x45mbeddedMessage\x12\x19\n\x11test_embedded_int\x18\x01 \x01(\x05\":\n\x08TestEnum\x12\n\n\x06TEST_0\x10\x00\x12\n\n\x06TEST_1\x10\x01\x12\n\n\x06TEST_2\x10\x02\x12\n\n\x06TEST_3\x10\x03')
+  serialized_pb=_b('\n\x1ehangups/test/test_pblite.proto\"0\n\x13TestRequiredMessage\x12\x19\n\x11test_required_int\x18\x01 \x02(\x05\"\xe8\x03\n\x0bTestMessage\x12\x10\n\x08test_int\x18\x01 \x01(\x05\x12\x19\n\x11test_repeated_int\x18\x02 \x03(\x05\x12\x13\n\x0btest_string\x18\x03 \x01(\t\x12\x1c\n\x14test_repeated_string\x18\x04 \x03(\t\x12(\n\ttest_enum\x18\x05 \x01(\x0e\x32\x15.TestMessage.TestEnum\x12\x31\n\x12test_repeated_enum\x18\x06 \x03(\x0e\x32\x15.TestMessage.TestEnum\x12;\n\x15test_embedded_message\x18\x07 \x01(\x0b\x32\x1c.TestMessage.EmbeddedMessage\x12\x44\n\x1etest_repeated_embedded_message\x18\x08 \x03(\x0b\x32\x1c.TestMessage.EmbeddedMessage\x12\x12\n\ntest_bytes\x18\t \x01(\x0c\x12\x1b\n\x13test_repeated_bytes\x18\n \x03(\x0c\x1a,\n\x0f\x45mbeddedMessage\x12\x19\n\x11test_embedded_int\x18\x01 \x01(\x05\":\n\x08TestEnum\x12\n\n\x06TEST_0\x10\x00\x12\n\n\x06TEST_1\x10\x01\x12\n\n\x06TEST_2\x10\x02\x12\n\n\x06TEST_3\x10\x03')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -50,8 +50,8 @@ _TESTMESSAGE_TESTENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=466,
-  serialized_end=524,
+  serialized_start=515,
+  serialized_end=573,
 )
 _sym_db.RegisterEnumDescriptor(_TESTMESSAGE_TESTENUM)
 
@@ -113,8 +113,8 @@ _TESTMESSAGE_EMBEDDEDMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=420,
-  serialized_end=464,
+  serialized_start=469,
+  serialized_end=513,
 )
 
 _TESTMESSAGE = _descriptor.Descriptor(
@@ -180,6 +180,20 @@ _TESTMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='test_bytes', full_name='TestMessage.test_bytes', index=8,
+      number=9, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='test_repeated_bytes', full_name='TestMessage.test_repeated_bytes', index=9,
+      number=10, type=12, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -194,7 +208,7 @@ _TESTMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=85,
-  serialized_end=524,
+  serialized_end=573,
 )
 
 _TESTMESSAGE_EMBEDDEDMESSAGE.containing_type = _TESTMESSAGE
