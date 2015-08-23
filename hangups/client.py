@@ -37,10 +37,10 @@ SETACTIVECLIENT_LIMIT_SECS = 60
 
 # Initial account data received after the client is first connected:
 InitialData = collections.namedtuple('InitialData', [
-    'conversation_states',  # [ClientConversationState]
-    'self_entity',  # ClientEntity
-    'entities',  # [ClientEntity]
-    'conversation_participants',  # [ClientConversationParticipantData]
+    'conversation_states',  # [ConversationState]
+    'self_entity',  # Entity
+    'entities',  # [Entity]
+    'conversation_participants',  # [ConversationParticipantData]
     'sync_timestamp'  # datetime
 ])
 
@@ -65,8 +65,7 @@ class Client(object):
         self.on_reconnect = event.Event('Client.on_reconnect')
         # Event fired when the client is disconnected with arguments ().
         self.on_disconnect = event.Event('Client.on_disconnect')
-        # Event fired when a ClientStateUpdate arrives with arguments
-        # (state_update).
+        # Event fired when a StateUpdate arrives with arguments (state_update).
         self.on_state_update = event.Event('Client.on_state_update')
 
         self._cookies = cookies
@@ -389,7 +388,7 @@ class Client(object):
         return res
 
     def _get_request_header_pb(self):
-        """Return populated ClientRequestHeader message."""
+        """Return populated RequestHeader message."""
         client_identifier = hangouts_pb2.ClientIdentifier(
             header_id=self._header_id,
         )
@@ -882,7 +881,6 @@ class Client(object):
             type=(hangouts_pb2.CONVERSATION_TYPE_GROUP if is_group else
                   hangouts_pb2.CONVERSATION_TYPE_ONE_TO_ONE),
             client_generated_id=self.get_client_generated_id(),
-            name="created by hangups",
             invitee_id=[hangouts_pb2.InviteeID(gaia_id=chat_id)
                         for chat_id in chat_id_list],
         )

@@ -13,16 +13,15 @@ class Conversation(object):
 
     """Wrapper around Client for working with a single chat conversation."""
 
-    def __init__(self, client, user_list, client_conversation,
-                 client_events=[]):
+    def __init__(self, client, user_list, conversation, events=[]):
         """Initialize a new Conversation."""
         self._client = client  # Client
         self._user_list = user_list  # UserList
-        self._conversation = client_conversation  # hangouts_pb2.Conversation
+        self._conversation = conversation  # hangouts_pb2.Conversation
         self._events = []  # [hangouts_pb2.Event]
         self._events_dict = {}  # {event_id: ConversationEvent}
         self._send_message_lock = asyncio.Lock()
-        for event_ in client_events:
+        for event_ in events:
             self.add_event(event_)
 
         # Event fired when a user starts or stops typing with arguments
@@ -53,7 +52,7 @@ class Conversation(object):
             )
 
     def update_conversation(self, conversation):
-        """Update the internal ClientConversation."""
+        """Update the internal Conversation."""
         # When latest_read_timestamp is 0, this seems to indicate no change
         # from the previous value. Word around this by saving and restoring the
         # previous value.
@@ -81,7 +80,7 @@ class Conversation(object):
             return conversation_event.ConversationEvent(event_)
 
     def add_event(self, event_):
-        """Add a ClientEvent to the Conversation.
+        """Add an Event to the Conversation.
 
         Returns an instance of ConversationEvent or subclass.
         """
@@ -248,7 +247,7 @@ class Conversation(object):
                 res = yield from self._client.getconversation(
                     self.id_, conv_event.timestamp, max_events
                 )
-                conv_events = [self._wrap_event(client_event) for client_event
+                conv_events = [self._wrap_event(event) for event
                                in res.conversation_state.event]
                 logger.info('Loaded {} events for conversation {}'
                             .format(len(conv_events), self.id_))
@@ -366,7 +365,7 @@ class ConversationList(object):
         self._user_list = user_list  # UserList
 
         # Initialize the list of conversations from Client's list of
-        # ClientConversationStates.
+        # hangouts_pb2.ConversationState.
         for conv_state in conv_states:
             self.add_conversation(conv_state.conversation, conv_state.event)
 
@@ -401,12 +400,12 @@ class ConversationList(object):
         """
         return self._conv_dict[conv_id]
 
-    def add_conversation(self, conversation, client_events=[]):
-        """Add new conversation from ClientConversation"""
+    def add_conversation(self, conversation, events=[]):
+        """Add new conversation from hangouts_pb2.Conversation"""
         conv_id = conversation.conversation_id.id
         logger.info('Adding new conversation: {}'.format(conv_id))
         conv = Conversation(self._client, self._user_list, conversation,
-                            client_events)
+                            events)
         self._conv_dict[conv_id] = conv
         return conv
 
@@ -422,7 +421,7 @@ class ConversationList(object):
         """Receive a StateUpdate and fan out to Conversations."""
         # Handle updating a conversation
         if state_update.HasField('conversation'):
-            self._handle_client_conversation(state_update.conversation)
+            self._handle_conversation(state_update.conversation)
         # Handle the notification
         notification_type = state_update.WhichOneof('state_update')
         if notification_type == 'typing_notification':
@@ -434,25 +433,25 @@ class ConversationList(object):
                 state_update.watermark_notification
             )
         elif notification_type == 'event_notification':
-            yield from self._on_client_event(
+            yield from self._on_event(
                 state_update.event_notification.event
             )
 
     @asyncio.coroutine
-    def _on_client_event(self, event_):
-        """Receive a ClientEvent and fan out to Conversations."""
+    def _on_event(self, event_):
+        """Receive a hangouts_pb2.Event and fan out to Conversations."""
         self._sync_timestamp = parsers.from_timestamp(event_.timestamp)
         try:
             conv = self._conv_dict[event_.conversation_id.id]
         except KeyError:
-            logger.warning('Received ClientEvent for unknown conversation {}'
+            logger.warning('Received Event for unknown conversation {}'
                            .format(event_.conversation_id.id))
         else:
             conv_event = conv.add_event(event_)
             yield from self.on_event.fire(conv_event)
             yield from conv.on_event.fire(conv_event)
 
-    def _handle_client_conversation(self, conversation):
+    def _handle_conversation(self, conversation):
         """Receive Conversation and create or update the conversation."""
         conv_id = conversation.conversation_id.id
         conv = self._conv_dict.get(conv_id, None)
@@ -463,7 +462,7 @@ class ConversationList(object):
 
     @asyncio.coroutine
     def _handle_set_typing_notification(self, set_typing_notification):
-        """Receive ClientSetTypingNotification and update the conversation."""
+        """Receive SetTypingNotification and update the conversation."""
         conv_id = set_typing_notification.conversation_id.id
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
@@ -471,12 +470,12 @@ class ConversationList(object):
             yield from self.on_typing.fire(res)
             yield from conv.on_typing.fire(res)
         else:
-            logger.warning('Received ClientSetTypingNotification for '
+            logger.warning('Received SetTypingNotification for '
                            'unknown conversation {}'.format(conv_id))
 
     @asyncio.coroutine
     def _handle_watermark_notification(self, watermark_notification):
-        """Receive ClientWatermarkNotification and update the conversation."""
+        """Receive WatermarkNotification and update the conversation."""
         conv_id = watermark_notification.conversation_id.id
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
@@ -484,7 +483,7 @@ class ConversationList(object):
             yield from self.on_watermark_notification.fire(res)
             yield from conv.on_watermark_notification.fire(res)
         else:
-            logger.warning('Received ClientWatermarkNotification for '
+            logger.warning('Received WatermarkNotification for '
                            'unknown conversation {}'.format(conv_id))
 
     @asyncio.coroutine
@@ -509,7 +508,7 @@ class ConversationList(object):
                         if timestamp > self._sync_timestamp:
                             # This updates the sync_timestamp for us, as well
                             # as triggering events.
-                            yield from self._on_client_event(event_)
+                            yield from self._on_event(event_)
                 else:
                     self.add_conversation(conv_state.conversation,
                                           conv_state.event)

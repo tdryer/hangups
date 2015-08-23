@@ -33,7 +33,7 @@ class User(object):
 
     @staticmethod
     def from_entity(entity, self_user_id):
-        """Initialize from a ClientEntity.
+        """Initialize from a Entity.
 
         If self_user_id is None, assume this is the self user.
         """
@@ -104,9 +104,9 @@ class UserList(object):
     def __init__(self, client, self_entity, entities, conv_parts):
         """Initialize the list of Users.
 
-        Creates users from the given ClientEntity and
-        ClientConversationParticipantData instances. The latter is used only as
-        a fallback, because it doesn't include a real first_name.
+        Creates users from the given Entity and ConversationParticipantData
+        instances. The latter is used only as a fallback, because it doesn't
+        include a real first_name.
         """
         self._client = client
         self._self_user = User.from_entity(self_entity, None)
@@ -146,7 +146,7 @@ class UserList(object):
         return self._user_dict.values()
 
     def add_user_from_conv_part(self, conv_part):
-        """Add new User from ClientConversationParticipantData"""
+        """Add new User from ConversationParticipantData"""
         assert isinstance(conv_part, hangouts_pb2.ConversationParticipantData)
         user_ = User.from_conv_part_data(conv_part, self._self_user.id_)
         if user_.id_ not in self._user_dict:
@@ -155,13 +155,13 @@ class UserList(object):
         return user_
 
     def _on_state_update(self, state_update):
-        """Receive a ClientStateUpdate"""
+        """Receive a StateUpdate"""
         # TODO
         pass
-        #if state_update.client_conversation is not None:
-        #    self._handle_client_conversation(state_update.client_conversation)
+        #if state_update.conversation is not None:
+        #    self._handle_conversation(state_update.conversation)
 
-    def _handle_client_conversation(self, client_conversation):
-        """Receive ClientConversation and update list of users"""
-        for participant in client_conversation.participant_data:
+    def _handle_conversation(self, conversation):
+        """Receive Conversation and update list of users"""
+        for participant in conversation.participant_data:
             self.add_user_from_conv_part(participant)

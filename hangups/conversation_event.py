@@ -1,8 +1,7 @@
 """ConversationEvent base class and subclasses.
 
-These classes are wrappers for ClientEvent instances from the API. Parsing is
-done through property methods, which prefer logging warnings to raising
-exceptions.
+These classes are wrappers for hangouts_pb2.Event instances. Parsing is done
+through property methods, which prefer logging warnings to raising exceptions.
 """
 
 import logging
@@ -22,8 +21,8 @@ class ConversationEvent(object):
     This is the base class for such events.
     """
 
-    def __init__(self, client_event):
-        self._event = client_event  # Event
+    def __init__(self, event):
+        self._event = event  # Event
 
     @property
     def timestamp(self):
@@ -107,7 +106,7 @@ class ChatMessageEvent(ConversationEvent):
 
     """An event containing a chat message.
 
-    Corresponds to ClientChatMessage in the API.
+    Corresponds to hangouts_pb2.ChatMessage.
     """
 
     @property
@@ -163,7 +162,7 @@ class RenameEvent(ConversationEvent):
 
     """An event that renames a conversation.
 
-    Corresponds to ClientConversationRename in the API.
+    Corresponds to hangouts_pb2.ConversationRename.
     """
 
     @property
@@ -187,7 +186,7 @@ class MembershipChangeEvent(ConversationEvent):
 
     """An event that adds or removes a conversation participant.
 
-    Corresponds to ClientMembershipChange in the API.
+    Corresponds to hangouts_pb2.MembershipChange.
     """
 
     @property
