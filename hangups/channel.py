@@ -1,17 +1,26 @@
 """Support for reading messages from the long-polling channel.
 
 Hangouts receives events using a system that appears very close to an App
-Engine Channel.
+Engine Channel. The source for the JavaScript client appears to be available in
+closure-library as "webchannel":
+    https://github.com/google/closure-library/tree/master/closure/goog/labs/
+    net/webchannel
+
+Protocol documentation for BrowserChannel (an older variant of WebChannel) is
+available here:
+    https://web.archive.org/web/20121226064550/http://code.google.com/p/
+    libevent-browserchannel-server/wiki/BrowserChannelProtocol
 """
 
 import aiohttp
 import asyncio
 import hashlib
+import json
 import logging
 import re
 import time
 
-from hangups import javascript, http_utils, event, exceptions
+from hangups import http_utils, event, exceptions
 
 logger = logging.getLogger(__name__)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
@@ -122,7 +131,7 @@ def _parse_sid_response(res):
 
     Returns (SID, gsessionid) tuple.
     """
-    res = javascript.loads(list(PushDataParser().get_submissions(res))[0])
+    res = json.loads(list(PushDataParser().get_submissions(res))[0])
     sid = res[0][1][1]
     gsessionid = res[1][1][0]['gsid']
     return (sid, gsessionid)
@@ -239,8 +248,8 @@ class Channel(object):
             cookies=self._cookies, data='count=0', connector=self._connector,
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params={
-                'VER': 8,
-                'RID': 81187,
+                'VER': 8,  # channel protocol version
+                'RID': 81187,  # request identifier
                 'ctype': 'hangouts',  # client type
             }
         )
@@ -267,11 +276,11 @@ class Channel(object):
             cookies=self._cookies, connector=self._connector,
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params={
-                'VER': 8,
-                'RID': 81188,
+                'VER': 8,  # channel protocol version
+                'RID': 81188,  # request identifier
                 'ctype': 'hangouts',  # client type
                 'gsessionid': self._gsessionid_param,
-                'SID': self._sid_param,
+                'SID': self._sid_param,  # session ID
             },
             data={
                 'count': 3,
@@ -302,14 +311,14 @@ class Channel(object):
         Raises hangups.NetworkError or UnknownSIDError.
         """
         params = {
-            'VER': 8,
+            'VER': 8,  # channel protocol version
             'gsessionid': self._gsessionid_param,
-            'RID': 'rpc',
+            'RID': 'rpc',  # request identifier
             't': 1,  # trial
-            'SID': self._sid_param,
-            'CI': 0,
+            'SID': self._sid_param,  # session ID
+            'CI': 0,  # 0 if streaming/chunked requests should be used
             'ctype': 'hangouts',  # client type
-            'TYPE': 'xmlhttp',
+            'TYPE': 'xmlhttp',  # type of request
         }
         headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')

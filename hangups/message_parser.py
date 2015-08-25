@@ -3,7 +3,8 @@
 import re
 
 from reparser import Parser, Token, MatchGroup
-from hangups.schemas import SegmentType
+
+from hangups import hangouts_pb2
 
 
 # Common regex patterns
@@ -56,7 +57,8 @@ class Tokens:
     basic = [
         Token('link', auto_link, link_target=MatchGroup('start',
                                                         func=url_complete)),
-        Token('br', newline, text='\n', segment_type=SegmentType.LINE_BREAK)
+        Token('br', newline, text='\n',
+              segment_type=hangouts_pb2.SEGMENT_TYPE_LINE_BREAK)
     ]
 
     markdown = [
@@ -92,7 +94,7 @@ class Tokens:
         Token('html_img', html_img, text=MatchGroup('url'),
               link_target=MatchGroup('url', func=url_complete)),
         Token('html_br', html_newline, text='\n',
-              segment_type=SegmentType.LINE_BREAK)
+              segment_type=hangouts_pb2.SEGMENT_TYPE_LINE_BREAK)
     ]
 
 

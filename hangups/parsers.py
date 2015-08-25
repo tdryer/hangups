@@ -1,17 +1,18 @@
 """Parser for long-polling responses from the talkgadget API."""
 
-import logging
 from collections import namedtuple
 import datetime
+import json
+import logging
 
-from hangups import javascript, schemas, user
+from hangups import user, hangouts_pb2, pblite
 
 
 logger = logging.getLogger(__name__)
 
 
 def parse_submission(submission):
-    """Yield ClientStateUpdate instances from a channel submission."""
+    """Yield StateUpdate messages from a channel submission."""
     # For each submission payload, yield its messages
     for payload in _get_submission_payloads(submission):
         if payload is not None:
@@ -29,31 +30,28 @@ def _get_submission_payloads(submission):
     connection was closed while something happened, there can be multiple
     payloads.
     """
-    for sub in javascript.loads(submission):
+    for sub in json.loads(submission):
 
         if sub[1][0] != 'noop':
-            wrapper = javascript.loads(sub[1][0]['p'])
+            wrapper = json.loads(sub[1][0]['p'])
             # pylint: disable=invalid-sequence-index
             if '3' in wrapper and '2' in wrapper['3']:
                 client_id = wrapper['3']['2']
                 # Hack to pass the client ID back to Client
                 yield {'client_id': client_id}
             if '2' in wrapper:
-                yield javascript.loads(wrapper['2']['2'])
+                yield json.loads(wrapper['2']['2'])
 
 
 def _parse_payload(payload):
-    """Yield a list of ClientStateUpdates."""
-    if payload[0] == 'cbu':
-        # payload[1] is a list of state updates.
-        for raw_update in payload[1]:
-            try:
-                state_update = schemas.CLIENT_STATE_UPDATE.parse(raw_update)
-                logger.info('Parsed ClientStateUpdate: {}'.format(state_update))
-                yield state_update
-            except ValueError as e:
-                logger.warning('Failed to parse ClientStateUpdate: {}'
-                               .format(e))
+    """Yield a list of StateUpdate messages."""
+    if payload[0] == 'cbu':  # ClientBatchUpdate
+        # This is a BatchUpdate containing StateUpdate messages
+        batch_update = hangouts_pb2.BatchUpdate()
+        pblite.decode(batch_update, payload, ignore_first_item=True)
+        for state_update in batch_update.state_update:
+            logger.debug('Received StateUpdate:\n%s', state_update)
+            yield state_update
     else:
         logger.info('Ignoring payload with header: {}'.format(payload[0]))
 
@@ -88,17 +86,17 @@ TypingStatusMessage = namedtuple(
 
 
 def parse_typing_status_message(p):
-    """Return TypingStatusMessage from ClientSetTypingNotification.
+    """Return TypingStatusMessage from hangouts_pb2.SetTypingNotification.
 
     The same status may be sent multiple times consecutively, and when a
     message is sent the typing status will not change to stopped.
     """
     return TypingStatusMessage(
-        conv_id=p.conversation_id.id_,
-        user_id=user.UserID(chat_id=p.user_id.chat_id,
-                            gaia_id=p.user_id.gaia_id),
+        conv_id=p.conversation_id.id,
+        user_id=user.UserID(chat_id=p.sender_id.chat_id,
+                            gaia_id=p.sender_id.gaia_id),
         timestamp=from_timestamp(p.timestamp),
-        status=p.status,
+        status=p.type,
     )
 
 
@@ -107,15 +105,15 @@ WatermarkNotification = namedtuple(
 )
 
 
-def parse_watermark_notification(client_watermark_notification):
-    """Return WatermarkNotification from ClientWatermarkNotification."""
+def parse_watermark_notification(p):
+    """Return WatermarkNotification from hangouts_pb2.WatermarkNotification."""
     return WatermarkNotification(
-        conv_id=client_watermark_notification.conversation_id.id_,
+        conv_id=p.conversation_id.id,
         user_id=user.UserID(
-            chat_id=client_watermark_notification.participant_id.chat_id,
-            gaia_id=client_watermark_notification.participant_id.gaia_id,
+            chat_id=p.sender_id.chat_id,
+            gaia_id=p.sender_id.gaia_id,
         ),
         read_timestamp=from_timestamp(
-            client_watermark_notification.latest_read_timestamp
+            p.latest_read_timestamp
         ),
     )
