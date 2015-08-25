@@ -103,9 +103,7 @@ class ChatMessageSegment(object):
             ),
         )
         if self.link_target is not None:
-            segment.link_data = hangouts_pb2.LinkData(
-                link_target=self.link_target,
-            )
+            segment.link_data.link_target = self.link_target
         return pblite.encode(segment)
 
 
