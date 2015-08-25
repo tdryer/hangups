@@ -69,7 +69,6 @@ class Conversation(object):
     @staticmethod
     def _wrap_event(event_):
         """Wrap hangouts_pb2.Event in ConversationEvent subclass."""
-        # TODO: should add a oneof for this
         if event_.HasField('chat_message'):
             return conversation_event.ChatMessageEvent(event_)
         elif event_.HasField('conversation_rename'):

@@ -4,7 +4,7 @@ from collections import namedtuple
 import asyncio
 import logging
 
-from hangups import exceptions, hangouts_pb2
+from hangups import exceptions
 
 logger = logging.getLogger(__name__)
 DEFAULT_NAME = 'Unknown'
@@ -51,8 +51,6 @@ class User(object):
 
         If self_user_id is None, assume this is the self user.
         """
-        assert isinstance(conv_part_data,
-                          hangouts_pb2.ConversationParticipantData)
         user_id = UserID(chat_id=conv_part_data.id.chat_id,
                          gaia_id=conv_part_data.id.gaia_id)
         return User(user_id, conv_part_data.fallback_name, None, None, [],
@@ -85,7 +83,7 @@ def build_user_list(client, initial_data):
                      .format(missing_user_ids))
         try:
             response = yield from client.getentitybyid(
-                [user_id.chat_id for user_id in missing_user_ids]
+                [user_id.gaia_id for user_id in missing_user_ids]
             )
             missing_entities = list(response.entity)
             logger.debug('Received additional user entities:\n%s',
@@ -119,8 +117,6 @@ class UserList(object):
         # Add each conversation participant as a new User if we didn't already
         # add them from an entity.
         for participant in conv_parts:
-            assert isinstance(participant,
-                              hangouts_pb2.ConversationParticipantData)
             logger.debug('Creating User from ConversationParticipantData:\n%s',
                          participant)
             self.add_user_from_conv_part(participant)
@@ -147,7 +143,6 @@ class UserList(object):
 
     def add_user_from_conv_part(self, conv_part):
         """Add new User from ConversationParticipantData"""
-        assert isinstance(conv_part, hangouts_pb2.ConversationParticipantData)
         user_ = User.from_conv_part_data(conv_part, self._self_user.id_)
         if user_.id_ not in self._user_dict:
             logging.warning('Adding fallback User: {}'.format(user_))
@@ -156,10 +151,8 @@ class UserList(object):
 
     def _on_state_update(self, state_update):
         """Receive a StateUpdate"""
-        # TODO
-        pass
-        #if state_update.conversation is not None:
-        #    self._handle_conversation(state_update.conversation)
+        if state_update.HasField('conversation'):
+            self._handle_conversation(state_update.conversation)
 
     def _handle_conversation(self, conversation):
         """Receive Conversation and update list of users"""

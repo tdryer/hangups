@@ -1,3 +1,7 @@
+# Import the objects here that form the public API of hangups so they may be
+# conveniently imported.
+
+# Keep version in a separate file so setup.py can import it separately.
 from .version import __version__
 from .client import Client
 from .user import UserList, build_user_list

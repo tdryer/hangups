@@ -210,17 +210,10 @@ class Client(object):
                 # pylint: disable=invalid-sequence-index
                 data_dict[data['key']] = data['data']
             except ValueError as e:
-                try:
-                    data = data.replace("data:function(){return", "data:")
-                    data = data.replace("}}", "}")
-                    data = javascript.loads(data)
-                    data_dict[data['key']] = data['data']
-
-                except ValueError as e:
-                    raise
-
-                # logger.debug('Failed to parse initialize chat object: {}\n{}'
-                #              .format(e, data))
+                data = data.replace("data:function(){return", "data:")
+                data = data.replace("}}", "}")
+                data = javascript.loads(data)
+                data_dict[data['key']] = data['data']
 
         # Extract various values that we will need.
         try:
@@ -250,9 +243,7 @@ class Client(object):
         )
         pblite.decode(sync_recent_conversations_response,
                       data_dict['ds:19'][0], ignore_first_item=True)
-        # TODO: this might be too much data to log
-        #logger.debug('Parsed SyncRecentConversationsResponse:\n%s',
-        #             sync_recent_conversations_response)
+        # This is too much data to log even in debug level.
 
         # Parse GetSuggestedEntitiesResponse
         # This gives us entities for the user's contacts, but doesn't include
@@ -461,7 +452,6 @@ class Client(object):
 
         Raises hangups.NetworkError if the request fails.
         """
-        # TODO: temporary conversation for compat
         segments_pb = []
         for segment_pblite in segments:
             segment_pb = hangouts_pb2.Segment()
@@ -530,16 +520,15 @@ class Client(object):
         return response
 
     @asyncio.coroutine
-    def getentitybyid(self, chat_id_list):
+    def getentitybyid(self, gaia_id_list):
         """Return information about a list of contacts.
 
         Raises hangups.NetworkError if the request fails.
         """
-        # TODO: change chat_id_list to gaia_id_list
         request = hangouts_pb2.GetEntityByIdRequest(
             request_header=self._get_request_header_pb(),
             batch_lookup_spec=[hangouts_pb2.EntityLookupSpec(gaia_id=gaia_id)
-                               for gaia_id in chat_id_list],
+                               for gaia_id in gaia_id_list],
         )
         response = hangouts_pb2.GetEntityByIdResponse()
         yield from self._pb_request('contacts/getentitybyid', request,

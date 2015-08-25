@@ -6,7 +6,7 @@ through property methods, which prefer logging warnings to raising exceptions.
 
 import logging
 
-from hangups import parsers, message_parser, user, hangouts_pb2
+from hangups import parsers, message_parser, user, hangouts_pb2, pblite
 
 logger = logging.getLogger(__name__)
 chat_message_parser = message_parser.ChatMessageParser()
@@ -80,7 +80,6 @@ class ChatMessageSegment(object):
     @staticmethod
     def deserialize(segment):
         """Create a chat message segment from hangups_pb2.Segment."""
-        assert isinstance(segment, hangouts_pb2.Segment)
         link_target = segment.link_data.link_target
         return ChatMessageSegment(
             segment.text, segment_type=segment.type,
@@ -93,13 +92,21 @@ class ChatMessageSegment(object):
 
     def serialize(self):
         """Serialize the segment to pblite."""
-        # TODO: use protobuf
-        return [self.type_, self.text, [
-            1 if self.is_bold else 0,
-            1 if self.is_italic else 0,
-            1 if self.is_strikethrough else 0,
-            1 if self.is_underline else 0,
-        ], [self.link_target]]
+        segment = hangouts_pb2.Segment(
+            type=self.type_,
+            text=self.text,
+            formatting=hangouts_pb2.Formatting(
+                bold=self.is_bold,
+                italic=self.is_italic,
+                strikethrough=self.is_strikethrough,
+                underline=self.is_underline,
+            ),
+        )
+        if self.link_target is not None:
+            segment.link_data = hangouts_pb2.LinkData(
+                link_target=self.link_target,
+            )
+        return pblite.encode(segment)
 
 
 class ChatMessageEvent(ConversationEvent):

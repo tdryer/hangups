@@ -33,7 +33,6 @@ def _get_submission_payloads(submission):
     for sub in json.loads(submission):
 
         if sub[1][0] != 'noop':
-            # TODO: can we use json here instead?
             wrapper = json.loads(sub[1][0]['p'])
             # pylint: disable=invalid-sequence-index
             if '3' in wrapper and '2' in wrapper['3']:
@@ -49,7 +48,6 @@ def _parse_payload(payload):
     if payload[0] == 'cbu':  # ClientBatchUpdate
         # This is a BatchUpdate containing StateUpdate messages
         batch_update = hangouts_pb2.BatchUpdate()
-        # TODO: error handling
         pblite.decode(batch_update, payload, ignore_first_item=True)
         for state_update in batch_update.state_update:
             logger.debug('Received StateUpdate:\n%s', state_update)
