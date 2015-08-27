@@ -122,7 +122,8 @@ class Client(object):
             yield from self._listen_future
         except asyncio.CancelledError:
             pass
-        logger.info('disconnecting gracefully')
+        self._connector.close()
+        logger.info('Client.connect returning because Channel.listen returned')
 
     @asyncio.coroutine
     def disconnect(self):
@@ -130,8 +131,13 @@ class Client(object):
 
         When disconnection is complete, Client.connect will return.
         """
-        self._listen_future.cancel()
-        self._connector.close()
+        logger.info('Disconnecting gracefully...')
+        res = self._listen_future.cancel()
+        try:
+            yield from self._listen_future
+        except asyncio.CancelledError:
+            pass
+        logger.info('Disconnected gracefully')
 
     @asyncio.coroutine
     def set_active(self):
