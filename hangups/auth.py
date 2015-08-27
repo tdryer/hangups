@@ -153,15 +153,18 @@ def _get_session_cookies(access_token):
 
     Return dict of cookies.
     """
-    session = requests.Session()
-    headers = {'Authorization': 'Bearer {}'.format(access_token)}
-    r = session.get(('https://accounts.google.com/accounts/OAuthLogin'
-                     '?source=hangups&issueuberauth=1'), headers=headers)
-    uberauth = r.text
-    r = session.get(('https://accounts.google.com/MergeSession?'
-                     'service=mail&continue=http://www.google.com&uberauth={}')
-                    .format(uberauth), headers=headers)
-    return session.cookies.get_dict(domain='.google.com')
+    # Prevent ResourceWarning by using context manager to close session
+    # connection.
+    with requests.Session() as session:
+        headers = {'Authorization': 'Bearer {}'.format(access_token)}
+        r = session.get(('https://accounts.google.com/accounts/OAuthLogin'
+                         '?source=hangups&issueuberauth=1'), headers=headers)
+        uberauth = r.text
+        r = session.get(('https://accounts.google.com/MergeSession?'
+                         'service=mail&'
+                         'continue=http://www.google.com&uberauth={}')
+                        .format(uberauth), headers=headers)
+        return session.cookies.get_dict(domain='.google.com')
 
 
 def get_auth_stdin(refresh_token_filename):
