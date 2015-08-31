@@ -9,6 +9,60 @@ from hangups import (parsers, event, user, conversation_event, exceptions,
 logger = logging.getLogger(__name__)
 
 
+@asyncio.coroutine
+def build_user_conversation_list(client):
+    """Return UserList from initial contact data and an additional request.
+
+    The initial data contains the user's contacts, but there may be conversions
+    containing users that are not in the contacts. This function takes care of
+    requesting data for those users and constructing the UserList.
+    """
+
+    # Retrieve recent conversations so we can preemptively look up their
+    # participants.
+    sync_recent_conversations_response = (
+        yield from client.syncrecentconversations()
+    )
+    conv_states = sync_recent_conversations_response.conversation_state
+    sync_timestamp = parsers.from_timestamp(
+        sync_recent_conversations_response.sync_timestamp
+    )
+
+    # Retrieve entities participating in all conversations.
+    required_user_ids = set()
+    for conv_state in conv_states:
+        required_user_ids |= {
+            user.UserID(chat_id=part.id.chat_id, gaia_id=part.id.gaia_id)
+            for part in conv_state.conversation.participant_data
+        }
+    required_entities = []
+    if required_user_ids:
+        logger.debug('Need to request additional users: {}'
+                     .format(required_user_ids))
+        try:
+            response = yield from client.getentitybyid(
+                [user_id.gaia_id for user_id in required_user_ids]
+            )
+            required_entities = list(response.entity)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to request missing users: {}'.format(e))
+
+    # Build list of conversation participants.
+    conv_part_list = []
+    for conv_state in conv_states:
+        conv_part_list.extend(conv_state.conversation.participant_data)
+
+    # Retrieve self entity.
+    get_self_info_response = yield from client.getselfinfo()
+    self_entity = get_self_info_response.self_entity
+
+    user_list = user.UserList(client, self_entity, required_entities,
+                              conv_part_list)
+    conversation_list = ConversationList(client, conv_states, user_list,
+                                         sync_timestamp)
+    return (user_list, conversation_list)
+
+
 class Conversation(object):
 
     """Wrapper around Client for working with a single chat conversation."""
@@ -527,7 +581,7 @@ class ConversationList(object):
                            'unknown conversation {}'.format(conv_id))
 
     @asyncio.coroutine
-    def _sync(self, initial_data=None):
+    def _sync(self):
         """Sync conversation state and events that could have been missed."""
         logger.info('Syncing events since {}'.format(self._sync_timestamp))
         try:

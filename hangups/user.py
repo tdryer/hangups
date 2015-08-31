@@ -1,10 +1,8 @@
 """User objects."""
 
 from collections import namedtuple
-import asyncio
 import logging
 
-from hangups import exceptions
 
 logger = logging.getLogger(__name__)
 DEFAULT_NAME = 'Unknown'
@@ -57,44 +55,6 @@ class User(object):
                     (self_user_id == user_id) or (self_user_id is None))
 
 
-@asyncio.coroutine
-def build_user_list(client, initial_data):
-    """Return UserList from initial contact data and an additional request.
-
-    The initial data contains the user's contacts, but there may be conversions
-    containing users that are not in the contacts. This function takes care of
-    requesting data for those users and constructing the UserList.
-    """
-
-    present_user_ids = {
-        UserID(chat_id=entity.id.chat_id, gaia_id=entity.id.gaia_id)
-        for entity in initial_data.entities + [initial_data.self_entity]
-    }
-    required_user_ids = set()
-    for conv_state in initial_data.conversation_states:
-        required_user_ids |= {
-            UserID(chat_id=part.id.chat_id, gaia_id=part.id.gaia_id)
-            for part in conv_state.conversation.participant_data
-        }
-    missing_user_ids = required_user_ids - present_user_ids
-    missing_entities = []
-    if missing_user_ids:
-        logger.debug('Need to request additional users: {}'
-                     .format(missing_user_ids))
-        try:
-            response = yield from client.getentitybyid(
-                [user_id.gaia_id for user_id in missing_user_ids]
-            )
-            missing_entities = list(response.entity)
-            logger.debug('Received additional user entities:\n%s',
-                         '\n'.join(str(entity) for entity in missing_entities))
-        except exceptions.NetworkError as e:
-            logger.warning('Failed to request missing users: {}'.format(e))
-    return UserList(client, initial_data.self_entity,
-                    initial_data.entities + missing_entities,
-                    initial_data.conversation_participants)
-
-
 class UserList(object):
 
     """Collection of User instances."""
@@ -117,8 +77,6 @@ class UserList(object):
         # Add each conversation participant as a new User if we didn't already
         # add them from an entity.
         for participant in conv_parts:
-            logger.debug('Creating User from ConversationParticipantData:\n%s',
-                         participant)
             self.add_user_from_conv_part(participant)
         logger.info('UserList initialized with {} user(s)'
                     .format(len(self._user_dict)))

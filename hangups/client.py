@@ -2,47 +2,23 @@
 
 import aiohttp
 import asyncio
-import collections
-import itertools
 import json
 import logging
 import random
-import re
 import time
 import datetime
 import os
 
 from hangups import (javascript, parsers, exceptions, http_utils, channel,
-                     event, hangouts_pb2, pblite)
+                     event, hangouts_pb2, pblite, __version__)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
 IMAGE_UPLOAD_URL = 'http://docs.google.com/upload/photos/resumable'
-PVT_TOKEN_URL = 'https://talkgadget.google.com/talkgadget/_/extension-start'
-CHAT_INIT_URL = 'https://talkgadget.google.com/u/0/talkgadget/_/chat'
-CHAT_INIT_PARAMS = {
-    'prop': 'aChromeExtension',
-    'fid': 'gtn-roster-iframe-id',
-    'ec': '["ci:ec",true,true,false]',
-    'pvt': None,  # Populated later
-}
-CHAT_INIT_REGEX = re.compile(
-    r"(?:<script>AF_initDataCallback\((.*?)\);</script>)", re.DOTALL
-)
 # Timeout to send for setactiveclient requests:
 ACTIVE_TIMEOUT_SECS = 120
 # Minimum timeout between subsequent setactiveclient requests:
 SETACTIVECLIENT_LIMIT_SECS = 60
-
-
-# Initial account data received after the client is first connected:
-InitialData = collections.namedtuple('InitialData', [
-    'conversation_states',  # [ConversationState]
-    'self_entity',  # Entity
-    'entities',  # [Entity]
-    'conversation_participants',  # [ConversationParticipantData]
-    'sync_timestamp'  # datetime
-])
 
 
 class Client(object):
@@ -58,7 +34,7 @@ class Client(object):
         """
 
         # Event fired when the client connects for the first time with
-        # arguments (initial_data).
+        # arguments ().
         self.on_connect = event.Event('Client.on_connect')
         # Event fired when the client reconnects after being disconnected with
         # arguments ().
@@ -75,24 +51,30 @@ class Client(object):
         else:
             self._connector = aiohttp.TCPConnector()
 
-        # hangups.channel.Channel instantiated in connect()
-        self._channel = None
-        # API key sent with every request:
-        self._api_key = None
-        # Parameters sent in request headers:
-        self._header_date = None
-        self._header_version = None
-        self._header_id = None
-        # String identifying this client:
+        self._channel = channel.Channel(self._cookies, self._connector)
+        # Future for Channel.listen
+        self._listen_future = None
+
+        self._request_header = hangouts_pb2.RequestHeader(
+            # Ignore most of the RequestHeader fields since they aren't
+            # required.
+            client_version=hangouts_pb2.ClientVersion(
+                major_version='hangups-{}'.format(__version__),
+            ),
+            language_code='en',
+        )
+
+        # String identifying this client (populated later):
         self._client_id = None
-        # Account email address:
+
+        # String email address for this account (populated later):
         self._email = None
+
+        # Active client management parameters:
         # Time in seconds that the client as last set as active:
         self._last_active_secs = 0.0
         # ActiveClientState enum int value or None:
         self._active_client_state = None
-        # Future for Channel.listen
-        self._listen_future = None
 
     ##########################################################################
     # Public methods
@@ -105,18 +87,14 @@ class Client(object):
         Returns when an error has occurred, or Client.disconnect has been
         called.
         """
-        initial_data = yield from self._initialize_chat()
-        self._channel = channel.Channel(self._cookies, self._connector)
-
-        @asyncio.coroutine
-        def _on_connect():
-            """Wrapper to fire on_connect with initial_data."""
-            yield from self.on_connect.fire(initial_data)
-        self._channel.on_connect.add_observer(_on_connect)
+        # Forward the Channel events to the Client events.
+        self._channel.on_connect.add_observer(self.on_connect.fire)
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
         self._channel.on_receive_array.add_observer(self._on_receive_array)
 
+        # Listen for StateUpdate messages from the Channel until it
+        # disconnects.
         self._listen_future = asyncio.async(self._channel.listen())
         try:
             yield from self._listen_future
@@ -159,6 +137,28 @@ class Client(object):
                 hangouts_pb2.ACTIVE_CLIENT_STATE_IS_ACTIVE
             )
             self._last_active_secs = time.time()
+
+            # The first time this is called, we need to retrieve the user's
+            # email address.
+            if self._email is None:
+                try:
+                    get_self_info_response = yield from self.getselfinfo()
+                except exceptions.NetworkError as e:
+                    logger.warning('Failed to find email address: {}'
+                                   .format(e))
+                    return
+                self._email = (
+                    get_self_info_response.self_entity.properties.email[0]
+                )
+
+            # If the client_id hasn't been received yet, we can't set the
+            # active client.
+            if self._client_id is None:
+                logger.info(
+                    'Cannot set active client until client_id is received'
+                )
+                return
+
             try:
                 yield from self.setactiveclient(True, ACTIVE_TIMEOUT_SECS)
             except exceptions.NetworkError as e:
@@ -171,139 +171,12 @@ class Client(object):
     # Private methods
     ##########################################################################
 
-    @asyncio.coroutine
-    def _initialize_chat(self):
-        """Request push channel creation and initial chat data.
-
-        Returns instance of InitialData.
-
-        The response body is a HTML document containing a series of script tags
-        containing JavaScript objects. We need to parse the objects to get at
-        the data.
-        """
-        # We first need to fetch the 'pvt' token, which is required for the
-        # initialization request (otherwise it will return 400).
-        try:
-            res = yield from http_utils.fetch(
-                'get', PVT_TOKEN_URL, cookies=self._cookies,
-                connector=self._connector
-            )
-            CHAT_INIT_PARAMS['pvt'] = javascript.loads(res.body.decode())[1]
-            logger.info('Found PVT token: {}'.format(CHAT_INIT_PARAMS['pvt']))
-        except (exceptions.NetworkError, ValueError) as e:
-            raise exceptions.HangupsError('Failed to fetch PVT token: {}'
-                                          .format(e))
-        # Now make the actual initialization request:
-        try:
-            res = yield from http_utils.fetch(
-                'get', CHAT_INIT_URL, cookies=self._cookies,
-                params=CHAT_INIT_PARAMS, connector=self._connector
-            )
-        except exceptions.NetworkError as e:
-            raise exceptions.HangupsError('Initialize chat request failed: {}'
-                                          .format(e))
-
-        # Parse the response by using a regex to find all the JS objects, and
-        # parsing them. Not everything will be parsable, but we don't care if
-        # an object we don't need can't be parsed.
-
-        data_dict = {}
-        for data in CHAT_INIT_REGEX.findall(res.body.decode()):
-            try:
-                logger.debug("Attempting to load javascript: {}..."
-                             .format(repr(data[:100])))
-                data = javascript.loads(data)
-                # pylint: disable=invalid-sequence-index
-                data_dict[data['key']] = data['data']
-            except ValueError as e:
-                data = data.replace("data:function(){return", "data:")
-                data = data.replace("}}", "}")
-                data = javascript.loads(data)
-                data_dict[data['key']] = data['data']
-
-        # Extract various values that we will need.
-        try:
-            self._api_key = data_dict['ds:7'][0][2]
-            logger.info('Found api_key: %s', self._api_key)
-            self._email = data_dict['ds:33'][0][2]
-            logger.info('Found email: %s', self._email)
-            self._header_date = data_dict['ds:2'][0][4]
-            logger.info('Found header_date: %s', self._header_date)
-            self._header_version = data_dict['ds:2'][0][6]
-            logger.info('Found header_version: %s', self._header_version)
-            self._header_id = data_dict['ds:4'][0][7]
-            logger.info('Found header_id: %s', self._header_id)
-        except KeyError as e:
-            raise exceptions.HangupsError('Failed to get initialize chat '
-                                          'value: {}'.format(e))
-
-        # Parse GetSelfInfoResponse
-        get_self_info_response = hangouts_pb2.GetSelfInfoResponse()
-        pblite.decode(get_self_info_response, data_dict['ds:20'][0],
-                      ignore_first_item=True)
-        logger.debug('Parsed GetSelfInfoResponse:\n%s', get_self_info_response)
-
-        # Parse SyncRecentConversationsResponse
-        sync_recent_conversations_response = (
-            hangouts_pb2.SyncRecentConversationsResponse()
-        )
-        pblite.decode(sync_recent_conversations_response,
-                      data_dict['ds:19'][0], ignore_first_item=True)
-        # This is too much data to log even in debug level.
-
-        # Parse GetSuggestedEntitiesResponse
-        # This gives us entities for the user's contacts, but doesn't include
-        # users not in contacts.
-        get_suggested_entities_response = (
-            hangouts_pb2.GetSuggestedEntitiesResponse()
-        )
-        pblite.decode(get_suggested_entities_response, data_dict['ds:21'][0],
-                      ignore_first_item=True)
-        logger.debug('Parsed GetSuggestedEntitiesResponse:\n%s',
-                     get_suggested_entities_response)
-
-        # Combine entities from all responses into one list of all the known
-        # entities
-        initial_entities = []
-        initial_entities.extend(get_suggested_entities_response.entity)
-        initial_entities.extend(e.entity for e in itertools.chain(
-            get_suggested_entities_response.favorites.contact,
-            get_suggested_entities_response.contacts_you_hangout_with.contact,
-            get_suggested_entities_response.other_contacts_on_hangouts.contact,
-            get_suggested_entities_response.other_contacts.contact,
-            get_suggested_entities_response.dismissed_contacts.contact,
-            get_suggested_entities_response.pinned_favorites.contact
-        ))
-
-        # Create list of ConversationParticipant data to use as a fallback for
-        # entities that can't be found.
-        conv_part_list = []
-        conv_states = sync_recent_conversations_response.conversation_state
-        for conv_state in conv_states:
-            conv_part_list.extend(conv_state.conversation.participant_data)
-
-        sync_timestamp = parsers.from_timestamp(
-            sync_recent_conversations_response.sync_timestamp
-        )
-
-        return InitialData(conv_states, get_self_info_response.self_entity,
-                           initial_entities, conv_part_list, sync_timestamp)
-
     def _get_cookie(self, name):
         """Return a cookie for raise error if that cookie was not provided."""
         try:
             return self._cookies[name]
         except KeyError:
             raise KeyError("Cookie '{}' is required".format(name))
-
-    def _get_request_header(self):
-        """Return request header for chat API request."""
-        return [
-            [6, 3, self._header_version, self._header_date],
-            [self._client_id, self._header_id],
-            None,
-            "en"
-        ]
 
     @asyncio.coroutine
     def _on_receive_array(self, array):
@@ -414,7 +287,6 @@ class Client(object):
         cookies = {cookie: self._get_cookie(cookie)
                    for cookie in required_cookies}
         params = {
-            'key': self._api_key,
             # "alternative representation type" (desired response format).
             'alt': response_type,
         }
@@ -426,23 +298,11 @@ class Client(object):
 
     def _get_request_header_pb(self):
         """Return populated RequestHeader message."""
-        client_identifier = hangouts_pb2.ClientIdentifier(
-            header_id=self._header_id,
-        )
         # resource is allowed to be null if it's not available yet (the Chrome
         # client does this for the first getentitybyid call)
         if self._client_id is not None:
-            client_identifier.resource = self._client_id
-        return hangouts_pb2.RequestHeader(
-            client_version=hangouts_pb2.ClientVersion(
-                client_id=hangouts_pb2.CLIENT_ID_WEB_GMAIL,
-                build_type=hangouts_pb2.BUILD_TYPE_PRODUCTION_WEB,
-                major_version=self._header_version,
-                version_timestamp=int(self._header_date),
-            ),
-            client_identifier=client_identifier,
-            language_code='en',
-        )
+            self._request_header.client_identifier.resource = self._client_id
+        return self._request_header
 
     def get_client_generated_id(self):
         """Return ID for client_generated_id fields."""
@@ -843,11 +703,12 @@ class Client(object):
         return response
 
     @asyncio.coroutine
-    def syncrecentconversations(self):
+    def syncrecentconversations(self, max_conversations=100,
+                                max_events_per_conversation=1):
         """List the contents of recent conversations, including messages.
 
-        Similar to syncallnewevents, but appears to return a limited number of
-        conversations (20) rather than all conversations in a given date range.
+        Similar to syncallnewevents, but returns a limited number of
+        conversations rather than all conversations in a given date range.
 
         Can be used to retrieve archived conversations.
 
@@ -855,8 +716,8 @@ class Client(object):
         """
         request = hangouts_pb2.SyncRecentConversationsRequest(
             request_header=self._get_request_header_pb(),
-            max_conversations=5,
-            max_events_per_conversation=2,
+            max_conversations=max_conversations,
+            max_events_per_conversation=max_events_per_conversation,
             sync_filter=[hangouts_pb2.SYNC_FILTER_INBOX],
         )
         response = hangouts_pb2.SyncRecentConversationsResponse()

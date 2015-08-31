@@ -4,8 +4,8 @@
 # Keep version in a separate file so setup.py can import it separately.
 from .version import __version__
 from .client import Client
-from .user import UserList, build_user_list
-from .conversation import ConversationList
+from .user import UserList
+from .conversation import ConversationList, build_user_conversation_list
 from .auth import get_auth, get_auth_stdin, GoogleAuthError
 from .exceptions import HangupsError, NetworkError
 from .conversation_event import (ChatMessageSegment, ConversationEvent,
