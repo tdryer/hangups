@@ -8,3 +8,7 @@ ignore=hangouts_pb2.py,test_pblite_pb2.py
 [MESSAGES CONTROL]
 
 disable=logging-format-interpolation,invalid-name,missing-docstring,locally-disabled
+
+[FORMAT]
+
+max-line-length=79
