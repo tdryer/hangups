@@ -360,11 +360,12 @@ Field                         Number Type             Label    Description
 DeliveryMedium
 --------------
 
-=================== ====== ===================== ======== ===========
-Field               Number Type                  Label    Description
-=================== ====== ===================== ======== ===========
-:code:`medium_type` 1      `DeliveryMediumType`_ optional            
-=================== ====== ===================== ======== ===========
+=================== ====== ===================== ======== ======================================================
+Field               Number Type                  Label    Description                                           
+=================== ====== ===================== ======== ======================================================
+:code:`medium_type` 1      `DeliveryMediumType`_ optional                                                       
+:code:`phone`       2      `Phone`_              optional Phone number to use for sending Google Voice messages.
+=================== ====== ===================== ======== ======================================================
 
 DeliveryMediumOption
 --------------------

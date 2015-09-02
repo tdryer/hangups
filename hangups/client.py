@@ -479,7 +479,8 @@ class Client(object):
     @asyncio.coroutine
     def sendchatmessage(
             self, conversation_id, segments, image_id=None,
-            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD):
+            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD,
+            delivery_medium=None):
         """Send a chat message to a conversation.
 
         conversation_id must be a valid conversation ID. segments must be a
@@ -501,6 +502,10 @@ class Client(object):
             segment_pb = hangouts_pb2.Segment()
             pblite.decode(segment_pb, segment_pblite)
             segments_pb.append(segment_pb)
+        if delivery_medium is None:
+            delivery_medium = hangouts_pb2.DeliveryMedium(
+                medium_type=hangouts_pb2.DELIVERY_MEDIUM_BABEL,
+            )
 
         request = hangouts_pb2.SendChatMessageRequest(
             request_header=self._get_request_header_pb(),
@@ -513,9 +518,7 @@ class Client(object):
                 ),
                 client_generated_id=self.get_client_generated_id(),
                 expected_otr=otr_status,
-                delivery_medium=hangouts_pb2.DeliveryMedium(
-                    medium_type=hangouts_pb2.DELIVERY_MEDIUM_BABEL,
-                ),
+                delivery_medium=delivery_medium,
                 event_type=hangouts_pb2.EVENT_TYPE_REGULAR_CHAT_MESSAGE,
             ),
         )

@@ -428,9 +428,8 @@ enum DeliveryMediumType {
 
 message DeliveryMedium {
   optional DeliveryMediumType medium_type = 1;
-
-  // TODO: add this for sending google voice messages?
-  //optional Phone phone = 2;
+  // Phone number to use for sending Google Voice messages.
+  optional Phone phone = 2;
 }
 
 message DeliveryMediumOption {

@@ -53,9 +53,20 @@ class Conversation(object):
 
     def update_conversation(self, conversation):
         """Update the internal Conversation."""
-        # When latest_read_timestamp is 0, this seems to indicate no change
-        # from the previous value. Word around this by saving and restoring the
-        # previous value.
+        # StateUpdate.conversation is actually a delta; fields that aren't
+        # specified are assumed to be unchanged. Until this class is
+        # refactored, hide this by saving and restoring previous values where
+        # necessary.
+
+        # delivery_medium_option
+        new_state = conversation.self_conversation_state
+        if len(new_state.delivery_medium_option) == 0:
+            old_state = self._conversation.self_conversation_state
+            new_state.delivery_medium_option.extend(
+                old_state.delivery_medium_option
+            )
+
+        # latest_read_timestamp
         old_timestamp = self.latest_read_timestamp
         self._conversation = conversation
         if parsers.to_timestamp(self.latest_read_timestamp) == 0:
@@ -98,6 +109,27 @@ class Conversation(object):
         """Return the User instance with the given UserID."""
         return self._user_list.get_user(user_id)
 
+    def _get_default_delivery_medium(self):
+        """Return default DeliveryMedium to use for sending messages.
+
+        Use the first option, or an option that's marked as the current
+        default.
+        """
+        medium_options = (
+            self._conversation.self_conversation_state.delivery_medium_option
+        )
+        try:
+            default_medium = medium_options[0].delivery_medium
+        except IndexError:
+            logger.warning('Conversation %r has no delivery medium')
+            default_medium = hangouts_pb2.DeliveryMedium(
+                medium_type=hangouts_pb2.DELIVERY_MEDIUM_BABEL
+            )
+        for medium_option in medium_options:
+            if medium_option.current_default:
+                default_medium = medium_option.delivery_medium
+        return default_medium
+
     @asyncio.coroutine
     def send_message(self, segments, image_file=None, image_id=None):
         """Send a message to this conversation.
@@ -131,7 +163,8 @@ class Conversation(object):
             try:
                 yield from self._client.sendchatmessage(
                     self.id_, [seg.serialize() for seg in segments],
-                    image_id=image_id, otr_status=otr_status
+                    image_id=image_id, otr_status=otr_status,
+                    delivery_medium=self._get_default_delivery_medium()
                 )
             except exceptions.NetworkError as e:
                 logger.warning('Failed to send message: {}'.format(e))
