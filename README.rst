@@ -41,6 +41,7 @@ Projects using hangups
 - `HangupsBot`_: Bot for Google Hangouts
 - `Hubot Hangouts Adapter`_: Hubot adapter using hangups
 - `QHangups`_: Alternative client for Google Hangouts written in PyQt
+- `Ubuntu Hangups`_: Unofficial Google Hangouts client for Ubuntu Touch
 - `bastardbot`_: A bot to follow and interact with Google Hangouts conversations
 - `hangoutsbot/hangoutsbot`_: Google Hangouts bot
 - `pickups`_: IRC gateway for hangups (prototype)
@@ -50,6 +51,7 @@ Projects using hangups
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
 .. _Hubot Hangouts Adapter: https://github.com/groupby/hubot-hangups
 .. _QHangups: https://github.com/xmikos/qhangups
+.. _Ubuntu Hangups: https://github.com/tim-sueberkrueb/ubuntu-hangups
 .. _bastardbot: https://github.com/elamperti/bastardbot
 .. _hangoutsbot/hangoutsbot: https://github.com/hangoutsbot/hangoutsbot
 .. _pickups: https://github.com/mtomwing/pickups
