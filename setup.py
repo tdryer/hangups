@@ -63,11 +63,13 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
     ],
     packages=['hangups', 'hangups.ui'],
     install_requires=install_requires,
     tests_require=[
-        'pytest',
+        # >= 2.7.3 required for Python 3.5 support
+        'pytest==2.7.3',
     ],
     cmdclass={'test': PyTest},
     entry_points={

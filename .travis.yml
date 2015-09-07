@@ -2,13 +2,17 @@ language: python
 python:
     - '3.3'
     - '3.4'
+    - '3.5'
 
 # commands to install dependencies
 install:
     - python setup.py install
 
 # commands to run tests
+# Remove the outdated packages that Travis provides so it can install the
+# version of pytest that hangups requires.
 script:
+    - pip uninstall --quiet --yes pytest py
     - python setup.py --quiet test
     - pip install --quiet docutils
     - python setup.py check --metadata --restructuredtext --strict
