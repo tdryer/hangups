@@ -39,11 +39,6 @@ install_requires = [
 ]
 
 
-if sys.version_info < (3, 4):
-    # For Python earlier than 3.4, a backport of enum is required.
-    install_requires.append('enum34==1.0.4')
-
-
 if sys.version_info < (3, 4, 3):
     # For Python earlier than 3.4.3, use a backported asyncio that fixes an
     # issue with an exception being logged on exit.
