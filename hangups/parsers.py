@@ -1,59 +1,13 @@
-"""Parser for long-polling responses from the talkgadget API."""
+"""Parsing helper functions."""
 
 from collections import namedtuple
 import datetime
-import json
 import logging
 
-from hangups import user, hangouts_pb2, pblite
+from hangups import user
 
 
 logger = logging.getLogger(__name__)
-
-
-def parse_submission(submission):
-    """Yield StateUpdate messages from a channel submission."""
-    # For each submission payload, yield its messages
-    for payload in _get_submission_payloads(submission):
-        if payload is not None:
-            if isinstance(payload, dict) and 'client_id' in payload:
-                # Hack to pass the client ID back to Client
-                yield payload
-            else:
-                yield from _parse_payload(payload)
-
-
-def _get_submission_payloads(submission):
-    """Yield a submission's payloads.
-
-    Most submissions only contain one payload, but if the long-polling
-    connection was closed while something happened, there can be multiple
-    payloads.
-    """
-    for sub in json.loads(submission):
-
-        if sub[1][0] != 'noop':
-            wrapper = json.loads(sub[1][0]['p'])
-            # pylint: disable=invalid-sequence-index
-            if '3' in wrapper and '2' in wrapper['3']:
-                client_id = wrapper['3']['2']
-                # Hack to pass the client ID back to Client
-                yield {'client_id': client_id}
-            if '2' in wrapper:
-                yield json.loads(wrapper['2']['2'])
-
-
-def _parse_payload(payload):
-    """Yield a list of StateUpdate messages."""
-    if payload[0] == 'cbu':  # ClientBatchUpdate
-        # This is a BatchUpdate containing StateUpdate messages
-        batch_update = hangouts_pb2.BatchUpdate()
-        pblite.decode(batch_update, payload, ignore_first_item=True)
-        for state_update in batch_update.state_update:
-            logger.debug('Received StateUpdate:\n%s', state_update)
-            yield state_update
-    else:
-        logger.info('Ignoring payload with header: {}'.format(payload[0]))
 
 
 ##############################################################################

@@ -115,7 +115,7 @@ class Client(object):
         self._channel.on_connect.add_observer(_on_connect)
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
         self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
-        self._channel.on_message.add_observer(self._on_push_data)
+        self._channel.on_receive_array.add_observer(self._on_receive_array)
 
         self._listen_future = asyncio.async(self._channel.listen())
         try:
@@ -132,7 +132,7 @@ class Client(object):
         When disconnection is complete, Client.connect will return.
         """
         logger.info('Disconnecting gracefully...')
-        res = self._listen_future.cancel()
+        self._listen_future.cancel()
         try:
             yield from self._listen_future
         except asyncio.CancelledError:
@@ -306,18 +306,56 @@ class Client(object):
         ]
 
     @asyncio.coroutine
-    def _on_push_data(self, submission):
-        """Parse StateUpdate messages and call the appropriate events."""
-        for state_update in parsers.parse_submission(submission):
-            if isinstance(state_update, dict) and 'client_id' in state_update:
-                # Hack to receive client ID:
-                self._client_id = state_update['client_id']
-                logger.info('Received new client_id: {}'
-                            .format(self._client_id))
-            else:
-                header = state_update.state_update_header
-                self._active_client_state = header.active_client_state
-                yield from self.on_state_update.fire(state_update)
+    def _on_receive_array(self, array):
+        """Parse channel array and call the appropriate events."""
+        if array[0] == 'noop':
+            pass  # This is just a keep-alive, ignore it.
+        else:
+            wrapper = json.loads(array[0]['p'])
+            # Wrapper appears to be a Protocol Buffer message, but encoded via
+            # field numbers as dictionary keys. Since we don't have a parser
+            # for that, parse it ad-hoc here.
+            if '3' in wrapper:
+                # This is a new client_id.
+                self._client_id = wrapper['3']['2']
+                logger.info('Received new client_id: %r', self._client_id)
+                # Once client_id is received, the channel is ready to have
+                # services added.
+                yield from self._add_channel_services()
+            if '2' in wrapper:
+                pblite_message = json.loads(wrapper['2']['2'])
+                if pblite_message[0] == 'cbu':
+                    # This is a (Client)BatchUpdate containing StateUpdate
+                    # messages.
+                    batch_update = hangouts_pb2.BatchUpdate()
+                    pblite.decode(batch_update, pblite_message,
+                                  ignore_first_item=True)
+                    for state_update in batch_update.state_update:
+                        logger.debug('Received StateUpdate:\n%s', state_update)
+                        header = state_update.state_update_header
+                        self._active_client_state = header.active_client_state
+                        yield from self.on_state_update.fire(state_update)
+                else:
+                    logger.info('Ignoring message: %r', pblite_message[0])
+
+    @asyncio.coroutine
+    def _add_channel_services(self):
+        """Add services to the channel.
+
+        The services we add to the channel determine what kind of data we will
+        receive on it. The "babel" service includes what we need for Hangouts.
+        If this fails for some reason, hangups will never receive any events.
+
+        This needs to be re-called whenever we open a new channel (when there's
+        a new SID and client_id.
+        """
+        logger.info('Adding channel services...')
+        # Based on what Hangouts for Chrome does over 2 requests, this is
+        # trimmed down to 1 request that includes the bare minimum to make
+        # things work.
+        map_list = [dict(p=json.dumps({"3": {"1": {"1": "babel"}}}))]
+        yield from self._channel.send_maps(map_list)
+        logger.info('Channel services added')
 
     @asyncio.coroutine
     def _pb_request(self, endpoint, request_pb, response_pb):
