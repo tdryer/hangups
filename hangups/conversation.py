@@ -84,8 +84,14 @@ class Conversation(object):
         Returns an instance of ConversationEvent or subclass.
         """
         conv_event = self._wrap_event(event_)
-        self._events.append(conv_event)
-        self._events_dict[conv_event.id_] = conv_event
+        if conv_event.id_ not in self._events_dict:
+            self._events.append(conv_event)
+            self._events_dict[conv_event.id_] = conv_event
+        else:
+            # If this happens, there's probably a bug.
+            logger.info('Conversation %s ignoring duplicate event %s',
+                        self.id_, conv_event.id_)
+            return None
         return conv_event
 
     def get_user(self, user_id):
@@ -447,8 +453,10 @@ class ConversationList(object):
                            .format(event_.conversation_id.id))
         else:
             conv_event = conv.add_event(event_)
-            yield from self.on_event.fire(conv_event)
-            yield from conv.on_event.fire(conv_event)
+            # conv_event may be None if the event was a duplicate.
+            if conv_event is not None:
+                yield from self.on_event.fire(conv_event)
+                yield from conv.on_event.fire(conv_event)
 
     def _handle_conversation(self, conversation):
         """Receive Conversation and create or update the conversation."""
