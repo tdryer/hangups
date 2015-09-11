@@ -25,7 +25,11 @@ def build_user_conversation_list(client):
     )
     conv_states = sync_recent_conversations_response.conversation_state
     sync_timestamp = parsers.from_timestamp(
-        sync_recent_conversations_response.sync_timestamp
+        # syncrecentconversations seems to return a sync_timestamp 4 minutes
+        # before the present. To prevent syncallnewevents later breaking
+        # requesting events older than what we already have, use
+        # current_server_time instead.
+        sync_recent_conversations_response.response_header.current_server_time
     )
 
     # Retrieve entities participating in all conversations.
@@ -343,9 +347,19 @@ class Conversation(object):
                                in res.conversation_state.event]
                 logger.info('Loaded {} events for conversation {}'
                             .format(len(conv_events), self.id_))
+                # Iterate though the events newest to oldest.
                 for conv_event in reversed(conv_events):
-                    self._events.insert(0, conv_event)
-                    self._events_dict[conv_event.id_] = conv_event
+                    # Add event as the new oldest event, unless we already have
+                    # it.
+                    if conv_event.id_ not in self._events_dict:
+                        self._events.insert(0, conv_event)
+                        self._events_dict[conv_event.id_] = conv_event
+                    else:
+                        # If this happens, there's probably a bug.
+                        logger.info(
+                            'Conversation %s ignoring duplicate event %s',
+                            self.id_, conv_event.id_
+                        )
         return conv_events
 
     def next_event(self, event_id, prev=False):
