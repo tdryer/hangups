@@ -16,7 +16,7 @@ from hangups.ui.utils import get_conv_name
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 MESSAGE_TIME_FORMAT = '(%I:%M:%S %p)'
-MESSAGE_DATETIME_FORMAT = '%y-%m-%d\n(%I:%M:%S %p)'
+MESSAGE_DATETIME_FORMAT = '\n< %y-%m-%d >\n(%I:%M:%S %p)'
 COL_SCHEMES = {
     # Very basic scheme with no colour
     'default': {
