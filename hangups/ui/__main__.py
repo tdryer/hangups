@@ -15,8 +15,8 @@ from hangups.ui.utils import get_conv_name
 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-MESSAGE_TIME_FORMAT = '%I:%M:%S %p'
-MESSAGE_DATETIME_FORMAT = '%y-%m-%d %I:%M:%S %p'
+MESSAGE_TIME_FORMAT = '(%I:%M:%S %p)'
+MESSAGE_DATETIME_FORMAT = '\n< %y-%m-%d >\n(%I:%M:%S %p)'
 COL_SCHEMES = {
     # Very basic scheme with no colour
     'default': {
@@ -407,8 +407,8 @@ class MessageWidget(urwid.WidgetWrap):
         # Save the timestamp as an attribute for sorting.
         self.timestamp = timestamp
         text = [
-            ('msg_date', '(' + self._get_date_str(timestamp,
-                                                  show_date=show_date) + ') '),
+            ('msg_date', self._get_date_str(timestamp,
+                                                  show_date=show_date) + ' '),
             ('msg_text', text)
         ]
         if user is not None:
