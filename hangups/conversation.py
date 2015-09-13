@@ -316,7 +316,7 @@ class Conversation(object):
     def get_events(self, event_id=None, max_events=50):
         """Return list of ConversationEvents ordered newest-first.
 
-        If event_id is specified, return events preceeding this event.
+        If event_id is specified, return events preceding this event.
 
         This method will make an API request to load historical events if
         necessary. If the beginning of the conversation is reached, an empty
