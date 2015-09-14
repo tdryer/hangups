@@ -8,6 +8,7 @@ import os
 import sys
 import urwid
 import readlike
+import shlex
 
 import hangups
 from hangups.ui.notify import Notifier
@@ -145,8 +146,7 @@ class ChatUI(object):
             self._notifier = Notifier(self._conv_list)
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
-                                               self.on_select_conversation,
-                                               self._keys)
+                                               self.on_select_conversation)
         self._tabbed_window = TabbedWindowWidget(self._keys)
         self._tabbed_window.set_tab(conv_picker, switch=True,
                                     title='Conversations')
@@ -209,7 +209,7 @@ class RenameConversationDialog(urwid.WidgetWrap):
 class ConversationMenu(urwid.WidgetWrap):
     """Menu for conversation actions."""
 
-    def __init__(self, conversation, close_callback, keybindings):
+    def __init__(self, conversation, close_callback):
         rename_dialog = RenameConversationDialog(
             conversation,
             lambda: frame.contents.__setitem__('body', (list_box, None)),
@@ -234,17 +234,6 @@ class ConversationMenu(urwid.WidgetWrap):
         padding = urwid.Padding(frame, left=1, right=1)
         line_box = urwid.LineBox(padding, title='Conversation Menu')
         super().__init__(line_box)
-        self._keys = keybindings
-
-    def keypress(self, size, key):
-        # Handle alternate up/down keybindings
-        key = super().keypress(size, key)
-        if key == self._keys['down']:
-            super().keypress(size, 'down')
-        elif key == self._keys['up']:
-            super().keypress(size, 'up')
-        else:
-            return key
 
 
 class ConversationButton(urwid.WidgetWrap):
@@ -300,22 +289,11 @@ class ConversationListWalker(urwid.SimpleFocusListWalker):
 class ConversationPickerWidget(urwid.WidgetWrap):
     """ListBox widget for picking a conversation from a list."""
 
-    def __init__(self, conversation_list, on_select, keybindings):
+    def __init__(self, conversation_list, on_select):
         list_walker = ConversationListWalker(conversation_list, on_select)
         list_box = urwid.ListBox(list_walker)
         widget = urwid.Padding(list_box, left=2, right=2)
         super().__init__(widget)
-        self._keys = keybindings
-
-    def keypress(self, size, key):
-        # Handle alternate up/down keybindings
-        key = super().keypress(size, key)
-        if key == self._keys['down']:
-            super().keypress(size, 'down')
-        elif key == self._keys['up']:
-            super().keypress(size, 'up')
-        else:
-            return key
 
 
 class ReturnableEdit(urwid.Edit):
@@ -431,7 +409,7 @@ class MessageWidget(urwid.WidgetWrap):
         self.timestamp = timestamp
         text = [
             ('msg_date', self._get_date_str(timestamp,
-                                            show_date=show_date) + ' '),
+                                                  show_date=show_date) + ' '),
             ('msg_text', text)
         ]
         if user is not None:
@@ -680,7 +658,7 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def get_menu_widget(self, close_callback):
         """Return the menu widget associated with this widget."""
-        return ConversationMenu(self._conversation, close_callback, self._keys)
+        return ConversationMenu(self._conversation, close_callback)
 
     def keypress(self, size, key):
         """Handle marking messages as read and keeping client active."""
@@ -829,12 +807,39 @@ def main():
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_token_path = os.path.join(dirs.user_cache_dir, 'refresh_token.txt')
     default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
+    default_colors_path = os.path.join(dirs.user_config_dir, 'colors')
 
     # Create a default empty config file if does not exist.
     dir_maker(default_config_path)
     if not os.path.isfile(default_config_path):
         with open(default_config_path, 'a') as cfg:
             cfg.write("")
+
+    # Create empty colors directory if there is none
+    dir_maker(default_colors_path)
+
+    # Read .col files
+    attributes = {'active_tab', 'inactive_tab', 'msg_date', 'msg_sender', 'msg_text', 'status_line', 'tab_background'}
+    for root, dirs, files in os.walk(default_colors_path):
+        for filename in files:
+            if filename[-4:] == '.col':
+                obj = []
+                usedAttrs = []
+
+                name = os.path.splitext(filename)[0]
+
+                with open(os.path.join(root, filename), "rt") as f:
+                    for line in f.read().split('\n'):
+                        split = shlex.split(line, comments=True)
+                        if len(split) == 3 and split[0] in attributes:
+                            usedAttrs.append(split[0])
+                            obj.append(tuple(split))
+
+                for attr in (attributes - set(usedAttrs)):
+                    obj.append(tuple([attr, '', '']))
+
+                COL_SCHEMES[name] = set(obj)
+
 
     parser = configargparse.ArgumentParser(
         prog='hangups', default_config_files=[default_config_path],
@@ -868,10 +873,6 @@ def main():
                   help='keybinding for quitting')
     key_group.add('--key-menu', default='ctrl n',
                   help='keybinding for context menu')
-    key_group.add('--key-up', default='k',
-                  help='keybinding for alternate up key')
-    key_group.add('--key-down', default='j',
-                  help='keybinding for alternate down key')
     args = parser.parse_args()
 
     # Create all necessary directories.
@@ -890,8 +891,6 @@ def main():
             'close_tab': args.key_close_tab,
             'quit': args.key_quit,
             'menu': args.key_menu,
-            'up': args.key_up,
-            'down': args.key_down
         }, COL_SCHEMES[args.col_scheme], args.disable_notifications)
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
