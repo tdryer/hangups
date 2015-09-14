@@ -93,12 +93,12 @@ class ChatUI(object):
         elif keys == [self._keys['quit']]:
             self._on_quit()
         else:
-            # Vimlike movements -- only in main tab because otherwise you can't type the letters j or k in chat
-            if self._tabbed_window._tab_index == 0:
-                if 'j' in keys:
-                    keys[keys.index('j')] = 'down'
-                elif 'k' in keys:
-                    keys[keys.index('k')] = 'up'
+            # # Vimlike movements -- only in main tab because otherwise you can't type the letters j or k in chat
+            # if self._tabbed_window._tab_index == 0:
+            #     if 'j' in keys:
+            #         keys[keys.index('j')] = 'down'
+            #     elif 'k' in keys:
+            #         keys[keys.index('k')] = 'up'
             return keys
 
     def _show_menu(self):
@@ -151,7 +151,8 @@ class ChatUI(object):
             self._notifier = Notifier(self._conv_list)
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
-                                               self.on_select_conversation)
+                                               self.on_select_conversation,
+                                               self._keys)
         self._tabbed_window = TabbedWindowWidget(self._keys)
         self._tabbed_window.set_tab(conv_picker, switch=True,
                                     title='Conversations')
@@ -214,7 +215,7 @@ class RenameConversationDialog(urwid.WidgetWrap):
 class ConversationMenu(urwid.WidgetWrap):
     """Menu for conversation actions."""
 
-    def __init__(self, conversation, close_callback):
+    def __init__(self, conversation, close_callback, keybindings):
         rename_dialog = RenameConversationDialog(
             conversation,
             lambda: frame.contents.__setitem__('body', (list_box, None)),
@@ -239,6 +240,14 @@ class ConversationMenu(urwid.WidgetWrap):
         padding = urwid.Padding(frame, left=1, right=1)
         line_box = urwid.LineBox(padding, title='Conversation Menu')
         super().__init__(line_box)
+        self._keys = keybindings
+
+    def keypress(self, size, key):
+        key = super().keypress(size, key)
+        if key == self._keys['down']:
+            super().keypress(size, 'down')
+        elif key == self._keys['up']:
+            super().keypress(size, 'up')
 
 
 class ConversationButton(urwid.WidgetWrap):
@@ -294,11 +303,19 @@ class ConversationListWalker(urwid.SimpleFocusListWalker):
 class ConversationPickerWidget(urwid.WidgetWrap):
     """ListBox widget for picking a conversation from a list."""
 
-    def __init__(self, conversation_list, on_select):
+    def __init__(self, conversation_list, on_select, keybindings):
         list_walker = ConversationListWalker(conversation_list, on_select)
         list_box = urwid.ListBox(list_walker)
         widget = urwid.Padding(list_box, left=2, right=2)
         super().__init__(widget)
+        self._keys = keybindings
+
+    def keypress(self, size, key):
+        key = super().keypress(size, key)
+        if key == self._keys['down']:
+            super().keypress(size, 'down')
+        elif key == self._keys['up']:
+            super().keypress(size, 'up')
 
 
 class ReturnableEdit(urwid.Edit):
@@ -663,7 +680,7 @@ class ConversationWidget(urwid.WidgetWrap):
 
     def get_menu_widget(self, close_callback):
         """Return the menu widget associated with this widget."""
-        return ConversationMenu(self._conversation, close_callback)
+        return ConversationMenu(self._conversation, close_callback, self._keys)
 
     def keypress(self, size, key):
         """Handle marking messages as read and keeping client active."""
@@ -851,6 +868,10 @@ def main():
                   help='keybinding for quitting')
     key_group.add('--key-menu', default='ctrl n',
                   help='keybinding for context menu')
+    key_group.add('--key-up', default='k',
+                  help='keybinding for alternate up key')
+    key_group.add('--key-down', default='j',
+                  help='keybinding for alternate down key')
     args = parser.parse_args()
 
     # Create all necessary directories.
@@ -869,6 +890,8 @@ def main():
             'close_tab': args.key_close_tab,
             'quit': args.key_quit,
             'menu': args.key_menu,
+            'up': args.key_up,
+            'down': args.key_down
         }, COL_SCHEMES[args.col_scheme], args.disable_notifications)
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
