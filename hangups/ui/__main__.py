@@ -237,11 +237,14 @@ class ConversationMenu(urwid.WidgetWrap):
         self._keys = keybindings
 
     def keypress(self, size, key):
+        # Handle alternate up/down keybindings
         key = super().keypress(size, key)
         if key == self._keys['down']:
             super().keypress(size, 'down')
         elif key == self._keys['up']:
             super().keypress(size, 'up')
+        else:
+            return key
 
 
 class ConversationButton(urwid.WidgetWrap):
@@ -305,11 +308,14 @@ class ConversationPickerWidget(urwid.WidgetWrap):
         self._keys = keybindings
 
     def keypress(self, size, key):
+        # Handle alternate up/down keybindings
         key = super().keypress(size, key)
         if key == self._keys['down']:
             super().keypress(size, 'down')
         elif key == self._keys['up']:
             super().keypress(size, 'up')
+        else:
+            return key
 
 
 class ReturnableEdit(urwid.Edit):
