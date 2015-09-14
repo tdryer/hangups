@@ -93,12 +93,6 @@ class ChatUI(object):
         elif keys == [self._keys['quit']]:
             self._on_quit()
         else:
-            # # Vimlike movements -- only in main tab because otherwise you can't type the letters j or k in chat
-            # if self._tabbed_window._tab_index == 0:
-            #     if 'j' in keys:
-            #         keys[keys.index('j')] = 'down'
-            #     elif 'k' in keys:
-            #         keys[keys.index('k')] = 'up'
             return keys
 
     def _show_menu(self):
