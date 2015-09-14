@@ -431,7 +431,7 @@ class MessageWidget(urwid.WidgetWrap):
         self.timestamp = timestamp
         text = [
             ('msg_date', self._get_date_str(timestamp,
-                                                  show_date=show_date) + ' '),
+                                            show_date=show_date) + ' '),
             ('msg_text', text)
         ]
         if user is not None:
