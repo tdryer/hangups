@@ -6,11 +6,10 @@ import json
 import logging
 import random
 import time
-import datetime
 import os
 
-from hangups import (javascript, parsers, exceptions, http_utils, channel,
-                     event, hangouts_pb2, pblite, __version__)
+from hangups import (javascript, exceptions, http_utils, channel, event,
+                     hangouts_pb2, pblite, __version__)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -117,6 +116,27 @@ class Client(object):
             pass
         logger.info('Disconnected gracefully')
 
+    def get_request_header(self):
+        """Return populated RequestHeader message.
+
+        Use this method for constructing request messages when calling Hangouts
+        APIs.
+        """
+        # resource is allowed to be null if it's not available yet (the Chrome
+        # client does this for the first getentitybyid call)
+        if self._client_id is not None:
+            self._request_header.client_identifier.resource = self._client_id
+        return self._request_header
+
+    @staticmethod
+    def get_client_generated_id():
+        """Return ID for client_generated_id fields.
+
+        Use this method for constructing request messages when calling Hangouts
+        APIs.
+        """
+        return random.randint(0, 2**32)
+
     @asyncio.coroutine
     def set_active(self):
         """Set this client as active.
@@ -142,7 +162,12 @@ class Client(object):
             # email address.
             if self._email is None:
                 try:
-                    get_self_info_response = yield from self.getselfinfo()
+                    request = hangouts_pb2.GetSelfInfoRequest(
+                        request_header=self.get_request_header(),
+                    )
+                    get_self_info_response = yield from self.get_self_info(
+                        request
+                    )
                 except exceptions.NetworkError as e:
                     logger.warning('Failed to find email address: {}'
                                    .format(e))
@@ -160,12 +185,65 @@ class Client(object):
                 return
 
             try:
-                yield from self.setactiveclient(True, ACTIVE_TIMEOUT_SECS)
+                request = hangouts_pb2.SetActiveClientRequest(
+                    request_header=self.get_request_header(),
+                    is_active=True,
+                    full_jid="{}/{}".format(self._email, self._client_id),
+                    timeout_secs=ACTIVE_TIMEOUT_SECS,
+                )
+                yield from self.set_active_client(request)
             except exceptions.NetworkError as e:
                 logger.warning('Failed to set active client: {}'.format(e))
             else:
                 logger.info('Set active client for {} seconds'
                             .format(ACTIVE_TIMEOUT_SECS))
+
+    @asyncio.coroutine
+    def upload_image(self, image_file, filename=None):
+        """Upload an image that can be later attached to a chat message.
+
+        image_file is a file-like object containing an image.
+
+        The name of the uploaded file may be changed by specifying the filename
+        argument.
+
+        Raises hangups.NetworkError if the request fails.
+
+        Returns ID of uploaded image.
+        """
+        image_filename = (filename if filename
+                          else os.path.basename(image_file.name))
+        image_data = image_file.read()
+
+        # Create image and request upload URL
+        res1 = yield from self._base_request(
+            IMAGE_UPLOAD_URL,
+            'application/x-www-form-urlencoded;charset=UTF-8',
+            'json',
+            json.dumps({
+                "protocolVersion": "0.8",
+                "createSessionRequest": {
+                    "fields": [{
+                        "external": {
+                            "name": "file",
+                            "filename": image_filename,
+                            "put": {},
+                            "size": len(image_data),
+                        }
+                    }]
+                }
+            }))
+        upload_url = (json.loads(res1.body.decode())['sessionStatus']
+                      ['externalFieldTransfers'][0]['putInfo']['url'])
+
+        # Upload image data and get image ID
+        res2 = yield from self._base_request(
+            upload_url, 'application/octet-stream', 'json', image_data
+        )
+        return (json.loads(res2.body.decode())['sessionStatus']
+                ['additionalInfo']
+                ['uploader_service.GoogleRupioAdditionalInfo']
+                ['completionInfo']['customerSpecificInfo']['photoid'])
 
     ##########################################################################
     # Private methods
@@ -296,517 +374,182 @@ class Client(object):
         )
         return res
 
-    def _get_request_header_pb(self):
-        """Return populated RequestHeader message."""
-        # resource is allowed to be null if it's not available yet (the Chrome
-        # client does this for the first getentitybyid call)
-        if self._client_id is not None:
-            self._request_header.client_identifier.resource = self._client_id
-        return self._request_header
-
-    def get_client_generated_id(self):
-        """Return ID for client_generated_id fields."""
-        return random.randint(0, 2**32)
-
     ###########################################################################
-    # Raw API request methods
+    # API request methods - wrappers for self._pb_request for calling
+    # particular APIs.
     ###########################################################################
 
     @asyncio.coroutine
-    def syncallnewevents(self, timestamp):
-        """List all events occurring at or after timestamp.
-
-        This method requests protojson rather than json so we have one chat
-        message parser rather than two.
-
-        timestamp: datetime.datetime instance specifying the time after
-        which to return all events occurring in.
-
-        Raises hangups.NetworkError if the request fails.
-
-        Returns SyncAllNewEventsResponse.
-        """
-        request = hangouts_pb2.SyncAllNewEventsRequest(
-            request_header=self._get_request_header_pb(),
-            last_sync_timestamp=parsers.to_timestamp(timestamp),
-            max_response_size_bytes=1048576,
-        )
-        response = hangouts_pb2.SyncAllNewEventsResponse()
-        yield from self._pb_request('conversations/syncallnewevents', request,
-                                    response)
+    def add_user(self, add_user_request):
+        """Invite users to join an existing group conversation."""
+        response = hangouts_pb2.AddUserResponse()
+        yield from self._pb_request('conversations/adduser',
+                                    add_user_request, response)
         return response
 
     @asyncio.coroutine
-    def sendchatmessage(
-            self, conversation_id, segments, image_id=None,
-            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD,
-            delivery_medium=None):
-        """Send a chat message to a conversation.
-
-        conversation_id must be a valid conversation ID. segments must be a
-        list of message segments to send, in pblite format.
-
-        otr_status determines whether the message will be saved in the server's
-        chat history. Note that the OTR status of the conversation is
-        irrelevant, clients may send messages with whatever OTR status they
-        like.
-
-        image_id is an option ID of an image retrieved from
-        Client.upload_image. If provided, the image will be attached to the
-        message.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        segments_pb = []
-        for segment_pblite in segments:
-            segment_pb = hangouts_pb2.Segment()
-            pblite.decode(segment_pb, segment_pblite)
-            segments_pb.append(segment_pb)
-        if delivery_medium is None:
-            delivery_medium = hangouts_pb2.DeliveryMedium(
-                medium_type=hangouts_pb2.DELIVERY_MEDIUM_BABEL,
-            )
-
-        request = hangouts_pb2.SendChatMessageRequest(
-            request_header=self._get_request_header_pb(),
-            message_content=hangouts_pb2.MessageContent(
-                segment=segments_pb,
-            ),
-            event_request_header=hangouts_pb2.EventRequestHeader(
-                conversation_id=hangouts_pb2.ConversationId(
-                    id=conversation_id,
-                ),
-                client_generated_id=self.get_client_generated_id(),
-                expected_otr=otr_status,
-                delivery_medium=delivery_medium,
-                event_type=hangouts_pb2.EVENT_TYPE_REGULAR_CHAT_MESSAGE,
-            ),
-        )
-
-        if image_id is not None:
-            request.existing_media = hangouts_pb2.ExistingMedia(
-                photo=hangouts_pb2.Photo(photo_id=image_id)
-            )
-
-        response = hangouts_pb2.SendChatMessageResponse()
-        yield from self._pb_request('conversations/sendchatmessage', request,
-                                    response)
+    def create_conversation(self, create_conversation_request):
+        """Create a new conversation."""
+        response = hangouts_pb2.CreateConversationResponse()
+        yield from self._pb_request('conversations/createconversation',
+                                    create_conversation_request, response)
         return response
 
     @asyncio.coroutine
-    def setactiveclient(self, is_active, timeout_secs):
-        """Set the active client.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.SetActiveClientRequest(
-            request_header=self._get_request_header_pb(),
-            is_active=is_active,
-            full_jid="{}/{}".format(self._email, self._client_id),
-            timeout_secs=timeout_secs,
-        )
-        response = hangouts_pb2.SetActiveClientResponse()
-        yield from self._pb_request('clients/setactiveclient', request,
-                                    response)
-        return response
-
-    @asyncio.coroutine
-    def updatewatermark(self, conv_id, read_timestamp):
-        """Update the watermark (read timestamp) for a conversation.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.UpdateWatermarkRequest(
-            request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationId(id=conv_id),
-            last_read_timestamp=parsers.to_timestamp(read_timestamp),
-        )
-        response = hangouts_pb2.UpdateWatermarkResponse()
-        yield from self._pb_request('conversations/updatewatermark', request,
-                                    response)
-        return response
-
-    @asyncio.coroutine
-    def getentitybyid(self, gaia_id_list):
-        """Return information about a list of contacts.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.GetEntityByIdRequest(
-            request_header=self._get_request_header_pb(),
-            batch_lookup_spec=[hangouts_pb2.EntityLookupSpec(gaia_id=gaia_id)
-                               for gaia_id in gaia_id_list],
-        )
-        response = hangouts_pb2.GetEntityByIdResponse()
-        yield from self._pb_request('contacts/getentitybyid', request,
-                                    response)
-        return response
-
-    @asyncio.coroutine
-    def renameconversation(
-            self, conversation_id, name,
-            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD):
-        """Rename a conversation.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.RenameConversationRequest(
-            request_header=self._get_request_header_pb(),
-            new_name=name,
-            event_request_header=hangouts_pb2.EventRequestHeader(
-                conversation_id=hangouts_pb2.ConversationId(
-                    id=conversation_id,
-                ),
-                client_generated_id=self.get_client_generated_id(),
-                expected_otr=otr_status,
-            ),
-        )
-        response = hangouts_pb2.RenameConversationResponse()
-        yield from self._pb_request('conversations/renameconversation',
-                                    request, response)
-        return response
-
-    @asyncio.coroutine
-    def getconversation(self, conversation_id, event_timestamp, max_events=50):
-        """Return conversation events.
-
-        This is mainly used for retrieving conversation scrollback. Events
-        occurring before event_timestamp are returned, in order from oldest to
-        newest.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.GetConversationRequest(
-            request_header=self._get_request_header_pb(),
-            conversation_spec=hangouts_pb2.ConversationSpec(
-                conversation_id=hangouts_pb2.ConversationId(id=conversation_id)
-            ),
-            include_event=True,
-            max_events_per_conversation=max_events,
-            event_continuation_token=hangouts_pb2.EventContinuationToken(
-                event_timestamp=parsers.to_timestamp(event_timestamp)
-            ),
-        )
-        response = hangouts_pb2.GetConversationResponse()
-        yield from self._pb_request('conversations/getconversation', request,
-                                    response)
-        return response
-
-    @asyncio.coroutine
-    def upload_image(self, image_file, filename=None):
-        """Upload an image that can be later attached to a chat message.
-
-        image_file is a file-like object containing an image.
-
-        The name of the uploaded file may be changed by specifying the filename
-        argument.
-
-        Raises hangups.NetworkError if the request fails.
-
-        Returns ID of uploaded image.
-        """
-        image_filename = (filename if filename
-                          else os.path.basename(image_file.name))
-        image_data = image_file.read()
-
-        # Create image and request upload URL
-        res1 = yield from self._base_request(
-            IMAGE_UPLOAD_URL,
-            'application/x-www-form-urlencoded;charset=UTF-8',
-            'json',
-            json.dumps({
-                "protocolVersion": "0.8",
-                "createSessionRequest": {
-                    "fields": [{
-                        "external": {
-                            "name": "file",
-                            "filename": image_filename,
-                            "put": {},
-                            "size": len(image_data),
-                        }
-                    }]
-                }
-            }))
-        upload_url = (json.loads(res1.body.decode())['sessionStatus']
-                      ['externalFieldTransfers'][0]['putInfo']['url'])
-
-        # Upload image data and get image ID
-        res2 = yield from self._base_request(
-            upload_url, 'application/octet-stream', 'json', image_data
-        )
-        return (json.loads(res2.body.decode())['sessionStatus']
-                ['additionalInfo']
-                ['uploader_service.GoogleRupioAdditionalInfo']
-                ['completionInfo']['customerSpecificInfo']['photoid'])
-
-    ###########################################################################
-    # UNUSED raw API request methods (by hangups itself) for reference
-    ###########################################################################
-
-    @asyncio.coroutine
-    def removeuser(
-            self, conversation_id,
-            otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD):
-        """Leave group conversation.
-
-        conversation_id must be a valid conversation ID.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.RemoveUserRequest(
-            request_header=self._get_request_header_pb(),
-            event_request_header=hangouts_pb2.EventRequestHeader(
-                conversation_id=hangouts_pb2.ConversationId(
-                    id=conversation_id,
-                ),
-                client_generated_id=self.get_client_generated_id(),
-                expected_otr=otr_status,
-            ),
-        )
-        response = hangouts_pb2.RemoveUserResponse()
-        yield from self._pb_request('conversations/removeuser', request,
-                                    response)
-        return response
-
-    @asyncio.coroutine
-    def deleteconversation(self, conversation_id):
-        """Delete one-to-one conversation.
+    def delete_conversation(self, delete_conversation_request):
+        """Leave a one-to-one conversation.
 
         One-to-one conversations are "sticky"; they can't actually be deleted.
         This API clears the event history of the specified conversation up to
         delete_upper_bound_timestamp, hiding it if no events remain.
-
-        conversation_id must be a valid conversation ID.
-
-        Raises hangups.NetworkError if the request fails.
         """
-        timestamp = parsers.to_timestamp(
-            datetime.datetime.now(tz=datetime.timezone.utc)
-        )
-        request = hangouts_pb2.DeleteConversationRequest(
-            request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
-            delete_upper_bound_timestamp=timestamp
-        )
         response = hangouts_pb2.DeleteConversationResponse()
         yield from self._pb_request('conversations/deleteconversation',
-                                    request, response)
+                                    delete_conversation_request, response)
         return response
 
     @asyncio.coroutine
-    def settyping(self, conversation_id,
-                  typing=hangouts_pb2.TYPING_TYPE_STARTED):
-        """Send typing notification.
-
-        conversation_id must be a valid conversation ID.
-        typing must be a hangups.TypingType Enum.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.SetTypingRequest(
-            request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
-            type=typing,
-        )
-        response = hangouts_pb2.SetTypingResponse()
-        yield from self._pb_request('conversations/settyping', request,
-                                    response)
+    def easter_egg(self, easter_egg_request):
+        """Send an easter egg event to a conversation."""
+        response = hangouts_pb2.EasterEggResponse()
+        yield from self._pb_request('conversations/easteregg',
+                                    easter_egg_request, response)
         return response
 
     @asyncio.coroutine
-    def getselfinfo(self):
-        """Return information about your account.
+    def get_conversation(self, get_conversation_request):
+        """Return conversation info and recent events."""
+        response = hangouts_pb2.GetConversationResponse()
+        yield from self._pb_request('conversations/getconversation',
+                                    get_conversation_request, response)
+        return response
 
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.GetSelfInfoRequest(
-            request_header=self._get_request_header_pb(),
-        )
+    @asyncio.coroutine
+    def get_entity_by_id(self, get_entity_by_id_request):
+        """Return info about a list of users."""
+        response = hangouts_pb2.GetEntityByIdResponse()
+        yield from self._pb_request('contacts/getentitybyid',
+                                    get_entity_by_id_request, response)
+        return response
+
+    @asyncio.coroutine
+    def get_self_info(self, get_self_info_request):
+        """Return info about the current user."""
         response = hangouts_pb2.GetSelfInfoResponse()
-        yield from self._pb_request('contacts/getselfinfo', request, response)
+        yield from self._pb_request('contacts/getselfinfo',
+                                    get_self_info_request, response)
         return response
 
     @asyncio.coroutine
-    def setfocus(self, conversation_id):
-        """Set focus to a conversation.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.SetFocusRequest(
-            request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
-            type=hangouts_pb2.FOCUS_TYPE_FOCUSED,
-            timeout_secs=20,
-        )
-        response = hangouts_pb2.SetFocusResponse()
-        yield from self._pb_request('conversations/setfocus', request,
-                                    response)
-        return response
-
-    @asyncio.coroutine
-    def searchentities(self, search_string, max_results):
-        """Search for people.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.SearchEntitiesRequest(
-            request_header=self._get_request_header_pb(),
-            query=search_string,
-            max_count=max_results,
-        )
-        response = hangouts_pb2.SearchEntitiesResponse()
-        yield from self._pb_request('contacts/searchentities', request,
-                                    response)
-        return response
-
-    @asyncio.coroutine
-    def setpresence(self, online, mood=None):
-        """Set the presence or mood of this client.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        type_ = (hangouts_pb2.CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE if online
-                 else hangouts_pb2.CLIENT_PRESENCE_STATE_DESKTOP_IDLE)
-        request = hangouts_pb2.SetPresenceRequest(
-            request_header=self._get_request_header_pb(),
-            presence_state_setting=hangouts_pb2.PresenceStateSetting(
-                timeout_secs=720,
-                type=type_,
-            ),
-        )
-        if mood is not None:
-            segment = (
-                request.mood_setting.mood_message.mood_content.segment.add()
-            )
-            segment.type = hangouts_pb2.SEGMENT_TYPE_TEXT
-            segment.text = mood
-        response = hangouts_pb2.SetPresenceResponse()
-        yield from self._pb_request('presence/setpresence', request, response)
-        return response
-
-    @asyncio.coroutine
-    def querypresence(self, gaia_id):
-        """Check someone's presence status.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.QueryPresenceRequest(
-            request_header=self._get_request_header_pb(),
-            participant_id=[hangouts_pb2.ParticipantId(gaia_id=gaia_id)],
-            field_mask=[hangouts_pb2.FIELD_MASK_REACHABLE,
-                        hangouts_pb2.FIELD_MASK_AVAILABLE,
-                        hangouts_pb2.FIELD_MASK_DEVICE],
-        )
+    def query_presence(self, query_presence_request):
+        """Return presence status for a list of users."""
         response = hangouts_pb2.QueryPresenceResponse()
-        yield from self._pb_request('presence/querypresence', request,
-                                    response)
+        yield from self._pb_request('presence/querypresence',
+                                    query_presence_request, response)
         return response
 
     @asyncio.coroutine
-    def syncrecentconversations(self, max_conversations=100,
-                                max_events_per_conversation=1):
-        """List the contents of recent conversations, including messages.
-
-        Similar to syncallnewevents, but returns a limited number of
-        conversations rather than all conversations in a given date range.
-
-        Can be used to retrieve archived conversations.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.SyncRecentConversationsRequest(
-            request_header=self._get_request_header_pb(),
-            max_conversations=max_conversations,
-            max_events_per_conversation=max_events_per_conversation,
-            sync_filter=[hangouts_pb2.SYNC_FILTER_INBOX],
-        )
-        response = hangouts_pb2.SyncRecentConversationsResponse()
-        yield from self._pb_request('conversations/syncrecentconversations',
-                                    request, response)
+    def remove_user(self, remove_user_request):
+        """Leave a group conversation."""
+        response = hangouts_pb2.RemoveUserResponse()
+        yield from self._pb_request('conversations/removeuser',
+                                    remove_user_request, response)
         return response
 
     @asyncio.coroutine
-    def setconversationnotificationlevel(self, conversation_id, level):
-        """Set the notification level of a conversation.
+    def rename_conversation(self, rename_conversation_request):
+        """Rename a conversation.
 
-        Pass hangouts_pb2.NOTIFICATION_LEVEL_QUIET to disable notifications, or
-        hangouts_pb2.NOTIFICATION_LEVEL_RING to enable them.
-
-        Raises hangups.NetworkError if the request fails.
+        Both group and one-to-one conversations may be renamed, but the
+        official Hangouts clients have mixed support for one-to-one
+        conversations with custom names.
         """
-        request = hangouts_pb2.SetConversationNotificationLevelRequest(
-            request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
-            level=level,
-        )
+        response = hangouts_pb2.RenameConversationResponse()
+        yield from self._pb_request('conversations/renameconversation',
+                                    rename_conversation_request, response)
+        return response
+
+    @asyncio.coroutine
+    def search_entities(self, search_entities_request):
+        """Return info for users based on a query."""
+        response = hangouts_pb2.SearchEntitiesResponse()
+        yield from self._pb_request('contacts/searchentities',
+                                    search_entities_request, response)
+        return response
+
+    @asyncio.coroutine
+    def send_chat_message(self, send_chat_message_request):
+        """Send a chat message to a conversation."""
+        response = hangouts_pb2.SendChatMessageResponse()
+        yield from self._pb_request('conversations/sendchatmessage',
+                                    send_chat_message_request, response)
+        return response
+
+    @asyncio.coroutine
+    def set_active_client(self, set_active_client_request):
+        """Set the active client."""
+        response = hangouts_pb2.SetActiveClientResponse()
+        yield from self._pb_request('clients/setactiveclient',
+                                    set_active_client_request, response)
+        return response
+
+    @asyncio.coroutine
+    def set_conversation_notification_level(
+            self, set_conversation_notification_level_request
+    ):
+        """Set the notification level of a conversation."""
         response = hangouts_pb2.SetConversationNotificationLevelResponse()
         yield from self._pb_request(
-            'conversations/setconversationnotificationlevel', request, response
+            'conversations/setconversationnotificationlevel',
+            set_conversation_notification_level_request, response
         )
         return response
 
     @asyncio.coroutine
-    def easteregg(self, conversation_id, easteregg):
-        """Send an easteregg to a conversation.
+    def set_focus(self, set_focus_request):
+        """Set focus to a conversation."""
+        response = hangouts_pb2.SetFocusResponse()
+        yield from self._pb_request('conversations/setfocus',
+                                    set_focus_request, response)
+        return response
 
-        easteregg may not be empty.
+    @asyncio.coroutine
+    def set_presence(self, set_presence_request):
+        """Set the presence status."""
+        response = hangouts_pb2.SetPresenceResponse()
+        yield from self._pb_request('presence/setpresence',
+                                    set_presence_request, response)
+        return response
 
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.EasterEggRequest(
-            request_header=self._get_request_header_pb(),
-            conversation_id=hangouts_pb2.ConversationId(id=conversation_id),
-            easter_egg=hangouts_pb2.EasterEgg(message=easteregg),
-        )
-        response = hangouts_pb2.EasterEggResponse()
-        yield from self._pb_request('conversations/easteregg', request,
+    @asyncio.coroutine
+    def set_typing(self, set_typing_request):
+        """Set the typing status of a conversation."""
+        response = hangouts_pb2.SetTypingResponse()
+        yield from self._pb_request('conversations/settyping',
+                                    set_typing_request, response)
+        return response
+
+    @asyncio.coroutine
+    def sync_all_new_events(self, sync_all_new_events_request):
+        """List all events occurring at or after a timestamp."""
+        response = hangouts_pb2.SyncAllNewEventsResponse()
+        yield from self._pb_request('conversations/syncallnewevents',
+                                    sync_all_new_events_request, response)
+        return response
+
+    @asyncio.coroutine
+    def sync_recent_conversations(self, sync_recent_conversations_request):
+        """Return info on recent conversations and their events."""
+        response = hangouts_pb2.SyncRecentConversationsResponse()
+        yield from self._pb_request('conversations/syncrecentconversations',
+                                    sync_recent_conversations_request,
                                     response)
         return response
 
     @asyncio.coroutine
-    def createconversation(self, chat_id_list, force_group=False):
-        """Create new one-to-one or group conversation.
-
-        chat_id_list is list of other users to invite to the conversation.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        is_group = len(chat_id_list) > 1 or force_group
-        request = hangouts_pb2.CreateConversationRequest(
-            request_header=self._get_request_header_pb(),
-            type=(hangouts_pb2.CONVERSATION_TYPE_GROUP if is_group else
-                  hangouts_pb2.CONVERSATION_TYPE_ONE_TO_ONE),
-            client_generated_id=self.get_client_generated_id(),
-            invitee_id=[hangouts_pb2.InviteeID(gaia_id=chat_id)
-                        for chat_id in chat_id_list],
-        )
-        response = hangouts_pb2.CreateConversationResponse()
-        yield from self._pb_request('conversations/createconversation',
-                                    request, response)
-        return response
-
-    @asyncio.coroutine
-    def adduser(self, conversation_id, chat_id_list,
-                otr_status=hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD):
-        """Add users to an existing group conversation.
-
-        conversation_id must be a valid conversation ID.
-        chat_id_list is list of users which should be invited to conversation.
-
-        Raises hangups.NetworkError if the request fails.
-        """
-        request = hangouts_pb2.AddUserRequest(
-            request_header=self._get_request_header_pb(),
-            invitee_id=[hangouts_pb2.InviteeID(gaia_id=chat_id)
-                        for chat_id in chat_id_list],
-            event_request_header=hangouts_pb2.EventRequestHeader(
-                conversation_id=hangouts_pb2.ConversationId(
-                    id=conversation_id,
-                ),
-                client_generated_id=self.get_client_generated_id(),
-                expected_otr=otr_status,
-            ),
-        )
-        response = hangouts_pb2.AddUserResponse()
-        yield from self._pb_request('conversations/adduser', request, response)
+    def update_watermark(self, update_watermark_request):
+        """Update the watermark (read timestamp) of a conversation."""
+        response = hangouts_pb2.UpdateWatermarkResponse()
+        yield from self._pb_request('conversations/updatewatermark',
+                                    update_watermark_request, response)
         return response
