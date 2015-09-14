@@ -8,6 +8,7 @@ import os
 import sys
 import urwid
 import readlike
+import shlex
 
 import hangups
 from hangups.ui.notify import Notifier
@@ -829,12 +830,38 @@ def main():
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_token_path = os.path.join(dirs.user_cache_dir, 'refresh_token.txt')
     default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
+    default_colors_path = os.path.join(dirs.user_config_dir, 'colors')
 
     # Create a default empty config file if does not exist.
     dir_maker(default_config_path)
     if not os.path.isfile(default_config_path):
         with open(default_config_path, 'a') as cfg:
             cfg.write("")
+
+    # Create empty colors directory if there is none
+    dir_maker(default_colors_path)
+
+    # Read .col files
+    attributes = {'active_tab', 'inactive_tab', 'msg_date', 'msg_sender', 'msg_text', 'status_line', 'tab_background'}
+    for root, dirs, files in os.walk(default_colors_path):
+        for filename in files:
+            if filename[-4:] == '.col':
+                obj = []
+                usedAttrs = []
+
+                name = os.path.splitext(filename)[0]
+
+                with open(os.path.join(root, filename), "rt") as f:
+                    for line in f.read().split('\n'):
+                        split = shlex.split(line, comments=True)
+                        if len(split) == 3 and split[0] in attributes:
+                            usedAttrs.append(split[0])
+                            obj.append(tuple(split))
+
+                for attr in (attributes - set(usedAttrs)):
+                    obj.append(tuple([attr, '', '']))
+
+                COL_SCHEMES[name] = set(obj)
 
     parser = configargparse.ArgumentParser(
         prog='hangups', default_config_files=[default_config_path],
