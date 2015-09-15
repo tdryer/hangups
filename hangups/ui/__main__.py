@@ -845,11 +845,12 @@ def main():
     attributes = {'active_tab', 'inactive_tab', 'msg_date', 'msg_sender', 'msg_text', 'status_line', 'tab_background'}
     for root, dirs, files in os.walk(default_colors_path):
         for filename in files:
-            if filename[-4:] == '.col':
+            splitName = os.path.splitext(filename)
+            if splitName[1] == 'col':
                 obj = []
                 usedAttrs = []
 
-                name = os.path.splitext(filename)[0]
+                name = splitName[0]
 
                 with open(os.path.join(root, filename), "rt") as f:
                     for line in f.read().split('\n'):
