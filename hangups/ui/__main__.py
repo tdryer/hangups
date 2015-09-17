@@ -848,7 +848,7 @@ def main():
     for root, dirs, files in os.walk(default_colors_path):
         for filename in files:
             splitName = os.path.splitext(filename)
-            if splitName[1] == '.col':
+            if splitName[1] == '.json':
                 obj = []
                 usedAttrs = []
 
