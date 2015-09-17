@@ -1,5 +1,7 @@
 """Reference chat client for hangups."""
 
+from pprint import pprint
+
 import appdirs
 import asyncio
 import configargparse
@@ -8,7 +10,7 @@ import os
 import sys
 import urwid
 import readlike
-import shlex
+import json
 
 import hangups
 from hangups.ui.notify import Notifier
@@ -846,18 +848,22 @@ def main():
     for root, dirs, files in os.walk(default_colors_path):
         for filename in files:
             splitName = os.path.splitext(filename)
-            if splitName[1] == 'col':
+            if splitName[1] == '.col':
                 obj = []
                 usedAttrs = []
 
                 name = splitName[0]
 
-                with open(os.path.join(root, filename), "rt") as f:
-                    for line in f.read().split('\n'):
-                        split = shlex.split(line, comments=True)
-                        if len(split) == 3 and split[0] in attributes:
-                            usedAttrs.append(split[0])
-                            obj.append(tuple(split))
+                with open(os.path.join(root, filename), "r") as f:
+                    data = json.load(f)
+                    for key, subdict in data.items():
+                        retList = [key,'','']
+                        if 'foreground' in subdict:
+                            retList[1] = subdict['foreground']
+                        if 'background' in subdict:
+                            retList[2] = subdict['background']
+                        usedAttrs.append(key)
+                        obj.append(tuple(retList))
 
                 for attr in (attributes - set(usedAttrs)):
                     obj.append(tuple([attr, '', '']))
