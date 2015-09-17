@@ -855,7 +855,11 @@ def main():
                 name = splitName[0]
 
                 with open(os.path.join(root, filename), "r") as f:
-                    data = json.load(f)
+                    try:
+                        data = json.load(f)
+                    except:
+                        print("Error loading JSON file (" + filename + ")")
+                        return
                     for key, subdict in data.items():
                         retList = [key,'','']
                         if 'foreground' in subdict:
