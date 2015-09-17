@@ -1,7 +1,5 @@
 """Reference chat client for hangups."""
 
-from pprint import pprint
-
 import appdirs
 import asyncio
 import configargparse
