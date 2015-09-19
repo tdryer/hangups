@@ -6,13 +6,15 @@ python:
 
 # commands to install dependencies
 install:
-    - python setup.py install
+    - python setup.py --quiet install
 
 # commands to run tests
-# Remove the outdated packages that Travis provides so it can install the
-# version of pytest that hangups requires.
 script:
+    # Remove the outdated packages that Travis provides so it can install the
+    # version of pytest that hangups requires.
     - pip uninstall --quiet --yes pytest py
+    # Skip lint on Python 3.5 since Pylint isn't compatible yet.
+    - if [[ $TRAVIS_PYTHON_VERSION != '3.5' ]]; then python setup.py --quiet lint; fi
     - python setup.py --quiet test
     - pip install --quiet docutils
     - python setup.py check --metadata --restructuredtext --strict

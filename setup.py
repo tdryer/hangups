@@ -9,15 +9,30 @@ exec(open(os.path.join(
 )).read())
 
 
-class PyTest(TestCommand):
+class PytestCommand(TestCommand):
+
     def finalize_options(self):
         TestCommand.finalize_options(self)
         self.test_args = []
         self.test_suite = True
+
     def run_tests(self):
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)
+
+
+class PylintCommand(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pylint.lint
+        # Exits with number of messages.
+        pylint.lint.Run(['--reports=n', 'hangups', ])
 
 
 with open('README.rst') as f:
@@ -73,8 +88,12 @@ setup(
     tests_require=[
         # >= 2.7.3 required for Python 3.5 support
         'pytest==2.7.3',
+        'pylint==1.4.4',
     ],
-    cmdclass={'test': PyTest},
+    cmdclass={
+        'test': PytestCommand,
+        'lint': PylintCommand,
+    },
     entry_points={
         'console_scripts': [
             'hangups=hangups.ui.__main__:main',
