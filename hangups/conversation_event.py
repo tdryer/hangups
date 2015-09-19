@@ -6,7 +6,7 @@ through property methods, which prefer logging warnings to raising exceptions.
 
 import logging
 
-from hangups import parsers, message_parser, user, hangouts_pb2, pblite
+from hangups import parsers, message_parser, user, hangouts_pb2
 
 logger = logging.getLogger(__name__)
 chat_message_parser = message_parser.ChatMessageParser()
@@ -91,7 +91,7 @@ class ChatMessageSegment(object):
         )
 
     def serialize(self):
-        """Serialize the segment to pblite."""
+        """Serialize the segment to protobuf."""
         segment = hangouts_pb2.Segment(
             type=self.type_,
             text=self.text,
@@ -104,7 +104,7 @@ class ChatMessageSegment(object):
         )
         if self.link_target is not None:
             segment.link_data.link_target = self.link_target
-        return pblite.encode(segment)
+        return segment
 
 
 class ChatMessageEvent(ConversationEvent):

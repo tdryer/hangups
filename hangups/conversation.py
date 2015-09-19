@@ -1,6 +1,7 @@
 """Conversation objects."""
 
 import asyncio
+import datetime
 import logging
 
 from hangups import (parsers, event, user, conversation_event, exceptions,
@@ -21,7 +22,14 @@ def build_user_conversation_list(client):
     # Retrieve recent conversations so we can preemptively look up their
     # participants.
     sync_recent_conversations_response = (
-        yield from client.syncrecentconversations()
+        yield from client.sync_recent_conversations(
+            hangouts_pb2.SyncRecentConversationsRequest(
+                request_header=client.get_request_header(),
+                max_conversations=100,
+                max_events_per_conversation=1,
+                sync_filter=[hangouts_pb2.SYNC_FILTER_INBOX],
+            )
+        )
     )
     conv_states = sync_recent_conversations_response.conversation_state
     sync_timestamp = parsers.from_timestamp(
@@ -44,8 +52,14 @@ def build_user_conversation_list(client):
         logger.debug('Need to request additional users: {}'
                      .format(required_user_ids))
         try:
-            response = yield from client.getentitybyid(
-                [user_id.gaia_id for user_id in required_user_ids]
+            response = yield from client.get_entity_by_id(
+                hangouts_pb2.GetEntityByIdRequest(
+                    request_header=client.get_request_header(),
+                    batch_lookup_spec=[
+                        hangouts_pb2.EntityLookupSpec(gaia_id=user_id.gaia_id)
+                        for user_id in required_user_ids
+                    ],
+                )
             )
             required_entities = list(response.entity)
         except exceptions.NetworkError as e:
@@ -57,7 +71,11 @@ def build_user_conversation_list(client):
         conv_part_list.extend(conv_state.conversation.participant_data)
 
     # Retrieve self entity.
-    get_self_info_response = yield from client.getselfinfo()
+    get_self_info_response = yield from client.get_self_info(
+        hangouts_pb2.GetSelfInfoRequest(
+            request_header=client.get_request_header(),
+        )
+    )
     self_entity = get_self_info_response.self_entity
 
     user_list = user.UserList(client, self_entity, required_entities,
@@ -188,6 +206,18 @@ class Conversation(object):
                 default_medium = medium_option.delivery_medium
         return default_medium
 
+    def _get_event_request_header(self):
+        """Return EventRequestHeader for conversation."""
+        otr_status = (hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
+                      if self.is_off_the_record else
+                      hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD)
+        return hangouts_pb2.EventRequestHeader(
+            conversation_id=hangouts_pb2.ConversationId(id=self.id_),
+            client_generated_id=self._client.get_client_generated_id(),
+            expected_otr=otr_status,
+            delivery_medium=self._get_default_delivery_medium(),
+        )
+
     @asyncio.coroutine
     def send_message(self, segments, image_file=None, image_id=None):
         """Send a message to this conversation.
@@ -208,10 +238,6 @@ class Conversation(object):
         Raises hangups.NetworkError if the message can not be sent.
         """
         with (yield from self._send_message_lock):
-            # Send messages with OTR status matching the conversation's status.
-            otr_status = (hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
-                          if self.is_off_the_record else
-                          hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD)
             if image_file:
                 try:
                     image_id = yield from self._client.upload_image(image_file)
@@ -219,11 +245,18 @@ class Conversation(object):
                     logger.warning('Failed to upload image: {}'.format(e))
                     raise
             try:
-                yield from self._client.sendchatmessage(
-                    self.id_, [seg.serialize() for seg in segments],
-                    image_id=image_id, otr_status=otr_status,
-                    delivery_medium=self._get_default_delivery_medium()
+                request = hangouts_pb2.SendChatMessageRequest(
+                    request_header=self._client.get_request_header(),
+                    event_request_header=self._get_event_request_header(),
+                    message_content=hangouts_pb2.MessageContent(
+                        segment=[seg.serialize() for seg in segments],
+                    ),
                 )
+                if image_id is not None:
+                    request.existing_media = hangouts_pb2.ExistingMedia(
+                        photo=hangouts_pb2.Photo(photo_id=image_id),
+                    )
+                yield from self._client.send_chat_message(request)
             except exceptions.NetworkError as e:
                 logger.warning('Failed to send message: {}'.format(e))
                 raise
@@ -238,9 +271,24 @@ class Conversation(object):
                                  hangouts_pb2.CONVERSATION_TYPE_GROUP)
         try:
             if is_group_conversation:
-                yield from self._client.removeuser(self.id_)
+                yield from self._client.remove_user(
+                    hangouts_pb2.RemoveUserRequest(
+                        request_header=self._client.get_request_header(),
+                        event_request_header=self._get_event_request_header(),
+                    )
+                )
             else:
-                yield from self._client.deleteconversation(self.id_)
+                yield from self._client.delete_conversation(
+                    hangouts_pb2.DeleteConversationRequest(
+                        request_header=self._client.get_request_header(),
+                        conversation_id=hangouts_pb2.ConversationId(
+                            id=self.id_
+                        ),
+                        delete_upper_bound_timestamp=parsers.to_timestamp(
+                            datetime.datetime.now(tz=datetime.timezone.utc)
+                        )
+                    )
+                )
         except exceptions.NetworkError as e:
             logger.warning('Failed to leave conversation: {}'.format(e))
             raise
@@ -255,7 +303,13 @@ class Conversation(object):
 
         Raises hangups.NetworkError if conversation cannot be renamed.
         """
-        yield from self._client.renameconversation(self.id_, name)
+        yield from self._client.rename_conversation(
+            hangouts_pb2.RenameConversationRequest(
+                request_header=self._client.get_request_header(),
+                new_name=name,
+                event_request_header=self._get_event_request_header(),
+            )
+        )
 
     @asyncio.coroutine
     def set_notification_level(self, level):
@@ -266,8 +320,13 @@ class Conversation(object):
 
         Raises hangups.NetworkError if the request fails.
         """
-        yield from self._client.setconversationnotificationlevel(self.id_,
-                                                                 level)
+        yield from self._client.set_conversation_notification_level(
+            hangouts_pb2.SetConversationNotificationLevelRequest(
+                request_header=self._client.get_request_header(),
+                conversation_id=hangouts_pb2.ConversationId(id=self.id_),
+                level=level,
+            )
+        )
 
     @asyncio.coroutine
     def set_typing(self, typing=hangouts_pb2.TYPING_TYPE_STARTED):
@@ -278,7 +337,13 @@ class Conversation(object):
         Raises hangups.NetworkError if typing status cannot be set.
         """
         try:
-            yield from self._client.settyping(self.id_, typing)
+            yield from self._client.set_typing(
+                hangouts_pb2.SetTypingRequest(
+                    request_header=self._client.get_request_header(),
+                    conversation_id=hangouts_pb2.ConversationId(id=self.id_),
+                    type=typing,
+                )
+            )
         except exceptions.NetworkError as e:
             logger.warning('Failed to set typing status: {}'.format(e))
             raise
@@ -306,8 +371,17 @@ class Conversation(object):
                 parsers.to_timestamp(read_timestamp)
             )
             try:
-                yield from self._client.updatewatermark(self.id_,
-                                                        read_timestamp)
+                yield from self._client.update_watermark(
+                    hangouts_pb2.UpdateWatermarkRequest(
+                        request_header=self._client.get_request_header(),
+                        conversation_id=hangouts_pb2.ConversationId(
+                            id=self.id_
+                        ),
+                        last_read_timestamp=parsers.to_timestamp(
+                            read_timestamp
+                        ),
+                    )
+                )
             except exceptions.NetworkError as e:
                 logger.warning('Failed to update read timestamp: {}'.format(e))
                 raise
@@ -340,8 +414,24 @@ class Conversation(object):
             else:
                 logger.info('Loading events for conversation {} before {}'
                             .format(self.id_, conv_event.timestamp))
-                res = yield from self._client.getconversation(
-                    self.id_, conv_event.timestamp, max_events
+                res = yield from self._client.get_conversation(
+                    hangouts_pb2.GetConversationRequest(
+                        request_header=self._client.get_request_header(),
+                        conversation_spec=hangouts_pb2.ConversationSpec(
+                            conversation_id=hangouts_pb2.ConversationId(
+                                id=self.id_
+                            )
+                        ),
+                        include_event=True,
+                        max_events_per_conversation=max_events,
+                        event_continuation_token=(
+                            hangouts_pb2.EventContinuationToken(
+                                event_timestamp=parsers.to_timestamp(
+                                    conv_event.timestamp
+                                )
+                            )
+                        )
+                    )
                 )
                 conv_events = [self._wrap_event(event) for event
                                in res.conversation_state.event]
@@ -599,8 +689,14 @@ class ConversationList(object):
         """Sync conversation state and events that could have been missed."""
         logger.info('Syncing events since {}'.format(self._sync_timestamp))
         try:
-            res = yield from self._client.syncallnewevents(
-                self._sync_timestamp
+            res = yield from self._client.sync_all_new_events(
+                hangouts_pb2.SyncAllNewEventsRequest(
+                    request_header=self._client.get_request_header(),
+                    last_sync_timestamp=parsers.to_timestamp(
+                        self._sync_timestamp
+                    ),
+                    max_response_size_bytes=1048576,  # 1 MB
+                )
             )
         except exceptions.NetworkError as e:
             logger.warning('Failed to sync events, some events may be lost: {}'

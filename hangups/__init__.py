@@ -11,8 +11,9 @@ from .exceptions import HangupsError, NetworkError
 from .conversation_event import (ChatMessageSegment, ConversationEvent,
                                  ChatMessageEvent, RenameEvent,
                                  MembershipChangeEvent)
-# Only import enum values and messages from the proto file that are necessary
-# for third-party code to use hangups.
+# Only import Protocol Buffer objects that are needed for the high-level
+# hangups API (ConversationList, etc.) here. Low-level Client users could need
+# just about anything, and importing it here would create conflicts.
 from .hangouts_pb2 import (
     TYPING_TYPE_STARTED, TYPING_TYPE_PAUSED, TYPING_TYPE_STOPPED,
     MEMBERSHIP_CHANGE_TYPE_LEAVE, MEMBERSHIP_CHANGE_TYPE_JOIN
