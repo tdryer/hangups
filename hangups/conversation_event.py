@@ -75,7 +75,8 @@ class ChatMessageSegment(object):
         parsing simple formatting markup (simplified Markdown and HTML).
         """
         segment_list = chat_message_parser.parse(text)
-        return [ChatMessageSegment(segment.text, **segment.params) for segment in segment_list]
+        return [ChatMessageSegment(segment.text, **segment.params)
+                for segment in segment_list]
 
     @staticmethod
     def deserialize(segment):

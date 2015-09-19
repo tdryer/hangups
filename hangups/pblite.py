@@ -15,7 +15,9 @@ import base64
 import itertools
 import logging
 
+# pylint: disable=no-name-in-module,import-error
 from google.protobuf.descriptor import FieldDescriptor
+# pylint: enable=no-name-in-module,import-error
 
 
 logger = logging.getLogger(__name__)

@@ -91,6 +91,7 @@ class Conversation(object):
 
     def __init__(self, client, user_list, conversation, events=[]):
         """Initialize a new Conversation."""
+        # pylint: disable=dangerous-default-value
         self._client = client  # Client
         self._user_list = user_list  # UserList
         self._conversation = conversation  # hangouts_pb2.Conversation
@@ -598,6 +599,7 @@ class ConversationList(object):
 
     def add_conversation(self, conversation, events=[]):
         """Add new conversation from hangouts_pb2.Conversation"""
+        # pylint: disable=dangerous-default-value
         conv_id = conversation.conversation_id.id
         logger.info('Adding new conversation: {}'.format(conv_id))
         conv = Conversation(self._client, self._user_list, conversation,

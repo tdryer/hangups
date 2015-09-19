@@ -280,6 +280,8 @@ class ConversationListWalker(urwid.SimpleFocusListWalker):
     ConversationButtons are kept in order of last modified.
     """
 
+    # pylint: disable=abstract-method
+
     def __init__(self, conversation_list, on_select):
         self._conversation_list = conversation_list
         self._conversation_list.on_event.add_observer(self._on_event)
@@ -726,12 +728,12 @@ class ConversationWidget(urwid.WidgetWrap):
         except hangups.NetworkError:
             self._status_widget.show_message('Failed to send message')
 
-    def _on_watermark_notification(self, watermark_notification):
+    def _on_watermark_notification(self, _):
         """Handle watermark changes for this conversation."""
         # Update the unread count in the title.
         self._set_title()
 
-    def _on_event(self, conv_event):
+    def _on_event(self, _):
         """Display a new conversation message."""
         # Update the title in case unread count or conversation name changed.
         self._set_title()

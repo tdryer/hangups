@@ -19,19 +19,24 @@ def test_parse_linebreaks():
 
 
 def test_parse_autolinks():
-    text = 'www.google.com google.com/maps (https://en.wikipedia.org/wiki/Parenthesis_(disambiguation))'
-    expected = [('www.google.com', {'link_target': 'http://www.google.com'}),
-                (' ', {}),
-                ('google.com/maps', {'link_target': 'http://google.com/maps'}),
-                (' (', {}),
-                ('https://en.wikipedia.org/wiki/Parenthesis_(disambiguation)',
-                 {'link_target': 'https://en.wikipedia.org/wiki/Parenthesis_(disambiguation)'}),
-                (')', {})]
+    text = ('www.google.com google.com/maps '
+            '(https://en.wikipedia.org/wiki/Parenthesis_(disambiguation))')
+    expected = [
+        ('www.google.com', {'link_target': 'http://www.google.com'}),
+        (' ', {}),
+        ('google.com/maps', {'link_target': 'http://google.com/maps'}),
+        (' (', {}),
+        ('https://en.wikipedia.org/wiki/Parenthesis_(disambiguation)',
+         {'link_target':
+          'https://en.wikipedia.org/wiki/Parenthesis_(disambiguation)'}),
+        (')', {})
+    ]
     assert expected == parse_text(text)
 
 
 def test_parse_markdown():
-    text = 'Test **bold *bolditalic* bold** _italic_ not_italic_not ~~strike~~ [Google](www.google.com)'
+    text = ('Test **bold *bolditalic* bold** _italic_ not_italic_not '
+            '~~strike~~ [Google](www.google.com)')
     expected = [('Test ', {}),
                 ('bold ', {'is_bold': True}),
                 ('bolditalic', {'is_bold': True, 'is_italic': True}),
@@ -46,20 +51,27 @@ def test_parse_markdown():
 
 
 def test_parse_html():
-    text = ('Test <b>bold <i>bolditalic</i> bold</b> <em>italic</em> <del>strike</del>'
-            '<br>'
-            '<a href="google.com">Google</a>'
-            '<img src=\'https://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg\'>')
-    expected = [('Test ', {}),
-                ('bold ', {'is_bold': True}),
-                ('bolditalic', {'is_bold': True, 'is_italic': True}),
-                (' bold', {'is_bold': True}),
-                (' ', {}),
-                ('italic', {'is_italic': True}),
-                (' ', {}),
-                ('strike', {'is_strikethrough': True}),
-                ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
-                ('Google', {'link_target': 'http://google.com'}),
-                ('https://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg',
-                 {'link_target': 'https://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg'})]
+    text = (
+        'Test <b>bold <i>bolditalic</i> bold</b> <em>italic</em> '
+        '<del>strike</del><br><a href="google.com">Google</a>'
+        '<img src=\'https://upload.wikimedia.org/wikipedia/en/8/80/'
+        'Wikipedia-logo-v2.svg\'>'
+    )
+    expected = [
+        ('Test ', {}),
+        ('bold ', {'is_bold': True}),
+        ('bolditalic', {'is_bold': True, 'is_italic': True}),
+        (' bold', {'is_bold': True}),
+        (' ', {}),
+        ('italic', {'is_italic': True}),
+        (' ', {}),
+        ('strike', {'is_strikethrough': True}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('Google', {'link_target': 'http://google.com'}),
+        ('https://upload.wikimedia.org/wikipedia/en/8/80/'
+         'Wikipedia-logo-v2.svg',
+         {'link_target':
+          'https://upload.wikimedia.org/wikipedia/en/8/80/'
+          'Wikipedia-logo-v2.svg'})
+    ]
     assert expected == parse_text(text)

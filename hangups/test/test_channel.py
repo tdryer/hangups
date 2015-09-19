@@ -1,12 +1,14 @@
 """Tests for channel data parsing."""
 
+# pylint: disable=protected-access
+
 import pytest
 
 from hangups import channel
 
-
 @pytest.mark.parametrize('input_,expected', [
-    (b'79\n[[0,["c","98803CAAD92268E8","",8]\n]\n,[1,[{"gsid":"7tCoFHumSL-IT6BHpCaxLA"}]]\n]\n',
+    (b'79\n[[0,["c","98803CAAD92268E8","",8]\n]\n,'
+     b'[1,[{"gsid":"7tCoFHumSL-IT6BHpCaxLA"}]]\n]\n',
      ('98803CAAD92268E8', '7tCoFHumSL-IT6BHpCaxLA')),
 ])
 def test_parse_sid_response(input_, expected):

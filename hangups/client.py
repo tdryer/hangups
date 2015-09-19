@@ -9,7 +9,7 @@ import time
 import os
 
 from hangups import (javascript, exceptions, http_utils, channel, event,
-                     hangouts_pb2, pblite, __version__)
+                     hangouts_pb2, pblite, version)
 
 logger = logging.getLogger(__name__)
 ORIGIN_URL = 'https://talkgadget.google.com'
@@ -58,7 +58,7 @@ class Client(object):
             # Ignore most of the RequestHeader fields since they aren't
             # required.
             client_version=hangouts_pb2.ClientVersion(
-                major_version='hangups-{}'.format(__version__),
+                major_version='hangups-{}'.format(version.__version__),
             ),
             language_code='en',
         )
