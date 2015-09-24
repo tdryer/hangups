@@ -254,9 +254,7 @@ class Conversation(object):
                     ),
                 )
                 if image_id is not None:
-                    request.existing_media = hangouts_pb2.ExistingMedia(
-                        photo=hangouts_pb2.Photo(photo_id=image_id),
-                    )
+                    request.existing_media.photo.photo_id = image_id
                 yield from self._client.send_chat_message(request)
             except exceptions.NetworkError as e:
                 logger.warning('Failed to send message: {}'.format(e))
