@@ -266,7 +266,7 @@ class Conversation(object):
 
         Raises hangups.NetworkError if conversation cannot be left.
         """
-        is_group_conversation = (self._conversation.type_ ==
+        is_group_conversation = (self._conversation.type ==
                                  hangouts_pb2.CONVERSATION_TYPE_GROUP)
         try:
             if is_group_conversation:
