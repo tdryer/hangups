@@ -1,4 +1,4 @@
-.. This file was automatically generated from hangups/hangouts.proto and should be be edited directly.
+.. This file was automatically generated from hangups/hangouts.proto and should not be edited directly.
 
 DoNotDisturbSetting
 -------------------

@@ -220,7 +220,7 @@ def main():
             locations[tuple(location.path)] = location
         # Add comment to top
         print(make_comment('This file was automatically generated from {} and '
-                           'should be be edited directly.'
+                           'should not be edited directly.'
                            .format(args.protofilepath)))
         # Generate documentation
         for index, message_desc in enumerate(file_descriptor.message_type):
