@@ -261,14 +261,24 @@ message MessageContent {
   repeated Attachment attachment = 2;
 }
 
+// Annotation that can be applied to a chat message event. The only known use
+// for this is "\me" actions supported by the Chrome client (type 4).
+message EventAnnotation {
+  // Annotation type.
+  optional int32 type = 1;
+  // Optional annotation string value.
+  optional string value = 2;
+}
+
 // A chat message in a conversation.
 message ChatMessage {
+  // Optional annotation to attach to message.
+  repeated EventAnnotation annotation = 2;
   // The message's content.
   optional MessageContent message_content = 3;
 
   // TODO:
   // always 0? = 1;
-  // annotation (always None?) = 2;
 }
 
 enum MembershipChangeType {
@@ -1298,6 +1308,7 @@ message SearchEntitiesResponse {
 
 message SendChatMessageRequest {
   optional RequestHeader request_header = 1;
+  repeated EventAnnotation annotation = 5;
   optional MessageContent message_content = 6;
   optional ExistingMedia existing_media = 7;
   optional EventRequestHeader event_request_header = 8;

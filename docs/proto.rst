@@ -254,16 +254,30 @@ Field              Number Type          Label    Description
 :code:`attachment` 2      `Attachment`_ repeated            
 ================== ====== ============= ======== ===========
 
+EventAnnotation
+---------------
+
+Annotation that can be applied to a chat message event. The only known use
+for this is "\me" actions supported by the Chrome client (type 4).
+
+============= ====== ====== ======== =================================
+Field         Number Type   Label    Description                      
+============= ====== ====== ======== =================================
+:code:`type`  1      int32  optional Annotation type.                 
+:code:`value` 2      string optional Optional annotation string value.
+============= ====== ====== ======== =================================
+
 ChatMessage
 -----------
 
 A chat message in a conversation.
 
-======================= ====== ================= ======== ======================
-Field                   Number Type              Label    Description           
-======================= ====== ================= ======== ======================
-:code:`message_content` 3      `MessageContent`_ optional The message's content.
-======================= ====== ================= ======== ======================
+======================= ====== ================== ======== =========================================
+Field                   Number Type               Label    Description                              
+======================= ====== ================== ======== =========================================
+:code:`annotation`      2      `EventAnnotation`_ repeated Optional annotation to attach to message.
+:code:`message_content` 3      `MessageContent`_  optional The message's content.                   
+======================= ====== ================== ======== =========================================
 
 MembershipChange
 ----------------
@@ -1333,6 +1347,7 @@ SendChatMessageRequest
 Field                        Number Type                  Label    Description
 ============================ ====== ===================== ======== ===========
 :code:`request_header`       1      `RequestHeader`_      optional            
+:code:`annotation`           5      `EventAnnotation`_    repeated            
 :code:`message_content`      6      `MessageContent`_     optional            
 :code:`existing_media`       7      `ExistingMedia`_      optional            
 :code:`event_request_header` 8      `EventRequestHeader`_ optional            
