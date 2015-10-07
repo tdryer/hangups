@@ -44,6 +44,7 @@ Projects using hangups
 - `Ubuntu Hangups`_: Unofficial Google Hangouts client for Ubuntu Touch
 - `bastardbot`_: A bot to follow and interact with Google Hangouts conversations
 - `hangoutsbot/hangoutsbot`_: Google Hangouts bot
+- `hangups.el`_: Hangouts interface for Emacs
 - `pickups`_: IRC gateway for hangups (prototype)
 - `telepathy-hangups`_: Telepathy bindings for Google Chat via hangups library
 - `wardellchandler/HangoutsBot`_: Python 3 Bot for Hangouts
@@ -54,6 +55,7 @@ Projects using hangups
 .. _Ubuntu Hangups: https://github.com/tim-sueberkrueb/ubuntu-hangups
 .. _bastardbot: https://github.com/elamperti/bastardbot
 .. _hangoutsbot/hangoutsbot: https://github.com/hangoutsbot/hangoutsbot
+.. _hangups.el: https://github.com/jtamagnan/hangups.el
 .. _pickups: https://github.com/mtomwing/pickups
 .. _telepathy-hangups: https://github.com/davidedmundson/telepathy-hangups
 .. _wardellchandler/HangoutsBot: https://github.com/wardellchandler/HangoutsBot
