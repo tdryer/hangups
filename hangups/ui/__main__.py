@@ -448,7 +448,7 @@ class MessageWidget(urwid.WidgetWrap):
         """Convert UTC datetime into user interface string."""
         fmt = ''
         if show_date:
-            fmt += datetimefmt.get('date', '')
+            fmt += '\n'+datetimefmt.get('date', '')+'\n'
         fmt += datetimefmt.get('time', '')
         return timestamp.astimezone(tz=None).strftime(fmt)
 
@@ -860,6 +860,10 @@ def main():
                       help='path used to store OAuth refresh token')
     general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
                       default='default', help='colour scheme to use')
+    general_group.add('--date-format', default='< %y-%m-%d >',
+                      help='date format string')
+    general_group.add('--time-format', default='(%I:%M:%S %p)',
+                      help='time format string')
     general_group.add('-c', '--config', help='configuration file path',
                       is_config_file=True, default=default_config_path)
     general_group.add('-v', '--version', action='version',
@@ -895,8 +899,8 @@ def main():
     # urwid makes asyncio's debugging logs VERY noisy, so adjust the log level:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
 
-    datetimefmt = {'date': '< %y-%m-%d >',
-                   'time': '(%H:%M:%S)'}
+    datetimefmt = {'date': args.date_format,
+                   'time': args.time_format}
 
     try:
         ChatUI(args.token_path, {
