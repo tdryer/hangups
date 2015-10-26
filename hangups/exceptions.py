@@ -1,5 +1,6 @@
 """Exceptions used by hangups."""
 
+
 class HangupsError(Exception):
     """hangups general exception."""
     pass

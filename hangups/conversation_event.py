@@ -1,30 +1,28 @@
 """ConversationEvent base class and subclasses.
 
-These classes are wrappers for ClientEvent instances from the API. Parsing is
-done through property methods, which prefer logging warnings to raising
-exceptions.
+These classes are wrappers for hangouts_pb2.Event instances. Parsing is done
+through property methods, which prefer logging warnings to raising exceptions.
 """
 
 import logging
-import re
 
-from hangups import parsers, user, schemas
+from hangups import parsers, message_parser, user, hangouts_pb2
 
 logger = logging.getLogger(__name__)
-URL_RE = re.compile(r'https?://\S+')
+chat_message_parser = message_parser.ChatMessageParser()
 
 
 class ConversationEvent(object):
 
     """An event which becomes part of the permanent record of a conversation.
 
-    This corresponds to ClientEvent in the API.
+    This corresponds to hangouts_pb2.Event.
 
     This is the base class for such events.
     """
 
-    def __init__(self, client_event):
-        self._event = client_event
+    def __init__(self, event):
+        self._event = event  # Event
 
     @property
     def timestamp(self):
@@ -40,7 +38,7 @@ class ConversationEvent(object):
     @property
     def conversation_id(self):
         """The ID of the conversation the event belongs to."""
-        return self._event.conversation_id.id_
+        return self._event.conversation_id.id
 
     @property
     def id_(self):
@@ -59,9 +57,9 @@ class ChatMessageSegment(object):
         if segment_type is not None:
             self.type_ = segment_type
         elif link_target is not None:
-            self.type_ = schemas.SegmentType.LINK
+            self.type_ = hangouts_pb2.SEGMENT_TYPE_LINK
         else:
-            self.type_ = schemas.SegmentType.TEXT
+            self.type_ = hangouts_pb2.SEGMENT_TYPE_TEXT
         self.text = text
         self.is_bold = is_bold
         self.is_italic = is_italic
@@ -73,53 +71,48 @@ class ChatMessageSegment(object):
     def from_str(text):
         """Generate ChatMessageSegment list parsed from a string.
 
-        This method handles automatically finding URLs and making them into
-        link segments.
+        This method handles automatically finding line breaks, URLs and
+        parsing simple formatting markup (simplified Markdown and HTML).
         """
-        last = 0
-        for match in URL_RE.finditer(text):
-            if match.start() > last:
-                yield ChatMessageSegment(text[last:match.start()])
-            yield ChatMessageSegment(match.group(), link_target=match.group())
-            last = match.end()
-        if last != len(text):
-            yield ChatMessageSegment(text[last:])
+        segment_list = chat_message_parser.parse(text)
+        return [ChatMessageSegment(segment.text, **segment.params)
+                for segment in segment_list]
 
     @staticmethod
     def deserialize(segment):
-        """Create a chat message segment from a parsed MESSAGE_SEGMENT."""
-        # The formatting options are optional.
-        if segment.formatting is None:
-            is_bold = False
-            is_italic = False
-            is_strikethrough = False
-            is_underline = False
-        else:
-            is_bold = bool(segment.formatting.bold)
-            is_italic = bool(segment.formatting.italic)
-            is_strikethrough = bool(segment.formatting.strikethrough)
-            is_underline = bool(segment.formatting.underline)
+        """Create a chat message segment from hangups_pb2.Segment."""
+        link_target = segment.link_data.link_target
         return ChatMessageSegment(
-            segment.text, segment_type=segment.type_,
-            is_bold=is_bold, is_italic=is_italic,
-            is_strikethrough=is_strikethrough, is_underline=is_underline,
+            segment.text, segment_type=segment.type,
+            is_bold=segment.formatting.bold,
+            is_italic=segment.formatting.italic,
+            is_strikethrough=segment.formatting.strikethrough,
+            is_underline=segment.formatting.underline,
+            link_target=None if link_target == '' else link_target
         )
 
     def serialize(self):
-        """Serialize the segment to pblite."""
-        return [self.type_.value, self.text, [
-            1 if self.is_bold else 0,
-            1 if self.is_italic else 0,
-            1 if self.is_strikethrough else 0,
-            1 if self.is_underline else 0,
-        ], [self.link_target]]
+        """Serialize the segment to protobuf."""
+        segment = hangouts_pb2.Segment(
+            type=self.type_,
+            text=self.text,
+            formatting=hangouts_pb2.Formatting(
+                bold=self.is_bold,
+                italic=self.is_italic,
+                strikethrough=self.is_strikethrough,
+                underline=self.is_underline,
+            ),
+        )
+        if self.link_target is not None:
+            segment.link_data.link_target = self.link_target
+        return segment
 
 
 class ChatMessageEvent(ConversationEvent):
 
     """An event containing a chat message.
 
-    Corresponds to ClientChatMessage in the API.
+    Corresponds to hangouts_pb2.ChatMessage.
     """
 
     @property
@@ -127,11 +120,11 @@ class ChatMessageEvent(ConversationEvent):
         """A textual representation of the message."""
         lines = ['']
         for segment in self.segments:
-            if segment.type_ == schemas.SegmentType.TEXT:
+            if segment.type_ == hangouts_pb2.SEGMENT_TYPE_TEXT:
                 lines[-1] += segment.text
-            elif segment.type_ == schemas.SegmentType.LINK:
+            elif segment.type_ == hangouts_pb2.SEGMENT_TYPE_LINK:
                 lines[-1] += segment.text
-            elif segment.type_ == schemas.SegmentType.LINE_BREAK:
+            elif segment.type_ == hangouts_pb2.SEGMENT_TYPE_LINE_BREAK:
                 lines.append('')
             else:
                 logger.warning('Ignoring unknown chat message segment type: {}'
@@ -141,13 +134,9 @@ class ChatMessageEvent(ConversationEvent):
 
     @property
     def segments(self):
-        """List of ChatMessageSegments in the message."""
+        """List of hangouts_pb2.Segment in the message."""
         seg_list = self._event.chat_message.message_content.segment
-        # seg_list may be None because the field is optional
-        if seg_list is not None:
-            return [ChatMessageSegment.deserialize(seg) for seg in seg_list]
-        else:
-            return []
+        return [ChatMessageSegment.deserialize(seg) for seg in seg_list]
 
     @property
     def attachments(self):
@@ -157,24 +146,21 @@ class ChatMessageEvent(ConversationEvent):
             raw_attachments = []
         attachments = []
         for attachment in raw_attachments:
-            if attachment.embed_item.type_ == [249]:  # PLUS_PHOTO
-                # Try to parse an image message. Image messages contain no
-                # message segments, and thus have no automatic textual
-                # fallback.
-                try:
-                    attachments.append(
-                        attachment.embed_item.data['27639957'][0][3]
-                    )
-                except (KeyError, TypeError, IndexError):
-                    logger.warning(
-                        'Failed to parse PLUS_PHOTO attachment: {}'
-                        .format(attachment)
-                    )
-            elif attachment.embed_item.type_ == [340, 335, 0]:
-                pass  # Google Maps URL that's already in the text.
-            else:
-                logger.warning('Ignoring unknown chat message attachment: {}'
-                               .format(attachment))
+            for embed_item_type in attachment.embed_item.type:
+                known_types = [
+                    hangouts_pb2.ITEM_TYPE_PLUS_PHOTO,
+                    hangouts_pb2.ITEM_TYPE_PLACE_V2,
+                    hangouts_pb2.ITEM_TYPE_PLACE,
+                    hangouts_pb2.ITEM_TYPE_THING,
+                ]
+                if embed_item_type not in known_types:
+                    logger.warning('Received chat message attachment with '
+                                   'unknown embed type: %r', embed_item_type)
+
+            if attachment.embed_item.HasField('plus_photo'):
+                attachments.append(
+                    attachment.embed_item.plus_photo.thumbnail.image_url
+                )
         return attachments
 
 
@@ -182,7 +168,7 @@ class RenameEvent(ConversationEvent):
 
     """An event that renames a conversation.
 
-    Corresponds to ClientConversationRename in the API.
+    Corresponds to hangouts_pb2.ConversationRename.
     """
 
     @property
@@ -206,13 +192,13 @@ class MembershipChangeEvent(ConversationEvent):
 
     """An event that adds or removes a conversation participant.
 
-    Corresponds to ClientMembershipChange in the API.
+    Corresponds to hangouts_pb2.MembershipChange.
     """
 
     @property
     def type_(self):
         """The membership change type (MembershipChangeType)."""
-        return self._event.membership_change.type_
+        return self._event.membership_change.type
 
     @property
     def participant_ids(self):

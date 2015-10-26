@@ -1,0 +1,1441 @@
+/*
+
+hangouts.proto - Unofficial, reverse engineered Protocol Buffers for Google's
+Hangouts chat protocol.
+
+Originally based on Darryl Pogue's reversed engineered proto file from an early
+version of Hangouts for Android: https://gist.github.com/dpogue/5692114
+
+Field and message name should generally match those used by Google, with the
+major exception that "Client" prefixes have been removed.
+
+ */
+
+// proto2 is required because we need to be able to serialize default values:
+syntax = "proto2";
+
+// Describes which Hangouts client is active.
+enum ActiveClientState {
+  // No client is active.
+  ACTIVE_CLIENT_STATE_NO_ACTIVE = 0;
+  // This is the active client.
+  ACTIVE_CLIENT_STATE_IS_ACTIVE = 1;
+  // Other client is active.
+  ACTIVE_CLIENT_STATE_OTHER_ACTIVE = 2;
+}
+
+// The state of do-not-disturb mode. Not to be confused with DndSetting, which
+// is used to change the state of do-not-disturb mode.
+message DoNotDisturbSetting {
+  // Whether do-not-disturb mode is enabled.
+  optional bool do_not_disturb = 1;
+  // Timestamp when do-not-disturb mode expires.
+  optional uint64 expiration_timestamp = 2;
+  // Timestamp when this setting was applied. Not present when this message
+  // comes from a notification.
+  optional uint64 version = 3;
+}
+
+message NotificationSettings {
+  optional DoNotDisturbSetting dnd_settings = 1;
+}
+
+enum FocusType {
+  FOCUS_TYPE_UNKNOWN = 0;
+  FOCUS_TYPE_FOCUSED = 1;
+  FOCUS_TYPE_UNFOCUSED = 2;
+}
+
+enum FocusDevice {
+  FOCUS_DEVICE_UNSPECIFIED = 0;
+  FOCUS_DEVICE_DESKTOP = 20;
+  FOCUS_DEVICE_MOBILE = 300;
+}
+
+// Identifies a conversation.
+message ConversationId {
+  // Unique identifier for a conversation.
+  optional string id = 1;
+}
+
+// Identifies a user.
+message ParticipantId {
+  // Unique identifier for a user's Google account.
+  optional string gaia_id = 1;
+  // Seems to always be the same as gaia_id.
+  optional string chat_id = 2;
+}
+
+// Indicates whether Hangouts is active (running in the foreground) on
+// different types of devices.
+message DeviceStatus {
+  // True if a mobile phone is active.
+  optional bool mobile = 1;
+  // True if a desktop or laptop is active.
+  optional bool desktop = 2;
+  // True if a tablet is active.
+  optional bool tablet = 3;
+}
+
+message Presence {
+  optional bool reachable = 1;
+  optional bool available = 2;
+  optional DeviceStatus device_status = 6;
+  optional MoodSetting mood_setting = 9;
+}
+
+message PresenceResult {
+  optional ParticipantId user_id = 1;
+  optional Presence presence = 2;
+}
+
+enum TypingType {
+  TYPING_TYPE_UNKNOWN = 0;
+  // Started typing.
+  TYPING_TYPE_STARTED = 1;
+  // Stopped typing with inputted text.
+  TYPING_TYPE_PAUSED = 2;
+  // Stopped typing with no inputted text.
+  TYPING_TYPE_STOPPED = 3;
+}
+
+message ClientIdentifier {
+  // (client_id in hangups).
+  optional string resource = 1;
+  // unknown (header_id in hangups).
+  optional string header_id = 2;
+}
+
+enum ClientPresenceStateType {
+  CLIENT_PRESENCE_STATE_UNKNOWN = 0;
+  CLIENT_PRESENCE_STATE_NONE = 1;
+  CLIENT_PRESENCE_STATE_DESKTOP_IDLE = 30;
+  CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE = 40;
+
+  // TODO
+}
+
+message ClientPresenceState {
+  optional ClientIdentifier identifier = 1;
+  optional ClientPresenceStateType state = 2;
+}
+
+enum NotificationLevel {
+  NOTIFICATION_LEVEL_UNKNOWN = 0;
+  // Notifications are disabled.
+  NOTIFICATION_LEVEL_QUIET = 10;
+  // Notifications are enabled.
+  NOTIFICATION_LEVEL_RING = 30;
+}
+
+message UserEventState {
+  optional ParticipantId user_id = 1;
+  optional string client_generated_id = 2;
+  optional NotificationLevel notification_level = 3;
+}
+
+enum SegmentType {
+  // Segment is text.
+  SEGMENT_TYPE_TEXT = 0;
+  // Segment is a line break.
+  SEGMENT_TYPE_LINE_BREAK = 1;
+  // Segment is hyperlinked text.
+  SEGMENT_TYPE_LINK = 2;
+}
+
+message Formatting {
+  optional bool bold = 1;
+  optional bool italic = 2;
+  optional bool strikethrough = 3;
+  optional bool underline = 4;
+}
+
+message LinkData {
+  optional string link_target = 1;
+}
+
+// A segment of a message. Message are broken into segments that may be of
+// different types and have different formatting.
+message Segment {
+  // Note: This field is required because Hangouts for Chrome misbehaves if it
+  // isn't serialized.
+  required SegmentType type = 1;
+  // The segment text. For line breaks, may either be empty or contain new line
+  // character.
+  optional string text = 2;
+  // Formatting for this segment.
+  optional Formatting formatting = 3;
+  // Link data for this segment, if it is a link.
+  optional LinkData link_data = 4;
+}
+
+// A type of embedded item.
+enum ItemType {
+  ITEM_TYPE_THING = 0;
+  // Google Plus photo.
+  ITEM_TYPE_PLUS_PHOTO = 249;
+  ITEM_TYPE_PLACE = 335;
+  // Google Map place.
+  ITEM_TYPE_PLACE_V2 = 340;
+}
+
+// Google Plus photo that can be embedded in a chat message.
+message PlusPhoto {
+
+  // Metadata for displaying an image thumbnail.
+  message Thumbnail {
+
+    // URL to navigate to when thumbnail is selected (a Google Plus album
+    // page).
+    optional string url = 1;
+    // URL of thumbnail image.
+    optional string image_url = 4;
+    // Image width in pixels.
+    optional uint64 width_px = 10;
+    // Image height in pixels.
+    optional uint64 height_px = 11;
+  }
+
+  // Media type.
+  enum MediaType {
+    MEDIA_TYPE_UNKNOWN = 0;
+    MEDIA_TYPE_PHOTO = 1;
+  }
+
+  // Thumbnail.
+  optional Thumbnail thumbnail = 1;
+  // Owner obfuscated ID.
+  optional string owner_obfuscated_id = 2;
+  // Album ID.
+  optional string album_id = 3;
+  // Photo ID.
+  optional string photo_id = 4;
+  // URL of full-sized image.
+  optional string url = 6;
+  // URL of image thumbnail.
+  optional string original_content_url = 10;
+  // The media type.
+  optional MediaType media_type = 13;
+  // List of stream ID parameters.
+  repeated string stream_id = 14;
+
+}
+
+// Place that can be embedded in a chat message via Google Maps.
+message Place {
+
+  // Representative image of a place.
+  message RepresentativeImage {
+    // URL of image.
+    optional string url = 2;
+  }
+
+  // Google Maps URL pointing to the map coordinates.
+  optional string url = 1;
+  // Name of map location.
+  optional string name = 3;
+  // Representative image of the place (map with pin).
+  optional RepresentativeImage representative_image = 185;
+}
+
+// An item of some type embedded in a chat message.
+message EmbedItem {
+  // List of embedded item types in this message.
+  repeated ItemType type = 1;
+  // For photos this is not given, for maps, it's the URL of the map.
+  optional string id = 2;
+  // Embedded Google Plus photo.
+  optional PlusPhoto plus_photo = 27639957;
+  // Embedded Google Map of a place.
+  optional Place place = 35825640;
+}
+
+// An attachment for a chat message.
+message Attachment {
+  optional EmbedItem embed_item = 1;
+}
+
+// Chat message content.
+message MessageContent {
+  repeated Segment segment = 1;
+  repeated Attachment attachment = 2;
+}
+
+// Annotation that can be applied to a chat message event. The only known use
+// for this is "\me" actions supported by the Chrome client (type 4).
+message EventAnnotation {
+  // Annotation type.
+  optional int32 type = 1;
+  // Optional annotation string value.
+  optional string value = 2;
+}
+
+// A chat message in a conversation.
+message ChatMessage {
+  // Optional annotation to attach to message.
+  repeated EventAnnotation annotation = 2;
+  // The message's content.
+  optional MessageContent message_content = 3;
+
+  // TODO:
+  // always 0? = 1;
+}
+
+enum MembershipChangeType {
+  MEMBERSHIP_CHANGE_TYPE_JOIN = 1;
+  MEMBERSHIP_CHANGE_TYPE_LEAVE = 2;
+}
+
+message MembershipChange {
+  optional MembershipChangeType type = 1;
+  repeated ParticipantId participant_ids = 3;
+
+  // TODO:
+  // unknown [] = 2;
+  // leave_reason (4, 2) = 4;
+}
+
+message ConversationRename {
+  optional string new_name = 1;
+  optional string old_name = 2;
+}
+
+enum HangoutEventType {
+  HANGOUT_EVENT_TYPE_UNKNOWN = 0;
+  HANGOUT_EVENT_TYPE_START = 1;
+  HANGOUT_EVENT_TYPE_END = 2;
+  HANGOUT_EVENT_TYPE_JOIN = 3;
+  HANGOUT_EVENT_TYPE_LEAVE = 4;
+  HANGOUT_EVENT_TYPE_COMING_SOON = 5;
+  HANGOUT_EVENT_TYPE_ONGOING = 6;
+}
+
+message HangoutEvent {
+  optional HangoutEventType event_type = 1;
+  repeated ParticipantId participant_id = 2;
+
+  // TODO:
+  // unknown 7 = 1;
+  // unknown 3 = 25;
+}
+
+message OTRModification {
+  optional OffTheRecordStatus old_otr_status = 1;
+  optional OffTheRecordStatus new_otr_status = 2;
+  optional OffTheRecordToggle old_otr_toggle = 3;
+  optional OffTheRecordToggle new_otr_toggle = 4;
+}
+
+// Whether the OTR toggle is available to the user.
+enum OffTheRecordToggle {
+  OFF_THE_RECORD_TOGGLE_UNKNOWN = 0;
+  OFF_THE_RECORD_TOGGLE_ENABLED = 1;
+  OFF_THE_RECORD_TOGGLE_DISABLED = 2;
+}
+
+enum OffTheRecordStatus {
+  OFF_THE_RECORD_STATUS_UNKNOWN = 0;
+  // Conversation is off-the-record (history disabled).
+  OFF_THE_RECORD_STATUS_OFF_THE_RECORD = 1;
+  // Conversation is on-the-record (history enabled).
+  OFF_THE_RECORD_STATUS_ON_THE_RECORD = 2;
+}
+
+enum SourceType {
+  SOURCE_TYPE_UNKNOWN = 0;
+}
+
+enum EventType {
+  EVENT_TYPE_UNKNOWN = 0;
+  EVENT_TYPE_REGULAR_CHAT_MESSAGE = 1;
+  EVENT_TYPE_SMS = 2;
+  EVENT_TYPE_VOICEMAIL = 3;
+  EVENT_TYPE_ADD_USER = 4;
+  EVENT_TYPE_REMOVE_USER = 5;
+  EVENT_TYPE_CONVERSATION_RENAME = 6;
+  EVENT_TYPE_HANGOUT = 7;
+  EVENT_TYPE_PHONE_CALL = 8;
+  EVENT_TYPE_OTR_MODIFICATION = 9;
+  EVENT_TYPE_PLAN_MUTATION = 10;
+  EVENT_TYPE_MMS = 11;
+  EVENT_TYPE_DEPRECATED_12 = 12;
+}
+
+message HashModifier {
+  optional string update_id = 1;
+  optional uint64 hash_diff = 2;
+  optional uint64 version = 4;
+}
+
+// Event that becomes part of a conversation's history.
+message Event {
+  // ID of the conversation this event belongs to.
+  optional ConversationId conversation_id = 1;
+  // ID of the user that sent this event.
+  optional ParticipantId sender_id = 2;
+  // Timestamp when the event occurred.
+  optional uint64 timestamp = 3;
+  optional UserEventState self_event_state = 4;
+  optional SourceType source_type = 6;
+  optional ChatMessage chat_message = 7;
+  optional MembershipChange membership_change = 9;
+  optional ConversationRename conversation_rename = 10;
+  optional HangoutEvent hangout_event = 11;
+  // Unique ID for the event.
+  optional string event_id = 12;
+  optional uint64 expiration_timestamp = 13;
+  optional OTRModification otr_modification = 14;
+  optional bool advances_sort_timestamp = 15;
+  optional OffTheRecordStatus otr_status = 16;
+  optional bool persisted = 17;
+  optional DeliveryMedium medium_type = 20;
+  // The event's type.
+  optional EventType event_type = 23;
+  // Event version timestamp.
+  optional uint64 event_version = 24;
+  optional HashModifier hash_modifier = 26;
+}
+
+enum ConversationType {
+  CONVERSATION_TYPE_UNKNOWN = 0;
+  // Conversation is one-to-one (only 2 participants).
+  CONVERSATION_TYPE_ONE_TO_ONE = 1;
+  // Conversation is group (any number of participants).
+  CONVERSATION_TYPE_GROUP = 2;
+}
+
+message UserReadState {
+  optional ParticipantId participant_id = 1;
+  optional uint64 latest_read_timestamp = 2;
+
+  // TODO: is latest_read_timestamp always 0?
+}
+
+enum ConversationStatus {
+  CONVERSATION_STATUS_UNKNOWN = 0;
+  // User is invited to conversation.
+  CONVERSATION_STATUS_INVITED = 1;
+  // User is participating in conversation.
+  CONVERSATION_STATUS_ACTIVE = 2;
+  // User has left conversation.
+  CONVERSATION_STATUS_LEFT = 3;
+}
+
+enum ConversationView {
+  CONVERSATION_VIEW_UNKNOWN = 0;
+  // Conversation is in inbox.
+  CONVERSATION_VIEW_INBOX = 1;
+  // Conversation has been archived.
+  CONVERSATION_VIEW_ARCHIVED = 2;
+}
+
+enum DeliveryMediumType {
+  DELIVERY_MEDIUM_UNKNOWN = 0;
+  DELIVERY_MEDIUM_BABEL = 1;
+  DELIVERY_MEDIUM_GOOGLE_VOICE = 2;
+  DELIVERY_MEDIUM_LOCAL_SMS = 3;
+}
+
+message DeliveryMedium {
+  optional DeliveryMediumType medium_type = 1;
+  // Phone number to use for sending Google Voice messages.
+  optional Phone phone = 2;
+}
+
+message DeliveryMediumOption {
+  optional DeliveryMedium delivery_medium = 1;
+  optional bool current_default = 2;
+}
+
+message UserConversationState {
+   optional string client_generated_id = 2;
+   optional UserReadState self_read_state = 7;
+   optional ConversationStatus status = 8;
+   optional NotificationLevel notification_level = 9;
+   repeated ConversationView view = 10;
+   optional ParticipantId inviter_id = 11;
+   optional uint64 invite_timestamp = 12;
+   optional uint64 sort_timestamp = 13;
+   optional uint64 active_timestamp = 14;
+   repeated DeliveryMediumOption delivery_medium_option = 17;
+}
+
+enum ParticipantType {
+  PARTICIPANT_TYPE_UNKNOWN = 0;
+  PARTICIPANT_TYPE_GAIA = 2;
+}
+
+enum InvitationStatus {
+  INVITATION_STATUS_UNKNOWN = 0;
+  INVITATION_STATUS_PENDING = 1;
+  INVITATION_STATUS_ACCEPTED = 2;
+}
+
+message ConversationParticipantData {
+  optional ParticipantId id = 1;
+  optional string fallback_name = 2;
+  optional InvitationStatus invitation_status = 3;
+  optional ParticipantType participant_type = 5;
+  optional InvitationStatus new_invitation_status = 6;
+}
+
+enum ForceHistory {
+  FORCE_HISTORY_UNKNOWN = 0;
+  FORCE_HISTORY_NO = 1;
+}
+
+enum NetworkType {
+  NETWORK_TYPE_UNKNOWN = 0;
+  NETWORK_TYPE_BABEL = 1;
+}
+
+// A conversation between two or more users.
+message Conversation {
+  optional ConversationId conversation_id = 1;
+  optional ConversationType type = 2;
+  optional string name = 3;
+  optional UserConversationState self_conversation_state = 4;
+  repeated UserReadState read_state = 8;
+  // True if the conversation has an active Hangout.
+  optional bool has_active_hangout = 9;
+  // The conversation's "off the record" status.
+  optional OffTheRecordStatus otr_status = 10;
+  // Whether the OTR toggle is available to the user for this conversation.
+  optional OffTheRecordToggle otr_toggle = 11;
+  optional bool conversation_history_supported = 12;
+  repeated ParticipantId current_participant = 13;
+  repeated ConversationParticipantData participant_data = 14;
+  repeated NetworkType network_type = 18;
+  optional ForceHistory force_history_state = 19;
+}
+
+message EasterEgg {
+  optional string message = 1;
+}
+
+enum BlockState {
+  BLOCK_STATE_UNKNOWN = 0;
+  BLOCK_STATE_BLOCK = 1;
+  BLOCK_STATE_UNBLOCK = 2;
+}
+
+message BlockStateChange {
+  optional ParticipantId participant_id = 1;
+  optional BlockState new_block_state = 2;
+}
+
+enum ReplyToInviteType {
+  REPLY_TO_INVITE_TYPE_UNKNOWN = 0;
+  REPLY_TO_INVITE_TYPE_ACCEPT = 1;
+  REPLY_TO_INVITE_TYPE_DECLINE = 2;
+}
+
+message Photo {
+  optional string photo_id = 1;
+  optional bool delete_albumless_source_photo = 2;
+
+  // TODO: test delete_albumless_source_photo
+}
+
+message ExistingMedia {
+  optional Photo photo = 1;
+}
+
+message EventRequestHeader {
+  optional ConversationId conversation_id = 1;
+  optional uint64 client_generated_id = 2;
+  optional OffTheRecordStatus expected_otr = 3;
+  optional DeliveryMedium delivery_medium = 4;
+  optional EventType event_type = 5;
+}
+
+// Identifies the client.
+enum ClientId {
+  CLIENT_ID_UNKNOWN = 0;
+  // Hangouts app for Android.
+  CLIENT_ID_ANDROID = 1;
+  // Hangouts app for iOS.
+  CLIENT_ID_IOS = 2;
+  // Hangouts Chrome extension.
+  CLIENT_ID_CHROME = 3;
+  // Hangouts web interface in Google Plus.
+  CLIENT_ID_WEB_GPLUS = 5;
+  // Hangouts web interface in Gmail.
+  CLIENT_ID_WEB_GMAIL = 6;
+  // Hangouts Chrome app ("ultraviolet").
+  CLIENT_ID_ULTRAVIOLET = 13;
+}
+
+// Build type of the client.
+enum ClientBuildType {
+  BUILD_TYPE_UNKNOWN = 0;
+  // Web app.
+  BUILD_TYPE_PRODUCTION_WEB = 1;
+  // Native app.
+  BUILD_TYPE_PRODUCTION_APP = 3;
+}
+
+// The client and device version.
+message ClientVersion {
+  // Identifies the client.
+  optional ClientId client_id = 1;
+  // The client build type.
+  optional ClientBuildType build_type = 2;
+  // Client version.
+  optional string major_version = 3;
+  // Client version timestamp.
+  optional uint64 version_timestamp = 4;
+  // OS version string (for native apps).
+  optional string device_os_version = 5;
+  // Device hardware name (for native apps).
+  optional string device_hardware = 6;
+}
+
+// Header for requests from the client to the server.
+message RequestHeader {
+  optional ClientVersion client_version = 1;
+  optional ClientIdentifier client_identifier = 2;
+  optional string language_code = 4;
+
+  // TODO: incomplete
+}
+
+// Status of the response from the server to the client.
+enum ResponseStatus {
+  RESPONSE_STATUS_UNKNOWN = 0;
+  RESPONSE_STATUS_OK = 1;
+  RESPONSE_STATUS_UNEXPECTED_ERROR = 3;
+  RESPONSE_STATUS_INVALID_REQUEST = 4;
+}
+
+// Header for responses from the server to the client.
+message ResponseHeader {
+  optional ResponseStatus status = 1;
+  optional string error_description = 2;
+  optional string debug_url = 3;
+  optional string request_trace_id = 4;
+  optional uint64 current_server_time = 5;
+}
+
+// A user that can participate in conversations.
+message Entity {
+  // The user's ID.
+  optional ParticipantId id = 9;
+  // Optional user presence status.
+  optional Presence presence = 8;
+  // Optional user properties.
+  optional EntityProperties properties = 10;
+  optional ParticipantType entity_type = 13;
+  enum PastHangoutState {
+    PAST_HANGOUT_STATE_UNKNOWN = 0;
+    PAST_HANGOUT_STATE_HAD_PAST_HANGOUT = 1;
+    PAST_HANGOUT_STATE_NO_PAST_HANGOUT = 2;
+  }
+  optional PastHangoutState had_past_hangout_state = 16;
+
+  // TODO:
+  // unknown 1 = 15;
+  // unknown 2 = 17;
+}
+
+message EntityProperties {
+  optional ProfileType type = 1;
+  optional string display_name = 2;
+  optional string first_name = 3;
+  optional string photo_url = 4;
+  repeated string email = 5;
+  repeated string phone = 6;
+  optional bool in_users_domain = 10;
+  optional Gender gender = 11;
+  optional PhotoUrlStatus photo_url_status = 12;
+  optional string canonical_email = 15;
+}
+
+// Status of EntityProperties.photo_url.
+enum PhotoUrlStatus {
+  PHOTO_URL_STATUS_UNKNOWN = 0;
+  // URL is a placeholder.
+  PHOTO_URL_STATUS_PLACEHOLDER = 1;
+  // URL is a photo set by the user.
+  PHOTO_URL_STATUS_USER_PHOTO = 2;
+}
+
+enum Gender {
+  GENDER_UNKNOWN = 0;
+  GENDER_MALE = 1;
+  GENDER_FEMALE = 2;
+}
+
+enum ProfileType {
+  PROFILE_TYPE_NONE = 0;
+  PROFILE_TYPE_ES_USER = 1;
+}
+
+// State of a conversation and recent events.
+message ConversationState {
+  optional ConversationId conversation_id = 1;
+  optional Conversation conversation = 2;
+  repeated Event event = 3;
+  optional EventContinuationToken event_continuation_token = 5;
+}
+
+// Token that allows retrieving more events from a position in a conversation.
+// Specifying event_timestamp is sufficient.
+message EventContinuationToken {
+  optional string event_id = 1;
+  optional bytes storage_continuation_token = 2;
+  optional uint64 event_timestamp = 3;
+}
+
+message EntityLookupSpec {
+  optional string gaia_id = 1;
+
+  // TODO
+}
+
+// A type of binary configuration option.
+enum ConfigurationBitType {
+
+  // TODO
+  // RICH_PRESENCE_ACTIVITY_PROMO_SHOWN
+  // RICH_PRESENCE_DEVICE_PROMO_SHOWN
+  // RICH_PRESENCE_LAST_SEEN_DESKTOP_PROMO_SHOWN
+  // RICH_PRESENCE_LAST_SEEN_MOBILE_PROMO_SHOWN
+  // RICH_PRESENCE_IN_CALL_STATE_PROMO_SHOWN
+  // RICH_PRESENCE_MOOD_PROMO_SHOWN
+  // GV_SMS_INTEGRATION_PROMO_SHOWN
+  // RICH_PRESENCE_LAST_SEEN_DESKTOP_PROMPT_SHOWN
+  // BUSINESS_FEATURES_ENABLED
+  // BUSINESS_FEATURES_PROMO_DISMISSED
+  // CONVERSATION_INVITE_SETTINGS_SET_TO_CUSTOM
+  // REPORT_ABUSE_NOTICE_ACKNOWLEDGED
+  // PHONE_VERIFICATION_MOBILE_PROMPT_SHOWN
+  // HANGOUT_P2P_NOTICE_ACKNOWLEDGED
+  // HANGOUT_P2P_ENABLED
+  // INVITE_NOTIFICATIONS_ENABLED
+  // DESKTOP_AUTO_EMOJI_CONVERSION_ENABLED
+  // ALLOWED_FOR_DOMAIN
+  // GMAIL_CHAT_ARCHIVE_ENABLED
+  // QUASAR_MARKETING_PROMO_DISMISSED
+  // GPLUS_SIGNUP_PROMO_DISMISSED
+  // GPLUS_UPGRADE_ALLOWED_FOR_DOMAIN
+  // CHAT_WITH_CIRCLES_ACCEPTED
+  // CHAT_WITH_CIRCLES_PROMO_DISMISSED
+  // PHOTO_SERVICE_REGISTERED
+  // GV_SMS_INTEGRATION_ENABLED
+  // CAN_OPT_INTO_GV_SMS_INTEGRATION
+  // BUSINESS_FEATURES_ELIGIBLE
+  // CAN_USE_GV_CALLER_ID_FEATURE
+
+  CONFIGURATION_BIT_TYPE_UNKNOWN = 0;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_1 = 1;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_2 = 2;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_3 = 3;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_4 = 4;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_5 = 5;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_6 = 6;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_7 = 7;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_8 = 8;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_9 = 9;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_10 = 10;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_11 = 11;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_12 = 12;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_13 = 13;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_14 = 14;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_15 = 15;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_16 = 16;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_17 = 17;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_18 = 18;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_19 = 19;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_20 = 20;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_21 = 21;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_22 = 22;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_23 = 23;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_24 = 24;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_25 = 25;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_26 = 26;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_27 = 27;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_28 = 28;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_29 = 29;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_30 = 30;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_31 = 31;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_32 = 32;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_33 = 33;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_34 = 34;
+  CONFIGURATION_BIT_TYPE_UNKNOWN_35 = 35;
+}
+
+message ConfigurationBit {
+  optional ConfigurationBitType configuration_bit_type = 1;
+  optional bool value = 2;
+}
+
+enum RichPresenceType {
+  RICH_PRESENCE_TYPE_UNKNOWN = 0;
+  RICH_PRESENCE_TYPE_IN_CALL_STATE = 1;
+
+  // TODO
+  // RICH_PRESENCE_TYPE_GLOBALLY_ENABLED
+  // RICH_PRESENCE_TYPE_ACTIVITY
+  // RICH_PRESENCE_TYPE_MOOD
+
+  RICH_PRESENCE_TYPE_UNKNOWN_3 = 3;
+  RICH_PRESENCE_TYPE_UNKNOWN_4 = 4;
+  RICH_PRESENCE_TYPE_UNKNOWN_5 = 5;
+
+  RICH_PRESENCE_TYPE_DEVICE = 2;
+  RICH_PRESENCE_TYPE_LAST_SEEN = 6;
+}
+
+message RichPresenceState {
+  repeated RichPresenceEnabledState get_rich_presence_enabled_state = 3;
+}
+
+message RichPresenceEnabledState {
+  optional RichPresenceType type = 1;
+  optional bool enabled = 2;
+}
+
+enum FieldMask {
+  FIELD_MASK_REACHABLE = 1;
+  FIELD_MASK_AVAILABLE = 2;
+  FIELD_MASK_DEVICE = 7;
+}
+
+message DesktopOffSetting {
+  // State of "desktop off" setting.
+  optional bool desktop_off = 1;
+}
+
+message DesktopOffState {
+  // Whether Hangouts desktop is signed off or on.
+  optional bool desktop_off = 1;
+  optional uint64 version = 2;
+}
+
+// Enable or disable do-not-disturb mode. Not to be confused with
+// DoNotDisturbSetting, which is used to indicate the state of do-not-disturb
+// mode.
+message DndSetting {
+  // Whether to enable or disable do-not-disturb mode.
+  optional bool do_not_disturb = 1;
+  // Do not disturb expiration in seconds.
+  optional uint64 timeout_secs = 2;
+}
+
+message PresenceStateSetting {
+  optional uint64 timeout_secs = 1;
+  optional ClientPresenceStateType type = 2;
+}
+
+message MoodMessage {
+  optional MoodContent mood_content = 1;
+}
+
+message MoodContent {
+  repeated Segment segment = 1;
+}
+
+// The user's mood message.
+message MoodSetting {
+  optional MoodMessage mood_message = 1;
+}
+
+message MoodState {
+  optional MoodSetting mood_setting = 4;
+}
+
+enum DeleteType {
+  DELETE_TYPE_UNKNOWN = 0;
+  DELETE_TYPE_UPPER_BOUND = 1;
+}
+
+message DeleteAction {
+  optional uint64 delete_action_timestamp = 1;
+  optional uint64 delete_upper_bound_timestamp = 2;
+  optional DeleteType delete_type = 3;
+}
+
+message InviteeID {
+  optional string gaia_id = 1;
+  optional string fallback_name = 4;
+}
+
+enum SyncFilter {
+  SYNC_FILTER_UNKNOWN = 0;
+  SYNC_FILTER_INBOX = 1;
+  SYNC_FILTER_ARCHIVED = 2;
+
+  // TODO
+}
+
+// Describes a user's country.
+message Country {
+  // Abbreviated region code (eg. "CA").
+  optional string region_code = 1;
+  // Country's calling code (eg. "1").
+  optional uint64 country_code = 2;
+}
+
+enum SoundState {
+  SOUND_STATE_UNKNOWN = 0;
+  SOUND_STATE_ON = 1;
+  SOUND_STATE_OFF = 2;
+}
+
+// Sound settings in the desktop Hangouts client.
+message DesktopSoundSetting {
+  // Whether to play sound for incoming messages.
+  optional SoundState desktop_sound_state = 1;
+  // Whether to ring for incoming calls.
+  optional SoundState desktop_ring_sound_state = 2;
+}
+
+enum CallerIdSettingsMask {
+  CALLER_ID_SETTINGS_MASK_UNKNOWN = 0;
+  CALLER_ID_SETTINGS_MASK_PROVIDED = 1;
+}
+
+message PhoneData {
+  repeated Phone phone = 1;
+  optional CallerIdSettingsMask caller_id_settings_mask = 3;
+}
+
+enum PhoneVerificationStatus {
+  PHONE_VERIFICATION_STATUS_UNKNOWN = 0;
+  PHONE_VERIFICATION_STATUS_VERIFIED = 1;
+}
+
+enum PhoneDiscoverabilityStatus {
+  PHONE_DISCOVERABILITY_STATUS_UNKNOWN = 0;
+  PHONE_DISCOVERABILITY_STATUS_OPTED_IN_BUT_NOT_DISCOVERABLE = 2;
+}
+
+message Phone {
+  optional PhoneNumber phone_number = 1;
+  optional bool google_voice = 2;
+  optional PhoneVerificationStatus verification_status = 3;
+  optional bool discoverable = 4;
+  optional PhoneDiscoverabilityStatus discoverability_status = 5;
+  optional bool primary = 6;
+}
+
+enum PhoneValidationResult {
+  PHONE_VALIDATION_RESULT_IS_POSSIBLE = 0;
+}
+
+message I18nData {
+  optional string national_number = 1;
+  optional string international_number = 2;
+  optional uint64 country_code = 3;
+  optional string region_code = 4;
+  optional bool is_valid = 5;
+  optional PhoneValidationResult validation_result = 6;
+}
+
+message PhoneNumber {
+  // Phone number as string (eg. "+15551234567").
+  optional string e164 = 1;
+  optional I18nData i18n_data = 2;
+}
+
+message SuggestedContactGroupHash {
+  // Number of results to return from this group.
+  optional uint64 max_results = 1;
+  // A 4-byte hash.
+  optional bytes hash = 2;
+}
+
+message SuggestedContact {
+  optional Entity entity = 1;
+  optional InvitationStatus invitation_status = 2;
+}
+
+message SuggestedContactGroup {
+  optional bool hash_matched = 1;
+  // A 4-byte hash.
+  optional bytes hash = 2;
+  repeated SuggestedContact contact = 3;
+}
+
+// ----------------------------------------------------------------------------
+// State Update and Notifications
+// ----------------------------------------------------------------------------
+
+// Pushed from the server to the client to notify it of state changes. Includes
+// exactly one type of notification, and optionally updates the attributes of a
+// conversation.
+message StateUpdate {
+
+  optional StateUpdateHeader state_update_header = 1;
+
+  // If set, includes conversation attributes that have been updated by the
+  // notification.
+  optional Conversation conversation = 13;
+
+  oneof state_update {
+
+    //UnimplementedMessage conversation_notification = 2; // always null?
+
+    EventNotification event_notification = 3;
+    SetFocusNotification focus_notification = 4;
+    SetTypingNotification typing_notification = 5;
+    SetConversationNotificationLevelNotification notification_level_notification = 6;
+    ReplyToInviteNotification reply_to_invite_notification = 7;
+    WatermarkNotification watermark_notification = 8;
+
+    //UnimplementedMessage unknown_1 = 9;
+    //UnimplementedMessage settings_notification = 10;
+
+    // TODO: rename to ViewModificationNotification?
+
+    ConversationViewModification view_modification = 11;
+    EasterEggNotification easter_egg_notification = 12;
+    SelfPresenceNotification self_presence_notification = 14;
+    DeleteActionNotification delete_notification = 15;
+    PresenceNotification presence_notification = 16;
+    BlockNotification block_notification = 17;
+
+    //UnimplementedMessage invitation_watermark_notification = 18;
+
+    SetNotificationSettingNotification notification_setting_notification = 19;
+    RichPresenceEnabledStateNotification rich_presence_enabled_state_notification = 20;
+  }
+}
+
+// Header for StateUpdate messages.
+message StateUpdateHeader {
+  optional ActiveClientState active_client_state = 1;
+  optional string request_trace_id = 3;
+  optional NotificationSettings notification_settings = 4;
+  optional uint64 current_server_time = 5;
+
+  // TODO:
+  // unknown = 2
+  // archive settings? ([1]) = 6
+  // unknown = 7
+  // optional ID of the client causing the update (3767219427742586121) ? = 8
+}
+
+// List of StateUpdate messages to allow pushing multiple notifications from
+// the server to the client simultaneously.
+message BatchUpdate {
+  repeated StateUpdate state_update = 1;
+}
+
+message EventNotification {
+  optional Event event = 1;
+}
+
+message SetFocusNotification {
+  optional ConversationId conversation_id = 1;
+  optional ParticipantId sender_id = 2;
+  optional uint64 timestamp = 3;
+  optional FocusType type = 4;
+  optional FocusDevice device = 5;
+}
+
+message SetTypingNotification {
+  optional ConversationId conversation_id = 1;
+  optional ParticipantId sender_id = 2;
+  optional uint64 timestamp = 3;
+  optional TypingType type = 4;
+}
+
+message SetConversationNotificationLevelNotification {
+  optional ConversationId conversation_id = 1;
+  optional NotificationLevel level = 2;
+  optional uint64 timestamp = 4;
+
+  // TODO:
+  // unknown (0) = 3;
+}
+
+message ReplyToInviteNotification {
+  optional ConversationId conversation_id = 1;
+  optional ReplyToInviteType type = 2;
+
+  // TODO: untested
+}
+
+message WatermarkNotification {
+  optional ParticipantId sender_id = 1;
+  optional ConversationId conversation_id = 2;
+  optional uint64 latest_read_timestamp = 3;
+}
+
+message ConversationViewModification {
+  optional ConversationId conversation_id = 1;
+  optional ConversationView old_view = 2;
+  optional ConversationView new_view = 3;
+}
+
+message EasterEggNotification {
+  optional ParticipantId sender_id = 1;
+  optional ConversationId conversation_id = 2;
+  optional EasterEgg easter_egg = 3;
+}
+
+// Notifies the status of other clients and mood.
+message SelfPresenceNotification {
+  optional ClientPresenceState client_presence_state = 1;
+  optional DoNotDisturbSetting do_not_disturb_setting = 3;
+  optional DesktopOffSetting desktop_off_setting = 4;
+  optional DesktopOffState desktop_off_state = 5;
+  optional MoodState mood_state = 6;
+}
+
+message DeleteActionNotification {
+  optional ConversationId conversation_id = 1;
+  optional DeleteAction delete_action = 2;
+}
+
+message PresenceNotification {
+  repeated PresenceResult presence = 1;
+}
+
+message BlockNotification {
+  repeated BlockStateChange block_state_change = 1;
+}
+
+message SetNotificationSettingNotification {
+  optional DesktopSoundSetting desktop_sound_setting = 2;
+
+  // TODO
+  // convert text to emoji setting
+}
+
+message RichPresenceEnabledStateNotification {
+  repeated RichPresenceEnabledState rich_presence_enabled_state = 1;
+}
+
+message ConversationSpec {
+  optional ConversationId conversation_id = 1;
+
+  // TODO
+}
+
+// ----------------------------------------------------------------------------
+// Requests & Responses
+// ----------------------------------------------------------------------------
+
+message AddUserRequest {
+  optional RequestHeader request_header = 1;
+  repeated InviteeID invitee_id = 3;
+  optional EventRequestHeader event_request_header = 5;
+}
+
+message AddUserResponse {
+  optional ResponseHeader response_header = 1;
+  optional Event created_event = 5;
+}
+
+message CreateConversationRequest {
+  optional RequestHeader request_header = 1;
+  optional ConversationType type = 2;
+  optional uint64 client_generated_id = 3;
+  optional string name = 4;
+  repeated InviteeID invitee_id = 5;
+}
+
+message CreateConversationResponse {
+  optional ResponseHeader response_header = 1;
+  optional Conversation conversation = 2;
+  optional bool new_conversation_created = 7;
+}
+
+message DeleteConversationRequest {
+  optional RequestHeader request_header = 1;
+  optional ConversationId conversation_id = 2;
+  optional uint64 delete_upper_bound_timestamp = 3;
+}
+
+message DeleteConversationResponse {
+  optional ResponseHeader response_header = 1;
+  optional DeleteAction delete_action = 2;
+}
+
+message EasterEggRequest {
+  optional RequestHeader request_header = 1;
+  optional ConversationId conversation_id = 2;
+  optional EasterEgg easter_egg = 3;
+}
+
+message EasterEggResponse {
+  optional ResponseHeader response_header = 1;
+  optional uint64 timestamp = 2;
+}
+
+message GetConversationRequest {
+  optional RequestHeader request_header = 1;
+  optional ConversationSpec conversation_spec = 2;
+  optional bool include_event = 4;
+  optional uint64 max_events_per_conversation = 6;
+  optional EventContinuationToken event_continuation_token = 7;
+
+  // TODO:
+  // include_conversation_metadata? = 3;
+  // unknown = 5;
+}
+
+message GetConversationResponse {
+  optional ResponseHeader response_header = 1;
+  optional ConversationState conversation_state = 2;
+
+  // TODO
+}
+
+message GetEntityByIdRequest {
+  optional RequestHeader request_header = 1;
+  repeated EntityLookupSpec batch_lookup_spec = 3;
+
+  // TODO
+  // unknown = 2;
+}
+
+message GetEntityByIdResponse {
+  optional ResponseHeader response_header = 1;
+  repeated Entity entity = 2;
+
+  // TODO
+}
+
+message GetSuggestedEntitiesRequest {
+  optional RequestHeader request_header = 1;
+  optional SuggestedContactGroupHash favorites = 8;
+  optional SuggestedContactGroupHash contacts_you_hangout_with = 9;
+  optional SuggestedContactGroupHash other_contacts_on_hangouts = 10;
+  optional SuggestedContactGroupHash other_contacts = 11;
+  optional SuggestedContactGroupHash dismissed_contacts = 12;
+  optional SuggestedContactGroupHash pinned_favorites = 13;
+
+  // TODO: possible other fields:
+  // unknown bytes = 2;
+  // unknown bytes = 3;
+  // unknown int/enum = 4;
+  // unknown bool = 5;
+  // repeated ParticipantId unknown = 6;
+  // unknown bool = 7;
+}
+
+message GetSuggestedEntitiesResponse {
+  optional ResponseHeader response_header = 1;
+  repeated Entity entity = 2;
+  optional SuggestedContactGroup favorites = 4;
+  optional SuggestedContactGroup contacts_you_hangout_with = 5;
+  optional SuggestedContactGroup other_contacts_on_hangouts = 6;
+  optional SuggestedContactGroup other_contacts = 7;
+  optional SuggestedContactGroup dismissed_contacts = 8;
+  optional SuggestedContactGroup pinned_favorites = 9;
+}
+
+message GetSelfInfoRequest {
+  optional RequestHeader request_header = 1;
+
+  // TODO
+}
+
+message GetSelfInfoResponse {
+  optional ResponseHeader response_header = 1;
+  optional Entity self_entity = 2;
+  optional bool is_known_minor = 3;
+  optional DoNotDisturbSetting dnd_state = 5;
+  optional DesktopOffSetting desktop_off_setting = 6;
+  optional PhoneData phone_data = 7;
+  repeated ConfigurationBit configuration_bit = 8;
+  optional DesktopOffState desktop_off_state = 9;
+  optional bool google_plus_user = 10;
+  optional DesktopSoundSetting desktop_sound_setting = 11;
+  optional RichPresenceState rich_presence_state = 12;
+  optional Country default_country = 19;
+
+  // TODO:
+  // client_presence? = 4;
+  // babel_user? = 13;
+  // desktop_availability_sharing_enabled? = 14;
+  // unknown = 16;
+  // bool google_plus_mobile_user = 15;
+  // unknown = 18;
+  // unknown = 22;
+}
+
+message QueryPresenceRequest {
+  optional RequestHeader request_header = 1;
+  repeated ParticipantId participant_id = 2;
+  repeated FieldMask field_mask = 3;
+}
+
+message QueryPresenceResponse {
+  optional ResponseHeader response_header = 1;
+  repeated PresenceResult presence_result = 2;
+}
+
+message RemoveUserRequest {
+  optional RequestHeader request_header = 1;
+  optional EventRequestHeader event_request_header = 5;
+}
+
+message RemoveUserResponse {
+  optional ResponseHeader response_header = 1;
+  optional Event created_event = 4;
+}
+
+message RenameConversationRequest {
+  optional RequestHeader request_header = 1;
+  optional string new_name = 3;
+  optional EventRequestHeader event_request_header = 5;
+
+  // TODO
+}
+
+message RenameConversationResponse {
+  optional ResponseHeader response_header = 1;
+  optional Event created_event = 4;
+
+  // TODO: use json to check field names?
+}
+
+message SearchEntitiesRequest {
+  optional RequestHeader request_header = 1;
+  optional string query = 3;
+  optional uint64 max_count = 4;
+}
+
+message SearchEntitiesResponse {
+  optional ResponseHeader response_header = 1;
+  repeated Entity entity = 2;
+}
+
+message SendChatMessageRequest {
+  optional RequestHeader request_header = 1;
+  repeated EventAnnotation annotation = 5;
+  optional MessageContent message_content = 6;
+  optional ExistingMedia existing_media = 7;
+  optional EventRequestHeader event_request_header = 8;
+
+  // TODO: incomplete
+}
+
+message SendChatMessageResponse {
+  optional ResponseHeader response_header = 1;
+  optional Event created_event = 6;
+
+  // TODO:
+  // unknown [] = 4;
+}
+
+message SetActiveClientRequest {
+  optional RequestHeader request_header = 1;
+  // Whether to set the client as active or inactive.
+  optional bool is_active = 2;
+  // 'email/resource'.
+  optional string full_jid = 3;
+  // Timeout in seconds for client to remain active.
+  optional uint64 timeout_secs = 4;
+
+  // TODO:
+  // unknown (true) = 5;
+}
+
+message SetActiveClientResponse {
+  optional ResponseHeader response_header = 1;
+}
+
+message SetConversationLevelRequest {
+  optional RequestHeader request_header = 1;
+
+  // TODO: implement me
+}
+
+message SetConversationLevelResponse {
+  optional ResponseHeader response_header = 1;
+
+  // TODO: implement me
+}
+
+message SetConversationNotificationLevelRequest {
+  optional RequestHeader request_header = 1;
+  optional ConversationId conversation_id = 2;
+  optional NotificationLevel level = 3;
+}
+
+message SetConversationNotificationLevelResponse {
+  optional ResponseHeader response_header = 1;
+  optional uint64 timestamp = 2;
+}
+
+message SetFocusRequest {
+  optional RequestHeader request_header = 1;
+  optional ConversationId conversation_id = 2;
+  optional FocusType type = 3;
+  optional uint32 timeout_secs = 4;
+}
+
+message SetFocusResponse {
+  optional ResponseHeader response_header = 1;
+  optional uint64 timestamp = 2;
+}
+
+// Allows setting one or more of the included presence-related settings.
+message SetPresenceRequest {
+  optional RequestHeader request_header = 1;
+  optional PresenceStateSetting presence_state_setting = 2;
+  optional DndSetting dnd_setting = 3;
+  optional DesktopOffSetting desktop_off_setting = 5;
+  optional MoodSetting mood_setting = 8;
+}
+
+message SetPresenceResponse {
+  optional ResponseHeader response_header = 1;
+}
+
+message SetTypingRequest {
+  optional RequestHeader request_header = 1;
+  optional ConversationId conversation_id = 2;
+  optional TypingType type = 3;
+}
+
+message SetTypingResponse {
+  optional ResponseHeader response_header = 1;
+  optional uint64 timestamp = 2;
+}
+
+message SyncAllNewEventsRequest {
+  optional RequestHeader request_header = 1;
+  // Timestamp after which to return all new events.
+  optional uint64 last_sync_timestamp = 2;
+  optional uint64 max_response_size_bytes = 8;
+
+  // TODO
+}
+
+message SyncAllNewEventsResponse {
+  optional ResponseHeader response_header = 1;
+  optional uint64 sync_timestamp = 2;
+  repeated ConversationState conversation_state = 3;
+
+  // TODO
+}
+
+message SyncRecentConversationsRequest {
+  optional RequestHeader request_header = 1;
+  optional uint64 max_conversations = 3;
+  optional uint64 max_events_per_conversation = 4;
+  repeated SyncFilter sync_filter = 5;
+}
+
+message SyncRecentConversationsResponse {
+  optional ResponseHeader response_header = 1;
+  optional uint64 sync_timestamp = 2;
+  repeated ConversationState conversation_state = 3;
+}
+
+message UpdateWatermarkRequest {
+  optional RequestHeader request_header = 1;
+  optional ConversationId conversation_id = 2;
+  optional uint64 last_read_timestamp = 3;
+}
+
+message UpdateWatermarkResponse {
+  optional ResponseHeader response_header = 1;
+}

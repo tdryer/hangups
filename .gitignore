@@ -4,3 +4,5 @@ dist/
 docs/_build/
 *.egg-info/
 cookies.txt
+.coverage
+.idea/

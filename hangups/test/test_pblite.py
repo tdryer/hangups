@@ -1,112 +1,247 @@
-"""Tests for hangups.pblite."""
+"""Tests for pblite format decoder and encoder."""
 
-import enum
 import pytest
-import types
 
 from hangups import pblite
+from hangups.test import test_pblite_pb2
 
 
-##############################################################################
-# Fixtures
-##############################################################################
+###############################################################################
+# pblite.decode
+###############################################################################
 
-class Colour(enum.Enum):
-    RED = 1
-    BLUE = 2
+def test_decode():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        1,
+        [3, 4],
+        'foo',
+        ['bar', 'baz'],
+        1,
+        [2, 3],
+        [1],
+        [[2], [3]],
+        'AA==',
+        ['AAE=', 'AAEC'],
+    ])
+    assert message == test_pblite_pb2.TestMessage(
+        test_int=1,
+        test_repeated_int=[3, 4],
+        test_string='foo',
+        test_repeated_string=['bar', 'baz'],
+        test_enum=test_pblite_pb2.TestMessage.TEST_1,
+        test_repeated_enum=[test_pblite_pb2.TestMessage.TEST_2,
+                            test_pblite_pb2.TestMessage.TEST_3],
+        test_embedded_message=test_pblite_pb2.TestMessage.EmbeddedMessage(
+            test_embedded_int=1,
+        ),
+        test_repeated_embedded_message=[
+            test_pblite_pb2.TestMessage.EmbeddedMessage(
+                test_embedded_int=2,
+            ),
+            test_pblite_pb2.TestMessage.EmbeddedMessage(
+                test_embedded_int=3,
+            ),
+        ],
+        test_bytes=b'\x00',
+        test_repeated_bytes=[b'\x00\x01', b'\x00\x01\x02'],
+    )
 
+def test_decode_unserialized_fields():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None,
+        None,
+        'foo',
+    ])
+    assert message == test_pblite_pb2.TestMessage(
+        test_string='foo',
+    )
 
-field = pblite.Field()
-optional_field = pblite.Field(is_optional=True)
-enum_field = pblite.EnumField(Colour)
-repeated_field = pblite.RepeatedField(pblite.Field())
-optional_repeated_field = pblite.RepeatedField(pblite.Field(),
-                                               is_optional=True)
-message = pblite.Message(
-    ('item', pblite.Field()),
-    (None, pblite.Field()),
-    ('count', pblite.Field(is_optional=True)),
-)
+def test_decode_unknown_field():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [None] * 99 + [1])
+    assert message == test_pblite_pb2.TestMessage()
 
+def test_decode_unknown_enum():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None,
+        None,
+        None,
+        None,
+        99,
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
-##############################################################################
-# Tests
-##############################################################################
+def test_decode_unknown_repeated_enum():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None,
+        None,
+        None,
+        None,
+        None,
+        [1, 99],
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
-def test_field():
-    assert field.parse("test") == "test"
+def test_decode_scalar_wrong_type():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        'foo',
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
+def test_decode_repeated_scalar_wrong_type():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None,
+        [1, 'foo', 2]
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
-def test_field_none():
-    with pytest.raises(ValueError) as e:
-        field.parse(None)
-    assert e.value.args[0] == 'Field is not optional'
+def test_decode_message_wrong_type():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        1,
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
+def test_decode_repeated_message_wrong_type():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        [1],
+    ])
+    assert message == test_pblite_pb2.TestMessage(
+        test_repeated_embedded_message=[
+            test_pblite_pb2.TestMessage.EmbeddedMessage(),
+        ],
+    )
 
-def test_optional_field_none():
-    assert optional_field.parse(None) == None
+def test_decode_bytes_wrong_type():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None, None, None, None, None, None, None, None, 1,
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
+def test_decode_bytes_invalid_value():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None, None, None, None, None, None, None, None, 'A?==',
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
-def test_enum_field():
-    assert enum_field.parse(2) == Colour.BLUE
+def test_decode_repeated_bytes_wrong_type():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None, None, None, None, None, None, None, None, None, [1],
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
+def test_decode_repeated_bytes_invalid_value():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        None, None, None, None, None, None, None, None, None, ['A?=='],
+    ])
+    assert message == test_pblite_pb2.TestMessage()
 
-def test_enum_field_invalid():
-    with pytest.raises(ValueError) as e:
-        enum_field.parse(None)
-    assert e.value.args[0] == 'None is not a valid Colour'
+def test_decode_ignore_first_item():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        'ignored',
+        1,
+        [3, 4],
+    ], ignore_first_item=True)
+    assert message == test_pblite_pb2.TestMessage(
+        test_int=1,
+        test_repeated_int=[3, 4],
+    )
 
+def test_decode_dict():
+    message = test_pblite_pb2.TestMessage()
+    pblite.decode(message, [
+        1,
+        {
+            '7': [2],
+        },
+    ])
+    assert message == test_pblite_pb2.TestMessage(
+        test_int=1,
+        test_embedded_message=test_pblite_pb2.TestMessage.EmbeddedMessage(
+            test_embedded_int=2,
+        ),
+    )
 
-def test_repeated_field():
-    assert repeated_field.parse([1, 2, 3]) == [1, 2, 3]
+###############################################################################
+# pblite.encode
+###############################################################################
 
+def test_encode():
+    message = test_pblite_pb2.TestMessage(
+        test_int=1,
+        test_repeated_int=[3, 4],
+        test_string='foo',
+        test_repeated_string=['bar', 'baz'],
+        test_enum=test_pblite_pb2.TestMessage.TEST_1,
+        test_repeated_enum=[test_pblite_pb2.TestMessage.TEST_2,
+                            test_pblite_pb2.TestMessage.TEST_3],
+        test_embedded_message=test_pblite_pb2.TestMessage.EmbeddedMessage(
+            test_embedded_int=1,
+        ),
+        test_repeated_embedded_message=[
+            test_pblite_pb2.TestMessage.EmbeddedMessage(
+                test_embedded_int=2,
+            ),
+            test_pblite_pb2.TestMessage.EmbeddedMessage(
+                test_embedded_int=3,
+            ),
+        ],
+        test_bytes=b'\x00',
+        test_repeated_bytes=[b'\x00\x01', b'\x00\x01\x02'],
+    )
+    assert pblite.encode(message) == [
+        1,
+        [3, 4],
+        'foo',
+        ['bar', 'baz'],
+        1,
+        [2, 3],
+        [1],
+        [[2], [3]],
+        'AA==',
+        ['AAE=', 'AAEC'],
+    ]
 
-def test_repeated_field_item_error():
-    with pytest.raises(ValueError) as e:
-        repeated_field.parse([1, None, 3])
-    assert e.value.args[0] == 'RepeatedField item: Field is not optional'
+def test_encode_no_fields():
+    message = test_pblite_pb2.TestMessage()
+    assert pblite.encode(message) == []
 
+def test_encode_serialize_default_value():
+    # Field is always serialized when it is set, even when set to the default
+    # value.
+    message = test_pblite_pb2.TestMessage()
+    message.test_int = 0
+    assert pblite.encode(message) == [0]
 
-def test_repeated_field_none():
-    with pytest.raises(ValueError) as e:
-        repeated_field.parse(None)
-    assert e.value.args[0] == 'RepeatedField is not optional'
-
-
-def test_repeated_field_not_list():
-    with pytest.raises(ValueError) as e:
-        repeated_field.parse(123)
-    assert e.value.args[0] == ('RepeatedField expected list but got '
-                               '<class \'int\'>')
-
-
-def test_optional_repeated_field_none():
-    assert optional_repeated_field.parse(None) == None
-
-
-def test_message():
-    assert (message.parse(['rose', None, 1]).__dict__ ==
-            types.SimpleNamespace(item='rose', count=1).__dict__)
-
-
-def test_message_extra_field():
-    assert (message.parse(['rose', None, 1, 100]).__dict__ ==
-            types.SimpleNamespace(item='rose', count=1).__dict__)
-
-
-def test_message_missing_optional_field():
-    assert (message.parse(['rose', None]).__dict__ ==
-            types.SimpleNamespace(item='rose', count=None).__dict__)
-
-
-def test_message_missing_field():
-    with pytest.raises(ValueError) as e:
-        message.parse([])
-    assert e.value.args[0] == 'Message field \'item\': Field is not optional'
-
-
-def test_message_not_list():
-    with pytest.raises(ValueError) as e:
-        message.parse(123)
-    assert e.value.args[0] == ('Message expected list but got '
-                               '<class \'int\'>')
+def test_encode_required_field():
+    # Required fields must be set prior to encoding.
+    message = test_pblite_pb2.TestRequiredMessage()
+    with pytest.raises(ValueError):
+        pblite.encode(message)
+    message.test_required_int = 0
+    assert pblite.encode(message) == [0]

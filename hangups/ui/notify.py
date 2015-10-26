@@ -64,8 +64,12 @@ class Notifier(object):
         conv = self._conv_list.get(conv_event.conversation_id)
         user = conv.get_user(conv_event.user_id)
         # Ignore non-messages or messages sent by yourself.
-        if (not user.is_self and
-                isinstance(conv_event, hangups.ChatMessageEvent)):
+        show_notification = all((
+            isinstance(conv_event, hangups.ChatMessageEvent),
+            not user.is_self,
+            not conv.is_quiet,
+        ))
+        if show_notification:
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
             cmd = [arg.format(
@@ -84,7 +88,9 @@ class Notifier(object):
                     cmd, stderr=subprocess.STDOUT
                 ).decode()
             except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                logger.warning('Notification command failed: {}'.format(e))
+                # Only log this at INFO level to prevent log spam when gdbus
+                # isn't available.
+                logger.info('Notification command failed: {}'.format(e))
                 return
             try:
                 self._replaces_id = RESULT_RE.match(output).groups()[0]

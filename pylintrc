@@ -1,0 +1,14 @@
+# pylint configuration
+
+[MASTER]
+
+# ignore auto-generated protobuf files
+ignore=hangouts_pb2.py,test_pblite_pb2.py
+
+[MESSAGES CONTROL]
+
+disable=logging-format-interpolation,invalid-name,missing-docstring,locally-disabled,locally-enabled,fixme,too-few-public-methods,too-many-arguments,too-many-instance-attributes,too-many-public-methods,no-member
+
+[FORMAT]
+
+max-line-length=79

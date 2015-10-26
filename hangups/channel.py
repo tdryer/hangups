@@ -1,17 +1,29 @@
-"""Support for reading messages from the long-polling channel.
+"""Client for Google's BrowserChannel protocol.
 
-Hangouts receives events using a system that appears very close to an App
-Engine Channel.
+BrowserChannel allows simulating a bidirectional socket in a web browser using
+long-polling requests. It is used by the Hangouts web client to receive state
+updates from the server. The "forward channel" sends "maps" (dictionaries) to
+the server. The "backwards channel" receives "arrays" (lists) from the server.
+
+Google provides a JavaScript BrowserChannel client as part of closure-library:
+http://google.github.io/closure-library/api/class_goog_net_BrowserChannel.html
+
+Source code is available here:
+https://github.com/google/closure-library/blob/master/closure/goog/net/browserchannel.js
+
+Unofficial protocol documentation is available here:
+https://web.archive.org/web/20121226064550/http://code.google.com/p/libevent-browserchannel-server/wiki/BrowserChannelProtocol
 """
 
 import aiohttp
 import asyncio
 import hashlib
+import json
 import logging
 import re
 import time
 
-from hangups import javascript, http_utils, event, exceptions
+from hangups import http_utils, event, exceptions
 
 logger = logging.getLogger(__name__)
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
@@ -60,18 +72,21 @@ def _best_effort_decode(data_bytes):
     return ''
 
 
-class PushDataParser(object):
-    """Parse data from the long-polling endpoint."""
+class ChunkParser(object):
+    """Parse data from the backward channel into chunks.
+
+    Responses from the backward channel consist of a sequence of chunks which
+    are streamed to the client. Each chunk is prefixed with its length,
+    followed by a newline. The length allows the client to identify when the
+    entire chunk has been received.
+    """
 
     def __init__(self):
         # Buffer for bytes containing utf-8 text:
         self._buf = b''
 
-    def get_submissions(self, new_data_bytes):
-        """Yield submissions generated from received data.
-
-        Responses from the push endpoint consist of a sequence of submissions.
-        Each submission is prefixed with its length followed by a newline.
+    def get_chunks(self, new_data_bytes):
+        """Yield chunks generated from received data.
 
         The buffer may not be decodable as UTF-8 if there's a split multi-byte
         character at the end. To handle this, do a "best effort" decode of the
@@ -122,15 +137,14 @@ def _parse_sid_response(res):
 
     Returns (SID, gsessionid) tuple.
     """
-    res = javascript.loads(list(PushDataParser().get_submissions(res))[0])
+    res = json.loads(list(ChunkParser().get_chunks(res))[0])
     sid = res[0][1][1]
     gsessionid = res[1][1][0]['gsid']
     return (sid, gsessionid)
 
 
 class Channel(object):
-
-    """A channel connection that can listen for messages."""
+    """BrowserChannel client."""
 
     ##########################################################################
     # Public methods
@@ -145,20 +159,17 @@ class Channel(object):
         self.on_reconnect = event.Event('Channel.on_reconnect')
         # Event fired when channel disconnects with arguments ():
         self.on_disconnect = event.Event('Channel.on_disconnect')
-        # Event fired when a channel submission is received with arguments
-        # (submission):
-        self.on_message = event.Event('Channel.on_message')
+        # Event fired when an array is received with arguments (array):
+        self.on_receive_array = event.Event('Channel.on_receive_array')
 
         # True if the channel is currently connected:
         self._is_connected = False
-        # True if the channel has been subscribed:
-        self._is_subscribed = False
         # True if the on_connect event has been called at least once:
         self._on_connect_called = False
         # Request cookies dictionary:
         self._cookies = cookies
         # Parser for assembling messages:
-        self._push_parser = None
+        self._chunk_parser = None
         # aiohttp connector for keep-alive:
         self._connector = connector
 
@@ -168,18 +179,18 @@ class Channel(object):
 
     @property
     def is_connected(self):
-        """Whether the client is currently connected."""
+        """Whether the channel is currently connected."""
         return self._is_connected
 
     @asyncio.coroutine
     def listen(self):
-        """Listen for messages on the channel.
+        """Listen for messages on the backwards channel.
 
         This method only returns when the connection has been closed due to an
         error.
         """
         MAX_RETRIES = 5  # maximum number of times to retry after a failure
-        retries = MAX_RETRIES # number of remaining retries
+        retries = MAX_RETRIES  # number of remaining retries
         need_new_sid = True  # whether a new SID is needed
 
         while retries >= 0:
@@ -194,12 +205,11 @@ class Channel(object):
             # Request a new SID if we don't have one yet, or the previous one
             # became invalid.
             if need_new_sid:
-                # TODO: error handling
                 yield from self._fetch_channel_sid()
                 need_new_sid = False
             # Clear any previous push data, since if there was an error it
             # could contain garbage.
-            self._push_parser = PushDataParser()
+            self._chunk_parser = ChunkParser()
             try:
                 yield from self._longpoll_request()
             except (UnknownSIDError, exceptions.NetworkError) as e:
@@ -220,6 +230,30 @@ class Channel(object):
 
         logger.error('Ran out of retries for long-polling request')
 
+    @asyncio.coroutine
+    def send_maps(self, map_list):
+        """Sends a request to the server containing maps (dicts)."""
+        params = {
+            'VER': 8,  # channel protocol version
+            'RID': 81188,  # request identifier
+            'ctype': 'hangouts',  # client type
+        }
+        if self._gsessionid_param is not None:
+            params['gsessionid'] = self._gsessionid_param
+        if self._sid_param is not None:
+            params['SID'] = self._sid_param
+        data_dict = dict(count=len(map_list), ofs=0)
+        for map_num, map_ in enumerate(map_list):
+            for map_key, map_val in map_.items():
+                data_dict['req{}_{}'.format(map_num, map_key)] = map_val
+        res = yield from http_utils.fetch(
+            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
+            cookies=self._cookies, connector=self._connector,
+            headers=get_authorization_headers(self._cookies['SAPISID']),
+            params=params, data=data_dict,
+        )
+        return res
+
     ##########################################################################
     # Private methods
     ##########################################################################
@@ -228,73 +262,27 @@ class Channel(object):
     def _fetch_channel_sid(self):
         """Creates a new channel for receiving push data.
 
+        Sending an empty forward channel request will create a new channel on
+        the server.
+
+        There's a separate API to get the gsessionid alone that Hangouts for
+        Chrome uses, but if we don't send a gsessionid with this request, it
+        will return a gsessionid as well as the SID.
+
         Raises hangups.NetworkError if the channel can not be created.
         """
         logger.info('Requesting new gsessionid and SID...')
-        # There's a separate API to get the gsessionid alone that Hangouts for
-        # Chrome uses, but if we don't send a gsessionid with this request, it
-        # will return a gsessionid as well as the SID.
-        res = yield from http_utils.fetch(
-            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            cookies=self._cookies, data='count=0', connector=self._connector,
-            headers=get_authorization_headers(self._cookies['SAPISID']),
-            params={
-                'VER': 8,
-                'RID': 81187,
-                'ctype': 'hangouts',  # client type
-            }
-        )
+        # Set SID and gsessionid to None so they aren't sent in by send_maps.
+        self._sid_param = None
+        self._gsessionid_param = None
+        res = yield from self.send_maps([])
         self._sid_param, self._gsessionid_param = _parse_sid_response(res.body)
-        self._is_subscribed = False
         logger.info('New SID: {}'.format(self._sid_param))
         logger.info('New gsessionid: {}'.format(self._gsessionid_param))
 
     @asyncio.coroutine
-    def _subscribe(self):
-        """Subscribes the channel to receive relevant events.
-
-        Only needs to be called when a new channel (SID/gsessionid) is opened.
-        """
-        # XXX: Temporary workaround for #58
-        yield from asyncio.sleep(1)
-
-        logger.info('Subscribing channel...')
-        timestamp = str(int(time.time() * 1000))
-        # Hangouts for Chrome splits this over 2 requests, but it's possible to
-        # do everything in one.
-        yield from http_utils.fetch(
-            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            cookies=self._cookies, connector=self._connector,
-            headers=get_authorization_headers(self._cookies['SAPISID']),
-            params={
-                'VER': 8,
-                'RID': 81188,
-                'ctype': 'hangouts',  # client type
-                'gsessionid': self._gsessionid_param,
-                'SID': self._sid_param,
-            },
-            data={
-                'count': 3,
-                'ofs': 0,
-                'req0_p': ('{"1":{"1":{"1":{"1":3,"2":2}},"2":{"1":{"1":3,"2":'
-                           '2},"2":"","3":"JS","4":"lcsclient"},"3":' +
-                           timestamp + ',"4":0,"5":"c1"},"2":{}}'),
-                'req1_p': ('{"1":{"1":{"1":{"1":3,"2":2}},"2":{"1":{"1":3,"2":'
-                           '2},"2":"","3":"JS","4":"lcsclient"},"3":' +
-                           timestamp + ',"4":' + timestamp +
-                           ',"5":"c3"},"3":{"1":{"1":"babel"}}}'),
-                'req2_p': ('{"1":{"1":{"1":{"1":3,"2":2}},"2":{"1":{"1":3,"2":'
-                           '2},"2":"","3":"JS","4":"lcsclient"},"3":' +
-                           timestamp + ',"4":' + timestamp +
-                           ',"5":"c4"},"3":{"1":{"1":"hangout_invite"}}}'),
-            },
-        )
-        logger.info('Channel is now subscribed')
-        self._is_subscribed = True
-
-    @asyncio.coroutine
     def _longpoll_request(self):
-        """Open a long-polling request and receive push data.
+        """Open a long-polling request and receive arrays.
 
         This method uses keep-alive to make re-opening the request faster, but
         the remote server will set the "Connection: close" header once an hour.
@@ -302,14 +290,14 @@ class Channel(object):
         Raises hangups.NetworkError or UnknownSIDError.
         """
         params = {
-            'VER': 8,
+            'VER': 8,  # channel protocol version
             'gsessionid': self._gsessionid_param,
-            'RID': 'rpc',
-            't': 1, # trial
-            'SID': self._sid_param,
-            'CI': 0,
+            'RID': 'rpc',  # request identifier
+            't': 1,  # trial
+            'SID': self._sid_param,  # session ID
+            'CI': 0,  # 0 if streaming/chunked requests should be used
             'ctype': 'hangouts',  # client type
-            'TYPE': 'xmlhttp',
+            'TYPE': 'xmlhttp',  # type of request
         }
         headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
@@ -321,8 +309,11 @@ class Channel(object):
             ), CONNECT_TIMEOUT)
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
-        except aiohttp.errors.ConnectionError as e:
+        except aiohttp.ClientError as e:
             raise exceptions.NetworkError('Request connection error: {}'
+                                          .format(e))
+        except aiohttp.ServerDisconnectedError as e:
+            raise exceptions.NetworkError('Server disconnected error: {}'
                                           .format(e))
         if res.status == 400 and res.reason == 'Unknown SID':
             raise UnknownSIDError('SID became invalid')
@@ -338,9 +329,16 @@ class Channel(object):
                 )
             except asyncio.TimeoutError:
                 raise exceptions.NetworkError('Request timed out')
-            except aiohttp.errors.ConnectionError as e:
+            except aiohttp.ClientError as e:
                 raise exceptions.NetworkError('Request connection error: {}'
                                               .format(e))
+            except aiohttp.ServerDisconnectedError as e:
+                raise exceptions.NetworkError('Server disconnected error: {}'
+                                              .format(e))
+            except asyncio.CancelledError:
+                # Prevent ResourceWarning when channel is disconnected.
+                res.close()
+                raise
             if chunk:
                 yield from self._on_push_data(chunk)
             else:
@@ -351,25 +349,27 @@ class Channel(object):
 
     @asyncio.coroutine
     def _on_push_data(self, data_bytes):
-        """Parse push data and trigger event methods."""
-        logger.debug('Received push data:\n{}'.format(data_bytes))
+        """Parse push data and trigger events."""
+        logger.debug('Received chunk:\n{}'.format(data_bytes))
+        for chunk in self._chunk_parser.get_chunks(data_bytes):
 
-        # Delay subscribing until first byte is received prevent "channel not
-        # ready" errors that appear to be caused by a race condition on the
-        # server.
-        if not self._is_subscribed:
-            yield from self._subscribe()
+            # Consider the channel connected once the first chunk is received.
+            if not self._is_connected:
+                if self._on_connect_called:
+                    self._is_connected = True
+                    yield from self.on_reconnect.fire()
+                else:
+                    self._on_connect_called = True
+                    self._is_connected = True
+                    yield from self.on_connect.fire()
 
-        # This method is only called when the long-polling request was
-        # successful, so use it to trigger connection events if necessary.
-        if not self._is_connected:
-            if self._on_connect_called:
-                self._is_connected = True
-                yield from self.on_reconnect.fire()
-            else:
-                self._on_connect_called = True
-                self._is_connected = True
-                yield from self.on_connect.fire()
-
-        for submission in self._push_parser.get_submissions(data_bytes):
-            yield from self.on_message.fire(submission)
+            # chunk contains a container array
+            container_array = json.loads(chunk)
+            # container array is an array of inner arrays
+            for inner_array in container_array:
+                # inner_array always contains 2 elements, the array_id and the
+                # data_array.
+                array_id, data_array = inner_array
+                logger.debug('Chunk contains data array with id %r:\n%r',
+                             array_id, data_array)
+                yield from self.on_receive_array.fire(data_array)

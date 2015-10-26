@@ -1,183 +1,157 @@
-"""A parser for the pblite serialization format.
+"""Decoder and encoder for the pblite format.
 
-pblite (sometimes called "protojson") is a way of encoding Protocol Buffer
-messages to arrays. Google uses this in Hangouts because JavaScript handles
-arrays better than bytes.
+pblite (sometimes also known as protojson) is a format for serializing Protocol
+Buffers into JavaScript objects. Messages are represented as arrays where the
+tag number of a value is given by its position in the array.
 
-This module allows parsing lists together with a schema to produce
-programmer-friendly objects. The conversation from not-quite-json strings to
-lists can be done using hangups.javascript.
+Methods in this module assume encoding/decoding to JavaScript strings is done
+separately (see hangups.javascript).
 
-See:
-https://code.google.com/p/google-protorpc/source/browse/python/protorpc/
-protojson.py
-
-TODO: Serialization code is currently unused and doesn't have any tests.
+Google's implementation for JavaScript is available in closure-library:
+    https://github.com/google/closure-library/tree/master/closure/goog/proto2
 """
 
+import base64
 import itertools
-import types
+import logging
+
+# pylint: disable=no-name-in-module,import-error
+from google.protobuf.descriptor import FieldDescriptor
+# pylint: enable=no-name-in-module,import-error
 
 
-class Field(object):
+logger = logging.getLogger(__name__)
 
-    """An untyped field, corresponding to a primitive type."""
 
-    def __init__(self, is_optional=False):
-        self._is_optional = is_optional
+def _decode_field(message, field, value):
+    """Decode optional or required field."""
+    if field.type == FieldDescriptor.TYPE_MESSAGE:
+        decode(getattr(message, field.name), value)
+    else:
+        try:
+            if field.type == FieldDescriptor.TYPE_BYTES:
+                value = base64.b64decode(value)
+            setattr(message, field.name, value)
+        except (ValueError, TypeError) as e:
+            # ValueError: invalid enum value, negative unsigned int value, or
+            # invalid base64
+            # TypeError: mismatched type
+            logger.warning('Message %r ignoring field %s: %s',
+                           message.__class__.__name__, field.name, e)
 
-    def parse(self, input_):
-        """Parse the field.
 
-        Raises ValueError if the input is None and the Field is not optional.
-        """
-        if not self._is_optional and input_ is None:
-            raise ValueError('Field is not optional')
+def _decode_repeated_field(message, field, value_list):
+    """Decode repeated field."""
+    if field.type == FieldDescriptor.TYPE_MESSAGE:
+        for value in value_list:
+            decode(getattr(message, field.name).add(), value)
+    else:
+        try:
+            for value in value_list:
+                if field.type == FieldDescriptor.TYPE_BYTES:
+                    value = base64.b64decode(value)
+                getattr(message, field.name).append(value)
+        except (ValueError, TypeError) as e:
+            # ValueError: invalid enum value, negative unsigned int value, or
+            # invalid base64
+            # TypeError: mismatched type
+            logger.warning('Message %r ignoring repeated field %s: %s',
+                           message.__class__.__name__, field.name, e)
+            # Ignore any values already decoded by clearing list
+            message.ClearField(field.name)
+
+
+def decode(message, pblite, ignore_first_item=False):
+    """Decode pblite to Protocol Buffer message.
+
+    This method is permissive of decoding errors and will log them as warnings
+    and continue decoding where possible.
+
+    The first element of the outer pblite list must often be ignored using the
+    ignore_first_item parameter because it contains an abbreviation of the name
+    of the protobuf message (eg.  cscmrp for ClientSendChatMessageResponseP)
+    that's not part of the protobuf.
+
+    Args:
+        message: protocol buffer message instance to decode into.
+        pblite: list representing a pblite-serialized message.
+        ignore_first_item: If True, ignore the item at index 0 in the pblite
+            list, making the item at index 1 correspond to field 1 in the
+            message.
+    """
+    if not isinstance(pblite, list):
+        logger.warning('Ignoring invalid message: expected list, got %r',
+                       type(pblite))
+        return
+    if ignore_first_item:
+        pblite = pblite[1:]
+    # If the last item of the list is a dict, use it as additional field/value
+    # mappings. This seems to be an optimization added for dealing with really
+    # high field numbers.
+    if len(pblite) > 0 and isinstance(pblite[-1], dict):
+        extra_fields = {int(field_number): value for field_number, value
+                        in pblite[-1].items()}
+        pblite = pblite[:-1]
+    else:
+        extra_fields = {}
+    fields_values = itertools.chain(enumerate(pblite, start=1),
+                                    extra_fields.items())
+    for field_number, value in fields_values:
+        if value is None:
+            continue
+        try:
+            field = message.DESCRIPTOR.fields_by_number[field_number]
+        except KeyError:
+            # If the tag number is unknown and the value is non-trivial, log a
+            # message to aid reverse-engineering the missing field in the
+            # message.
+            if value not in [[], '', 0]:
+                logger.debug('Message %r contains unknown field %s with value '
+                             '%r', message.__class__.__name__, field_number,
+                             value)
+            continue
+        if field.label == FieldDescriptor.LABEL_REPEATED:
+            _decode_repeated_field(message, field, value)
         else:
-            return input_
+            _decode_field(message, field, value)
 
-    def serialize(self, input_):
-        """Serialize the field.
 
-        Raises ValueError if the input is None and the Field is not optional.
-        """
-        return self.parse(input_)
+def encode(message):
+    """Encode Protocol Buffer message to pblite.
 
-class EnumField(object):
+    Args:
+        message: protocol buffer message to encode.
 
-    """An enumeration field.
+    Raises:
+        ValueError: one or more required fields in message are not set.
 
-    Corresponds to a specified set of constants defined by the given Enum.
-    EnumFields are always required, but an enum may contain None as a value.
+    Returns:
+        list representing a pblite-serialized message.
     """
-
-    def __init__(self, enum):
-        self._enum = enum
-
-    def parse(self, input_):
-        """Parse the field.
-
-        Raises ValueError if the input is not an option in the enum.
-        """
-        return self._enum(input_)
-
-    def serialize(self, input_):
-        """Serialize the field.
-
-        Raises ValueError if the input is not an option in the enum.
-        """
-        return self.parse(input_).value
-
-class RepeatedField(object):
-
-    """A field which may be repeated any number of times.
-
-    Corresponds to a list.
-    """
-
-    def __init__(self, field, is_optional=False):
-        self._field = field
-        self._is_optional = is_optional
-
-    def parse(self, input_, serialize=False):
-        """Parse the message.
-
-        Raises ValueError if the input is None and the RepeatedField is not
-        optional, or if the input is not a list.
-        """
-        # Validate input:
-        if input_ is None and not self._is_optional:
-            raise ValueError('RepeatedField is not optional')
-        elif input_ is None and self._is_optional:
-            return None
-        elif not isinstance(input_, list):
-            raise ValueError('RepeatedField expected list but got {}'
-                             .format(type(input_)))
-
-        res = []
-        for field_input in input_:
-            try:
-                if serialize:
-                    res.append(self._field.serialize(field_input))
-                else:
-                    res.append(self._field.parse(field_input))
-            except ValueError as e:
-                raise ValueError('RepeatedField item: {}'.format(e))
-        return res
-
-    def serialize(self, input_):
-        """Serialize the message.
-
-        Raises ValueError if the input is None and the RepeatedField is not
-        optional, or if the input is not a list.
-        """
-        return self.parse(input_, serialize=True)
-
-class Message(object):
-
-    """A field consisting of a collection of fields paired with a name.
-
-    Corresponds to an object (SimpleNamespace).
-
-    The input may be shorter than the number of fields and the trailing fields
-    will be assigned None. The input may be longer than the number of fields
-    and the trailing input items will be ignored. Fields with name None will
-    cause the corresponding input item to be optional and ignored.
-
-    """
-
-    def __init__(self, *args, is_optional=False):
-        self._name_field_pairs = args
-        self._is_optional = is_optional
-
-    def parse(self, input_):
-        """Parse the message.
-
-        Raises ValueError if the input is None and the Message is not optional,
-        or if any of the contained Fields fail to parse.
-        """
-        # Validate input:
-        if input_ is None and not self._is_optional:
-            raise ValueError('Message is not optional')
-        elif input_ is None and self._is_optional:
-            return None
-        elif not isinstance(input_, list):
-            raise ValueError('Message expected list but got {}'
-                             .format(type(input_)))
-
-        # Pad input with Nones if necessary
-        input_ = itertools.chain(input_, itertools.repeat(None))
-        res = types.SimpleNamespace()
-        for (name, field), field_input in zip(self._name_field_pairs, input_):
-            if name is not None:
-                try:
-                    p = field.parse(field_input)
-                except ValueError as e:
-                    raise ValueError('Message field \'{}\': {}'.
-                                     format(name, e))
-                setattr(res, name, p)
-        return res
-
-    def serialize(self, input_):
-        """Serialize the message.
-
-        Raises ValueError if the input is None and the Message is not optional,
-        or if any of the contained Fields fail to parse.
-        """
-        # Validate input:
-        if input_ is None and not self._is_optional:
-            raise ValueError('Message is not optional')
-        elif input_ is None and self._is_optional:
-            return None
-        elif not isinstance(input_, types.SimpleNamespace):
-            raise ValueError('Message expected types.SimpleNamespace but got {}'
-                             .format(type(input_)))
-
-        res = []
-        for name, field in self._name_field_pairs:
-            if name is not None:
-                field_input = getattr(input_, name)
-                res.append(field.serialize(field_input))
+    if not message.IsInitialized():
+        raise ValueError('Can not encode message: one or more required fields '
+                         'are not set')
+    pblite = []
+    # ListFields only returns fields that are set, so use this to only encode
+    # necessary fields
+    for field_descriptor, field_value in message.ListFields():
+        if field_descriptor.label == FieldDescriptor.LABEL_REPEATED:
+            if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:
+                encoded_value = [encode(item) for item in field_value]
+            elif field_descriptor.type == FieldDescriptor.TYPE_BYTES:
+                encoded_value = [base64.b64encode(val).decode()
+                                 for val in field_value]
             else:
-                res.append(None)
-        return res
+                encoded_value = list(field_value)
+        else:
+            if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:
+                encoded_value = encode(field_value)
+            elif field_descriptor.type == FieldDescriptor.TYPE_BYTES:
+                encoded_value = base64.b64encode(field_value).decode()
+            else:
+                encoded_value = field_value
+        # Add any necessary padding to the list
+        required_padding = max(field_descriptor.number - len(pblite), 0)
+        pblite.extend([None] * required_padding)
+        pblite[field_descriptor.number - 1] = encoded_value
+    return pblite

@@ -38,25 +38,35 @@ See the documentation for `installation and usage instructions`_.
 Projects using hangups
 ----------------------
 
-- `HangoutsBot`_: Python Whistler Bot
 - `HangupsBot`_: Bot for Google Hangouts
 - `Hubot Hangouts Adapter`_: Hubot adapter using hangups
 - `QHangups`_: Alternative client for Google Hangouts written in PyQt
+- `Ubuntu Hangups`_: Unofficial Google Hangouts client for Ubuntu Touch
 - `bastardbot`_: A bot to follow and interact with Google Hangouts conversations
+- `hangoutsbot/hangoutsbot`_: Google Hangouts bot
+- `hangups.el`_: Hangouts interface for Emacs
 - `pickups`_: IRC gateway for hangups (prototype)
 - `telepathy-hangups`_: Telepathy bindings for Google Chat via hangups library
+- `wardellchandler/HangoutsBot`_: Python 3 Bot for Hangouts
 
-.. _HangoutsBot: https://github.com/wardellchandler/HangoutsBot
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
 .. _Hubot Hangouts Adapter: https://github.com/groupby/hubot-hangups
 .. _QHangups: https://github.com/xmikos/qhangups
+.. _Ubuntu Hangups: https://github.com/tim-sueberkrueb/ubuntu-hangups
 .. _bastardbot: https://github.com/elamperti/bastardbot
+.. _hangoutsbot/hangoutsbot: https://github.com/hangoutsbot/hangoutsbot
+.. _hangups.el: https://github.com/jtamagnan/hangups.el
 .. _pickups: https://github.com/mtomwing/pickups
 .. _telepathy-hangups: https://github.com/davidedmundson/telepathy-hangups
+.. _wardellchandler/HangoutsBot: https://github.com/wardellchandler/HangoutsBot
 
 Related projects
 ----------------
 
 - `Hangish`_: A Google Hangouts native client for Sailfish
+- `hangupsjs`_: Port of hangups to Node.js
+- `hangover`_: The first native Mac OS X client for Google Hangouts
 
 .. _Hangish: https://github.com/rogora/hangish
+.. _hangupsjs: https://github.com/algesten/hangupsjs
+.. _hangover: https://github.com/psobot/hangover

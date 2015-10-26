@@ -1,0 +1,36 @@
+syntax = "proto2";
+
+message TestRequiredMessage {
+  required int32 test_required_int = 1;
+}
+
+message TestMessage {
+  // integers
+  optional int32 test_int = 1;
+  repeated int32 test_repeated_int = 2;
+
+  // strings
+  optional string test_string = 3;
+  repeated string test_repeated_string = 4;
+
+  // enums
+  enum TestEnum {
+    TEST_0 = 0;
+    TEST_1 = 1;
+    TEST_2 = 2;
+    TEST_3 = 3;
+  }
+  optional TestEnum test_enum = 5;
+  repeated TestEnum test_repeated_enum = 6;
+
+  // messages
+  message EmbeddedMessage {
+    optional int32 test_embedded_int = 1;
+  }
+  optional EmbeddedMessage test_embedded_message = 7;
+  repeated EmbeddedMessage test_repeated_embedded_message = 8;
+
+  // bytes
+  optional bytes test_bytes = 9;
+  repeated bytes test_repeated_bytes = 10;
+}

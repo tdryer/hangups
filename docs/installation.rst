@@ -18,6 +18,27 @@ Simply run pip to install the hangups package::
 
   pip3 install hangups
 
+Docker
+------
+
+hangups is available as an automated build on the Docker Hub as
+`tdryer/hangups`_.
+
+.. _tdryer/hangups: https://registry.hub.docker.com/u/tdryer/hangups/
+
+Create a data-only container for hangups to allow upgrading without losing your
+login session::
+
+  docker run --name hangups-session --entrypoint true tdryer/hangups
+
+Whenever you want to start hangups, run a new container::
+
+  docker run -it --rm --name hangups --volumes-from hangups-session tdryer/hangups
+
+To upgrade hangups, pull the latest version of the image::
+
+  docker pull tdryer/hangups
+
 Arch Linux
 ----------
 
