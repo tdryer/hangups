@@ -830,16 +830,18 @@ def main():
     dirs = appdirs.AppDirs('hangups', 'hangups')
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_token_path = os.path.join(dirs.user_cache_dir, 'refresh_token.txt')
-    default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
+    default_config_path = 'default.conf'
+    user_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
 
     # Create a default empty config file if does not exist.
-    dir_maker(default_config_path)
-    if not os.path.isfile(default_config_path):
-        with open(default_config_path, 'a') as cfg:
+    dir_maker(user_config_path)
+    if not os.path.isfile(user_config_path):
+        with open(user_config_path, 'a') as cfg:
             cfg.write("")
 
     parser = configargparse.ArgumentParser(
-        prog='hangups', default_config_files=[default_config_path],
+        prog='hangups', default_config_files=[default_config_path,
+                                              user_config_path],
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter,
         add_help=False,  # Disable help so we can add it to the correct group.
     )
