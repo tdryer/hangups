@@ -853,7 +853,7 @@ def main():
     general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
                       default='default', help='colour scheme to use')
     general_group.add('-c', '--config', help='configuration file path',
-                      is_config_file=True, default=default_config_path)
+                      is_config_file=True, default=user_config_path)
     general_group.add('-v', '--version', action='version',
                       version='hangups {}'.format(hangups.__version__))
     general_group.add('-d', '--debug', action='store_true',
