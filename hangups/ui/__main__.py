@@ -15,8 +15,6 @@ from hangups.ui.utils import get_conv_name
 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-MESSAGE_TIME_FORMAT = '(%I:%M:%S %p)'
-MESSAGE_DATETIME_FORMAT = '\n< %y-%m-%d >\n(%I:%M:%S %p)'
 COL_SCHEMES = {
     # Very basic scheme with no colour
     'default': {
@@ -43,10 +41,11 @@ COL_SCHEMES = {
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, refresh_token_path, keybindings, palette,
+    def __init__(self, refresh_token_path, keybindings, palette, datetimefmt,
                  disable_notifier):
         """Start the user interface."""
         self._keys = keybindings
+        self._datetimefmt = datetimefmt
 
         set_terminal_title('hangups')
 
@@ -119,7 +118,8 @@ class ChatUI(object):
             widget = ConversationWidget(self._client,
                                         self._conv_list.get(conv_id),
                                         set_title_cb,
-                                        self._keys)
+                                        self._keys,
+                                        self._datetimefmt)
             self._conv_widgets[conv_id] = widget
         return self._conv_widgets[conv_id]
 
@@ -428,12 +428,14 @@ class MessageWidget(urwid.WidgetWrap):
 
     """Widget for displaying a single message in a conversation."""
 
-    def __init__(self, timestamp, text, user=None, show_date=False):
+    def __init__(self, timestamp, text, user=None, show_date=False,
+                 datetimefmt={}):
         # Save the timestamp as an attribute for sorting.
         self.timestamp = timestamp
         text = [
             ('msg_date', self._get_date_str(timestamp,
-                                            show_date=show_date) + ' '),
+                                            show_date=show_date,
+                                            datetimefmt=datetimefmt) + ' '),
             ('msg_text', text)
         ]
         if user is not None:
@@ -442,16 +444,20 @@ class MessageWidget(urwid.WidgetWrap):
         super().__init__(self._widget)
 
     @staticmethod
-    def _get_date_str(timestamp, show_date=False):
+    def _get_date_str(timestamp, show_date=False, datetimefmt={}):
         """Convert UTC datetime into user interface string."""
-        fmt = MESSAGE_DATETIME_FORMAT if show_date else MESSAGE_TIME_FORMAT
+        fmt = ''
+        if show_date:
+            fmt += '\n'+datetimefmt.get('date', '')+'\n'
+        fmt += datetimefmt.get('time', '')
         return timestamp.astimezone(tz=None).strftime(fmt)
 
     def __lt__(self, other):
         return self.timestamp < other.timestamp
 
     @staticmethod
-    def from_conversation_event(conversation, conv_event, prev_conv_event):
+    def from_conversation_event(conversation, conv_event, prev_conv_event,
+                                datetimefmt):
         """Return MessageWidget representing a ConversationEvent.
 
         Returns None if the ConversationEvent does not have a widget
@@ -467,7 +473,7 @@ class MessageWidget(urwid.WidgetWrap):
             is_new_day = False
         if isinstance(conv_event, hangups.ChatMessageEvent):
             return MessageWidget(conv_event.timestamp, conv_event.text, user,
-                                 show_date=is_new_day)
+                                 show_date=is_new_day, datetimefmt=datetimefmt)
         elif isinstance(conv_event, hangups.RenameEvent):
             if conv_event.new_name == '':
                 text = ('{} cleared the conversation name'
@@ -476,7 +482,7 @@ class MessageWidget(urwid.WidgetWrap):
                 text = ('{} renamed the conversation to {}'
                         .format(user.first_name, conv_event.new_name))
             return MessageWidget(conv_event.timestamp, text,
-                                 show_date=is_new_day)
+                                 show_date=is_new_day, datetimefmt=datetimefmt)
         elif isinstance(conv_event, hangups.MembershipChangeEvent):
             event_users = [conversation.get_user(user_id) for user_id
                            in conv_event.participant_ids]
@@ -487,7 +493,7 @@ class MessageWidget(urwid.WidgetWrap):
             else:  # LEAVE
                 text = ('{} left the conversation'.format(names))
             return MessageWidget(conv_event.timestamp, text,
-                                 show_date=is_new_day)
+                                 show_date=is_new_day, datetimefmt=datetimefmt)
         else:
             return None
 
@@ -500,11 +506,12 @@ class ConversationEventListWalker(urwid.ListWalker):
 
     POSITION_LOADING = 'loading'
 
-    def __init__(self, conversation):
+    def __init__(self, conversation, datetimefmt):
         self._conversation = conversation  # Conversation
         self._is_scrolling = False  # Whether the user is trying to scroll up
         self._is_loading = False  # Whether we're currently loading more events
         self._first_loaded = False  # Whether the first event is loaded
+        self._datetimefmt = datetimefmt
 
         # Focus position is the first displayable event ID, or None.
         self._focus_position = next((
@@ -517,7 +524,8 @@ class ConversationEventListWalker(urwid.ListWalker):
     def _is_event_displayable(self, conv_event):
         """Return True if the ConversationWidget is displayable."""
         widget = MessageWidget.from_conversation_event(self._conversation,
-                                                       conv_event, None)
+                                                       conv_event, None,
+                                                       self._datetimefmt)
         return widget is not None
 
     def _handle_event(self, conv_event):
@@ -587,7 +595,7 @@ class ConversationEventListWalker(urwid.ListWalker):
             # timestamp can be shown if this event occurred on a different day.
             widget = MessageWidget.from_conversation_event(
                 self._conversation, self._conversation.get_event(position),
-                prev_event
+                prev_event, self._datetimefmt
             )
         except KeyError:
             raise IndexError('Invalid position: {}'.format(position))
@@ -648,7 +656,8 @@ class ConversationEventListWalker(urwid.ListWalker):
 class ConversationWidget(urwid.WidgetWrap):
     """Widget for interacting with a conversation."""
 
-    def __init__(self, client, conversation, set_title_cb, keybindings):
+    def __init__(self, client, conversation, set_title_cb, keybindings,
+                 datetimefmt):
         self._client = client
         self._conversation = conversation
         self._conversation.on_event.add_observer(self._on_event)
@@ -661,7 +670,8 @@ class ConversationWidget(urwid.WidgetWrap):
         self._set_title_cb = set_title_cb
         self._set_title()
 
-        self._list_walker = ConversationEventListWalker(conversation)
+        self._list_walker = ConversationEventListWalker(conversation,
+                                                        datetimefmt)
         self._list_box = urwid.ListBox(self._list_walker)
         self._status_widget = StatusLineWidget(client, conversation)
         self._widget = urwid.Pile([
@@ -850,6 +860,10 @@ def main():
                       help='path used to store OAuth refresh token')
     general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
                       default='default', help='colour scheme to use')
+    general_group.add('--date-format', default='< %y-%m-%d >',
+                      help='date format string')
+    general_group.add('--time-format', default='(%I:%M:%S %p)',
+                      help='time format string')
     general_group.add('-c', '--config', help='configuration file path',
                       is_config_file=True, default=default_config_path)
     general_group.add('-v', '--version', action='version',
@@ -885,6 +899,9 @@ def main():
     # urwid makes asyncio's debugging logs VERY noisy, so adjust the log level:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
 
+    datetimefmt = {'date': args.date_format,
+                   'time': args.time_format}
+
     try:
         ChatUI(args.token_path, {
             'next_tab': args.key_next_tab,
@@ -894,7 +911,7 @@ def main():
             'menu': args.key_menu,
             'up': args.key_up,
             'down': args.key_down
-        }, COL_SCHEMES[args.col_scheme], args.disable_notifications)
+        }, COL_SCHEMES[args.col_scheme], datetimefmt, args.disable_notifications)
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
     except:
