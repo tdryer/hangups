@@ -428,14 +428,13 @@ class MessageWidget(urwid.WidgetWrap):
 
     """Widget for displaying a single message in a conversation."""
 
-    def __init__(self, timestamp, text, user=None, show_date=False,
-                 datetimefmt={}):
+    def __init__(self, timestamp, text, datetimefmt, user=None,
+                 show_date=False):
         # Save the timestamp as an attribute for sorting.
         self.timestamp = timestamp
         text = [
-            ('msg_date', self._get_date_str(timestamp,
-                                            show_date=show_date,
-                                            datetimefmt=datetimefmt) + ' '),
+            ('msg_date', self._get_date_str(timestamp, datetimefmt,
+                                            show_date=show_date) + ' '),
             ('msg_text', text)
         ]
         if user is not None:
@@ -444,7 +443,7 @@ class MessageWidget(urwid.WidgetWrap):
         super().__init__(self._widget)
 
     @staticmethod
-    def _get_date_str(timestamp, show_date=False, datetimefmt={}):
+    def _get_date_str(timestamp, datetimefmt, show_date=False):
         """Convert UTC datetime into user interface string."""
         fmt = ''
         if show_date:
@@ -472,8 +471,8 @@ class MessageWidget(urwid.WidgetWrap):
         else:
             is_new_day = False
         if isinstance(conv_event, hangups.ChatMessageEvent):
-            return MessageWidget(conv_event.timestamp, conv_event.text, user,
-                                 show_date=is_new_day, datetimefmt=datetimefmt)
+            return MessageWidget(conv_event.timestamp, conv_event.text,
+                                 datetimefmt, user, show_date=is_new_day)
         elif isinstance(conv_event, hangups.RenameEvent):
             if conv_event.new_name == '':
                 text = ('{} cleared the conversation name'
@@ -481,8 +480,8 @@ class MessageWidget(urwid.WidgetWrap):
             else:
                 text = ('{} renamed the conversation to {}'
                         .format(user.first_name, conv_event.new_name))
-            return MessageWidget(conv_event.timestamp, text,
-                                 show_date=is_new_day, datetimefmt=datetimefmt)
+            return MessageWidget(conv_event.timestamp, text, datetimefmt,
+                                 show_date=is_new_day)
         elif isinstance(conv_event, hangups.MembershipChangeEvent):
             event_users = [conversation.get_user(user_id) for user_id
                            in conv_event.participant_ids]
@@ -492,8 +491,8 @@ class MessageWidget(urwid.WidgetWrap):
                         .format(user.first_name, names))
             else:  # LEAVE
                 text = ('{} left the conversation'.format(names))
-            return MessageWidget(conv_event.timestamp, text,
-                                 show_date=is_new_day, datetimefmt=datetimefmt)
+            return MessageWidget(conv_event.timestamp, text, datetimefmt,
+                                 show_date=is_new_day)
         else:
             return None
 
@@ -903,15 +902,18 @@ def main():
                    'time': args.time_format}
 
     try:
-        ChatUI(args.token_path, {
-            'next_tab': args.key_next_tab,
-            'prev_tab': args.key_prev_tab,
-            'close_tab': args.key_close_tab,
-            'quit': args.key_quit,
-            'menu': args.key_menu,
-            'up': args.key_up,
-            'down': args.key_down
-        }, COL_SCHEMES[args.col_scheme], datetimefmt, args.disable_notifications)
+        ChatUI(
+            args.token_path, {
+                'next_tab': args.key_next_tab,
+                'prev_tab': args.key_prev_tab,
+                'close_tab': args.key_close_tab,
+                'quit': args.key_quit,
+                'menu': args.key_menu,
+                'up': args.key_up,
+                'down': args.key_down
+            }, COL_SCHEMES[args.col_scheme], datetimefmt,
+            args.disable_notifications
+        )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
     except:
