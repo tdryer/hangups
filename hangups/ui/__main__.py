@@ -12,6 +12,7 @@ import readlike
 import hangups
 from hangups.ui.notify import Notifier
 from hangups.ui.utils import get_conv_name
+from hangups.ui.utils import add_color_to_scheme
 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -36,13 +37,15 @@ COL_SCHEMES = {
         ('tab_background', 'underline', 'black'),
     },
 }
+COL_SCHEME_NAMES = ('active_tab', 'inactive_tab', 'msg_date', 'msg_sender',
+                    'msg_text', 'status_line', 'tab_background')
 
 
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, refresh_token_path, keybindings, palette, datetimefmt,
-                 disable_notifier):
+    def __init__(self, refresh_token_path, keybindings, palette,
+                 palette_colors, datetimefmt, disable_notifier):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
@@ -73,6 +76,7 @@ class ChatUI(object):
             event_loop=urwid.AsyncioEventLoop(loop=loop)
         )
 
+        self._urwid_loop.screen.set_terminal_properties(colors=palette_colors)
         self._urwid_loop.start()
         try:
             # Returns when the connection is closed.
@@ -887,6 +891,18 @@ def main():
                   help='keybinding for alternate up key')
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
+
+    #add color scheme options
+    col_group = parser.add_argument_group('Colors')
+    col_group.add('--col-palette-colors', choices=('16', '88', '265'),
+                  default=16, help='Amount of available colors')
+    for name in COL_SCHEME_NAMES:
+        new_name = name.replace('_', '-')
+        col_group.add('--col-' + new_name + '-fg',
+                      help=name + ' foreground color')
+        col_group.add('--col-' + new_name + '-bg',
+                      help=name + ' background color')
+    
     args = parser.parse_args()
 
     # Create all necessary directories.
@@ -901,6 +917,19 @@ def main():
     datetimefmt = {'date': args.date_format,
                    'time': args.time_format}
 
+    #setup color scheme
+    try:
+        palette_colors = int(args.col_palette_colors)
+    except ValueError:
+        palette_colors = 16
+
+    col_scheme = COL_SCHEMES[args.col_scheme]
+    for name in COL_SCHEME_NAMES:
+        col_scheme = add_color_to_scheme(col_scheme, name,
+                                         eval('args.col_' + name + '_fg'),
+                                         eval('args.col_' + name + '_bg'),
+                                         palette_colors)
+        
     try:
         ChatUI(
             args.token_path, {
@@ -911,8 +940,8 @@ def main():
                 'menu': args.key_menu,
                 'up': args.key_up,
                 'down': args.key_down
-            }, COL_SCHEMES[args.col_scheme], datetimefmt,
-            args.disable_notifications
+            }, col_scheme, palette_colors,
+            datetimefmt, args.disable_notifications
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
