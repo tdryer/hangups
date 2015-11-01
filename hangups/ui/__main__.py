@@ -897,20 +897,20 @@ def main():
     col_group.add('--col-palette-colors', choices=('16', '88', '265'),
                   default=16, help='Amount of available colors')
     for name in COL_SCHEME_NAMES:
-        new_name = name.replace('_', '-')
-        col_group.add('--col-' + new_name + '-fg',
+        col_group.add('--col-' + name.replace('_', '-') + '-fg',
                       help=name + ' foreground color')
-        col_group.add('--col-' + new_name + '-bg',
+        col_group.add('--col-' + name.replace('_', '-') + '-bg',
                       help=name + ' background color')
-    
+
     args = parser.parse_args()
 
     # Create all necessary directories.
     for path in [args.log, args.token_path]:
         dir_maker(path)
 
-    log_level = logging.DEBUG if args.debug else logging.WARNING
-    logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
+    logging.basicConfig(filename=args.log,
+                        level=logging.DEBUG if args.debug else logging.WARNING,
+                        format=LOG_FORMAT)
     # urwid makes asyncio's debugging logs VERY noisy, so adjust the log level:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
 
@@ -918,18 +918,15 @@ def main():
                    'time': args.time_format}
 
     #setup color scheme
-    try:
-        palette_colors = int(args.col_palette_colors)
-    except ValueError:
-        palette_colors = 16
+    palette_colors = int(args.col_palette_colors)
 
     col_scheme = COL_SCHEMES[args.col_scheme]
     for name in COL_SCHEME_NAMES:
         col_scheme = add_color_to_scheme(col_scheme, name,
-                                         eval('args.col_' + name + '_fg'),
-                                         eval('args.col_' + name + '_bg'),
+                                         getattr(args, 'col_' + name + '_fg'),
+                                         getattr(args, 'col_' + name + '_bg'),
                                          palette_colors)
-        
+
     try:
         ChatUI(
             args.token_path, {
