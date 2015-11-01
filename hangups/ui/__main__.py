@@ -41,8 +41,8 @@ COL_SCHEMES = {
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, refresh_token_path, keybindings, palette, datetimefmt,
-                 disable_notifier):
+    def __init__(self, refresh_token_path, keybindings, palette, palette_colors,
+                 datetimefmt, disable_notifier):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
@@ -73,6 +73,7 @@ class ChatUI(object):
             event_loop=urwid.AsyncioEventLoop(loop=loop)
         )
 
+        self._urwid_loop.screen.set_terminal_properties(colors=palette_colors)
         self._urwid_loop.start()
         try:
             # Returns when the connection is closed.
@@ -822,6 +823,27 @@ def set_terminal_title(title):
     """Use an xterm escape sequence to set the terminal title."""
     sys.stdout.write("\x1b]2;{}\x07".format(title))
 
+def add_color_to_scheme(scheme,name,foreground,background,palette_colors):
+    """Add forground and background colours to a color scheme"""
+    if foreground == None and background == None:
+        return scheme
+
+    if foreground == None:
+        forground = ""
+    if background == None:
+        background = ""
+
+    new_scheme = []
+    for item in scheme:
+        if item[0] == name:
+            if palette_colors > 16:
+                new_scheme.append((name,'','','',foreground,background))
+            else:
+                new_scheme.append((name,foreground,background))
+        else:
+            new_scheme.append(item)
+    return new_scheme
+
 
 def dir_maker(path):
     """Create a directory if it does not exist."""
@@ -887,6 +909,37 @@ def main():
                   help='keybinding for alternate up key')
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
+    col_group = parser.add_argument_group('Colors')
+    col_group.add('--col-palette-colors',choices=('16','88','265'),
+                  default=16, help='Amount of available colors')
+    col_group.add('--col-active-tab-fg',
+                  help='Active tab foreground color')
+    col_group.add('--col-active-tab-bg',
+                  help='Active tab background color')
+    col_group.add('--col-inactive-tab-fg',
+                  help='Inactive tab foreground color')
+    col_group.add('--col-inactive-tab-bg',
+                  help='Inactive tab background color')
+    col_group.add('--col-msg-date-fg',
+                  help='Message date foreground color')
+    col_group.add('--col-msg-date-bg',
+                  help='Message date background color')
+    col_group.add('--col-msg-sender-fg',
+                  help='Message sender foreground color')
+    col_group.add('--col-msg-sender-bg',
+                  help='Message sender background color')
+    col_group.add('--col-msg-text-fg',
+                  help='Message text foreground color')
+    col_group.add('--col-msg-text-bg',
+                  help='Message text background color')
+    col_group.add('--col-status-line-fg',
+                  help='Status line foreground color')
+    col_group.add('--col-status-line-bg',
+                  help='Status line background color')
+    col_group.add('--col-tab-background-fg',
+                  help='tab-background foreground color')
+    col_group.add('--col-tab-background-bg',
+                  help='tab background background color')
     args = parser.parse_args()
 
     # Create all necessary directories.
@@ -901,6 +954,42 @@ def main():
     datetimefmt = {'date': args.date_format,
                    'time': args.time_format}
 
+    #setup color scheme
+    try:
+        palette_colors = int(args.col_palette_colors)
+    except ValueError:
+        palette_colors = 16
+
+    col_scheme = COL_SCHEMES[args.col_scheme]
+    col_scheme = add_color_to_scheme(col_scheme,'active_tab',
+                                    args.col_active_tab_fg,
+                                    args.col_active_tab_bg,
+                                    palette_colors)
+    col_scheme = add_color_to_scheme(col_scheme,'inactive_tab',
+                                    args.col_inactive_tab_fg,
+                                    args.col_inactive_tab_bg,
+                                    palette_colors)
+    col_scheme = add_color_to_scheme(col_scheme,'msg_date',
+                                    args.col_msg_date_fg,
+                                    args.col_msg_date_bg,
+                                    palette_colors)
+    col_scheme = add_color_to_scheme(col_scheme,'msg_sender',
+                                    args.col_msg_sender_fg,
+                                    args.col_msg_sender_bg,
+                                    palette_colors)
+    col_scheme = add_color_to_scheme(col_scheme,'msg_text',
+                                    args.col_msg_text_fg,
+                                    args.col_msg_text_bg,
+                                    palette_colors)
+    col_scheme = add_color_to_scheme(col_scheme,'status_line',
+                                    args.col_status_line_fg,
+                                    args.col_status_line_bg,
+                                    palette_colors)
+    col_scheme = add_color_to_scheme(col_scheme,'tab_background',
+                                    args.col_tab_background_fg,
+                                    args.col_tab_background_bg,
+                                    palette_colors)
+
     try:
         ChatUI(
             args.token_path, {
@@ -911,8 +1000,8 @@ def main():
                 'menu': args.key_menu,
                 'up': args.key_up,
                 'down': args.key_down
-            }, COL_SCHEMES[args.col_scheme], datetimefmt,
-            args.disable_notifications
+            }, col_scheme, palette_colors,
+            datetimefmt, args.disable_notifications
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
