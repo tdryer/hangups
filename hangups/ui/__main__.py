@@ -9,6 +9,7 @@ import os
 import sys
 import urwid
 import readlike
+import json
 
 import hangups
 from hangups.ui.notify import Notifier
@@ -860,12 +861,47 @@ def main():
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_token_path = os.path.join(dirs.user_cache_dir, 'refresh_token.txt')
     default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
+    default_colors_path = os.path.join(dirs.user_config_dir, 'colors')
 
     # Create a default empty config file if does not exist.
     dir_maker(default_config_path)
     if not os.path.isfile(default_config_path):
         with open(default_config_path, 'a') as cfg:
             cfg.write("")
+
+    # Create empty colors directory if there is none
+    dir_maker(default_colors_path)
+
+    # Read .col files
+    attributes = {'active_tab', 'inactive_tab', 'msg_date', 'msg_sender', 'msg_text', 'status_line', 'tab_background'}
+    for root, dirs, files in os.walk(default_colors_path):
+        for filename in files:
+            splitName = os.path.splitext(filename)
+            if splitName[1] == '.json':
+                obj = []
+                usedAttrs = []
+
+                name = splitName[0]
+
+                with open(os.path.join(root, filename), "r") as f:
+                    try:
+                        data = json.load(f)
+                    except:
+                        print("Error loading JSON file (" + filename + ")")
+                        return
+                    for key, subdict in data.items():
+                        retList = [key,'','']
+                        if 'foreground' in subdict:
+                            retList[1] = subdict['foreground']
+                        if 'background' in subdict:
+                            retList[2] = subdict['background']
+                        usedAttrs.append(key)
+                        obj.append(tuple(retList))
+
+                for attr in (attributes - set(usedAttrs)):
+                    obj.append(tuple([attr, '', '']))
+
+                COL_SCHEMES[name] = set(obj)
 
     parser = configargparse.ArgumentParser(
         prog='hangups', default_config_files=[default_config_path],
