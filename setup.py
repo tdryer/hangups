@@ -49,8 +49,7 @@ install_requires = [
     'ReParser==1.4.3',
     # use alpha protobuf for official Python 3 support
     'protobuf==3.0.0a3',
-    # use forked urwid until there's a 1.3 release with colour bugfix
-    'hangups-urwid==1.2.2-dev',
+    'urwid==1.3.1',
 ]
 
 
