@@ -864,8 +864,6 @@ def main():
                       help='show this help message and exit')
     general_group.add('--token-path', default=default_token_path,
                       help='path used to store OAuth refresh token')
-    general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
-                      default='default', help='colour scheme to use')
     general_group.add('--date-format', default='< %y-%m-%d >',
                       help='date format string')
     general_group.add('--time-format', default='(%I:%M:%S %p)',
@@ -895,8 +893,10 @@ def main():
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
 
-    #add color scheme options
+    # add color scheme options
     col_group = parser.add_argument_group('Colors')
+    col_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
+                  default='default', help='colour scheme to use')
     col_group.add('--col-palette-colors', choices=('16', '88', '265'),
                   default=16, help='Amount of available colors')
     for name in COL_SCHEME_NAMES:
@@ -920,7 +920,7 @@ def main():
     datetimefmt = {'date': args.date_format,
                    'time': args.time_format}
 
-    #setup color scheme
+    # setup color scheme
     palette_colors = int(args.col_palette_colors)
 
     col_scheme = COL_SCHEMES[args.col_scheme]

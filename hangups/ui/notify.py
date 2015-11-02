@@ -24,7 +24,9 @@ if sys.platform == 'darwin':
          'title "{convo_name}" '
          'subtitle "{sender_name}"'),
     ]
-    NOTIFY_ESCAPER = lambda s: s.replace('"', '\\"')
+
+    def NOTIFY_ESCAPER(s):
+        return s.replace('"', '\\"')
 else:
     NOTIFY_CMD = [
         'gdbus', 'call', '--session', '--dest',
@@ -33,6 +35,7 @@ else:
         'org.freedesktop.Notifications.Notify', 'hangups', '{replaces_id}', '',
         '{sender_name}', '{msg_text}', '[]', '{{}}', ' -1'
     ]
+
     def NOTIFY_ESCAPER(text):
         """Escape text for passing into gdbus."""
         # Prevent the notifier from interpreting markup:
