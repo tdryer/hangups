@@ -897,7 +897,7 @@ def main():
     col_group = parser.add_argument_group('Colors')
     col_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
                   default='default', help='colour scheme to use')
-    col_group.add('--col-palette-colors', choices=('16', '88', '265'),
+    col_group.add('--col-palette-colors', choices=('16', '88', '256'),
                   default=16, help='Amount of available colors')
     for name in COL_SCHEME_NAMES:
         col_group.add('--col-' + name.replace('_', '-') + '-fg',
