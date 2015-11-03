@@ -859,7 +859,7 @@ def main():
     dirs = appdirs.AppDirs('hangups', 'hangups')
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_token_path = os.path.join(dirs.user_cache_dir, 'refresh_token.txt')
-    default_config_path = 'default.conf'
+    default_config_path = 'hangups.conf'
     user_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
 
     # Create a default empty config file if does not exist.
