@@ -859,16 +859,18 @@ def main():
     dirs = appdirs.AppDirs('hangups', 'hangups')
     default_log_path = os.path.join(dirs.user_log_dir, 'hangups.log')
     default_token_path = os.path.join(dirs.user_cache_dir, 'refresh_token.txt')
-    default_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
+    default_config_path = 'hangups.conf'
+    user_config_path = os.path.join(dirs.user_config_dir, 'hangups.conf')
 
     # Create a default empty config file if does not exist.
-    dir_maker(default_config_path)
-    if not os.path.isfile(default_config_path):
-        with open(default_config_path, 'a') as cfg:
+    dir_maker(user_config_path)
+    if not os.path.isfile(user_config_path):
+        with open(user_config_path, 'a') as cfg:
             cfg.write("")
 
     parser = configargparse.ArgumentParser(
-        prog='hangups', default_config_files=[default_config_path],
+        prog='hangups', default_config_files=[default_config_path,
+                                              user_config_path],
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter,
         add_help=False,  # Disable help so we can add it to the correct group.
     )
@@ -884,7 +886,7 @@ def main():
     general_group.add('--time-format', default='(%I:%M:%S %p)',
                       help='time format string')
     general_group.add('-c', '--config', help='configuration file path',
-                      is_config_file=True, default=default_config_path)
+                      is_config_file=True, default=user_config_path)
     general_group.add('-v', '--version', action='version',
                       version='hangups {}'.format(hangups.__version__))
     general_group.add('-d', '--debug', action='store_true',
