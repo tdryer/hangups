@@ -13,6 +13,7 @@ import readlike
 import hangups
 from hangups.ui.notify import Notifier
 from hangups.ui.utils import get_conv_name
+from hangups.ui.utils import add_color_to_scheme
 
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -23,6 +24,7 @@ COL_SCHEMES = {
         ('inactive_tab', 'standout', ''),
         ('msg_date', '', ''),
         ('msg_sender', '', ''),
+        ('msg_self', '', ''),
         ('msg_text', '', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'standout', ''),
@@ -32,18 +34,21 @@ COL_SCHEMES = {
         ('inactive_tab', 'underline', 'light green'),
         ('msg_date', 'dark cyan', ''),
         ('msg_sender', 'dark blue', ''),
+        ('msg_self', 'light blue', ''),
         ('msg_text', '', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'underline', 'black'),
     },
 }
+COL_SCHEME_NAMES = ('active_tab', 'inactive_tab', 'msg_date', 'msg_sender',
+                    'msg_self', 'msg_text', 'status_line', 'tab_background')
 
 
 class ChatUI(object):
     """User interface for hangups."""
 
-    def __init__(self, refresh_token_path, keybindings, palette, datetimefmt,
-                 disable_notifier):
+    def __init__(self, refresh_token_path, keybindings, palette,
+                 palette_colors, datetimefmt, disable_notifier):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
@@ -74,6 +79,7 @@ class ChatUI(object):
             event_loop=urwid.AsyncioEventLoop(loop=loop)
         )
 
+        self._urwid_loop.screen.set_terminal_properties(colors=palette_colors)
         self._urwid_loop.start()
         # Enable bracketed paste mode after the terminal has been switched to
         # the alternate screen (after MainLoop.start() to work around bug
@@ -448,7 +454,8 @@ class MessageWidget(urwid.WidgetWrap):
             ('msg_text', text)
         ]
         if user is not None:
-            text.insert(1, ('msg_sender', user.first_name + ': '))
+            text.insert(1, ('msg_self' if user.is_self else 'msg_sender',
+                            user.first_name + ': '))
         self._widget = urwid.Text(text)
         super().__init__(self._widget)
 
@@ -879,8 +886,6 @@ def main():
                       help='show this help message and exit')
     general_group.add('--token-path', default=default_token_path,
                       help='path used to store OAuth refresh token')
-    general_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
-                      default='default', help='colour scheme to use')
     general_group.add('--date-format', default='< %y-%m-%d >',
                       help='date format string')
     general_group.add('--time-format', default='(%I:%M:%S %p)',
@@ -909,19 +914,43 @@ def main():
                   help='keybinding for alternate up key')
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
+
+    # add color scheme options
+    col_group = parser.add_argument_group('Colors')
+    col_group.add('--col-scheme', choices=COL_SCHEMES.keys(),
+                  default='default', help='colour scheme to use')
+    col_group.add('--col-palette-colors', choices=('16', '88', '256'),
+                  default=16, help='Amount of available colors')
+    for name in COL_SCHEME_NAMES:
+        col_group.add('--col-' + name.replace('_', '-') + '-fg',
+                      help=name + ' foreground color')
+        col_group.add('--col-' + name.replace('_', '-') + '-bg',
+                      help=name + ' background color')
+
     args = parser.parse_args()
 
     # Create all necessary directories.
     for path in [args.log, args.token_path]:
         dir_maker(path)
 
-    log_level = logging.DEBUG if args.debug else logging.WARNING
-    logging.basicConfig(filename=args.log, level=log_level, format=LOG_FORMAT)
+    logging.basicConfig(filename=args.log,
+                        level=logging.DEBUG if args.debug else logging.WARNING,
+                        format=LOG_FORMAT)
     # urwid makes asyncio's debugging logs VERY noisy, so adjust the log level:
     logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     datetimefmt = {'date': args.date_format,
                    'time': args.time_format}
+
+    # setup color scheme
+    palette_colors = int(args.col_palette_colors)
+
+    col_scheme = COL_SCHEMES[args.col_scheme]
+    for name in COL_SCHEME_NAMES:
+        col_scheme = add_color_to_scheme(col_scheme, name,
+                                         getattr(args, 'col_' + name + '_fg'),
+                                         getattr(args, 'col_' + name + '_bg'),
+                                         palette_colors)
 
     try:
         ChatUI(
@@ -933,8 +962,8 @@ def main():
                 'menu': args.key_menu,
                 'up': args.key_up,
                 'down': args.key_down
-            }, COL_SCHEMES[args.col_scheme], datetimefmt,
-            args.disable_notifications
+            }, col_scheme, palette_colors,
+            datetimefmt, args.disable_notifications
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
