@@ -1,27 +1,26 @@
 Installation
 ============
 
-hangups requires `Python`_ 3.3 or 3.4, and is known to work on Linux and Mac OS
-X.
+hangups requires `Python`_ 3.3, 3.4, or 3.5 and is known to work on Linux, Mac
+OS X, and Windows (with `Cygwin`_).
 
 .. _Python: https://www.python.org/
+.. _Cygwin: http://cygwin.com/
 
 Python Package Index (PyPI)
 ---------------------------
 
-hangups is listed in `PyPI`_, and may be installed using `pip`_.
-
-.. _PyPI: https://pypi.python.org/pypi
-.. _pip: https://pip.pypa.io/
-
-Simply run pip to install the hangups package::
+hangups is listed in `PyPI`_, and may be installed using `pip`_::
 
   pip3 install hangups
+
+.. _PyPI: https://pypi.python.org/pypi/hangups
+.. _pip: https://pip.pypa.io/
 
 Docker
 ------
 
-hangups is available as an automated build on the Docker Hub as
+hangups is available as an automated build on `Docker Hub`_ as
 `tdryer/hangups`_.
 
 .. _tdryer/hangups: https://registry.hub.docker.com/u/tdryer/hangups/
@@ -39,6 +38,8 @@ To upgrade hangups, pull the latest version of the image::
 
   docker pull tdryer/hangups
 
+.. _Docker Hub: https://hub.docker.com/
+
 Arch Linux
 ----------
 
@@ -50,10 +51,8 @@ Repository.
 Install from Source
 -------------------
 
-The hangups code is also available from GitHub.
-
-Either download and extract a `hangups release archive`_, or clone the `hangups
-repository on GitHub`_::
+The hangups code is available from GitHub. Either download and extract a
+`hangups release archive`_, or clone the `hangups repository`_::
 
   git clone https://github.com/tdryer/hangups.git
 
@@ -63,5 +62,5 @@ Switch to the hangups directory and install the package::
   python3 setup.py install
 
 .. _hangups release archive: https://github.com/tdryer/hangups/releases
-.. _hangups repository on GitHub: https://github.com/tdryer/hangups
+.. _hangups repository: https://github.com/tdryer/hangups
 
