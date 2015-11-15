@@ -32,7 +32,22 @@ class PylintCommand(TestCommand):
     def run_tests(self):
         import pylint.lint
         # Exits with number of messages.
-        pylint.lint.Run(['--reports=n', 'hangups', ])
+        pylint.lint.Run(['--reports=n', 'hangups'])
+
+
+class Pep8Command(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pep8
+        style_guide = pep8.StyleGuide(config_file='setup.cfg')
+        report = style_guide.check_files(['hangups'])
+        if report.total_errors:
+            sys.exit(1)
 
 
 with open('README.rst') as f:
@@ -88,10 +103,12 @@ setup(
         # >= 2.7.3 required for Python 3.5 support
         'pytest==2.7.3',
         'pylint==1.4.4',
+        'pep8==1.6.2',
     ],
     cmdclass={
         'test': PytestCommand,
         'lint': PylintCommand,
+        'style': Pep8Command,
     },
     entry_points={
         'console_scripts': [
