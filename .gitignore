@@ -3,6 +3,7 @@ build/
 dist/
 docs/_build/
 *.egg-info/
+*.egg/
 cookies.txt
 .coverage
 .idea/
