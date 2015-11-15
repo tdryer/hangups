@@ -7,3 +7,5 @@ docs/_build/
 cookies.txt
 .coverage
 .idea/
+.cache/
+htmlcov/
