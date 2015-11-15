@@ -5,6 +5,7 @@ import pytest
 
 from hangups import event
 
+
 def coroutine_test(f):
     """Decorator to create a coroutine that starts and stops its own loop."""
     def wrapper(*args, **kwargs):
@@ -36,8 +37,7 @@ def test_event():
 def test_function_observer():
     e = event.Event('MyEvent')
     res = []
-    a = lambda arg: res.append('a' + arg)
-    e.add_observer(a)
+    e.add_observer(lambda arg: res.append('a' + arg))
     yield from e.fire('1')
     assert res == ['a1']
 
@@ -53,8 +53,9 @@ def test_coroutine_observer():
 
 
 def test_already_added():
+    def a(arg):
+        print('A: got {}'.format(arg))
     e = event.Event('MyEvent')
-    a = lambda a: print('A: got {}'.format(a))
     e.add_observer(a)
     with pytest.raises(ValueError):
         e.add_observer(a)
@@ -62,6 +63,5 @@ def test_already_added():
 
 def test_remove_nonexistant():
     e = event.Event('MyEvent')
-    a = lambda a: print('A: got {}'.format(a))
     with pytest.raises(ValueError):
-        e.remove_observer(a)
+        e.remove_observer(lambda a: print('A: got {}'.format(a)))

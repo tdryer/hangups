@@ -47,6 +47,7 @@ def test_decode():
         test_repeated_bytes=[b'\x00\x01', b'\x00\x01\x02'],
     )
 
+
 def test_decode_unserialized_fields():
     message = test_pblite_pb2.TestMessage()
     pblite.decode(message, [
@@ -58,10 +59,12 @@ def test_decode_unserialized_fields():
         test_string='foo',
     )
 
+
 def test_decode_unknown_field():
     message = test_pblite_pb2.TestMessage()
     pblite.decode(message, [None] * 99 + [1])
     assert message == test_pblite_pb2.TestMessage()
+
 
 def test_decode_unknown_enum():
     message = test_pblite_pb2.TestMessage()
@@ -73,6 +76,7 @@ def test_decode_unknown_enum():
         99,
     ])
     assert message == test_pblite_pb2.TestMessage()
+
 
 def test_decode_unknown_repeated_enum():
     message = test_pblite_pb2.TestMessage()
@@ -86,12 +90,14 @@ def test_decode_unknown_repeated_enum():
     ])
     assert message == test_pblite_pb2.TestMessage()
 
+
 def test_decode_scalar_wrong_type():
     message = test_pblite_pb2.TestMessage()
     pblite.decode(message, [
         'foo',
     ])
     assert message == test_pblite_pb2.TestMessage()
+
 
 def test_decode_repeated_scalar_wrong_type():
     message = test_pblite_pb2.TestMessage()
@@ -100,6 +106,7 @@ def test_decode_repeated_scalar_wrong_type():
         [1, 'foo', 2]
     ])
     assert message == test_pblite_pb2.TestMessage()
+
 
 def test_decode_message_wrong_type():
     message = test_pblite_pb2.TestMessage()
@@ -113,6 +120,7 @@ def test_decode_message_wrong_type():
         1,
     ])
     assert message == test_pblite_pb2.TestMessage()
+
 
 def test_decode_repeated_message_wrong_type():
     message = test_pblite_pb2.TestMessage()
@@ -132,12 +140,14 @@ def test_decode_repeated_message_wrong_type():
         ],
     )
 
+
 def test_decode_bytes_wrong_type():
     message = test_pblite_pb2.TestMessage()
     pblite.decode(message, [
         None, None, None, None, None, None, None, None, 1,
     ])
     assert message == test_pblite_pb2.TestMessage()
+
 
 def test_decode_bytes_invalid_value():
     message = test_pblite_pb2.TestMessage()
@@ -146,6 +156,7 @@ def test_decode_bytes_invalid_value():
     ])
     assert message == test_pblite_pb2.TestMessage()
 
+
 def test_decode_repeated_bytes_wrong_type():
     message = test_pblite_pb2.TestMessage()
     pblite.decode(message, [
@@ -153,12 +164,14 @@ def test_decode_repeated_bytes_wrong_type():
     ])
     assert message == test_pblite_pb2.TestMessage()
 
+
 def test_decode_repeated_bytes_invalid_value():
     message = test_pblite_pb2.TestMessage()
     pblite.decode(message, [
         None, None, None, None, None, None, None, None, None, ['A?=='],
     ])
     assert message == test_pblite_pb2.TestMessage()
+
 
 def test_decode_ignore_first_item():
     message = test_pblite_pb2.TestMessage()
@@ -171,6 +184,7 @@ def test_decode_ignore_first_item():
         test_int=1,
         test_repeated_int=[3, 4],
     )
+
 
 def test_decode_dict():
     message = test_pblite_pb2.TestMessage()
@@ -186,6 +200,7 @@ def test_decode_dict():
             test_embedded_int=2,
         ),
     )
+
 
 ###############################################################################
 # pblite.encode
@@ -227,9 +242,11 @@ def test_encode():
         ['AAE=', 'AAEC'],
     ]
 
+
 def test_encode_no_fields():
     message = test_pblite_pb2.TestMessage()
     assert pblite.encode(message) == []
+
 
 def test_encode_serialize_default_value():
     # Field is always serialized when it is set, even when set to the default
@@ -237,6 +254,7 @@ def test_encode_serialize_default_value():
     message = test_pblite_pb2.TestMessage()
     message.test_int = 0
     assert pblite.encode(message) == [0]
+
 
 def test_encode_required_field():
     # Required fields must be set prior to encoding.
