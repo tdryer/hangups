@@ -663,9 +663,12 @@ class ConversationEventListWalker(urwid.ListWalker):
 
     def get_focus(self):
         """Return (widget, position) tuple or (None, None) if empty."""
-        if len(self._conversation.events) > 0:
-            return (self[self._focus_position], self._focus_position)
-        else:
+        try:
+            if len(self._conversation.events) > 0:
+                return (self[self._focus_position], self._focus_position)
+            else:
+                return (None, None)
+        except IndexError as e:
             return (None, None)
 
 
