@@ -163,6 +163,8 @@ class Conversation(object):
             return conversation_event.RenameEvent(event_)
         elif event_.HasField('membership_change'):
             return conversation_event.MembershipChangeEvent(event_)
+        elif event_.HasField('hangout_event'):
+            return conversation_event.HangoutEvent(event_)
         else:
             return conversation_event.ConversationEvent(event_)
 

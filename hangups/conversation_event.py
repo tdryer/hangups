@@ -208,3 +208,16 @@ class MembershipChangeEvent(ConversationEvent):
         """
         return [user.UserID(chat_id=id_.chat_id, gaia_id=id_.gaia_id)
                 for id_ in self._event.membership_change.participant_ids]
+
+
+class HangoutEvent(ConversationEvent):
+
+    """An event in a Hangout voice/video call.
+
+    Corresponds to hangouts_pb2.HangoutEvent.
+    """
+
+    @property
+    def event_type(self):
+        """The Hangout event type (HangoutEventType)."""
+        return self._event.hangout_event.event_type

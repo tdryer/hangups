@@ -510,6 +510,17 @@ class MessageWidget(urwid.WidgetWrap):
                 text = ('{} left the conversation'.format(names))
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
                                  show_date=is_new_day)
+        elif isinstance(conv_event, hangups.HangoutEvent):
+            text = {
+                hangups.HANGOUT_EVENT_TYPE_START: (
+                    'A Hangout call is starting.'
+                ),
+                hangups.HANGOUT_EVENT_TYPE_END: (
+                    'A Hangout call ended.'
+                ),
+            }.get(conv_event.event_type, 'Unknown Hangout call event.')
+            return MessageWidget(conv_event.timestamp, text, datetimefmt,
+                                 show_date=is_new_day)
         else:
             # conv_event is a generic hangups.ConversationEvent.
             text = 'Unknown conversation event'
