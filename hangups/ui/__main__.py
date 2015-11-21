@@ -511,13 +511,16 @@ class MessageWidget(urwid.WidgetWrap):
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
                                  show_date=is_new_day)
         else:
-            return None
+            # conv_event is a generic hangups.ConversationEvent.
+            text = 'Unknown conversation event'
+            return MessageWidget(conv_event.timestamp, text, datetimefmt,
+                                 show_date=is_new_day)
 
 
 class ConversationEventListWalker(urwid.ListWalker):
     """ListWalker for ConversationEvents.
 
-    The position may be an event ID, POSITION_LOADING, or None.
+    The position may be an event ID or POSITION_LOADING.
     """
 
     POSITION_LOADING = 'loading'
@@ -529,20 +532,12 @@ class ConversationEventListWalker(urwid.ListWalker):
         self._first_loaded = False  # Whether the first event is loaded
         self._datetimefmt = datetimefmt
 
-        # Focus position is the first displayable event ID, or None.
-        self._focus_position = next((
-            ev.id_ for ev in reversed(conversation.events)
-            if self._is_event_displayable(ev)
-        ), None)
+        # Focus position is the first event ID, or POSITION_LOADING.
+        self._focus_position = (conversation.events[-1].id_
+                                if len(conversation.events) > 0
+                                else self.POSITION_LOADING)
 
         self._conversation.on_event.add_observer(self._handle_event)
-
-    def _is_event_displayable(self, conv_event):
-        """Return True if the ConversationWidget is displayable."""
-        widget = MessageWidget.from_conversation_event(self._conversation,
-                                                       conv_event, None,
-                                                       self._datetimefmt)
-        return widget is not None
 
     def _handle_event(self, conv_event):
         """Handle updating and scrolling when a new event is added.
@@ -552,13 +547,7 @@ class ConversationEventListWalker(urwid.ListWalker):
         while new messages are arriving.
         """
         if not self._is_scrolling:
-            try:
-                _ = self[conv_event.id_]  # Check that it has a widget.
-                pos = conv_event.id_
-            except IndexError:
-                pass  # New event might not have a widget.
-            else:
-                self.set_focus(pos)
+            self.set_focus(conv_event.id_)
         else:
             self._modified()
 
@@ -594,30 +583,26 @@ class ConversationEventListWalker(urwid.ListWalker):
             if self._first_loaded:
                 # TODO: Show the full date the conversation was created.
                 return urwid.Text('No more messages', align='center')
-            future = asyncio.async(self._load())
-            future.add_done_callback(lambda future: future.result())
-            return urwid.Text('Loading...', align='center')
-        # May return None if the event doesn't have a widget representation.
+            else:
+                future = asyncio.async(self._load())
+                future.add_done_callback(lambda future: future.result())
+                return urwid.Text('Loading...', align='center')
         try:
-            # Get the previous displayable event, or None if it isn't loaded or
-            # doesn't exist.
+            # When creating the widget, also pass the previous event so a
+            # timestamp can be shown if this event occurred on a different day.
+            # Get the previous event, or None if it isn't loaded or doesn't
+            # exist.
             prev_position = self._get_position(position, prev=True)
             if prev_position == self.POSITION_LOADING:
                 prev_event = None
             else:
                 prev_event = self._conversation.get_event(prev_position)
-
-            # When creating the widget, also pass the previous event so a
-            # timestamp can be shown if this event occurred on a different day.
-            widget = MessageWidget.from_conversation_event(
+            return MessageWidget.from_conversation_event(
                 self._conversation, self._conversation.get_event(position),
                 prev_event, self._datetimefmt
             )
         except KeyError:
             raise IndexError('Invalid position: {}'.format(position))
-        if not widget:
-            raise IndexError('Invalid position: {}'.format(position))
-        return widget
 
     def _get_position(self, position, prev=False):
         """Return the next/previous position or raise IndexError."""
@@ -626,19 +611,15 @@ class ConversationEventListWalker(urwid.ListWalker):
                 raise IndexError('Reached last position')
             else:
                 return self._conversation.events[0].id_
-        while True:
+        else:
             ev = self._conversation.next_event(position, prev=prev)
             if ev is None:
                 if prev:
                     return self.POSITION_LOADING
                 else:
                     raise IndexError('Reached first position')
-            # Skip events that aren't represented by a widget and try the next
-            # one.
-            if self._is_event_displayable(ev):
-                return ev.id_
             else:
-                position = ev.id_
+                return ev.id_
 
     def next_position(self, position):
         """Return the position below position or raise IndexError."""
@@ -662,14 +643,8 @@ class ConversationEventListWalker(urwid.ListWalker):
             self._is_scrolling = True
 
     def get_focus(self):
-        """Return (widget, position) tuple or (None, None) if empty."""
-        try:
-            if len(self._conversation.events) > 0:
-                return (self[self._focus_position], self._focus_position)
-            else:
-                return (None, None)
-        except IndexError as e:
-            return (None, None)
+        """Return (widget, position) tuple."""
+        return (self[self._focus_position], self._focus_position)
 
 
 class ConversationWidget(urwid.WidgetWrap):
