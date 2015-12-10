@@ -102,7 +102,7 @@ setup(
     tests_require=[
         # >= 2.7.3 required for Python 3.5 support
         'pytest==2.7.3',
-        'pylint==1.4.4',
+        'pylint==1.4.5',
         'pep8==1.6.2',
     ],
     cmdclass={
