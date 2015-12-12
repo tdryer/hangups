@@ -186,12 +186,13 @@ PlusPhoto.MediaType
 
 Media type.
 
-========================== ====== ===========
-Name                       Number Description
-========================== ====== ===========
-:code:`MEDIA_TYPE_UNKNOWN` 0                 
-:code:`MEDIA_TYPE_PHOTO`   1                 
-========================== ====== ===========
+================================= ====== ===========
+Name                              Number Description
+================================= ====== ===========
+:code:`MEDIA_TYPE_UNKNOWN`        0                 
+:code:`MEDIA_TYPE_PHOTO`          1                 
+:code:`MEDIA_TYPE_ANIMATED_PHOTO` 4                 
+================================= ====== ===========
 
 Place
 -----
@@ -467,12 +468,14 @@ Field                   Number Type             Label    Description
 Photo
 -----
 
-===================================== ====== ====== ======== ===========
-Field                                 Number Type   Label    Description
-===================================== ====== ====== ======== ===========
-:code:`photo_id`                      1      string optional            
-:code:`delete_albumless_source_photo` 2      bool   optional            
-===================================== ====== ====== ======== ===========
+===================================== ====== ====== ======== =============================================================================
+Field                                 Number Type   Label    Description                                                                  
+===================================== ====== ====== ======== =============================================================================
+:code:`photo_id`                      1      string optional Picasa photo ID.                                                             
+:code:`delete_albumless_source_photo` 2      bool   optional                                                                              
+:code:`user_id`                       3      string optional Optional Picasa user ID needed for photos from other accounts (eg. stickers).
+:code:`is_custom_user_id`             4      bool   optional Must be true if user_id is specified.                                        
+===================================== ====== ====== ======== =============================================================================
 
 ExistingMedia
 -------------

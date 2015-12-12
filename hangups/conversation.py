@@ -222,7 +222,8 @@ class Conversation(object):
         )
 
     @asyncio.coroutine
-    def send_message(self, segments, image_file=None, image_id=None):
+    def send_message(self, segments, image_file=None, image_id=None,
+                     image_user_id=None):
         """Send a message to this conversation.
 
         A per-conversation lock is acquired to ensure that messages are sent in
@@ -234,9 +235,13 @@ class Conversation(object):
         image_file is an optional file-like object containing an image to be
         attached to the message.
 
-        image_id is an optional ID of an image to be attached to the message
-        (if you specify both image_file and image_id together, image_file
-        takes precedence and supplied image_id will be ignored)
+        image_id is an optional ID of an Picasa photo to be attached to the
+        message (if you specify both image_file and image_id together,
+        image_file takes precedence and supplied image_id will be ignored).
+
+        image_user_id is an optional Picasa user ID, required only if image_id
+        refers to an image from another Picasa user (eg. Google's sticker
+        user).
 
         Raises hangups.NetworkError if the message can not be sent.
         """
@@ -257,6 +262,9 @@ class Conversation(object):
                 )
                 if image_id is not None:
                     request.existing_media.photo.photo_id = image_id
+                if image_user_id is not None:
+                    request.existing_media.photo.user_id = image_user_id
+                    request.existing_media.photo.is_custom_user_id = True
                 yield from self._client.send_chat_message(request)
             except exceptions.NetworkError as e:
                 logger.warning('Failed to send message: {}'.format(e))

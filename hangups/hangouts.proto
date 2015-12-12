@@ -200,6 +200,7 @@ message PlusPhoto {
   enum MediaType {
     MEDIA_TYPE_UNKNOWN = 0;
     MEDIA_TYPE_PHOTO = 1;
+    MEDIA_TYPE_ANIMATED_PHOTO = 4;
   }
 
   // Thumbnail.
@@ -315,6 +316,7 @@ message HangoutEvent {
   repeated ParticipantId participant_id = 2;
 
   // TODO:
+  // media_type
   // unknown 7 = 1;
   // unknown 3 = 25;
 }
@@ -531,10 +533,16 @@ enum ReplyToInviteType {
 }
 
 message Photo {
+  // Picasa photo ID.
   optional string photo_id = 1;
   optional bool delete_albumless_source_photo = 2;
+  // Optional Picasa user ID needed for photos from other accounts (eg. stickers).
+  optional string user_id = 3;
+  // Must be true if user_id is specified.
+  optional bool is_custom_user_id = 4;
 
   // TODO: test delete_albumless_source_photo
+  // TODO: verify name/behaviour of 'is_custom_user_id' field
 }
 
 message ExistingMedia {
