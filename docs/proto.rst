@@ -1963,6 +1963,7 @@ Name                                      Number Description
 :code:`CONFIGURATION_BIT_TYPE_UNKNOWN_33` 33                
 :code:`CONFIGURATION_BIT_TYPE_UNKNOWN_34` 34                
 :code:`CONFIGURATION_BIT_TYPE_UNKNOWN_35` 35                
+:code:`CONFIGURATION_BIT_TYPE_UNKNOWN_36` 36                
 ========================================= ====== ===========
 
 RichPresenceType
