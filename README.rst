@@ -48,6 +48,7 @@ Projects using hangups
 - `pickups`_: IRC gateway for hangups (prototype)
 - `telepathy-hangups`_: Telepathy bindings for Google Chat via hangups library
 - `wardellchandler/HangoutsBot`_: Python 3 Bot for Hangouts
+- `jabber-hangouts-transport`_: A Jabber/XMPP transport/gateway to Hangouts.
 
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
 .. _Hubot Hangouts Adapter: https://github.com/groupby/hubot-hangups
@@ -59,6 +60,7 @@ Projects using hangups
 .. _pickups: https://github.com/mtomwing/pickups
 .. _telepathy-hangups: https://github.com/davidedmundson/telepathy-hangups
 .. _wardellchandler/HangoutsBot: https://github.com/wardellchandler/HangoutsBot
+.. _jabber-hangouts-transport: https://github.com/ZeWaren/jabber-hangouts-transport
 
 Related projects
 ----------------
