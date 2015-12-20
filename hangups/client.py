@@ -485,6 +485,15 @@ class Client(object):
         return response
 
     @asyncio.coroutine
+    def send_offnetwork_invitation(self, send_offnetwork_invitation_request):
+        """Send an invitation to a non-contact."""
+        response = hangouts_pb2.SendOffnetworkInvitationResponse()
+        yield from self._pb_request('devices/sendoffnetworkinvitation',
+                                    send_offnetwork_invitation_request,
+                                    response)
+        return response
+
+    @asyncio.coroutine
     def set_active_client(self, set_active_client_request):
         """Set the active client."""
         response = hangouts_pb2.SetActiveClientResponse()
