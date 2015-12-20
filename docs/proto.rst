@@ -1070,6 +1070,16 @@ Field                   Number Type              Label    Description
 :code:`conversation_id` 1      `ConversationId`_ optional            
 ======================= ====== ================= ======== ===========
 
+OffnetworkAddress
+-----------------
+
+============= ====== ======================== ======== ===========
+Field         Number Type                     Label    Description
+============= ====== ======================== ======== ===========
+:code:`type`  1      `OffnetworkAddressType`_ optional            
+:code:`email` 3      string                   optional            
+============= ====== ======================== ======== ===========
+
 AddUserRequest
 --------------
 
@@ -1364,6 +1374,25 @@ Field                   Number Type              Label    Description
 ======================= ====== ================= ======== ===========
 :code:`response_header` 1      `ResponseHeader`_ optional            
 :code:`created_event`   6      `Event`_          optional            
+======================= ====== ================= ======== ===========
+
+SendOffnetworkInvitationRequest
+-------------------------------
+
+======================= ====== ==================== ======== ===========
+Field                   Number Type                 Label    Description
+======================= ====== ==================== ======== ===========
+:code:`request_header`  1      `RequestHeader`_     optional            
+:code:`invitee_address` 2      `OffnetworkAddress`_ optional            
+======================= ====== ==================== ======== ===========
+
+SendOffnetworkInvitationResponse
+--------------------------------
+
+======================= ====== ================= ======== ===========
+Field                   Number Type              Label    Description
+======================= ====== ================= ======== ===========
+:code:`response_header` 1      `ResponseHeader`_ optional            
 ======================= ====== ================= ======== ===========
 
 SetActiveClientRequest
@@ -2062,4 +2091,14 @@ Name                                        Number Description
 =========================================== ====== ===========
 :code:`PHONE_VALIDATION_RESULT_IS_POSSIBLE` 0                 
 =========================================== ====== ===========
+
+OffnetworkAddressType
+---------------------
+
+======================================= ====== ===========
+Name                                    Number Description
+======================================= ====== ===========
+:code:`OFFNETWORK_ADDRESS_TYPE_UNKNOWN` 0                 
+:code:`OFFNETWORK_ADDRESS_TYPE_EMAIL`   1                 
+======================================= ====== ===========
 

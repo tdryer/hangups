@@ -1124,6 +1124,16 @@ message ConversationSpec {
   // TODO
 }
 
+enum OffnetworkAddressType {
+  OFFNETWORK_ADDRESS_TYPE_UNKNOWN = 0;
+  OFFNETWORK_ADDRESS_TYPE_EMAIL = 1;
+}
+
+message OffnetworkAddress {
+  optional OffnetworkAddressType type = 1;
+  optional string email = 3;
+}
+
 // ----------------------------------------------------------------------------
 // Requests & Responses
 // ----------------------------------------------------------------------------
@@ -1331,6 +1341,15 @@ message SendChatMessageResponse {
 
   // TODO:
   // unknown [] = 4;
+}
+
+message SendOffnetworkInvitationRequest {
+  optional RequestHeader request_header = 1;
+  optional OffnetworkAddress invitee_address = 2;
+}
+
+message SendOffnetworkInvitationResponse {
+  optional ResponseHeader response_header = 1;
 }
 
 message SetActiveClientRequest {
