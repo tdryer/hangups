@@ -22,8 +22,8 @@ class User(object):
                  is_self):
         """Initialize a User."""
         self.id_ = user_id
-        self.full_name = full_name if full_name != '' else DEFAULT_NAME
-        self.first_name = (first_name if first_name != ''
+        self.full_name = full_name if full_name else DEFAULT_NAME
+        self.first_name = (first_name if first_name
                            else self.full_name.split()[0])
         self.photo_url = photo_url
         self.emails = emails
