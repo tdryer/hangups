@@ -421,7 +421,7 @@ class StatusLineWidget(urwid.WidgetWrap):
 
     def _update(self):
         """Update status text."""
-        typers = [self._conversation.get_user(user_id).first_name
+        typers = [self._conversation.get_user(user_id).unique_name
                   for user_id, status in self._typing_statuses.items()
                   if status == hangups.TYPING_TYPE_STARTED]
         if len(typers) > 0:
@@ -455,7 +455,7 @@ class MessageWidget(urwid.WidgetWrap):
         ]
         if user is not None:
             text.insert(1, ('msg_self' if user.is_self else 'msg_sender',
-                            user.first_name + ': '))
+                            user.unique_name + ': '))
         self._widget = urwid.Text(text)
         super().__init__(self._widget)
 
@@ -493,10 +493,10 @@ class MessageWidget(urwid.WidgetWrap):
         elif isinstance(conv_event, hangups.RenameEvent):
             if conv_event.new_name == '':
                 text = ('{} cleared the conversation name'
-                        .format(user.first_name))
+                        .format(user.unique_name))
             else:
                 text = ('{} renamed the conversation to {}'
-                        .format(user.first_name, conv_event.new_name))
+                        .format(user.unique_name, conv_event.new_name))
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
                                  show_date=is_new_day)
         elif isinstance(conv_event, hangups.MembershipChangeEvent):
@@ -505,7 +505,7 @@ class MessageWidget(urwid.WidgetWrap):
             names = ', '.join([user.full_name for user in event_users])
             if conv_event.type_ == hangups.MEMBERSHIP_CHANGE_TYPE_JOIN:
                 text = ('{} added {} to the conversation'
-                        .format(user.first_name, names))
+                        .format(user.unique_name, names))
             else:  # LEAVE
                 text = ('{} left the conversation'.format(names))
             return MessageWidget(conv_event.timestamp, text, datetimefmt,

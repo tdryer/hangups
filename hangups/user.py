@@ -25,15 +25,15 @@ class User(object):
         """Initialize a User."""
 
         if not full_name:
-            self.full_name = self.first_name = DEFAULT_NAME
+            self.unique_name = self.full_name = self.first_name = DEFAULT_NAME
             self.name_type = NameType.DEFAULT
         elif not any(c.isalpha() for c in full_name):
-            self.full_name = self.first_name = full_name
+            self.unique_name = self.full_name = self.first_name = full_name
             self.name_type = NameType.NUMERIC
         else:
             self.full_name = full_name if full_name else DEFAULT_NAME
-            self.first_name = (first_name if first_name
-                               else self.full_name.split()[0])
+            self.unique_name = self.first_name = (first_name if first_name
+                                                  else self.full_name.split()[0])
             self.name_type = NameType.REAL
 
         self.id_ = user_id
@@ -47,6 +47,7 @@ class User(object):
         if user_.name_type > self.name_type:
             self.full_name = user_.full_name
             self.first_name = user_.first_name
+            self.unique_name = user_.unique_name
             self.name_type = user_.name_type
             logging.debug('Added {} name to User "{}": {}'.format(
                 self.name_type.name.lower(), self.full_name, self))
@@ -103,7 +104,24 @@ class UserList(object):
         logger.info('UserList initialized with {} user(s)'
                     .format(len(self._user_dict)))
 
+        self._set_unique_names()
         self._client.on_state_update.add_observer(self._on_state_update)
+
+    def _set_unique_names(self):
+        users = self._user_dict.values()
+
+        # try to make names more unique by keeping the last initial
+        un = [user.unique_name for user in users]
+        for user in users:
+            if un.count(user.unique_name) > 1:
+                if user.name_type==NameType.REAL and user.first_name != user.full_name:
+                    user.unique_name = '{} {}'.format(user.first_name, user.full_name.split()[-1][:1])
+
+        # if that doesn't work, keep the full name
+        un = [user.unique_name for user in users]
+        for user in users:
+            if un.count(user.unique_name) > 1:
+                user.unique_name = user.full_name
 
     def get_user(self, user_id):
         """Return a User by their UserID.
@@ -130,11 +148,12 @@ class UserList(object):
         if existing is None:
             logging.warning('Adding fallback User with {} name "{}": {}'.format(
                 user_.name_type.name.lower(), user_.full_name, user_))
-            self._user_dict[user_.id_] = user_
-            return user_
+            existing = self._user_dict[user_.id_] = user_
         else:
             existing.upgrade_name(user_)
-            return existing
+
+        self._set_unique_names()
+        return existing
 
     def _on_state_update(self, state_update):
         """Receive a StateUpdate"""
