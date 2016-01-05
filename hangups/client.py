@@ -94,7 +94,7 @@ class Client(object):
 
         # Listen for StateUpdate messages from the Channel until it
         # disconnects.
-        self._listen_future = asyncio.async(self._channel.listen())
+        self._listen_future = asyncio.ensure_future(self._channel.listen())
         try:
             yield from self._listen_future
         except asyncio.CancelledError:
