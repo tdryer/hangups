@@ -66,9 +66,13 @@ Related projects
 ----------------
 
 - `Hangish`_: A Google Hangouts native client for Sailfish
-- `hangupsjs`_: Port of hangups to Node.js
+- `Hangups-UWP`_: Hangups client for Universal Windows Platform
+- `WTalk`_: Client library and desktop client for Google Hangouts written in C#
 - `hangover`_: The first native Mac OS X client for Google Hangouts
+- `hangupsjs`_: Port of hangups to Node.js
 
 .. _Hangish: https://github.com/rogora/hangish
-.. _hangupsjs: https://github.com/algesten/hangupsjs
+.. _Hangups-UWP: https://github.com/kfechter/Hangups-UWP
+.. _WTalk: https://github.com/madagaga/WTalk
 .. _hangover: https://github.com/psobot/hangover
+.. _hangupsjs: https://github.com/algesten/hangupsjs
