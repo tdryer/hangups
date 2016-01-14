@@ -12,7 +12,6 @@ from hangups import (javascript, exceptions, http_utils, channel, event,
                      hangouts_pb2, pblite, version)
 
 logger = logging.getLogger(__name__)
-ORIGIN_URL = 'https://talkgadget.google.com'
 IMAGE_UPLOAD_URL = 'https://docs.google.com/upload/photos/resumable'
 # Timeout to send for setactiveclient requests:
 ACTIVE_TIMEOUT_SECS = 120
