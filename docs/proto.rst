@@ -407,6 +407,7 @@ Field                          Number Type                    Label    Descripti
 :code:`invite_timestamp`       12     uint64                  optional            
 :code:`sort_timestamp`         13     uint64                  optional            
 :code:`active_timestamp`       14     uint64                  optional            
+:code:`invite_affinity`        15     `InvitationAffinity`_   optional            
 :code:`delivery_medium_option` 17     `DeliveryMediumOption`_ repeated            
 ============================== ====== ======================= ======== ===========
 
@@ -870,6 +871,7 @@ Field                                            Number Type                    
 ================================================ ====== =============================================== ======== ====================================================================================
 :code:`state_update_header`                      1      `StateUpdateHeader`_                            optional                                                                                     
 :code:`conversation`                             13     `Conversation`_                                 optional If set, includes conversation attributes that have been updated by the notification.
+:code:`conversation_notification`                2      `ConversationNotification`_                     optional                                                                                     
 :code:`event_notification`                       3      `EventNotification`_                            optional                                                                                     
 :code:`focus_notification`                       4      `SetFocusNotification`_                         optional                                                                                     
 :code:`typing_notification`                      5      `SetTypingNotification`_                        optional                                                                                     
@@ -911,6 +913,15 @@ Field                Number Type           Label    Description
 ==================== ====== ============== ======== ===========
 :code:`state_update` 1      `StateUpdate`_ repeated            
 ==================== ====== ============== ======== ===========
+
+ConversationNotification
+------------------------
+
+==================== ====== =============== ======== ===========
+Field                Number Type            Label    Description
+==================== ====== =============== ======== ===========
+:code:`conversation` 1      `Conversation`_ optional            
+==================== ====== =============== ======== ===========
 
 EventNotification
 -----------------
@@ -1777,6 +1788,17 @@ Name                                 Number Description
 :code:`DELIVERY_MEDIUM_GOOGLE_VOICE` 2                 
 :code:`DELIVERY_MEDIUM_LOCAL_SMS`    3                 
 ==================================== ====== ===========
+
+InvitationAffinity
+------------------
+
+=============================== ====== ===========
+Name                            Number Description
+=============================== ====== ===========
+:code:`INVITE_AFFINITY_UNKNOWN` 0                 
+:code:`INVITE_AFFINITY_HIGH`    1                 
+:code:`INVITE_AFFINITY_LOW`     2                 
+=============================== ====== ===========
 
 ParticipantType
 ---------------
