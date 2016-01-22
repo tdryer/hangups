@@ -17,6 +17,7 @@ https://web.archive.org/web/20121226064550/http://code.google.com/p/libevent-bro
 
 import aiohttp
 import asyncio
+import codecs
 import hashlib
 import json
 import logging
@@ -26,6 +27,7 @@ import time
 from hangups import http_utils, event, exceptions
 
 logger = logging.getLogger(__name__)
+Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 ORIGIN_URL = 'https://talkgadget.google.com'
 CHANNEL_URL_PREFIX = 'https://0.client-channel.google.com/client-channel/{}'
@@ -59,17 +61,9 @@ def get_authorization_headers(sapisid_cookie):
 
 
 def _best_effort_decode(data_bytes):
-    """Decode data_bytes into a string using UTF-8.
-
-    If data_bytes cannot be decoded, pop the last byte until it can be or
-    return an empty string.
-    """
-    for end in reversed(range(1, len(data_bytes) + 1)):
-        try:
-            return data_bytes[0:end].decode()
-        except UnicodeDecodeError:
-            pass
-    return ''
+    """Decode as much of data_bytes as possible as UTF-8."""
+    decoder = Utf8IncrementalDecoder()
+    return decoder.decode(data_bytes)
 
 
 class ChunkParser(object):
