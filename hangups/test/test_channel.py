@@ -43,6 +43,11 @@ def test_truncated_message():
     assert list(p.get_chunks('12\n012345678'.encode())) == []
 
 
+def test_junk_before_length():
+    p = channel.ChunkParser()
+    assert list(p.get_chunks('junk4\nfail'.encode())) == []
+
+
 def test_truncated_length():
     p = channel.ChunkParser()
     assert list(p.get_chunks('13'.encode())) == []
