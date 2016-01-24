@@ -83,8 +83,7 @@ Colours are specified using `urwid's colors`_, for example: `dark red` or
 `Xresources color1`. Standard Foreground and Background Colors can be found here
 for 16 bit palette.
 
-.. _urwid's colors:
-http://urwid.org/reference/constants.html#standard-background-and-foreground-colors
+.. _urwid's colors: http://urwid.org/reference/constants.html#standard-background-and-foreground-colors
 
 Constants for 88-Color and 256-Color palettes for `urwid's hcolors`_.
 
