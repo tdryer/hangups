@@ -79,6 +79,17 @@ limitations or conflicts.
 
 .. _urwid's format: http://urwid.org/manual/userinput.html#keyboard-input
 
+Colours are specified using `urwid's format`_, for example: `dark red` or
+`Xresources color1`. Standard Foreground and Background Colors can be found here
+for 16 bit palette.
+
+.. _urwid's format:
+http://urwid.org/reference/constants.html#standard-background-and-foreground-colors
+
+Constants for 88-Color and 256-Color palettes can be found here
+
+.. _urwid's format: http://urwid.org/manual/displayattributes.html#high-colors
+
 Troubleshooting
 ---------------
 
