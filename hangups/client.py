@@ -1,15 +1,19 @@
 """Abstract class for writing chat clients."""
 
-import aiohttp
 import asyncio
+import base64
+import binascii
 import json
 import logging
+import os
 import random
 import time
-import os
 
-from hangups import (javascript, exceptions, http_utils, channel, event,
-                     hangouts_pb2, pblite, version)
+import aiohttp
+import google.protobuf.message
+
+from hangups import (exceptions, http_utils, channel, event, hangouts_pb2,
+                     pblite, version)
 
 logger = logging.getLogger(__name__)
 IMAGE_UPLOAD_URL = 'https://docs.google.com/upload/photos/resumable'
@@ -323,12 +327,20 @@ class Client(object):
                      request_pb)
         res = yield from self._base_request(
             'https://clients6.google.com/chat/v1/{}'.format(endpoint),
-            'application/json+protobuf',  # The request body is pblite.
-            'protojson',  # The response should be pblite.
-            json.dumps(pblite.encode(request_pb))
+            'application/x-protobuf',  # Request body is Protocol Buffer.
+            'proto',  # Response body is Protocol Buffer.
+            request_pb.SerializeToString()
         )
-        pblite.decode(response_pb, javascript.loads(res.body.decode()),
-                      ignore_first_item=True)
+        try:
+            response_pb.ParseFromString(base64.b64decode(res.body))
+        except binascii.Error as e:
+            raise exceptions.NetworkError(
+                'Failed to decode base64 response: {}'.format(e)
+            )
+        except google.protobuf.message.DecodeError as e:
+            raise exceptions.NetworkError(
+                'Failed to decode Protocol Buffer response: {}'.format(e)
+            )
         logger.debug('Received Protocol Buffer response:\n%s', response_pb)
         status = response_pb.response_header.status
         if status != hangouts_pb2.RESPONSE_STATUS_OK:
@@ -360,6 +372,9 @@ class Client(object):
         sapisid_cookie = self._get_cookie('SAPISID')
         headers = channel.get_authorization_headers(sapisid_cookie)
         headers['content-type'] = content_type
+        # This header is required for Protocol Buffer responses, which causes
+        # them to be base64 encoded:
+        headers['X-Goog-Encode-Response-If-Executable'] = 'base64'
         required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
         cookies = {cookie: self._get_cookie(cookie)
                    for cookie in required_cookies}

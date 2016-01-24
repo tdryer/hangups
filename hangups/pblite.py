@@ -5,7 +5,7 @@ Buffers into JavaScript objects. Messages are represented as arrays where the
 tag number of a value is given by its position in the array.
 
 Methods in this module assume encoding/decoding to JavaScript strings is done
-separately (see hangups.javascript).
+separately.
 
 Google's implementation for JavaScript is available in closure-library:
     https://github.com/google/closure-library/tree/master/closure/goog/proto2
@@ -114,44 +114,3 @@ def decode(message, pblite, ignore_first_item=False):
             _decode_repeated_field(message, field, value)
         else:
             _decode_field(message, field, value)
-
-
-def encode(message):
-    """Encode Protocol Buffer message to pblite.
-
-    Args:
-        message: protocol buffer message to encode.
-
-    Raises:
-        ValueError: one or more required fields in message are not set.
-
-    Returns:
-        list representing a pblite-serialized message.
-    """
-    if not message.IsInitialized():
-        raise ValueError('Can not encode message: one or more required fields '
-                         'are not set')
-    pblite = []
-    # ListFields only returns fields that are set, so use this to only encode
-    # necessary fields
-    for field_descriptor, field_value in message.ListFields():
-        if field_descriptor.label == FieldDescriptor.LABEL_REPEATED:
-            if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:
-                encoded_value = [encode(item) for item in field_value]
-            elif field_descriptor.type == FieldDescriptor.TYPE_BYTES:
-                encoded_value = [base64.b64encode(val).decode()
-                                 for val in field_value]
-            else:
-                encoded_value = list(field_value)
-        else:
-            if field_descriptor.type == FieldDescriptor.TYPE_MESSAGE:
-                encoded_value = encode(field_value)
-            elif field_descriptor.type == FieldDescriptor.TYPE_BYTES:
-                encoded_value = base64.b64encode(field_value).decode()
-            else:
-                encoded_value = field_value
-        # Add any necessary padding to the list
-        required_padding = max(field_descriptor.number - len(pblite), 0)
-        pblite.extend([None] * required_padding)
-        pblite[field_descriptor.number - 1] = encoded_value
-    return pblite
