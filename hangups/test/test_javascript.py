@@ -8,6 +8,7 @@ from hangups import javascript
 @pytest.mark.parametrize('input_,expected', [
     # simple types
     ('12', 12),
+    ('-1', -1),
     ('null', None),
     ('true', True),
     ('false', False),

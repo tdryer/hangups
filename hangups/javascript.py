@@ -87,8 +87,7 @@ def _unescape_string(s):
 
 class JavaScriptLexer(purplex.Lexer):
     """Lexer for a subset of JavaScript."""
-    # TODO: Negative integers
-    INTEGER = purplex.TokenDef(r'\d+')
+    INTEGER = purplex.TokenDef(r'[+-]?(?<!\.)\b[0-9]+\b(?!\.[0-9])')
     FLOAT = purplex.TokenDef(r'[-+]?\d*[.]\d+')
 
     NULL = purplex.TokenDef(r'null')
