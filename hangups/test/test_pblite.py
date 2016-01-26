@@ -1,7 +1,5 @@
 """Tests for pblite format decoder and encoder."""
 
-import pytest
-
 from hangups import pblite
 from hangups.test import test_pblite_pb2
 
