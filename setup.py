@@ -100,9 +100,9 @@ setup(
     install_requires=install_requires,
     tests_require=[
         # >= 2.7.3 required for Python 3.5 support
-        'pytest==2.7.3',
-        'pylint==1.4.5',
-        'pep8==1.6.2',
+        'pytest==2.8.7',
+        'pylint==1.5.4',
+        'pep8==1.7.0',
     ],
     cmdclass={
         'test': PytestCommand,

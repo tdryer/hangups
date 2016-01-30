@@ -165,11 +165,11 @@ class Client(object):
             # email address.
             if self._email is None:
                 try:
-                    request = hangouts_pb2.GetSelfInfoRequest(
+                    get_self_info_request = hangouts_pb2.GetSelfInfoRequest(
                         request_header=self.get_request_header(),
                     )
                     get_self_info_response = yield from self.get_self_info(
-                        request
+                        get_self_info_request
                     )
                 except exceptions.NetworkError as e:
                     logger.warning('Failed to find email address: {}'
@@ -188,13 +188,13 @@ class Client(object):
                 return
 
             try:
-                request = hangouts_pb2.SetActiveClientRequest(
+                set_active_request = hangouts_pb2.SetActiveClientRequest(
                     request_header=self.get_request_header(),
                     is_active=True,
                     full_jid="{}/{}".format(self._email, self._client_id),
                     timeout_secs=ACTIVE_TIMEOUT_SECS,
                 )
-                yield from self.set_active_client(request)
+                yield from self.set_active_client(set_active_request)
             except exceptions.NetworkError as e:
                 logger.warning('Failed to set active client: {}'.format(e))
             else:
