@@ -10,6 +10,9 @@ install:
 
 # commands to run tests
 script:
+    # Remove the outdated packages that Travis provides so it can install the
+    # version of pytest that hangups requires.
+    - pip uninstall --quiet --yes pytest py
     - python setup.py --quiet style
     - python setup.py --quiet lint
     - python setup.py --quiet test
