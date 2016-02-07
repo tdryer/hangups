@@ -1,15 +1,15 @@
 """User objects."""
 
 from collections import namedtuple
+import enum
 import logging
-from enum import IntEnum
 
 
 logger = logging.getLogger(__name__)
 DEFAULT_NAME = 'Unknown'
 
 UserID = namedtuple('UserID', ['chat_id', 'gaia_id'])
-NameType = IntEnum('NameType', dict(DEFAULT=0, NUMERIC=1, REAL=2))
+NameType = enum.IntEnum('NameType', dict(DEFAULT=0, NUMERIC=1, REAL=2))
 
 
 class User(object):
@@ -42,8 +42,11 @@ class User(object):
         self.is_self = is_self
 
     def upgrade_name(self, user_):
-        # Google Voice participants often first appear with no name at all, and then
-        # get upgraded unpredictably to numbers ("+12125551212") or names.
+        """Upgrade name type of user.
+
+        Google Voice participants often first appear with no name at all, and
+        then get upgraded unpredictably to numbers ("+12125551212") or names.
+        """
         if user_.name_type > self.name_type:
             self.full_name = user_.full_name
             self.first_name = user_.first_name
@@ -122,14 +125,14 @@ class UserList(object):
         return self._user_dict.values()
 
     def add_user_from_conv_part(self, conv_part):
-        """Add new User from ConversationParticipantData, and update their
-        name if it was previously unknown or numeric"""
+        """Add or upgrade User from ConversationParticipantData."""
         user_ = User.from_conv_part_data(conv_part, self._self_user.id_)
 
         existing = self._user_dict.get(user_.id_)
         if existing is None:
-            logging.warning('Adding fallback User with {} name "{}": {}'.format(
-                user_.name_type.name.lower(), user_.full_name, user_))
+            logging.warning('Adding fallback User with {} name "{}": {}'
+                            .format(user_.name_type.name.lower(),
+                                    user_.full_name, user_))
             self._user_dict[user_.id_] = user_
             return user_
         else:
