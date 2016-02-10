@@ -1,8 +1,8 @@
 User Guide
 ==========
 
-This section is intended for end-users who want to use the textual user
-interface included with hangups.
+This page is intended for end-users who want to use the textual user interface
+included with hangups.
 
 Running
 -------
