@@ -375,12 +375,12 @@ Field                         Number Type             Label    Description
 DeliveryMedium
 --------------
 
-=================== ====== ===================== ======== ======================================================
-Field               Number Type                  Label    Description                                           
-=================== ====== ===================== ======== ======================================================
-:code:`medium_type` 1      `DeliveryMediumType`_ optional                                                       
-:code:`phone`       2      `Phone`_              optional Phone number to use for sending Google Voice messages.
-=================== ====== ===================== ======== ======================================================
+==================== ====== ===================== ======== ======================================================
+Field                Number Type                  Label    Description                                           
+==================== ====== ===================== ======== ======================================================
+:code:`medium_type`  1      `DeliveryMediumType`_ optional                                                       
+:code:`phone_number` 2      `PhoneNumber`_        optional Phone number to use for sending Google Voice messages.
+==================== ====== ===================== ======== ======================================================
 
 DeliveryMediumOption
 --------------------
@@ -1832,12 +1832,13 @@ Name                            Number Description
 ParticipantType
 ---------------
 
-================================ ====== ===========
-Name                             Number Description
-================================ ====== ===========
-:code:`PARTICIPANT_TYPE_UNKNOWN` 0                 
-:code:`PARTICIPANT_TYPE_GAIA`    2                 
-================================ ====== ===========
+===================================== ====== ===========
+Name                                  Number Description
+===================================== ====== ===========
+:code:`PARTICIPANT_TYPE_UNKNOWN`      0                 
+:code:`PARTICIPANT_TYPE_GAIA`         2                 
+:code:`PARTICIPANT_TYPE_GOOGLE_VOICE` 3                 
+===================================== ====== ===========
 
 InvitationStatus
 ----------------
@@ -1863,12 +1864,13 @@ Name                          Number Description
 NetworkType
 -----------
 
-============================ ====== ===========
-Name                         Number Description
-============================ ====== ===========
-:code:`NETWORK_TYPE_UNKNOWN` 0                 
-:code:`NETWORK_TYPE_BABEL`   1                 
-============================ ====== ===========
+================================= ====== ===========
+Name                              Number Description
+================================= ====== ===========
+:code:`NETWORK_TYPE_UNKNOWN`      0                 
+:code:`NETWORK_TYPE_BABEL`        1                 
+:code:`NETWORK_TYPE_GOOGLE_VOICE` 2                 
+================================= ====== ===========
 
 BlockState
 ----------

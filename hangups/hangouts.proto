@@ -441,7 +441,7 @@ enum DeliveryMediumType {
 message DeliveryMedium {
   optional DeliveryMediumType medium_type = 1;
   // Phone number to use for sending Google Voice messages.
-  optional Phone phone = 2;
+  optional PhoneNumber phone_number = 2;
 }
 
 message DeliveryMediumOption {
@@ -472,6 +472,7 @@ message UserConversationState {
 enum ParticipantType {
   PARTICIPANT_TYPE_UNKNOWN = 0;
   PARTICIPANT_TYPE_GAIA = 2;
+  PARTICIPANT_TYPE_GOOGLE_VOICE = 3;
 }
 
 enum InvitationStatus {
@@ -496,6 +497,7 @@ enum ForceHistory {
 enum NetworkType {
   NETWORK_TYPE_UNKNOWN = 0;
   NETWORK_TYPE_BABEL = 1;
+  NETWORK_TYPE_GOOGLE_VOICE = 2;
 }
 
 // A conversation between two or more users.
