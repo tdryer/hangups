@@ -25,8 +25,8 @@ if sys.platform == 'darwin':
          'subtitle "{sender_name}"'),
     ]
 
-    def NOTIFY_ESCAPER(s):
-        return s.replace('"', '\\"')
+    def NOTIFY_ESCAPER(text):
+        return text.replace('"', '\\"')
 else:
     NOTIFY_CMD = [
         'gdbus', 'call', '--session', '--dest',
@@ -57,14 +57,13 @@ class Notifier(object):
     previous notification is instantly replaced.
     """
 
-    def __init__(self, conv_list):
-        self._conv_list = conv_list  # hangups.ConversationList
-        self._conv_list.on_event.add_observer(self._on_event)
+    def __init__(self, discreet_notification):
         self._replaces_id = 0
+        self._discreet_notification = discreet_notification
 
-    def _on_event(self, conv_event):
+
+    def on_event(self, conv, conv_event):
         """Create notification for new messages."""
-        conv = self._conv_list.get(conv_event.conversation_id)
         user = conv.get_user(conv_event.user_id)
         # Ignore non-messages or messages sent by yourself.
         show_notification = all((
@@ -75,9 +74,16 @@ class Notifier(object):
         if show_notification:
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
+            if self._discreet_notification:
+                user = NOTIFY_ESCAPER("Hangups")
+                message = NOTIFY_ESCAPER("New message")
+            else:
+                user = NOTIFY_ESCAPER(user.full_name)
+                message = NOTIFY_ESCAPER(conv_event.text)
+
             cmd = [arg.format(
-                sender_name=NOTIFY_ESCAPER(user.full_name),
-                msg_text=NOTIFY_ESCAPER(conv_event.text),
+                sender_name=user,
+                msg_text=message,
                 replaces_id=self._replaces_id,
                 convo_name=NOTIFY_ESCAPER(get_conv_name(conv)),
             ) for arg in NOTIFY_CMD]
