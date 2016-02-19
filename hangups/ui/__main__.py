@@ -48,7 +48,8 @@ class ChatUI(object):
     """User interface for hangups."""
 
     def __init__(self, refresh_token_path, keybindings, palette,
-                 palette_colors, datetimefmt, disable_notifier):
+                 palette_colors, datetimefmt, disable_notifier,
+                 discreet_notifier):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
@@ -62,6 +63,7 @@ class ChatUI(object):
         self._user_list = None  # hangups.UserList
         self._notifier = None  # hangups.notify.Notifier
         self._disable_notifier = disable_notifier
+        self.discreet_notifier = discreet_notifier
 
         # TODO Add urwid widget for getting auth.
         try:
@@ -154,7 +156,7 @@ class ChatUI(object):
         )
         self._conv_list.on_event.add_observer(self._on_event)
         if not self._disable_notifier:
-            self._notifier = Notifier(self._conv_list)
+            self._notifier = Notifier(self._conv_list, self.discreet_notifier)
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
                                                self.on_select_conversation,
@@ -887,6 +889,9 @@ def main():
                       help='log detailed debugging messages')
     general_group.add('-n', '--disable-notifications', action='store_true',
                       help='disable desktop notifications')
+    general_group.add('-D', '--discreet', action='store_true',
+                      help='use discreet desktop notifications by hiding '
+                           'the contents of recieved messages')
     general_group.add('--log', default=default_log_path, help='log file path')
     key_group = parser.add_argument_group('Keybindings')
     key_group.add('--key-next-tab', default='ctrl d',
@@ -952,7 +957,8 @@ def main():
                 'up': args.key_up,
                 'down': args.key_down
             }, col_scheme, palette_colors,
-            datetimefmt, args.disable_notifications
+            datetimefmt, args.disable_notifications,
+            args.discreet
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')

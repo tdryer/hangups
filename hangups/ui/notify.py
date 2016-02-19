@@ -57,10 +57,11 @@ class Notifier(object):
     previous notification is instantly replaced.
     """
 
-    def __init__(self, conv_list):
+    def __init__(self, conv_list, discreet_notifier):
         self._conv_list = conv_list  # hangups.ConversationList
         self._conv_list.on_event.add_observer(self._on_event)
         self._replaces_id = 0
+        self.discreet_notifier = discreet_notifier
 
     def _on_event(self, conv_event):
         """Create notification for new messages."""
@@ -75,9 +76,13 @@ class Notifier(object):
         if show_notification:
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
+            if self.discreet_notifier:
+                message_text = "New message"
+            else:
+                message_text = NOTIFY_ESCAPER(conv_event.text)
             cmd = [arg.format(
                 sender_name=NOTIFY_ESCAPER(user.full_name),
-                msg_text=NOTIFY_ESCAPER(conv_event.text),
+                msg_text=message_text,
                 replaces_id=self._replaces_id,
                 convo_name=NOTIFY_ESCAPER(get_conv_name(conv)),
             ) for arg in NOTIFY_CMD]
