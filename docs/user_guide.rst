@@ -50,7 +50,11 @@ tab. Once multiple tabs are open, use :code:`ctrl+u` and :code:`ctrl+d` and
 move up and down the list of tabs. Use :code:`ctrl+w` to close a tab.
 
 In a conversation tab, type a message and press :code:`enter` to send it, or
-use the up and arrows to scroll the list of previous messages.
+use the up and arrows to scroll the list of previous messages. hangups
+supports readline commands for editing text. See the `readlike library
+documentation`_ for a full list. Note that some of hangouts' bindings
+conflict with these key combinations, see the Configuration section on how to
+adjust key bindings.
 
 When new messages arrive, hangups will open a conversation tab in the
 background, and display the number of unread messages in the tab title. On
@@ -65,6 +69,8 @@ missed during the disconnection. If hangups is disconnected for too long, it
 will eventually exit.
 
 To exit hangups, press :code:`ctrl+e`.
+
+.. _readlike library documentation: https://pypi.python.org/pypi/readlike
 
 Configuration
 -------------
