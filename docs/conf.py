@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'hangups'
-copyright = '2015, Tom Dryer'
+copyright = '2014-2016, Tom Dryer'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
