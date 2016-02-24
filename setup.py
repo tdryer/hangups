@@ -3,6 +3,11 @@ from setuptools.command.test import test as TestCommand
 import os
 import sys
 
+
+if sys.version_info < (3, 3):
+    raise RuntimeError("hangups requires Python 3.3+")
+
+
 # Find __version__ without import that requires dependencies to be installed:
 exec(open(os.path.join(
     os.path.dirname(__file__), 'hangups/version.py'
