@@ -70,9 +70,11 @@ Related projects
 - `WTalk`_: Client library and desktop client for Google Hangouts written in C#
 - `hangover`_: The first native Mac OS X client for Google Hangouts
 - `hangupsjs`_: Port of hangups to Node.js
+- `purple-hangouts`_: Hangouts plugin for libpurple
 
 .. _Hangish: https://github.com/rogora/hangish
 .. _Hangups-UWP: https://github.com/kfechter/Hangups-UWP
 .. _WTalk: https://github.com/madagaga/WTalk
 .. _hangover: https://github.com/psobot/hangover
 .. _hangupsjs: https://github.com/algesten/hangupsjs
+.. _purple-hangouts: https://bitbucket.org/EionRobb/purple-hangouts
