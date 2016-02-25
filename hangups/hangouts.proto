@@ -77,11 +77,19 @@ message DeviceStatus {
   optional bool tablet = 3;
 }
 
+message LastSeen {
+  optional uint64 last_seen_timestamp_usec = 1;
+}
+
 message Presence {
   optional bool reachable = 1;
   optional bool available = 2;
   optional DeviceStatus device_status = 6;
-  optional MoodSetting mood_setting = 9;
+  optional MoodMessage mood_message = 9;
+  optional LastSeen last_seen = 10;
+
+  // TODO:
+  // optional CallType call_type = 5;
 }
 
 message PresenceResult {
@@ -817,7 +825,12 @@ message RichPresenceEnabledState {
 enum FieldMask {
   FIELD_MASK_REACHABLE = 1;
   FIELD_MASK_AVAILABLE = 2;
+  FIELD_MASK_MOOD = 3;
+  FIELD_MASK_IN_CALL = 6;
   FIELD_MASK_DEVICE = 7;
+  FIELD_MASK_LAST_SEEN = 10;
+
+  // TODO: 3,4,8?
 }
 
 message DesktopOffSetting {
