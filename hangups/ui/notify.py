@@ -25,8 +25,8 @@ if sys.platform == 'darwin':
          'subtitle "{sender_name}"'),
     ]
 
-    def NOTIFY_ESCAPER(s):
-        return s.replace('"', '\\"')
+    def NOTIFY_ESCAPER(text):
+        return text.replace('"', '\\"')
 else:
     NOTIFY_CMD = [
         'gdbus', 'call', '--session', '--dest',
