@@ -60,6 +60,15 @@ Field           Number Type Label    Description
 :code:`tablet`  3      bool optional True if a tablet is active.           
 =============== ====== ==== ======== ======================================
 
+LastSeen
+--------
+
+================================ ====== ====== ======== ===========
+Field                            Number Type   Label    Description
+================================ ====== ====== ======== ===========
+:code:`last_seen_timestamp_usec` 1      uint64 optional            
+================================ ====== ====== ======== ===========
+
 Presence
 --------
 
@@ -69,7 +78,8 @@ Field                 Number Type            Label    Description
 :code:`reachable`     1      bool            optional            
 :code:`available`     2      bool            optional            
 :code:`device_status` 6      `DeviceStatus`_ optional            
-:code:`mood_setting`  9      `MoodSetting`_  optional            
+:code:`mood_message`  9      `MoodMessage`_  optional            
+:code:`last_seen`     10     `LastSeen`_     optional            
 ===================== ====== =============== ======== ===========
 
 PresenceResult
@@ -2042,7 +2052,10 @@ Name                         Number Description
 ============================ ====== ===========
 :code:`FIELD_MASK_REACHABLE` 1                 
 :code:`FIELD_MASK_AVAILABLE` 2                 
+:code:`FIELD_MASK_MOOD`      3                 
+:code:`FIELD_MASK_IN_CALL`   6                 
 :code:`FIELD_MASK_DEVICE`    7                 
+:code:`FIELD_MASK_LAST_SEEN` 10                
 ============================ ====== ===========
 
 DeleteType

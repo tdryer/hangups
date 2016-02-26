@@ -5,7 +5,8 @@ import asyncio
 import hangups
 
 
-# ID of the conversation to send the message to.
+# ID of the conversation to send the message to. Conversation IDs can be found
+# in the hangups debug log by searching for "conversation_id".
 CONVERSATION_ID = 'UgyoEJW1M5TLSnPWY494AaABAQ'
 
 # Plain-text content of the message to send.
@@ -13,7 +14,7 @@ MESSAGE = 'hello world'
 
 # Path where OAuth refresh token is saved, allowing hangups to remember your
 # credentials.
-REFRESH_TOKEN_PATH = '/home/tom/.cache/hangups/refresh_token.txt'
+REFRESH_TOKEN_PATH = 'refresh_token.txt'
 
 
 def main():
