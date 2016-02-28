@@ -48,12 +48,11 @@ class ChatUI(object):
     """User interface for hangups."""
 
     def __init__(self, refresh_token_path, keybindings, palette,
-                 palette_colors, datetimefmt, disable_notifier, notifier):
+                 palette_colors, datetimefmt, notifier):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
         self._notifier = notifier
-        self._disable_notifier = disable_notifier
 
         set_terminal_title('hangups')
 
@@ -154,11 +153,6 @@ class ChatUI(object):
         )
         self._conv_list.on_event.add_observer(self._on_event)
 
-        # Connect the notifier
-        if not self._disable_notifier:
-            self._notifier._conv_list = self._conv_list
-            self._notifier._conv_list.on_event.add_observer(self._notifier._on_event)
-
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
                                                self.on_select_conversation,
@@ -169,7 +163,8 @@ class ChatUI(object):
         self._urwid_loop.widget = self._tabbed_window
 
     def _on_event(self, conv_event):
-        """Open conversation tab for new messages when they arrive."""
+        """Open conversation tab for new messages when they arrive.
+           Pass conv events to notifier, if not diabled."""
         conv = self._conv_list.get(conv_event.conversation_id)
         user = conv.get_user(conv_event.user_id)
         add_tab = all((
@@ -179,6 +174,9 @@ class ChatUI(object):
         ))
         if add_tab:
             self.add_conversation_tab(conv_event.conversation_id)
+        # Handle notifications
+        if self._notifier is not False:
+            self._notifier._on_event(conv, conv_event)
 
     def _on_quit(self):
         """Handle the user quitting the application."""
@@ -950,6 +948,8 @@ def main():
 
     if not args.disable_notifications:
         notifier = Notifier(args.notification_type)
+    else:
+        notifier = False
 
     try:
         ChatUI(
@@ -961,8 +961,7 @@ def main():
                 'menu': args.key_menu,
                 'up': args.key_up,
                 'down': args.key_down
-            }, col_scheme, palette_colors, datetimefmt,
-            args.disable_notifications, notifier
+            }, col_scheme, palette_colors, datetimefmt, notifier
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
