@@ -48,10 +48,11 @@ class ChatUI(object):
     """User interface for hangups."""
 
     def __init__(self, refresh_token_path, keybindings, palette,
-                 palette_colors, datetimefmt, disable_notifier):
+                 palette_colors, datetimefmt, notifier):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
+        self._notifier = notifier
 
         set_terminal_title('hangups')
 
@@ -60,8 +61,6 @@ class ChatUI(object):
         self._tabbed_window = None  # TabbedWindowWidget
         self._conv_list = None  # hangups.ConversationList
         self._user_list = None  # hangups.UserList
-        self._notifier = None  # hangups.notify.Notifier
-        self._disable_notifier = disable_notifier
 
         # TODO Add urwid widget for getting auth.
         try:
@@ -153,8 +152,11 @@ class ChatUI(object):
             yield from hangups.build_user_conversation_list(self._client)
         )
         self._conv_list.on_event.add_observer(self._on_event)
-        if not self._disable_notifier:
-            self._notifier = Notifier(self._conv_list)
+
+        # Connect the notifier
+        self._notifier._conv_list = self._conv_list
+        self._notifier._conv_list.on_event.add_observer(self._notifier._on_event)
+
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
                                                self.on_select_conversation,
@@ -885,8 +887,6 @@ def main():
                       version='hangups {}'.format(hangups.__version__))
     general_group.add('-d', '--debug', action='store_true',
                       help='log detailed debugging messages')
-    general_group.add('-n', '--disable-notifications', action='store_true',
-                      help='disable desktop notifications')
     general_group.add('--log', default=default_log_path, help='log file path')
     key_group = parser.add_argument_group('Keybindings')
     key_group.add('--key-next-tab', default='ctrl d',
@@ -903,6 +903,9 @@ def main():
                   help='keybinding for alternate up key')
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
+    notification_group = parser.add_argument_group('Notifications')
+    general_group.add('-n', '--notification-type', default='full',
+                      help='choose notification type (full, none or discreet)')
 
     # add color scheme options
     col_group = parser.add_argument_group('Colors')
@@ -941,6 +944,8 @@ def main():
                                          getattr(args, 'col_' + name + '_bg'),
                                          palette_colors)
 
+    _notifier = Notifier(args.notification_type)
+
     try:
         ChatUI(
             args.token_path, {
@@ -951,8 +956,7 @@ def main():
                 'menu': args.key_menu,
                 'up': args.key_up,
                 'down': args.key_down
-            }, col_scheme, palette_colors,
-            datetimefmt, args.disable_notifications
+            }, col_scheme, palette_colors, datetimefmt, _notifier
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')

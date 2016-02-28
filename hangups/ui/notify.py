@@ -25,8 +25,8 @@ if sys.platform == 'darwin':
          'subtitle "{sender_name}"'),
     ]
 
-    def NOTIFY_ESCAPER(s):
-        return s.replace('"', '\\"')
+    def NOTIFY_ESCAPER(text):
+        return text.replace('"', '\\"')
 else:
     NOTIFY_CMD = [
         'gdbus', 'call', '--session', '--dest',
@@ -57,13 +57,17 @@ class Notifier(object):
     previous notification is instantly replaced.
     """
 
-    def __init__(self, conv_list):
-        self._conv_list = conv_list  # hangups.ConversationList
-        self._conv_list.on_event.add_observer(self._on_event)
+    def __init__(self, notification_type):
+        self._conv_list = None  # hangups.ConversationList
+        #self._conv_list.on_event.add_observer(self._on_event)
         self._replaces_id = 0
+        self._notification_type = notification_type # full, none or discreet
 
     def _on_event(self, conv_event):
         """Create notification for new messages."""
+        if self._notification_type == "none":
+            return
+
         conv = self._conv_list.get(conv_event.conversation_id)
         user = conv.get_user(conv_event.user_id)
         # Ignore non-messages or messages sent by yourself.
@@ -75,9 +79,16 @@ class Notifier(object):
         if show_notification:
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
+            if self._notification_type == "full":
+                self.user=NOTIFY_ESCAPER(user.full_name)
+                self.message = NOTIFY_ESCAPER(conv_event.text)
+            elif self._notification_type == "discreet":
+                self.user=NOTIFY_ESCAPER("Hangups")
+                self.message = NOTIFY_ESCAPER("New message")
+
             cmd = [arg.format(
-                sender_name=NOTIFY_ESCAPER(user.full_name),
-                msg_text=NOTIFY_ESCAPER(conv_event.text),
+                sender_name=self.user,
+                msg_text=self.message,
                 replaces_id=self._replaces_id,
                 convo_name=NOTIFY_ESCAPER(get_conv_name(conv)),
             ) for arg in NOTIFY_CMD]
