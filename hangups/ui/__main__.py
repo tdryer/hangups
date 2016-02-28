@@ -48,11 +48,12 @@ class ChatUI(object):
     """User interface for hangups."""
 
     def __init__(self, refresh_token_path, keybindings, palette,
-                 palette_colors, datetimefmt, notifier):
+                 palette_colors, datetimefmt, disable_notifier, notifier):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
         self._notifier = notifier
+        self._disable_notifier = disable_notifier
 
         set_terminal_title('hangups')
 
@@ -154,8 +155,9 @@ class ChatUI(object):
         self._conv_list.on_event.add_observer(self._on_event)
 
         # Connect the notifier
-        self._notifier._conv_list = self._conv_list
-        self._notifier._conv_list.on_event.add_observer(self._notifier._on_event)
+        if not self._disable_notifier:
+            self._notifier._conv_list = self._conv_list
+            self._notifier._conv_list.on_event.add_observer(self._notifier._on_event)
 
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
@@ -904,8 +906,10 @@ def main():
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
     notification_group = parser.add_argument_group('Notifications')
-    notification_group.add('-n', '--notification-type', default='full',
-                      help='choose notification type (full, none or discreet)')
+    notification_group.add('-n', '--disable-notifications', action='store_true',
+                      help='disable desktop notifications')
+    notification_group.add('-t', '--notification-type', default='full',
+                      help='choose notification type (full or discreet)')
 
     # add color scheme options
     col_group = parser.add_argument_group('Colors')
@@ -944,7 +948,8 @@ def main():
                                          getattr(args, 'col_' + name + '_bg'),
                                          palette_colors)
 
-    notifier = Notifier(args.notification_type)
+    if not args.disable_notifications:
+        notifier = Notifier(args.notification_type)
 
     try:
         ChatUI(
@@ -956,7 +961,8 @@ def main():
                 'menu': args.key_menu,
                 'up': args.key_up,
                 'down': args.key_down
-            }, col_scheme, palette_colors, datetimefmt, notifier
+            }, col_scheme, palette_colors, datetimefmt,
+            args.disable_notifications, notifier
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')

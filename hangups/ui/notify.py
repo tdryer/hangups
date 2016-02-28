@@ -66,9 +66,6 @@ class Notifier(object):
 
     def _on_event(self, conv_event):
         """Create notification for new messages."""
-        if self._notification_type == "none":
-            return
-
         conv = self._conv_list.get(conv_event.conversation_id)
         user = conv.get_user(conv_event.user_id)
         # Ignore non-messages or messages sent by yourself.
