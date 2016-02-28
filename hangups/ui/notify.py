@@ -57,9 +57,9 @@ class Notifier(object):
     previous notification is instantly replaced.
     """
 
-    def __init__(self, conv_list, notification_type):
-        self._conv_list = conv_list  # hangups.ConversationList
-        self._conv_list.on_event.add_observer(self._on_event)
+    def __init__(self, notification_type):
+        self._conv_list = None  # hangups.ConversationList
+        #self._conv_list.on_event.add_observer(self._on_event)
         self._replaces_id = 0
 
     def _on_event(self, conv_event):
