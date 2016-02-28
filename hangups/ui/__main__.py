@@ -48,11 +48,11 @@ class ChatUI(object):
     """User interface for hangups."""
 
     def __init__(self, refresh_token_path, keybindings, palette,
-                 palette_colors, datetimefmt, notification_type):
+                 palette_colors, datetimefmt, notifier):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
-        self._notification_type = notification_type
+        self._notifier = notifier
 
         set_terminal_title('hangups')
 
@@ -154,8 +154,8 @@ class ChatUI(object):
         self._conv_list.on_event.add_observer(self._on_event)
 
         # Connect the notifier
-        _notifier._conv_list = self._conv_list
-        _notifier._conv_list.on_event.add_observer(Notifier._on_event)
+        self._notifier._conv_list = self._conv_list
+        self._notifier._conv_list.on_event.add_observer(self._notifier._on_event)
 
         # show the conversation menu
         conv_picker = ConversationPickerWidget(self._conv_list,
@@ -956,8 +956,7 @@ def main():
                 'menu': args.key_menu,
                 'up': args.key_up,
                 'down': args.key_down
-            }, col_scheme, palette_colors,
-            datetimefmt, args.disable_notifications
+            }, col_scheme, palette_colors, datetimefmt, _notifier
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
