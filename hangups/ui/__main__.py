@@ -944,7 +944,7 @@ def main():
                                          getattr(args, 'col_' + name + '_bg'),
                                          palette_colors)
 
-    _notifier = Notifier(args.notification_type)
+    notifier = Notifier(args.notification_type)
 
     try:
         ChatUI(
@@ -956,7 +956,7 @@ def main():
                 'menu': args.key_menu,
                 'up': args.key_up,
                 'down': args.key_down
-            }, col_scheme, palette_colors, datetimefmt, _notifier
+            }, col_scheme, palette_colors, datetimefmt, notifier
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
