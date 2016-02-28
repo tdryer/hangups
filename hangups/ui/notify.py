@@ -62,6 +62,8 @@ class Notifier(object):
         #self._conv_list.on_event.add_observer(self._on_event)
         self._replaces_id = 0
         self._notification_type = notification_type # full, none or discreet
+        self._user = None
+        self._message = None
 
     def _on_event(self, conv_event):
         """Create notification for new messages."""
@@ -80,15 +82,15 @@ class Notifier(object):
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
             if self._notification_type == "full":
-                self.user=NOTIFY_ESCAPER(user.full_name)
-                self.message = NOTIFY_ESCAPER(conv_event.text)
+                self._user = NOTIFY_ESCAPER(user.full_name)
+                self._message = NOTIFY_ESCAPER(conv_event.text)
             elif self._notification_type == "discreet":
-                self.user=NOTIFY_ESCAPER("Hangups")
-                self.message = NOTIFY_ESCAPER("New message")
+                self._user = NOTIFY_ESCAPER("Hangups")
+                self._message = NOTIFY_ESCAPER("New message")
 
             cmd = [arg.format(
-                sender_name=self.user,
-                msg_text=self.message,
+                sender_name=self._user,
+                msg_text=self._message,
                 replaces_id=self._replaces_id,
                 convo_name=NOTIFY_ESCAPER(get_conv_name(conv)),
             ) for arg in NOTIFY_CMD]
