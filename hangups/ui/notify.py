@@ -61,6 +61,7 @@ class Notifier(object):
         self._conv_list = None  # hangups.ConversationList
         #self._conv_list.on_event.add_observer(self._on_event)
         self._replaces_id = 0
+        self._notification_type = notification_type # full, none or discreet
 
     def _on_event(self, conv_event):
         """Create notification for new messages."""

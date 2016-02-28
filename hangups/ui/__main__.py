@@ -905,7 +905,7 @@ def main():
                   help='keybinding for alternate down key')
     notification_group = parser.add_argument_group('Notifications')
     general_group.add('-n', '--notification-type', default='full',
-                      help='choose notification type')
+                      help='choose notification type (full, none or discreet)')
 
     # add color scheme options
     col_group = parser.add_argument_group('Colors')
