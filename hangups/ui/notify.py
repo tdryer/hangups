@@ -62,7 +62,7 @@ class Notifier(object):
         self._discreet_notification = discreet_notification
 
 
-    def _on_event(self, conv, conv_event):
+    def on_event(self, conv, conv_event):
         """Create notification for new messages."""
         user = conv.get_user(conv_event.user_id)
         # Ignore non-messages or messages sent by yourself.

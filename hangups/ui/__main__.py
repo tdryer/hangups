@@ -175,7 +175,7 @@ class ChatUI(object):
             self.add_conversation_tab(conv_event.conversation_id)
         # Handle notifications
         if self._notifier is not None:
-            self._notifier._on_event(conv, conv_event)
+            self._notifier.on_event(conv, conv_event)
 
     def _on_quit(self):
         """Handle the user quitting the application."""
