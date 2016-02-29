@@ -904,10 +904,11 @@ def main():
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
     notification_group = parser.add_argument_group('Notifications')
-    notification_group.add('-n', '--disable-notifications', action='store_true',
-                      help='disable desktop notifications')
+    notification_group.add('-n', '--disable-notifications',
+                           action='store_true',
+                           help='disable desktop notifications')
     notification_group.add('-t', '--notification-type', default='full',
-                      help='choose notification type (full or discreet)')
+                           help='choose notification type (full or discreet)')
 
     # add color scheme options
     col_group = parser.add_argument_group('Colors')
