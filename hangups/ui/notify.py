@@ -57,9 +57,9 @@ class Notifier(object):
     previous notification is instantly replaced.
     """
 
-    def __init__(self, notification_type):
+    def __init__(self, discreet_notification):
         self._replaces_id = 0
-        self._notification_type = notification_type # full, none or discreet
+        self._discreet_notification = discreet_notification
 
 
     def _on_event(self, conv, conv_event):
@@ -74,12 +74,12 @@ class Notifier(object):
         if show_notification:
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
-            if self._notification_type == "full":
-                user = NOTIFY_ESCAPER(user.full_name)
-                message = NOTIFY_ESCAPER(conv_event.text)
-            elif self._notification_type == "discreet":
+            if self._discreet_notification:
                 user = NOTIFY_ESCAPER("Hangups")
                 message = NOTIFY_ESCAPER("New message")
+            else:
+                user = NOTIFY_ESCAPER(user.full_name)
+                message = NOTIFY_ESCAPER(conv_event.text)
 
             cmd = [arg.format(
                 sender_name=user,

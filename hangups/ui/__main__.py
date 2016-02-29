@@ -174,7 +174,7 @@ class ChatUI(object):
         if add_tab:
             self.add_conversation_tab(conv_event.conversation_id)
         # Handle notifications
-        if self._notifier is not False:
+        if self._notifier is not None:
             self._notifier._on_event(conv, conv_event)
 
     def _on_quit(self):
@@ -906,8 +906,9 @@ def main():
     notification_group.add('-n', '--disable-notifications',
                            action='store_true',
                            help='disable desktop notifications')
-    notification_group.add('-t', '--notification-type', default='full',
-                           help='choose notification type (full or discreet)')
+    notification_group.add('-D', '--discreet-notification',
+                           action='store_true',
+                           help='Always display the same notification message')
 
     # add color scheme options
     col_group = parser.add_argument_group('Colors')
@@ -947,9 +948,9 @@ def main():
                                          palette_colors)
 
     if not args.disable_notifications:
-        notifier = Notifier(args.notification_type)
+        notifier = Notifier(args.discreet_notification)
     else:
-        notifier = False
+        notifier = None
 
     try:
         ChatUI(
