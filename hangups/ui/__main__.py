@@ -163,8 +163,7 @@ class ChatUI(object):
         self._urwid_loop.widget = self._tabbed_window
 
     def _on_event(self, conv_event):
-        """Open conversation tab for new messages when they arrive.
-           Pass conv events to notifier, if not diabled."""
+        """Open conversation tab for new messages & pass events to notifier."""
         conv = self._conv_list.get(conv_event.conversation_id)
         user = conv.get_user(conv_event.user_id)
         add_tab = all((
