@@ -75,7 +75,7 @@ class Notifier(object):
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
             if self._discreet_notification:
-                user = NOTIFY_ESCAPER("Hangups")
+                user = NOTIFY_ESCAPER("hangups")
                 message = NOTIFY_ESCAPER("New message")
             else:
                 user = NOTIFY_ESCAPER(user.full_name)
