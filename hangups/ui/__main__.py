@@ -948,7 +948,7 @@ def main():
                                          palette_colors)
 
     if not args.disable_notifications:
-        notifier = Notifier(args.discreet_notification)
+        notifier = Notifier(args.discreet_notifications)
     else:
         notifier = None
 
