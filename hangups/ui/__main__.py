@@ -906,9 +906,9 @@ def main():
     notification_group.add('-n', '--disable-notifications',
                            action='store_true',
                            help='disable desktop notifications')
-    notification_group.add('-D', '--discreet-notification',
+    notification_group.add('-D', '--discreet-notifications',
                            action='store_true',
-                           help='Always display the same notification message')
+                           help='hide message details in notifications')
 
     # add color scheme options
     col_group = parser.add_argument_group('Colors')
