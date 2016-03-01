@@ -61,7 +61,6 @@ class Notifier(object):
         self._replaces_id = 0
         self._discreet_notification = discreet_notification
 
-
     def on_event(self, conv, conv_event):
         """Create notification for new messages."""
         user = conv.get_user(conv_event.user_id)
