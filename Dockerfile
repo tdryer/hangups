@@ -1,9 +1,14 @@
 FROM python:3.4
 MAINTAINER Tom Dryer <tomdryer.com@gmail.com>
 
-WORKDIR /opt/hangups
+RUN useradd --create-home hangups
+USER hangups
+WORKDIR /home/hangups
+
 COPY hangups ./hangups
 COPY setup.py README.rst ./
-RUN python setup.py install
-VOLUME ["/root/.config/hangups", "/root/.cache/hangups"]
-ENTRYPOINT ["hangups"]
+RUN pip install --user .
+RUN mkdir -p .cache/hangups .config/hangups
+
+VOLUME ["/home/hangups/.config/hangups", "/home/hangups/.cache/hangups"]
+ENTRYPOINT [".local/bin/hangups"]
