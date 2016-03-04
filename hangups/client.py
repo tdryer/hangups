@@ -456,7 +456,7 @@ class Client(object):
 
     @asyncio.coroutine
     def get_suggested_entities(self, get_suggested_entities_request):
-        """Return info about the current user."""
+        """Return suggested contacts."""
         response = hangouts_pb2.GetSuggestedEntitiesResponse()
         yield from self._pb_request('contacts/getsuggestedentities',
                                     get_suggested_entities_request, response)
