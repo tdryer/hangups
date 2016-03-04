@@ -455,6 +455,14 @@ class Client(object):
         return response
 
     @asyncio.coroutine
+    def get_suggested_entities(self, get_suggested_entities_request):
+        """Return info about the current user."""
+        response = hangouts_pb2.GetSuggestedEntitiesResponse()
+        yield from self._pb_request('contacts/getsuggestedentities',
+                                    get_suggested_entities_request, response)
+        return response
+
+    @asyncio.coroutine
     def query_presence(self, query_presence_request):
         """Return presence status for a list of users."""
         response = hangouts_pb2.QueryPresenceResponse()

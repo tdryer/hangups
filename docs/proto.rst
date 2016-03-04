@@ -841,33 +841,33 @@ Field             Number Type        Label    Description
 SuggestedContactGroupHash
 -------------------------
 
-=================== ====== ====== ======== ============================================
-Field               Number Type   Label    Description                                 
-=================== ====== ====== ======== ============================================
-:code:`max_results` 1      uint64 optional Number of results to return from this group.
-:code:`hash`        2      bytes  optional A 4-byte hash.                              
-=================== ====== ====== ======== ============================================
+=================== ====== ====== ======== ====================================================================================
+Field               Number Type   Label    Description                                                                         
+=================== ====== ====== ======== ====================================================================================
+:code:`max_results` 1      uint64 optional Number of results to return from this group.                                        
+:code:`hash`        2      bytes  optional An optional 4-byte hash. If this matches the server's hash, no results will be sent.
+=================== ====== ====== ======== ====================================================================================
 
 SuggestedContact
 ----------------
 
-========================= ====== =================== ======== ===========
-Field                     Number Type                Label    Description
-========================= ====== =================== ======== ===========
-:code:`entity`            1      `Entity`_           optional            
-:code:`invitation_status` 2      `InvitationStatus`_ optional            
-========================= ====== =================== ======== ===========
+========================= ====== =================== ======== ================================
+Field                     Number Type                Label    Description                     
+========================= ====== =================== ======== ================================
+:code:`entity`            1      `Entity`_           optional The contact's entity.           
+:code:`invitation_status` 2      `InvitationStatus`_ optional The contact's invitation status.
+========================= ====== =================== ======== ================================
 
 SuggestedContactGroup
 ---------------------
 
-==================== ====== =================== ======== ==============
-Field                Number Type                Label    Description   
-==================== ====== =================== ======== ==============
-:code:`hash_matched` 1      bool                optional               
-:code:`hash`         2      bytes               optional A 4-byte hash.
-:code:`contact`      3      `SuggestedContact`_ repeated               
-==================== ====== =================== ======== ==============
+==================== ====== =================== ======== ====================================================================
+Field                Number Type                Label    Description                                                         
+==================== ====== =================== ======== ====================================================================
+:code:`hash_matched` 1      bool                optional True if the request's hash matched and no contacts will be included.
+:code:`hash`         2      bytes               optional A 4-byte hash which can be used in subsequent requests.             
+:code:`contact`      3      `SuggestedContact`_ repeated List of contacts in this group.                                     
+==================== ====== =================== ======== ====================================================================
 
 StateUpdate
 -----------
@@ -1234,17 +1234,18 @@ Field                   Number Type              Label    Description
 GetSuggestedEntitiesRequest
 ---------------------------
 
-================================== ====== ============================ ======== ===========
-Field                              Number Type                         Label    Description
-================================== ====== ============================ ======== ===========
-:code:`request_header`             1      `RequestHeader`_             optional            
-:code:`favorites`                  8      `SuggestedContactGroupHash`_ optional            
-:code:`contacts_you_hangout_with`  9      `SuggestedContactGroupHash`_ optional            
-:code:`other_contacts_on_hangouts` 10     `SuggestedContactGroupHash`_ optional            
-:code:`other_contacts`             11     `SuggestedContactGroupHash`_ optional            
-:code:`dismissed_contacts`         12     `SuggestedContactGroupHash`_ optional            
-:code:`pinned_favorites`           13     `SuggestedContactGroupHash`_ optional            
-================================== ====== ============================ ======== ===========
+================================== ====== ============================ ======== =============================================================
+Field                              Number Type                         Label    Description                                                  
+================================== ====== ============================ ======== =============================================================
+:code:`request_header`             1      `RequestHeader`_             optional                                                              
+:code:`max_count`                  4      uint64                       optional Max number of non-grouped entities to return.                
+:code:`favorites`                  8      `SuggestedContactGroupHash`_ optional Optional hash for "favorites" contact group.                 
+:code:`contacts_you_hangout_with`  9      `SuggestedContactGroupHash`_ optional Optional hash for "contacts you hangout with" contact group. 
+:code:`other_contacts_on_hangouts` 10     `SuggestedContactGroupHash`_ optional Optional hash for "other contacts on hangouts" contact group.
+:code:`other_contacts`             11     `SuggestedContactGroupHash`_ optional Optional hash for "other contacts" contact group.            
+:code:`dismissed_contacts`         12     `SuggestedContactGroupHash`_ optional Optional hash for "dismissed contacts" contact group.        
+:code:`pinned_favorites`           13     `SuggestedContactGroupHash`_ optional Optional hash for "pinned favorites" contact group.          
+================================== ====== ============================ ======== =============================================================
 
 GetSuggestedEntitiesResponse
 ----------------------------
