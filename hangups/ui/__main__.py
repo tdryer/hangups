@@ -16,6 +16,14 @@ from hangups.ui.utils import get_conv_name
 from hangups.ui.utils import add_color_to_scheme
 
 
+# hangups used to require a fork of urwid called hangups-urwid which may still
+# be installed and create a conflict with the 'urwid' package name. See #198.
+if urwid.__version__ == '1.2.2-dev':
+    sys.exit('error: hangups-urwid package is installed\n\n'
+             'Please uninstall hangups-urwid and urwid, and reinstall '
+             'hangups.')
+
+
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 COL_SCHEMES = {
     # Very basic scheme with no colour
