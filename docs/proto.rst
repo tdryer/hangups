@@ -629,10 +629,13 @@ Field                              Number Type   Label    Description
 EntityLookupSpec
 ----------------
 
+Specifies an entity to lookup by one of its properties.
+
 =============== ====== ====== ======== ===========
 Field           Number Type   Label    Description
 =============== ====== ====== ======== ===========
 :code:`gaia_id` 1      string optional            
+:code:`email`   3      string optional            
 =============== ====== ====== ======== ===========
 
 ConfigurationBit

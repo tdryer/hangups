@@ -712,11 +712,20 @@ message EventContinuationToken {
   optional uint64 event_timestamp = 3;
 }
 
+// Specifies an entity to lookup by one of its properties.
 message EntityLookupSpec {
   optional string gaia_id = 1;
+  optional string email = 3;
+
+  // TODO: do these work?
+  //optional string jid = 2;
+  //optional string phone = 4;
+  //optional string chat_id = 5;
 
   // TODO
+  //optional bool unknown = 6;
 }
+
 
 // A type of binary configuration option.
 enum ConfigurationBitType {
