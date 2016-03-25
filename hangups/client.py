@@ -440,7 +440,7 @@ class Client(object):
 
     @asyncio.coroutine
     def get_entity_by_id(self, get_entity_by_id_request):
-        """Return info about a list of users."""
+        """Return one or more user entities."""
         response = hangouts_pb2.GetEntityByIdResponse()
         yield from self._pb_request('contacts/getentitybyid',
                                     get_entity_by_id_request, response)
@@ -493,7 +493,7 @@ class Client(object):
 
     @asyncio.coroutine
     def search_entities(self, search_entities_request):
-        """Return info for users based on a query."""
+        """Return user entities based on a query."""
         response = hangouts_pb2.SearchEntitiesResponse()
         yield from self._pb_request('contacts/searchentities',
                                     search_entities_request, response)
@@ -509,7 +509,7 @@ class Client(object):
 
     @asyncio.coroutine
     def send_offnetwork_invitation(self, send_offnetwork_invitation_request):
-        """Send an invitation to a non-contact."""
+        """Send an email to invite a non-Google contact to Hangouts."""
         response = hangouts_pb2.SendOffnetworkInvitationResponse()
         yield from self._pb_request('devices/sendoffnetworkinvitation',
                                     send_offnetwork_invitation_request,
