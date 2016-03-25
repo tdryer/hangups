@@ -32,11 +32,11 @@ cache directory. The default token file path can be viewed using :code:`hangups
 
   hangups --token-path /path/to/refresh_token.txt
 
-hangups may be deauthorized from your Google account from the `Google Account
-Permissions page`_. hangups will be listed as "iOS device".
+hangups may be deauthorized from your Google account from the `Google recently
+used devices page`_. hangups will be listed as "iOS".
 
 .. _OAuth 2.0: http://oauth.net/2/
-.. _`Google Account Permissions page`: https://security.google.com/settings/security/permissions
+.. _`Google recently used devices page`: https://security.google.com/settings/security/activity
 
 Usage
 -----

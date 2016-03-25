@@ -4,7 +4,7 @@ Logging into Hangouts using OAuth2 requires a private scope only whitelisted
 for certain clients. This module uses the client ID and secret from iOS, so it
 will appear to Google to be an iOS device. Access can be revoked from this
 page:
-    https://security.google.com/settings/security/permissions
+    https://security.google.com/settings/security/activity
 
 For safety of public debugging, this module should not log any user credentials
 or tokens.
