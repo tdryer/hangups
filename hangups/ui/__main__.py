@@ -527,6 +527,9 @@ class MessageWidget(urwid.WidgetWrap):
                 hangups.HANGOUT_EVENT_TYPE_END: (
                     'A Hangout call ended.'
                 ),
+                hangups.HANGOUT_EVENT_TYPE_ONGOING: (
+                    'A Hangout call is ongoing.'
+                ),
             }.get(conv_event.event_type, 'Unknown Hangout call event.')
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
                                  show_date=is_new_day)
