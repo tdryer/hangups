@@ -667,7 +667,12 @@ message EntityProperties {
   optional ProfileType type = 1;
   optional string display_name = 2;
   optional string first_name = 3;
+
+  // this URL always seems to omit the protocol scheme,
+  // e.g.                     //lh.googleusercontent.com/...
+  //      rather than http(s)://lh.googleusercontent.com/...
   optional string photo_url = 4;
+
   repeated string email = 5;
   repeated string phone = 6;
   optional bool in_users_domain = 10;
@@ -719,7 +724,7 @@ message EntityLookupSpec {
 
   // TODO: do these work?
   //optional string jid = 2;
-  //optional string phone = 4;
+  optional string phone = 4; // must start with + (e.g. +1 for USA/Canada/NANP)
   //optional string chat_id = 5;
 
   // TODO
