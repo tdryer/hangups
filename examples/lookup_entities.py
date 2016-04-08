@@ -40,22 +40,24 @@ def main():
 def lookup_entities(client, identifiers):
     """Search for entities by phone number, email, or gaia_id."""
 
-    # Instantiate a GetSuggestedEntitiesRequest Protocol Buffer message
-    # describing the request.
+    # Instantiate a GetEntityByIdRequest Protocol Buffer message describing the
+    # request.
 
     lookup_dicts = []
-    for id in identifiers:
-        if id.startswith('+'): k='phone'
-        elif '@' in id: k='email'
-        else: k='gaia_id'
-        lookup_dicts.append({k:id}) #,'unknown':True})
-        #lookup_dicts.append({k:id,'unknown':False})
+    for identifier in identifiers:
+        if identifier.startswith('+'):
+            key = 'phone'
+        elif '@' in identifier:
+            key = 'email'
+        else:
+            key = 'gaia_id'
+        lookup_dicts.append({key: identifier})
 
     request = hangups.hangouts_pb2.GetEntityByIdRequest(
         request_header=client.get_request_header(),
-        batch_lookup_spec = [ hangups.hangouts_pb2.EntityLookupSpec(**d) for d in lookup_dicts ],
+        batch_lookup_spec=[hangups.hangouts_pb2.EntityLookupSpec(**d)
+                           for d in lookup_dicts],
     )
-
 
     try:
         # Make the request to the Hangouts API.
