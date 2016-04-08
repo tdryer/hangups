@@ -583,20 +583,20 @@ Name                                        Number Description
 EntityProperties
 ----------------
 
-======================== ====== ================= ======== ===========
-Field                    Number Type              Label    Description
-======================== ====== ================= ======== ===========
-:code:`type`             1      `ProfileType`_    optional            
-:code:`display_name`     2      string            optional            
-:code:`first_name`       3      string            optional            
-:code:`photo_url`        4      string            optional            
-:code:`email`            5      string            repeated            
-:code:`phone`            6      string            repeated            
-:code:`in_users_domain`  10     bool              optional            
-:code:`gender`           11     `Gender`_         optional            
-:code:`photo_url_status` 12     `PhotoUrlStatus`_ optional            
-:code:`canonical_email`  15     string            optional            
-======================== ====== ================= ======== ===========
+======================== ====== ================= ======== ==============================================================================
+Field                    Number Type              Label    Description                                                                   
+======================== ====== ================= ======== ==============================================================================
+:code:`type`             1      `ProfileType`_    optional                                                                               
+:code:`display_name`     2      string            optional                                                                               
+:code:`first_name`       3      string            optional                                                                               
+:code:`photo_url`        4      string            optional Photo URL with protocol scheme omitted (eg. "//lh.googleusercontent.com/...").
+:code:`email`            5      string            repeated                                                                               
+:code:`phone`            6      string            repeated                                                                               
+:code:`in_users_domain`  10     bool              optional                                                                               
+:code:`gender`           11     `Gender`_         optional                                                                               
+:code:`photo_url_status` 12     `PhotoUrlStatus`_ optional                                                                               
+:code:`canonical_email`  15     string            optional                                                                               
+======================== ====== ================= ======== ==============================================================================
 
 ConversationState
 -----------------
@@ -631,12 +631,13 @@ EntityLookupSpec
 
 Specifies an entity to lookup by one of its properties.
 
-=============== ====== ====== ======== ===========
-Field           Number Type   Label    Description
-=============== ====== ====== ======== ===========
-:code:`gaia_id` 1      string optional            
-:code:`email`   3      string optional            
-=============== ====== ====== ======== ===========
+=============== ====== ====== ======== ============================================
+Field           Number Type   Label    Description                                 
+=============== ====== ====== ======== ============================================
+:code:`gaia_id` 1      string optional                                             
+:code:`email`   3      string optional                                             
+:code:`phone`   4      string optional Phone number as string (eg. "+15551234567").
+=============== ====== ====== ======== ============================================
 
 ConfigurationBit
 ----------------

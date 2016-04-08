@@ -667,12 +667,9 @@ message EntityProperties {
   optional ProfileType type = 1;
   optional string display_name = 2;
   optional string first_name = 3;
-
-  // this URL always seems to omit the protocol scheme,
-  // e.g.                     //lh.googleusercontent.com/...
-  //      rather than http(s)://lh.googleusercontent.com/...
+  // Photo URL with protocol scheme omitted (eg.
+  // "//lh.googleusercontent.com/...").
   optional string photo_url = 4;
-
   repeated string email = 5;
   repeated string phone = 6;
   optional bool in_users_domain = 10;
@@ -721,10 +718,11 @@ message EventContinuationToken {
 message EntityLookupSpec {
   optional string gaia_id = 1;
   optional string email = 3;
+  // Phone number as string (eg. "+15551234567").
+  optional string phone = 4;
 
   // TODO: do these work?
   //optional string jid = 2;
-  optional string phone = 4; // must start with + (e.g. +1 for USA/Canada/NANP)
   //optional string chat_id = 5;
 
   // TODO
