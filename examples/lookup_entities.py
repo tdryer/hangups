@@ -44,10 +44,13 @@ def lookup_entities(client, identifiers):
     # request.
 
     lookup_dicts = []
-    for id in identifiers:
-        if id.startswith('+'): d={'phone':id, 'create_offnetwork_gaia':True}
-        elif '@' in id: d={'email':id, 'create_offnetwork_gaia':True}
-        else: d={'gaia_id':id}
+    for identifier in identifiers:
+        if identifier.startswith('+'):
+            d = {'phone': identifier, 'create_offnetwork_gaia': True}
+        elif '@' in identifier:
+            d = {'email': identifier, 'create_offnetwork_gaia': True}
+        else:
+            d = {'gaia_id': identifier}
         lookup_dicts.append(d)
 
     request = hangups.hangouts_pb2.GetEntityByIdRequest(
@@ -62,7 +65,9 @@ def lookup_entities(client, identifiers):
 
         # Print the list of entities in the response.
         for entity_result in res.entity_result:
-            print('Searched for [{}] and found:'.format(str(entity_result.lookup_spec).replace('\n',' ')))
+            print('Searched for [{}] and found:'.format(
+                str(entity_result.lookup_spec).replace('\n', ' ')
+            ))
             for entity in entity_result.entity:
                 print(entity)
             print()

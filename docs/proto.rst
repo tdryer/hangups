@@ -631,13 +631,14 @@ EntityLookupSpec
 
 Specifies an entity to lookup by one of its properties.
 
-=============== ====== ====== ======== ============================================
-Field           Number Type   Label    Description                                 
-=============== ====== ====== ======== ============================================
-:code:`gaia_id` 1      string optional                                             
-:code:`email`   3      string optional                                             
-:code:`phone`   4      string optional Phone number as string (eg. "+15551234567").
-=============== ====== ====== ======== ============================================
+============================== ====== ====== ======== ==============================================================================
+Field                          Number Type   Label    Description                                                                   
+============================== ====== ====== ======== ==============================================================================
+:code:`gaia_id`                1      string optional                                                                               
+:code:`email`                  3      string optional                                                                               
+:code:`phone`                  4      string optional Phone number as string (eg. "+15551234567").                                  
+:code:`create_offnetwork_gaia` 6      bool   optional Whether create a gaia_id for off-network contacts (eg. Google Voice contacts).
+============================== ====== ====== ======== ==============================================================================
 
 ConfigurationBit
 ----------------
@@ -1105,6 +1106,16 @@ Field         Number Type                     Label    Description
 :code:`email` 3      string                   optional            
 ============= ====== ======================== ======== ===========
 
+EntityResult
+------------
+
+=================== ====== =================== ======== ===========
+Field               Number Type                Label    Description
+=================== ====== =================== ======== ===========
+:code:`lookup_spec` 1      `EntityLookupSpec`_ optional            
+:code:`entity`      2      `Entity`_           repeated            
+=================== ====== =================== ======== ===========
+
 AddUserRequest
 --------------
 
@@ -1228,12 +1239,13 @@ Field                     Number Type                Label    Description
 GetEntityByIdResponse
 ---------------------
 
-======================= ====== ================= ======== ===========
-Field                   Number Type              Label    Description
-======================= ====== ================= ======== ===========
-:code:`response_header` 1      `ResponseHeader`_ optional            
-:code:`entity`          2      `Entity`_         repeated            
-======================= ====== ================= ======== ===========
+======================= ====== ================= ======== =================================================
+Field                   Number Type              Label    Description                                      
+======================= ====== ================= ======== =================================================
+:code:`response_header` 1      `ResponseHeader`_ optional                                                  
+:code:`entity`          2      `Entity`_         repeated Resulting entities of PARTICIPANT_TYPE_GAIA only.
+:code:`entity_result`   3      `EntityResult`_   repeated All resulting entities.                          
+======================= ====== ================= ======== =================================================
 
 GetSuggestedEntitiesRequest
 ---------------------------

@@ -720,13 +720,12 @@ message EntityLookupSpec {
   optional string email = 3;
   // Phone number as string (eg. "+15551234567").
   optional string phone = 4;
+  // Whether create a gaia_id for off-network contacts (eg. Google Voice contacts).
+  optional bool create_offnetwork_gaia = 6;
 
   // TODO: do these work?
   //optional string jid = 2;
   //optional string chat_id = 5;
-
-  // create a gaia_id for an off-network contact
-  optional bool create_offnetwork_gaia = 6;
 }
 
 
@@ -1176,6 +1175,11 @@ message OffnetworkAddress {
   optional string email = 3;
 }
 
+message EntityResult {
+  optional EntityLookupSpec lookup_spec = 1;
+  repeated Entity entity = 2;
+}
+
 // ----------------------------------------------------------------------------
 // Requests & Responses
 // ----------------------------------------------------------------------------
@@ -1256,13 +1260,10 @@ message GetEntityByIdRequest {
 
 message GetEntityByIdResponse {
   optional ResponseHeader response_header = 1;
+  // Resulting entities of PARTICIPANT_TYPE_GAIA only.
   repeated Entity entity = 2;
+  // All resulting entities.
   repeated EntityResult entity_result = 3;
-}
-
-message EntityResult {
-  optional EntityLookupSpec lookup_spec = 1;
-  repeated Entity entity = 2;
 }
 
 message GetSuggestedEntitiesRequest {
