@@ -725,8 +725,8 @@ message EntityLookupSpec {
   //optional string jid = 2;
   //optional string chat_id = 5;
 
-  // TODO
-  //optional bool unknown = 6;
+  // create a gaia_id for an off-network contact
+  optional bool create_offnetwork_gaia = 6;
 }
 
 
@@ -1257,8 +1257,12 @@ message GetEntityByIdRequest {
 message GetEntityByIdResponse {
   optional ResponseHeader response_header = 1;
   repeated Entity entity = 2;
+  repeated EntityResult entity_result = 3;
+}
 
-  // TODO
+message EntityResult {
+  optional EntityLookupSpec lookup_spec = 1;
+  repeated Entity entity = 2;
 }
 
 message GetSuggestedEntitiesRequest {
