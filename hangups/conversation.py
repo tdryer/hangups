@@ -56,12 +56,16 @@ def build_user_conversation_list(client):
                 hangouts_pb2.GetEntityByIdRequest(
                     request_header=client.get_request_header(),
                     batch_lookup_spec=[
-                        hangouts_pb2.EntityLookupSpec(gaia_id=user_id.gaia_id)
+                        hangouts_pb2.EntityLookupSpec(
+                            gaia_id=user_id.gaia_id,
+                            create_offnetwork_gaia=True,
+                        )
                         for user_id in required_user_ids
                     ],
                 )
             )
-            required_entities = list(response.entity)
+            for entity_result in response.entity_result:
+                required_entities.extend(entity_result.entity)
         except exceptions.NetworkError as e:
             logger.warning('Failed to request missing users: {}'.format(e))
 
