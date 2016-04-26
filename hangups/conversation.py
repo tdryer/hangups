@@ -204,7 +204,7 @@ class Conversation(object):
         try:
             default_medium = medium_options[0].delivery_medium
         except IndexError:
-            logger.warning('Conversation %r has no delivery medium')
+            logger.warning('Conversation %r has no delivery medium', self.id_)
             default_medium = hangouts_pb2.DeliveryMedium(
                 medium_type=hangouts_pb2.DELIVERY_MEDIUM_BABEL
             )
