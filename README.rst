@@ -5,8 +5,8 @@ hangups
     :target: https://travis-ci.org/tdryer/hangups
     :alt: Build Status
 
-.. image:: https://readthedocs.org/projects/hangups/badge/?version=latest
-    :target: https://readthedocs.org/projects/hangups/?badge=latest
+.. image:: https://readthedocs.io/projects/hangups/badge/?version=latest
+    :target: https://hangups.readthedocs.io/
     :alt: Documentation Status
 
 hangups is the first third-party instant messaging client for `Google
@@ -33,7 +33,7 @@ Documentation
 
 See the documentation for `installation and usage instructions`_.
 
-.. _installation and usage instructions: http://hangups.readthedocs.org/
+.. _installation and usage instructions: https://hangups.readthedocs.io/
 
 Projects using hangups
 ----------------------
