@@ -5,7 +5,7 @@ hangups
     :target: https://travis-ci.org/tdryer/hangups
     :alt: Build Status
 
-.. image:: https://readthedocs.io/projects/hangups/badge/?version=latest
+.. image:: https://readthedocs.org/projects/hangups/badge/?version=latest
     :target: https://hangups.readthedocs.io/
     :alt: Documentation Status
 
