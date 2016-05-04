@@ -430,13 +430,15 @@ class StatusLineWidget(urwid.WidgetWrap):
 
     def _update(self):
         """Update status text."""
-        typers = [self._conversation.get_user(user_id).first_name
-                  for user_id, status in self._typing_statuses.items()
-                  if status == hangups.TYPING_TYPE_STARTED]
-        if len(typers) > 0:
+        typing_users = [self._conversation.get_user(user_id)
+                        for user_id, status in self._typing_statuses.items()
+                        if status == hangups.TYPING_TYPE_STARTED]
+        displayed_names = [user.first_name for user in typing_users
+                           if not user.is_self]
+        if len(displayed_names) > 0:
             typing_message = '{} {} typing...'.format(
-                ', '.join(sorted(typers)),
-                'is' if len(typers) == 1 else 'are'
+                ', '.join(sorted(displayed_names)),
+                'is' if len(displayed_names) == 1 else 'are'
             )
         else:
             typing_message = ''
