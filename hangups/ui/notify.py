@@ -71,6 +71,10 @@ class Notifier(object):
             not conv.is_quiet,
         ))
         if show_notification:
+            # terminal bell
+            sys.stderr.write('\a')
+            sys.stderr.flush()
+
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
             if self._discreet_notification:
