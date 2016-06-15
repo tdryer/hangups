@@ -74,6 +74,7 @@ Related projects
 - `purple-hangouts`_: Hangouts plugin for libpurple
 - `go-hangups`_: Port of hangups to Go
 - `slangouts`_: A Hangouts/Slack bridge
+- `YakYak`_: Desktop client for Google Hangouts
 
 .. _Hangish: https://github.com/rogora/hangish
 .. _Hangups-UWP: https://github.com/kfechter/Hangups-UWP
@@ -84,3 +85,4 @@ Related projects
 .. _purple-hangouts: https://bitbucket.org/EionRobb/purple-hangouts
 .. _go-hangups: https://github.com/gpavlidi/go-hangups
 .. _slangouts: https://github.com/gpavlidi/slangouts
+.. _YakYak: https://github.com/yakyak/yakyak
