@@ -1332,12 +1332,13 @@ Field                   Number Type              Label    Description
 RemoveUserRequest
 -----------------
 
-============================ ====== ===================== ======== ===========
-Field                        Number Type                  Label    Description
-============================ ====== ===================== ======== ===========
-:code:`request_header`       1      `RequestHeader`_      optional            
-:code:`event_request_header` 5      `EventRequestHeader`_ optional            
-============================ ====== ===================== ======== ===========
+============================ ====== ===================== ======== ========================================================================
+Field                        Number Type                  Label    Description                                                             
+============================ ====== ===================== ======== ========================================================================
+:code:`request_header`       1      `RequestHeader`_      optional                                                                         
+:code:`participant_id`       3      `ParticipantId`_      optional Optional participant to remove from conversation, yourself if not given.
+:code:`event_request_header` 5      `EventRequestHeader`_ optional                                                                         
+============================ ====== ===================== ======== ========================================================================
 
 RemoveUserResponse
 ------------------

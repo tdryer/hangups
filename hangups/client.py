@@ -477,7 +477,7 @@ class Client(object):
 
     @asyncio.coroutine
     def remove_user(self, remove_user_request):
-        """Leave a group conversation."""
+        """Remove a participant from a group conversation."""
         response = hangouts_pb2.RemoveUserResponse()
         yield from self._pb_request('conversations/removeuser',
                                     remove_user_request, response)

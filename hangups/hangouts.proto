@@ -1347,6 +1347,8 @@ message QueryPresenceResponse {
 
 message RemoveUserRequest {
   optional RequestHeader request_header = 1;
+  // Optional participant to remove from conversation, yourself if not given.
+  optional ParticipantId participant_id = 3;
   optional EventRequestHeader event_request_header = 5;
 }
 
