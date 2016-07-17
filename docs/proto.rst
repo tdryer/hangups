@@ -1247,6 +1247,26 @@ Field                   Number Type              Label    Description
 :code:`entity_result`   3      `EntityResult`_   repeated All resulting entities.                          
 ======================= ====== ================= ======== =================================================
 
+GetGroupConversationUrlRequest
+------------------------------
+
+======================= ====== ================= ======== =================================
+Field                   Number Type              Label    Description                      
+======================= ====== ================= ======== =================================
+:code:`request_header`  1      `RequestHeader`_  optional                                  
+:code:`conversation_id` 2      `ConversationId`_ optional Conversation to retrieve URL for.
+======================= ====== ================= ======== =================================
+
+GetGroupConversationUrlResponse
+-------------------------------
+
+============================== ====== ================= ======== ====================================
+Field                          Number Type              Label    Description                         
+============================== ====== ================= ======== ====================================
+:code:`response_header`        1      `ResponseHeader`_ optional                                     
+:code:`group_conversation_url` 2      string            optional URL for others to join conversation.
+============================== ====== ================= ======== ====================================
+
 GetSuggestedEntitiesRequest
 ---------------------------
 

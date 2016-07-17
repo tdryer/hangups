@@ -1266,6 +1266,18 @@ message GetEntityByIdResponse {
   repeated EntityResult entity_result = 3;
 }
 
+message GetGroupConversationUrlRequest {
+  optional RequestHeader request_header = 1;
+  // Conversation to retrieve URL for.
+  optional ConversationId conversation_id = 2;
+}
+
+message GetGroupConversationUrlResponse {
+  optional ResponseHeader response_header = 1;
+  // URL for others to join conversation.
+  optional string group_conversation_url = 2;
+}
+
 message GetSuggestedEntitiesRequest {
   optional RequestHeader request_header = 1;
   // Max number of non-grouped entities to return.

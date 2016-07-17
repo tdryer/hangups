@@ -451,6 +451,14 @@ class Client(object):
                                     get_entity_by_id_request, response)
         return response
 
+    def get_group_conversation_url(self, get_group_conversation_url_request):
+        """Get URL to allow others to join a group conversation."""
+        response = hangouts_pb2.GetGroupConversationUrlResponse()
+        yield from self._pb_request('conversations/getgroupconversationurl',
+                                    get_group_conversation_url_request,
+                                    response)
+        return response
+
     @asyncio.coroutine
     def get_self_info(self, get_self_info_request):
         """Return info about the current user."""
