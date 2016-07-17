@@ -1536,6 +1536,28 @@ Field                   Number Type              Label    Description
 :code:`timestamp`       2      uint64            optional            
 ======================= ====== ================= ======== ===========
 
+SetGroupLinkSharingEnabledRequest
+---------------------------------
+
+================================= ====== ========================= ======== ==============================
+Field                             Number Type                      Label    Description                   
+================================= ====== ========================= ======== ==============================
+:code:`request_header`            1      `RequestHeader`_          optional                               
+:code:`event_request_header`      2      `EventRequestHeader`_     optional                               
+:code:`group_link_sharing_status` 4      `GroupLinkSharingStatus`_ optional New group link sharing status.
+================================= ====== ========================= ======== ==============================
+
+SetGroupLinkSharingEnabledResponse
+----------------------------------
+
+============================ ====== ================= ======== =================================================================
+Field                        Number Type              Label    Description                                                      
+============================ ====== ================= ======== =================================================================
+:code:`response_header`      1      `ResponseHeader`_ optional                                                                  
+:code:`created_event`        2      `Event`_          optional Created event of type EVENT_TYPE_GROUP_LINK_SHARING_MODIFICATION.
+:code:`updated_conversation` 3      `Conversation`_   optional Updated conversation.                                            
+============================ ====== ================= ======== =================================================================
+
 SetPresenceRequest
 ------------------
 
@@ -1802,23 +1824,24 @@ Name                        Number Description
 EventType
 ---------
 
-======================================= ====== ===========
-Name                                    Number Description
-======================================= ====== ===========
-:code:`EVENT_TYPE_UNKNOWN`              0                 
-:code:`EVENT_TYPE_REGULAR_CHAT_MESSAGE` 1                 
-:code:`EVENT_TYPE_SMS`                  2                 
-:code:`EVENT_TYPE_VOICEMAIL`            3                 
-:code:`EVENT_TYPE_ADD_USER`             4                 
-:code:`EVENT_TYPE_REMOVE_USER`          5                 
-:code:`EVENT_TYPE_CONVERSATION_RENAME`  6                 
-:code:`EVENT_TYPE_HANGOUT`              7                 
-:code:`EVENT_TYPE_PHONE_CALL`           8                 
-:code:`EVENT_TYPE_OTR_MODIFICATION`     9                 
-:code:`EVENT_TYPE_PLAN_MUTATION`        10                
-:code:`EVENT_TYPE_MMS`                  11                
-:code:`EVENT_TYPE_DEPRECATED_12`        12                
-======================================= ====== ===========
+================================================== ====== ===========
+Name                                               Number Description
+================================================== ====== ===========
+:code:`EVENT_TYPE_UNKNOWN`                         0                 
+:code:`EVENT_TYPE_REGULAR_CHAT_MESSAGE`            1                 
+:code:`EVENT_TYPE_SMS`                             2                 
+:code:`EVENT_TYPE_VOICEMAIL`                       3                 
+:code:`EVENT_TYPE_ADD_USER`                        4                 
+:code:`EVENT_TYPE_REMOVE_USER`                     5                 
+:code:`EVENT_TYPE_CONVERSATION_RENAME`             6                 
+:code:`EVENT_TYPE_HANGOUT`                         7                 
+:code:`EVENT_TYPE_PHONE_CALL`                      8                 
+:code:`EVENT_TYPE_OTR_MODIFICATION`                9                 
+:code:`EVENT_TYPE_PLAN_MUTATION`                   10                
+:code:`EVENT_TYPE_MMS`                             11                
+:code:`EVENT_TYPE_DEPRECATED_12`                   12                
+:code:`EVENT_TYPE_GROUP_LINK_SHARING_MODIFICATION` 14                
+================================================== ====== ===========
 
 ConversationType
 ----------------
@@ -2176,4 +2199,15 @@ Name                                    Number Description
 :code:`OFFNETWORK_ADDRESS_TYPE_UNKNOWN` 0                 
 :code:`OFFNETWORK_ADDRESS_TYPE_EMAIL`   1                 
 ======================================= ====== ===========
+
+GroupLinkSharingStatus
+----------------------
+
+========================================= ====== ===========
+Name                                      Number Description
+========================================= ====== ===========
+:code:`GROUP_LINK_SHARING_STATUS_UNKNOWN` 0                 
+:code:`GROUP_LINK_SHARING_STATUS_ON`      1                 
+:code:`GROUP_LINK_SHARING_STATUS_OFF`     2                 
+========================================= ====== ===========
 

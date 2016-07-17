@@ -558,6 +558,16 @@ class Client(object):
         return response
 
     @asyncio.coroutine
+    def set_group_link_sharing_enabled(self,
+                                       set_group_link_sharing_enabled_request):
+        """Set whether group link sharing is enabled for a conversation."""
+        response = hangouts_pb2.SetGroupLinkSharingEnabledResponse()
+        yield from self._pb_request('conversations/setgrouplinksharingenabled',
+                                    set_group_link_sharing_enabled_request,
+                                    response)
+        return response
+
+    @asyncio.coroutine
     def set_presence(self, set_presence_request):
         """Set the presence status."""
         response = hangouts_pb2.SetPresenceResponse()
