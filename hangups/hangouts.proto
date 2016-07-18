@@ -405,6 +405,7 @@ message Event {
   // Event version timestamp.
   optional uint64 event_version = 24;
   optional HashModifier hash_modifier = 26;
+  optional GroupLinkSharingModification group_link_sharing_modification = 31;
 }
 
 enum ConversationType {
@@ -527,6 +528,7 @@ message Conversation {
   repeated ConversationParticipantData participant_data = 14;
   repeated NetworkType network_type = 18;
   optional ForceHistory force_history_state = 19;
+  optional GroupLinkSharingStatus group_link_sharing_status = 22;
 }
 
 message EasterEgg {
@@ -1004,6 +1006,10 @@ message SuggestedContactGroup {
   optional bytes hash = 2;
   // List of contacts in this group.
   repeated SuggestedContact contact = 3;
+}
+
+message GroupLinkSharingModification {
+  optional GroupLinkSharingStatus new_status = 1;
 }
 
 // ----------------------------------------------------------------------------

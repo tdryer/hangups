@@ -348,29 +348,30 @@ Event
 
 Event that becomes part of a conversation's history.
 
-=============================== ====== ===================== ======== =============================================
-Field                           Number Type                  Label    Description                                  
-=============================== ====== ===================== ======== =============================================
-:code:`conversation_id`         1      `ConversationId`_     optional ID of the conversation this event belongs to.
-:code:`sender_id`               2      `ParticipantId`_      optional ID of the user that sent this event.         
-:code:`timestamp`               3      uint64                optional Timestamp when the event occurred.           
-:code:`self_event_state`        4      `UserEventState`_     optional                                              
-:code:`source_type`             6      `SourceType`_         optional                                              
-:code:`chat_message`            7      `ChatMessage`_        optional                                              
-:code:`membership_change`       9      `MembershipChange`_   optional                                              
-:code:`conversation_rename`     10     `ConversationRename`_ optional                                              
-:code:`hangout_event`           11     `HangoutEvent`_       optional                                              
-:code:`event_id`                12     string                optional Unique ID for the event.                     
-:code:`expiration_timestamp`    13     uint64                optional                                              
-:code:`otr_modification`        14     `OTRModification`_    optional                                              
-:code:`advances_sort_timestamp` 15     bool                  optional                                              
-:code:`otr_status`              16     `OffTheRecordStatus`_ optional                                              
-:code:`persisted`               17     bool                  optional                                              
-:code:`medium_type`             20     `DeliveryMedium`_     optional                                              
-:code:`event_type`              23     `EventType`_          optional The event's type.                            
-:code:`event_version`           24     uint64                optional Event version timestamp.                     
-:code:`hash_modifier`           26     `HashModifier`_       optional                                              
-=============================== ====== ===================== ======== =============================================
+======================================= ====== =============================== ======== =============================================
+Field                                   Number Type                            Label    Description                                  
+======================================= ====== =============================== ======== =============================================
+:code:`conversation_id`                 1      `ConversationId`_               optional ID of the conversation this event belongs to.
+:code:`sender_id`                       2      `ParticipantId`_                optional ID of the user that sent this event.         
+:code:`timestamp`                       3      uint64                          optional Timestamp when the event occurred.           
+:code:`self_event_state`                4      `UserEventState`_               optional                                              
+:code:`source_type`                     6      `SourceType`_                   optional                                              
+:code:`chat_message`                    7      `ChatMessage`_                  optional                                              
+:code:`membership_change`               9      `MembershipChange`_             optional                                              
+:code:`conversation_rename`             10     `ConversationRename`_           optional                                              
+:code:`hangout_event`                   11     `HangoutEvent`_                 optional                                              
+:code:`event_id`                        12     string                          optional Unique ID for the event.                     
+:code:`expiration_timestamp`            13     uint64                          optional                                              
+:code:`otr_modification`                14     `OTRModification`_              optional                                              
+:code:`advances_sort_timestamp`         15     bool                            optional                                              
+:code:`otr_status`                      16     `OffTheRecordStatus`_           optional                                              
+:code:`persisted`                       17     bool                            optional                                              
+:code:`medium_type`                     20     `DeliveryMedium`_               optional                                              
+:code:`event_type`                      23     `EventType`_                    optional The event's type.                            
+:code:`event_version`                   24     uint64                          optional Event version timestamp.                     
+:code:`hash_modifier`                   26     `HashModifier`_                 optional                                              
+:code:`group_link_sharing_modification` 31     `GroupLinkSharingModification`_ optional                                              
+======================================= ====== =============================== ======== =============================================
 
 UserReadState
 -------------
@@ -455,6 +456,7 @@ Field                                  Number Type                           Lab
 :code:`participant_data`               14     `ConversationParticipantData`_ repeated                                                                       
 :code:`network_type`                   18     `NetworkType`_                 repeated                                                                       
 :code:`force_history_state`            19     `ForceHistory`_                optional                                                                       
+:code:`group_link_sharing_status`      22     `GroupLinkSharingStatus`_      optional                                                                       
 ====================================== ====== ============================== ======== ======================================================================
 
 EasterEgg
@@ -873,6 +875,15 @@ Field                Number Type                Label    Description
 :code:`hash`         2      bytes               optional A 4-byte hash which can be used in subsequent requests.             
 :code:`contact`      3      `SuggestedContact`_ repeated List of contacts in this group.                                     
 ==================== ====== =================== ======== ====================================================================
+
+GroupLinkSharingModification
+----------------------------
+
+================== ====== ========================= ======== ===========
+Field              Number Type                      Label    Description
+================== ====== ========================= ======== ===========
+:code:`new_status` 1      `GroupLinkSharingStatus`_ optional            
+================== ====== ========================= ======== ===========
 
 StateUpdate
 -----------

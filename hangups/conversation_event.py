@@ -221,3 +221,16 @@ class HangoutEvent(ConversationEvent):
     def event_type(self):
         """The Hangout event type (HangoutEventType)."""
         return self._event.hangout_event.event_type
+
+
+class GroupLinkSharingModificationEvent(ConversationEvent):
+
+    """An event that modifies a conversation's group link sharing status.
+
+    Corresponds to hangouts_pb2.GroupLinkSharingModification.
+    """
+
+    @property
+    def new_status(self):
+        """The new group link sharing status (GroupLinkSharingStatus)."""
+        return self._event.group_link_sharing_modification.new_status

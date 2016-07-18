@@ -10,7 +10,8 @@ from .auth import get_auth, get_auth_stdin, GoogleAuthError
 from .exceptions import HangupsError, NetworkError
 from .conversation_event import (ChatMessageSegment, ConversationEvent,
                                  ChatMessageEvent, RenameEvent,
-                                 MembershipChangeEvent, HangoutEvent)
+                                 MembershipChangeEvent, HangoutEvent,
+                                 GroupLinkSharingModificationEvent)
 # Only import Protocol Buffer objects that are needed for the high-level
 # hangups API (ConversationList, etc.) here. Low-level Client users could need
 # just about anything, and importing it here would create conflicts.
@@ -18,5 +19,6 @@ from .hangouts_pb2 import (
     TYPING_TYPE_STARTED, TYPING_TYPE_PAUSED, TYPING_TYPE_STOPPED,
     MEMBERSHIP_CHANGE_TYPE_LEAVE, MEMBERSHIP_CHANGE_TYPE_JOIN,
     HANGOUT_EVENT_TYPE_START, HANGOUT_EVENT_TYPE_END,
-    HANGOUT_EVENT_TYPE_ONGOING
+    HANGOUT_EVENT_TYPE_ONGOING, GROUP_LINK_SHARING_STATUS_OFF,
+    GROUP_LINK_SHARING_STATUS_ON
 )

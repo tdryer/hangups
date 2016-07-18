@@ -169,6 +169,8 @@ class Conversation(object):
             return conversation_event.MembershipChangeEvent(event_)
         elif event_.HasField('hangout_event'):
             return conversation_event.HangoutEvent(event_)
+        elif event_.HasField('group_link_sharing_modification'):
+            return conversation_event.GroupLinkSharingModificationEvent(event_)
         else:
             return conversation_event.ConversationEvent(event_)
 
