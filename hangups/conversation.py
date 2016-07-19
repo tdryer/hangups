@@ -103,7 +103,10 @@ class Conversation(object):
         self._events_dict = {}  # {event_id: ConversationEvent}
         self._send_message_lock = asyncio.Lock()
         for event_ in events:
-            self.add_event(event_)
+            # Workaround to ignore observed events returned from
+            # syncrecentconversations.
+            if event_.event_type != hangouts_pb2.EVENT_TYPE_OBSERVED_EVENT:
+                self.add_event(event_)
 
         # Event fired when a user starts or stops typing with arguments
         # (typing_message).

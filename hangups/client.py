@@ -59,8 +59,12 @@ class Client(object):
 
         self._request_header = hangouts_pb2.RequestHeader(
             # Ignore most of the RequestHeader fields since they aren't
-            # required.
+            # required. Sending a recognized client_id is important because it
+            # changes the behaviour of some APIs (eg. get_conversation will
+            # filter out EVENT_TYPE_GROUP_LINK_SHARING_MODIFICATION without
+            # it).
             client_version=hangouts_pb2.ClientVersion(
+                client_id=hangouts_pb2.CLIENT_ID_WEB_HANGOUTS,
                 major_version='hangups-{}'.format(version.__version__),
             ),
             language_code='en',

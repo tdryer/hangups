@@ -1217,15 +1217,16 @@ Field                   Number Type              Label    Description
 GetConversationRequest
 ----------------------
 
-=================================== ====== ========================= ======== ===========
-Field                               Number Type                      Label    Description
-=================================== ====== ========================= ======== ===========
-:code:`request_header`              1      `RequestHeader`_          optional            
-:code:`conversation_spec`           2      `ConversationSpec`_       optional            
-:code:`include_event`               4      bool                      optional            
-:code:`max_events_per_conversation` 6      uint64                    optional            
-:code:`event_continuation_token`    7      `EventContinuationToken`_ optional            
-=================================== ====== ========================= ======== ===========
+===================================== ====== ========================= ======== ====================================================================================================================
+Field                                 Number Type                      Label    Description                                                                                                         
+===================================== ====== ========================= ======== ====================================================================================================================
+:code:`request_header`                1      `RequestHeader`_          optional                                                                                                                     
+:code:`conversation_spec`             2      `ConversationSpec`_       optional                                                                                                                     
+:code:`include_conversation_metadata` 3      bool                      optional Whether the ConversationState in the response should include metadata other than the conversation ID (default true).
+:code:`include_event`                 4      bool                      optional Whether to include list of events in the response (default true).                                                   
+:code:`max_events_per_conversation`   6      uint64                    optional                                                                                                                     
+:code:`event_continuation_token`      7      `EventContinuationToken`_ optional                                                                                                                     
+===================================== ====== ========================= ======== ====================================================================================================================
 
 GetConversationResponse
 -----------------------
@@ -1651,13 +1652,14 @@ Field                               Number Type             Label    Description
 SyncRecentConversationsResponse
 -------------------------------
 
-========================== ====== ==================== ======== ===========
-Field                      Number Type                 Label    Description
-========================== ====== ==================== ======== ===========
-:code:`response_header`    1      `ResponseHeader`_    optional            
-:code:`sync_timestamp`     2      uint64               optional            
-:code:`conversation_state` 3      `ConversationState`_ repeated            
-========================== ====== ==================== ======== ===========
+================================ ====== ========================= ======== ===========
+Field                            Number Type                      Label    Description
+================================ ====== ========================= ======== ===========
+:code:`response_header`          1      `ResponseHeader`_         optional            
+:code:`sync_timestamp`           2      uint64                    optional            
+:code:`conversation_state`       3      `ConversationState`_      repeated            
+:code:`event_continuation_token` 4      `EventContinuationToken`_ optional            
+================================ ====== ========================= ======== ===========
 
 UpdateWatermarkRequest
 ----------------------
@@ -1851,6 +1853,7 @@ Name                                               Number Description
 :code:`EVENT_TYPE_PLAN_MUTATION`                   10                
 :code:`EVENT_TYPE_MMS`                             11                
 :code:`EVENT_TYPE_DEPRECATED_12`                   12                
+:code:`EVENT_TYPE_OBSERVED_EVENT`                  13                
 :code:`EVENT_TYPE_GROUP_LINK_SHARING_MODIFICATION` 14                
 ================================================== ====== ===========
 
@@ -1981,30 +1984,31 @@ ClientId
 
 Identifies the client.
 
-============================= ====== ======================================
-Name                          Number Description                           
-============================= ====== ======================================
-:code:`CLIENT_ID_UNKNOWN`     0                                            
-:code:`CLIENT_ID_ANDROID`     1      Hangouts app for Android.             
-:code:`CLIENT_ID_IOS`         2      Hangouts app for iOS.                 
-:code:`CLIENT_ID_CHROME`      3      Hangouts Chrome extension.            
-:code:`CLIENT_ID_WEB_GPLUS`   5      Hangouts web interface in Google Plus.
-:code:`CLIENT_ID_WEB_GMAIL`   6      Hangouts web interface in Gmail.      
-:code:`CLIENT_ID_ULTRAVIOLET` 13     Hangouts Chrome app ("ultraviolet").  
-============================= ====== ======================================
+============================== ====== ===============================================
+Name                           Number Description                                    
+============================== ====== ===============================================
+:code:`CLIENT_ID_UNKNOWN`      0                                                     
+:code:`CLIENT_ID_ANDROID`      1      Hangouts app for Android.                      
+:code:`CLIENT_ID_IOS`          2      Hangouts app for iOS.                          
+:code:`CLIENT_ID_CHROME`       3      Hangouts Chrome extension.                     
+:code:`CLIENT_ID_WEB_GPLUS`    5      Hangouts web interface in Google Plus.         
+:code:`CLIENT_ID_WEB_GMAIL`    6      Hangouts web interface in Gmail.               
+:code:`CLIENT_ID_ULTRAVIOLET`  13     Hangouts Chrome app ("ultraviolet").           
+:code:`CLIENT_ID_WEB_HANGOUTS` 44     Hangouts web app (https://hangouts.google.com).
+============================== ====== ===============================================
 
 ClientBuildType
 ---------------
 
 Build type of the client.
 
-================================= ====== ===========
-Name                              Number Description
-================================= ====== ===========
-:code:`BUILD_TYPE_UNKNOWN`        0                 
-:code:`BUILD_TYPE_PRODUCTION_WEB` 1      Web app.   
-:code:`BUILD_TYPE_PRODUCTION_APP` 3      Native app.
-================================= ====== ===========
+================================= ====== ============================
+Name                              Number Description                 
+================================= ====== ============================
+:code:`BUILD_TYPE_UNKNOWN`        0                                  
+:code:`BUILD_TYPE_PRODUCTION_WEB` 1      Web app (not used anymore?).
+:code:`BUILD_TYPE_PRODUCTION_APP` 3      Native app.                 
+================================= ====== ============================
 
 ResponseStatus
 --------------

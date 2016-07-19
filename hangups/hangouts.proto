@@ -369,6 +369,7 @@ enum EventType {
   EVENT_TYPE_PLAN_MUTATION = 10;
   EVENT_TYPE_MMS = 11;
   EVENT_TYPE_DEPRECATED_12 = 12;
+  EVENT_TYPE_OBSERVED_EVENT = 13;
   EVENT_TYPE_GROUP_LINK_SHARING_MODIFICATION = 14;
 }
 
@@ -592,12 +593,14 @@ enum ClientId {
   CLIENT_ID_WEB_GMAIL = 6;
   // Hangouts Chrome app ("ultraviolet").
   CLIENT_ID_ULTRAVIOLET = 13;
+  // Hangouts web app (https://hangouts.google.com).
+  CLIENT_ID_WEB_HANGOUTS = 44;
 }
 
 // Build type of the client.
 enum ClientBuildType {
   BUILD_TYPE_UNKNOWN = 0;
-  // Web app.
+  // Web app (not used anymore?).
   BUILD_TYPE_PRODUCTION_WEB = 1;
   // Native app.
   BUILD_TYPE_PRODUCTION_APP = 3;
@@ -1247,12 +1250,15 @@ message EasterEggResponse {
 message GetConversationRequest {
   optional RequestHeader request_header = 1;
   optional ConversationSpec conversation_spec = 2;
+  // Whether the ConversationState in the response should include metadata
+  // other than the conversation ID (default true).
+  optional bool include_conversation_metadata = 3;
+  // Whether to include list of events in the response (default true).
   optional bool include_event = 4;
   optional uint64 max_events_per_conversation = 6;
   optional EventContinuationToken event_continuation_token = 7;
 
   // TODO:
-  // include_conversation_metadata? = 3;
   // unknown = 5;
 }
 
@@ -1555,6 +1561,7 @@ message SyncRecentConversationsResponse {
   optional ResponseHeader response_header = 1;
   optional uint64 sync_timestamp = 2;
   repeated ConversationState conversation_state = 3;
+  optional EventContinuationToken event_continuation_token = 4;
 }
 
 message UpdateWatermarkRequest {
