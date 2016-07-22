@@ -1,5 +1,6 @@
 """Hangouts emoticon to emoji converter."""
 
+
 def replace_emoticons(string):
     """Replace emoticon words in string with corresponding emoji."""
     return _replace_words(HANGOUTS_EMOTICONS_TO_EMOJI, string)
