@@ -11,6 +11,7 @@ import urwid
 import readlike
 
 import hangups
+from hangups.ui.emoticon import replace_emoticons
 from hangups.ui.notify import Notifier
 from hangups.ui.utils import get_conv_name
 from hangups.ui.utils import add_color_to_scheme
@@ -751,6 +752,7 @@ class ConversationWidget(urwid.WidgetWrap):
             text = ''
         else:
             image_file = None
+        text = replace_emoticons(text)
         # XXX: Exception handling here is still a bit broken. Uncaught
         # exceptions in _on_message_sent will only be logged.
         segments = hangups.ChatMessageSegment.from_str(text)
