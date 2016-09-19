@@ -69,6 +69,7 @@ install_requires = [
     # use alpha protobuf for official Python 3 support
     'protobuf==3.0.0a3',
     'urwid==1.3.1',
+    'MechanicalSoup==0.4.0',
 ]
 
 
@@ -108,6 +109,7 @@ setup(
         'pytest==2.8.7',
         'pylint==1.5.4',
         'pep8==1.7.0',
+        'httpretty==0.8.14',
     ],
     cmdclass={
         'test': PytestCommand,
