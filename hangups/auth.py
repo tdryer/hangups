@@ -172,12 +172,23 @@ class Browser(object):
 
         Raises GoogleAuthError if form can not be submitted.
         """
+        logger.info(
+            'Submitting form on page %r', self._page.url.split('?')[0]
+        )
+        logger.info(
+            'Page contains forms: %s',
+            [elem.get('id') for elem in self._page.soup.select('form')]
+        )
         try:
             form = self._page.soup.select(form_selector)[0]
         except IndexError:
             raise GoogleAuthError(
                 'Failed to find form {!r} in page'.format(form_selector)
             )
+        logger.info(
+            'Page contains inputs: %s',
+            [elem.get('id') for elem in form.select('input')]
+        )
         for selector, value in input_dict.items():
             try:
                 form.select(selector)[0]['value'] = value
