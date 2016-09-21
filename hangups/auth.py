@@ -48,7 +48,8 @@ FORM_SELECTOR = '#gaia_loginform'
 EMAIL_SELECTOR = '#Email'
 PASSWORD_SELECTOR = '#Passwd'
 VERIFICATION_FORM_SELECTOR = '#challenge'
-VERIFICATION_CODE_SELECTOR = '#totpPin'
+TOTP_CODE_SELECTOR = '#totpPin'
+PHONE_CODE_SELECTOR = '#idvPreregisteredPhonePin'
 USER_AGENT = 'hangups/{} ({} {})'.format(
     version.__version__, platform.system(), platform.machine()
 )
@@ -163,9 +164,9 @@ class Browser(object):
         except requests.RequestException as e:
             raise GoogleAuthError('Failed to load form: {}'.format(e))
 
-    def has_form(self, form_selector):
-        """Return True if form_selector finds a form on the current page."""
-        return len(self._page.soup.select(form_selector)) > 0
+    def has_selector(self, selector):
+        """Return True if selector matches an element on the current page."""
+        return len(self._page.soup.select(selector)) > 0
 
     def submit_form(self, form_selector, input_dict):
         """Populate and submit a form on the current page.
@@ -231,11 +232,16 @@ def _get_authorization_code(session, credentials_prompt):
     password = credentials_prompt.get_password()
     browser.submit_form(FORM_SELECTOR, {PASSWORD_SELECTOR: password})
 
-    if browser.has_form(VERIFICATION_FORM_SELECTOR):
+    if browser.has_selector(VERIFICATION_FORM_SELECTOR):
+        if browser.has_selector(TOTP_CODE_SELECTOR):
+            input_selector = TOTP_CODE_SELECTOR
+        elif browser.has_selector(PHONE_CODE_SELECTOR):
+            input_selector = PHONE_CODE_SELECTOR
+        else:
+            raise GoogleAuthError('Unknown verification code input')
         verfification_code = credentials_prompt.get_verification_code()
         browser.submit_form(
-            VERIFICATION_FORM_SELECTOR,
-            {VERIFICATION_CODE_SELECTOR: verfification_code}
+            VERIFICATION_FORM_SELECTOR, {input_selector: verfification_code}
         )
 
     try:
