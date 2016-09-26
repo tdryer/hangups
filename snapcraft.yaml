@@ -4,11 +4,13 @@ summary: Third-party instant messaging client for Google Hangouts
 description: |
   hangups is a third-party instant messaging client for Google Hangouts with a
   text-based user interface.
+confinement: strict
+grade: stable
 
 apps:
   hangups:
-    # the hangups executable created by setuptools doesn't work in snappy, so
-    # run hangups directly instead
+    # the hangups executable created by setuptools doesn't work in snap, so run
+    # hangups directly instead
     command: usr/bin/python3.5 -m hangups.ui
     # hangups is not a server, but the requests library seems to require the
     # bind syscall
@@ -18,14 +20,11 @@ apps:
 
 parts:
   hangups:
-    plugin: python3
+    plugin: python
     source: .
     # reduce the size of the snap package by only including the files needed to
     # run hangups
     snap:
-      - usr/bin/hangups
-      - usr/bin/python3.5
-      - usr/lib/python3
-      - -usr/lib/python3/dist-packages/pip-*
-      - usr/lib/python3.5
-      - -usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
+       - usr/bin/python3.5 # python binary
+       - usr/lib/python3.5 # standard library
+       - lib/python3.5/site-packages # python packages
