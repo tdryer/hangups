@@ -21,6 +21,8 @@ IMAGE_UPLOAD_URL = 'https://docs.google.com/upload/photos/resumable'
 ACTIVE_TIMEOUT_SECS = 120
 # Minimum timeout between subsequent setactiveclient requests:
 SETACTIVECLIENT_LIMIT_SECS = 60
+# API key for `key` parameter (from Hangouts web client)
+API_KEY = 'AIzaSyAfFJCeph-euFSwtmqFZi0kaKk-cZ5wufM'
 
 
 class Client(object):
@@ -385,6 +387,9 @@ class Client(object):
         params = {
             # "alternative representation type" (desired response format).
             'alt': response_type,
+            # API key (required to avoid 403 Forbidden "Daily Limit for
+            # Unauthenticated Use Exceeded. Continued use requires signup").
+            'key': API_KEY,
         }
         res = yield from http_utils.fetch(
             'post', url, headers=headers, cookies=cookies, params=params,
