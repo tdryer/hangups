@@ -166,6 +166,8 @@ class Conversation(object):
         """Wrap hangouts_pb2.Event in ConversationEvent subclass."""
         if event_.HasField('chat_message'):
             return conversation_event.ChatMessageEvent(event_)
+        elif event_.HasField('otr_modification'):
+            return conversation_event.OTREvent(event_)
         elif event_.HasField('conversation_rename'):
             return conversation_event.RenameEvent(event_)
         elif event_.HasField('membership_change'):
