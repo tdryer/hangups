@@ -164,18 +164,20 @@ class Conversation(object):
     @staticmethod
     def _wrap_event(event_):
         """Wrap hangouts_pb2.Event in ConversationEvent subclass."""
+        cls = conversation_event.ConversationEvent
         if event_.HasField('chat_message'):
-            return conversation_event.ChatMessageEvent(event_)
+            cls = conversation_event.ChatMessageEvent
+        elif event_.HasField('otr_modification'):
+            cls = conversation_event.OTREvent
         elif event_.HasField('conversation_rename'):
-            return conversation_event.RenameEvent(event_)
+            cls = conversation_event.RenameEvent
         elif event_.HasField('membership_change'):
-            return conversation_event.MembershipChangeEvent(event_)
+            cls = conversation_event.MembershipChangeEvent
         elif event_.HasField('hangout_event'):
-            return conversation_event.HangoutEvent(event_)
+            cls = conversation_event.HangoutEvent
         elif event_.HasField('group_link_sharing_modification'):
-            return conversation_event.GroupLinkSharingModificationEvent(event_)
-        else:
-            return conversation_event.ConversationEvent(event_)
+            cls = conversation_event.GroupLinkSharingModificationEvent
+        return cls(event_)
 
     def add_event(self, event_):
         """Add an Event to the Conversation.

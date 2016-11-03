@@ -164,6 +164,24 @@ class ChatMessageEvent(ConversationEvent):
         return attachments
 
 
+class OTREvent(ConversationEvent):
+
+    """An event that changes OTR mode.
+
+    Corresponds to hangouts_pb2.OTRModification.
+    """
+
+    @property
+    def new_otr_status(self):
+        """The conversation's old OTR status."""
+        return self._event.otr_modification.new_otr_status
+
+    @property
+    def old_otr_status(self):
+        """The conversation's old OTR status."""
+        return self._event.otr_modification.old_otr_status
+
+
 class RenameEvent(ConversationEvent):
 
     """An event that renames a conversation.

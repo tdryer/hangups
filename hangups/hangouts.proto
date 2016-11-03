@@ -1432,6 +1432,17 @@ message SendChatMessageResponse {
   // unknown [] = 4;
 }
 
+message ModifyOTRStatusRequest {
+  optional RequestHeader request_header = 1;
+  optional OffTheRecordStatus otr_status = 3;
+  optional EventRequestHeader event_request_header = 5;
+}
+
+message ModifyOTRStatusResponse {
+  optional ResponseHeader response_header = 1;
+  optional Event created_event = 4;
+}
+
 message SendOffnetworkInvitationRequest {
   optional RequestHeader request_header = 1;
   optional OffnetworkAddress invitee_address = 2;

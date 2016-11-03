@@ -1447,6 +1447,27 @@ Field                   Number Type              Label    Description
 :code:`created_event`   6      `Event`_          optional            
 ======================= ====== ================= ======== ===========
 
+ModifyOTRStatusRequest
+----------------------
+
+============================ ====== ===================== ======== ===========
+Field                        Number Type                  Label    Description
+============================ ====== ===================== ======== ===========
+:code:`request_header`       1      `RequestHeader`_      optional            
+:code:`otr_status`           3      `OffTheRecordStatus`_ optional            
+:code:`event_request_header` 5      `EventRequestHeader`_ optional            
+============================ ====== ===================== ======== ===========
+
+ModifyOTRStatusResponse
+-----------------------
+
+======================= ====== ================= ======== ===========
+Field                   Number Type              Label    Description
+======================= ====== ================= ======== ===========
+:code:`response_header` 1      `ResponseHeader`_ optional            
+:code:`created_event`   4      `Event`_          optional            
+======================= ====== ================= ======== ===========
+
 SendOffnetworkInvitationRequest
 -------------------------------
 
