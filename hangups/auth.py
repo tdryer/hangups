@@ -123,28 +123,28 @@ def get_auth(credentials_prompt, refresh_token_cache):
 
     Raises GoogleAuthError on failure.
     """
-    session = requests.Session()
-    session.headers = {'user-agent': USER_AGENT}
+    with requests.Session() as session:
+        session.headers = {'user-agent': USER_AGENT}
 
-    try:
-        logger.info('Authenticating with refresh token')
-        refresh_token = refresh_token_cache.get()
-        if refresh_token is None:
-            raise GoogleAuthError("Refresh token not found")
-        access_token = _auth_with_refresh_token(session, refresh_token)
-    except GoogleAuthError as e:
-        logger.info('Failed to authenticate using refresh token: %s', e)
-        logger.info('Authenticating with credentials')
-        authorization_code = _get_authorization_code(
-            session, credentials_prompt
-        )
-        access_token, refresh_token = _auth_with_code(
-            session, authorization_code
-        )
-        refresh_token_cache.set(refresh_token)
+        try:
+            logger.info('Authenticating with refresh token')
+            refresh_token = refresh_token_cache.get()
+            if refresh_token is None:
+                raise GoogleAuthError("Refresh token not found")
+            access_token = _auth_with_refresh_token(session, refresh_token)
+        except GoogleAuthError as e:
+            logger.info('Failed to authenticate using refresh token: %s', e)
+            logger.info('Authenticating with credentials')
+            authorization_code = _get_authorization_code(
+                session, credentials_prompt
+            )
+            access_token, refresh_token = _auth_with_code(
+                session, authorization_code
+            )
+            refresh_token_cache.set(refresh_token)
 
-    logger.info('Authentication successful')
-    return _get_session_cookies(session, access_token)
+        logger.info('Authentication successful')
+        return _get_session_cookies(session, access_token)
 
 
 class Browser(object):
