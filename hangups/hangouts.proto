@@ -803,9 +803,10 @@ enum ConfigurationBitType {
   CONFIGURATION_BIT_TYPE_UNKNOWN_31 = 31;
   CONFIGURATION_BIT_TYPE_UNKNOWN_32 = 32;
   CONFIGURATION_BIT_TYPE_UNKNOWN_33 = 33;
-  CONFIGURATION_BIT_TYPE_UNKNOWN_34 = 34;
+  CONFIGURATION_BIT_TYPE_DESKTOP_AUTO_EMOJI_CONVERSION_ENABLED = 34;
   CONFIGURATION_BIT_TYPE_UNKNOWN_35 = 35;
   CONFIGURATION_BIT_TYPE_UNKNOWN_36 = 36;
+  CONFIGURATION_BIT_TYPE_DESKTOP_COMPACT_MODE_ENABLED = 38;
 }
 
 message ConfigurationBit {
@@ -1159,10 +1160,8 @@ message BlockNotification {
 }
 
 message SetNotificationSettingNotification {
+  repeated ConfigurationBit configuration_bit = 1;
   optional DesktopSoundSetting desktop_sound_setting = 2;
-
-  // TODO
-  // convert text to emoji setting
 }
 
 message RichPresenceEnabledStateNotification {
