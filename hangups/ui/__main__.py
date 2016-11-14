@@ -46,7 +46,7 @@ COL_SCHEMES = {
         ('msg_self', 'light blue', ''),
         ('msg_text', '', ''),
         ('status_line', 'standout', ''),
-        ('tab_background', 'underline', 'black'),
+        ('tab_background', 'black,standout,underline', 'light green'),
     },
 }
 COL_SCHEME_NAMES = ('active_tab', 'inactive_tab', 'msg_date', 'msg_sender',
@@ -388,7 +388,7 @@ class StatusLineWidget(urwid.WidgetWrap):
         self._message_handle = None
         client.on_disconnect.add_observer(self._on_disconnect)
         client.on_reconnect.add_observer(self._on_reconnect)
-        super().__init__(urwid.AttrWrap(self._widget, 'status_line'))
+        super().__init__(urwid.AttrMap(self._widget, 'status_line'))
 
     def show_message(self, message_str):
         """Show a temporary message."""
@@ -790,7 +790,7 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         self._tabs = urwid.Text('')
         self._frame = urwid.Frame(None)
         super().__init__(urwid.Pile([
-            ('pack', urwid.AttrWrap(self._tabs, 'tab_background')),
+            ('pack', urwid.AttrMap(self._tabs, 'tab_background')),
             ('weight', 1, self._frame),
         ]))
 
