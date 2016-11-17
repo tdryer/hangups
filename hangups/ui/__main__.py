@@ -35,6 +35,7 @@ COL_SCHEMES = {
         ('msg_sender', '', ''),
         ('msg_self', '', ''),
         ('msg_text', '', ''),
+	('msg_text_sender', '', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'standout', ''),
     },
@@ -43,14 +44,15 @@ COL_SCHEMES = {
         ('inactive_tab', 'underline', 'light green'),
         ('msg_date', 'dark cyan', ''),
         ('msg_sender', 'dark blue', ''),
+	('msg_text_sender', '', ''),
         ('msg_self', 'light blue', ''),
         ('msg_text', '', ''),
         ('status_line', 'standout', ''),
-        ('tab_background', 'black,standout,underline', 'light green'),
+        ('tab_background', 'underline', 'black'),
     },
 }
 COL_SCHEME_NAMES = ('active_tab', 'inactive_tab', 'msg_date', 'msg_sender',
-                    'msg_self', 'msg_text', 'status_line', 'tab_background')
+                    'msg_self', 'msg_text', 'msg_text_sender', 'status_line', 'tab_background')
 
 
 class ChatUI(object):
@@ -388,7 +390,7 @@ class StatusLineWidget(urwid.WidgetWrap):
         self._message_handle = None
         client.on_disconnect.add_observer(self._on_disconnect)
         client.on_reconnect.add_observer(self._on_reconnect)
-        super().__init__(urwid.AttrMap(self._widget, 'status_line'))
+        super().__init__(urwid.AttrWrap(self._widget, 'status_line'))
 
     def show_message(self, message_str):
         """Show a temporary message."""
@@ -463,7 +465,7 @@ class MessageWidget(urwid.WidgetWrap):
         text = [
             ('msg_date', self._get_date_str(timestamp, datetimefmt,
                                             show_date=show_date) + ' '),
-            ('msg_text', text)
+            ('msg_text'if user.is_self else 'msg_text_sender',  text)
         ]
         if user is not None:
             text.insert(1, ('msg_self' if user.is_self else 'msg_sender',
@@ -790,7 +792,7 @@ class TabbedWindowWidget(urwid.WidgetWrap):
         self._tabs = urwid.Text('')
         self._frame = urwid.Frame(None)
         super().__init__(urwid.Pile([
-            ('pack', urwid.AttrMap(self._tabs, 'tab_background')),
+            ('pack', urwid.AttrWrap(self._tabs, 'tab_background')),
             ('weight', 1, self._frame),
         ]))
 
