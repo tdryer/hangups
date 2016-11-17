@@ -35,6 +35,7 @@ COL_SCHEMES = {
         ('msg_sender', '', ''),
         ('msg_self', '', ''),
         ('msg_text', '', ''),
+        ('msg_text_self', '', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'standout', ''),
     },
@@ -43,14 +44,17 @@ COL_SCHEMES = {
         ('inactive_tab', 'underline', 'light green'),
         ('msg_date', 'dark cyan', ''),
         ('msg_sender', 'dark blue', ''),
+        ('msg_text_self', '', ''),
         ('msg_self', 'light blue', ''),
         ('msg_text', '', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'black,standout,underline', 'light green'),
     },
 }
-COL_SCHEME_NAMES = ('active_tab', 'inactive_tab', 'msg_date', 'msg_sender',
-                    'msg_self', 'msg_text', 'status_line', 'tab_background')
+COL_SCHEME_NAMES = (
+    'active_tab', 'inactive_tab', 'msg_date', 'msg_sender', 'msg_self',
+    'msg_text', 'msg_text_self', 'status_line', 'tab_background'
+)
 
 
 class ChatUI(object):
@@ -463,7 +467,7 @@ class MessageWidget(urwid.WidgetWrap):
         text = [
             ('msg_date', self._get_date_str(timestamp, datetimefmt,
                                             show_date=show_date) + ' '),
-            ('msg_text', text)
+            ('msg_text_self' if user.is_self else 'msg_text', text)
         ]
         if user is not None:
             text.insert(1, ('msg_self' if user.is_self else 'msg_sender',
