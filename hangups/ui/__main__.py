@@ -45,7 +45,7 @@ COL_SCHEMES = {
         ('msg_date', 'dark cyan', ''),
         ('msg_sender', 'dark blue', ''),
         ('msg_text_self', '', ''),
-        ('msg_self', 'light blue', ''),
+        ('msg_self', 'dark green', ''),
         ('msg_text', '', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'black,standout,underline', 'light green'),
