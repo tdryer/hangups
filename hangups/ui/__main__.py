@@ -85,11 +85,15 @@ class ChatUI(object):
         self._client.on_connect.add_observer(self._on_connect)
 
         loop = asyncio.get_event_loop()
-        self._urwid_loop = urwid.MainLoop(
-            LoadingWidget(), palette, handle_mouse=False,
-            input_filter=self._input_filter,
-            event_loop=urwid.AsyncioEventLoop(loop=loop)
-        )
+        try:
+            self._urwid_loop = urwid.MainLoop(
+                LoadingWidget(), palette, handle_mouse=False,
+                input_filter=self._input_filter,
+                event_loop=urwid.AsyncioEventLoop(loop=loop)
+            )
+        except urwid.AttrSpecError as e:
+            # Fail gracefully for invalid colour options.
+            sys.exit(e)
 
         self._urwid_loop.screen.set_terminal_properties(colors=palette_colors)
         self._urwid_loop.start()
