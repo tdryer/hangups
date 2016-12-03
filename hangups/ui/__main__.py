@@ -471,7 +471,8 @@ class MessageWidget(urwid.WidgetWrap):
         text = [
             ('msg_date', self._get_date_str(timestamp, datetimefmt,
                                             show_date=show_date) + ' '),
-            ('msg_text_self' if user.is_self else 'msg_text', text)
+            ('msg_text_self' if user is not None and user.is_self
+             else 'msg_text', text)
         ]
         if user is not None:
             text.insert(1, ('msg_self' if user.is_self else 'msg_sender',
