@@ -173,7 +173,7 @@ class OTREvent(ConversationEvent):
 
     @property
     def new_otr_status(self):
-        """The conversation's old OTR status."""
+        """The conversation's new OTR status."""
         return self._event.otr_modification.new_otr_status
 
     @property
