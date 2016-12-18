@@ -32,7 +32,7 @@ Documentation Contents
 
    installation
    user_guide
-   developer_guide
+   developer_guide/index
    protocol
 
 Indices and tables
