@@ -11,11 +11,5 @@ See the `examples directory`_ for examples of using hangups as a library.
 .. toctree::
    :maxdepth: 2
 
-   auth
-   client
-   conversation_event
-   conversation
-   event
-   exceptions
-   message_parser
-   user
+   low_level
+   high_level
