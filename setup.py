@@ -60,23 +60,23 @@ with open('README.rst') as f:
 
 
 install_requires = [
-    'ConfigArgParse==0.10.0',
-    'aiohttp==0.17.3',
-    'appdirs==1.4.0',
+    'ConfigArgParse>=0.10.0',
+    'aiohttp>=0.17.3',
+    'appdirs>=1.4.0',
     'readlike>=0.1',
-    'requests==2.6.0',
-    'ReParser==1.4.3',
+    'requests>=2.6.0',
+    'ReParser>=1.4.3',
     # use alpha protobuf for official Python 3 support
-    'protobuf==3.0.0a3',
-    'urwid==1.3.1',
-    'MechanicalSoup==0.4.0',
+    'protobuf>=3.0.0a3',
+    'urwid>=1.3.1',
+    'MechanicalSoup>=0.4.0',
 ]
 
 
 if sys.version_info < (3, 4, 3):
     # For Python earlier than 3.4.3, use a backported asyncio that fixes an
     # issue with an exception being logged on exit.
-    install_requires.append('asyncio==3.4.3')
+    install_requires.append('asyncio>=3.4.3')
 
 
 setup(
@@ -106,10 +106,10 @@ setup(
     install_requires=install_requires,
     tests_require=[
         # >= 2.7.3 required for Python 3.5 support
-        'pytest==2.8.7',
-        'pylint==1.5.4',
-        'pep8==1.7.0',
-        'httpretty==0.8.14',
+        'pytest>=2.8.7',
+        'pylint>=1.5.4',
+        'pep8>=1.7.0',
+        'httpretty>=0.8.14',
     ],
     cmdclass={
         'test': PytestCommand,
