@@ -2,10 +2,10 @@
 
 
 class HangupsError(Exception):
-    """hangups general exception."""
+    """An ambiguous error occurred."""
     pass
 
 
 class NetworkError(HangupsError):
-    """hangups network operation failed."""
+    """A network error occurred."""
     pass

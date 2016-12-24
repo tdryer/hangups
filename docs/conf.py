@@ -28,6 +28,14 @@ exec(open(os.path.join(
 
 # -- General configuration ------------------------------------------------
 
+# warn about missing references
+nitpicky = True
+
+# make references to stdlib types work
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+}
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
@@ -37,7 +45,12 @@ exec(open(os.path.join(
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.intersphinx',
 ]
+
+# Use the same order for members as the source.
+autodoc_member_order = 'bysource'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

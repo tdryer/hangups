@@ -1,20 +1,22 @@
 Low-Level APIs
 ==============
 
+.. module:: hangups
+
 This page documents the low-level APIs for using hangups.
 
 Authentication
 --------------
+
+.. autofunction:: hangups.get_auth_stdin
+
+.. autofunction:: hangups.get_auth
 
 .. autoclass:: hangups.CredentialsPrompt
     :members:
 
 .. autoclass:: hangups.RefreshTokenCache
     :members:
-
-.. autofunction:: hangups.get_auth
-
-.. autofunction:: hangups.get_auth_stdin
 
 Client
 ------

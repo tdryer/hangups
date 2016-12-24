@@ -29,24 +29,38 @@ class Client(object):
     """Instant messaging client for Hangouts.
 
     Maintains a connections to the servers, emits events, and accepts commands.
+
+    Args:
+        cookies (dict): Google session cookies. Get these using
+            :func:`get_auth`.
     """
 
     def __init__(self, cookies):
-        """Create new client.
-
-        cookies is a dictionary of authentication cookies.
+        self.on_connect = event.Event('Client.on_connect')
+        """
+        :class:`~hangups.event.Event` fired when the client connects for the
+        first time.
         """
 
-        # Event fired when the client connects for the first time with
-        # arguments ().
-        self.on_connect = event.Event('Client.on_connect')
-        # Event fired when the client reconnects after being disconnected with
-        # arguments ().
         self.on_reconnect = event.Event('Client.on_reconnect')
-        # Event fired when the client is disconnected with arguments ().
+        """
+        :class:`~hangups.event.Event` fired when the client reconnects after
+        being disconnected.
+        """
+
         self.on_disconnect = event.Event('Client.on_disconnect')
-        # Event fired when a StateUpdate arrives with arguments (state_update).
+        """
+        :class:`~hangups.event.Event` fired when the client is disconnected.
+        """
+
         self.on_state_update = event.Event('Client.on_state_update')
+        """
+        :class:`~hangups.event.Event` fired when an update arrives from the
+        server.
+
+        Args:
+            state_update: A ``StateUpdate`` message.
+        """
 
         self._cookies = cookies
         proxy = os.environ.get('HTTP_PROXY')
@@ -92,7 +106,7 @@ class Client(object):
     def connect(self):
         """Establish a connection to the chat server.
 
-        Returns when an error has occurred, or Client.disconnect has been
+        Returns when an error has occurred, or :func:`disconnect` has been
         called.
         """
         # Forward the Channel events to the Client events.
@@ -115,7 +129,7 @@ class Client(object):
     def disconnect(self):
         """Gracefully disconnect from the server.
 
-        When disconnection is complete, Client.connect will return.
+        When disconnection is complete, :func:`connect` will return.
         """
         logger.info('Disconnecting gracefully...')
         self._listen_future.cancel()
@@ -126,10 +140,10 @@ class Client(object):
         logger.info('Disconnected gracefully')
 
     def get_request_header(self):
-        """Return populated RequestHeader message.
+        """Return ``request_header`` for use when constructing requests.
 
-        Use this method for constructing request messages when calling Hangouts
-        APIs.
+        Returns:
+            Populated request header.
         """
         # resource is allowed to be null if it's not available yet (the Chrome
         # client does this for the first getentitybyid call)
@@ -139,10 +153,10 @@ class Client(object):
 
     @staticmethod
     def get_client_generated_id():
-        """Return ID for client_generated_id fields.
+        """Return ``client_generated_id`` for use when constructing requests.
 
-        Use this method for constructing request messages when calling Hangouts
-        APIs.
+        Returns:
+            Client generated ID.
         """
         return random.randint(0, 2**32)
 
@@ -211,14 +225,15 @@ class Client(object):
     def upload_image(self, image_file, filename=None):
         """Upload an image that can be later attached to a chat message.
 
-        image_file is a file-like object containing an image.
+        Args:
+            image_file: A file-like object containing an image.
+            filename (str): (optional) Custom name for the uploaded file.
 
-        The name of the uploaded file may be changed by specifying the filename
-        argument.
+        Raises:
+            hangups.NetworkError: If the upload request failed.
 
-        Raises hangups.NetworkError if the request fails.
-
-        Returns ID of uploaded image.
+        Returns:
+            ID of the uploaded image.
         """
         image_filename = (filename if filename
                           else os.path.basename(image_file.name))
@@ -424,7 +439,7 @@ class Client(object):
 
         One-to-one conversations are "sticky"; they can't actually be deleted.
         This API clears the event history of the specified conversation up to
-        delete_upper_bound_timestamp, hiding it if no events remain.
+        ``delete_upper_bound_timestamp``, hiding it if no events remain.
         """
         response = hangouts_pb2.DeleteConversationResponse()
         yield from self._pb_request('conversations/deleteconversation',

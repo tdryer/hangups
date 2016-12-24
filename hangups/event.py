@@ -10,20 +10,25 @@ logger = logging.getLogger(__name__)
 
 
 class Event(object):
+    """An event that can notify subscribers with arguments when fired.
 
-    """Event that tracks a list of observer callbacks to notify when fired."""
+    Args:
+        name (str): Name of the new event.
+    """
 
     def __init__(self, name):
-        """Create a new Event with a name."""
         self._name = str(name)
         self._observers = []
 
     def add_observer(self, callback):
-        """Add an event observer callback.
+        """Add an observer to this event.
 
-        callback may be a coroutine or function.
+        Args:
+            callback: A function or coroutine callback to call when the event
+                is fired.
 
-        Raises ValueError if the callback has already been added.
+        Raises:
+            ValueError: If the callback has already been added.
         """
         if callback in self._observers:
             raise ValueError('{} is already an observer of {}'
@@ -31,9 +36,14 @@ class Event(object):
         self._observers.append(callback)
 
     def remove_observer(self, callback):
-        """Remove an event observer callback.
+        """Remove an observer from this event.
 
-        Raises ValueError if the callback is not an event observer.
+        Args:
+            callback: A function or coroutine callback to remove from this
+                event.
+
+        Raises:
+            ValueError: If the callback is not an observer of this event.
         """
         if callback not in self._observers:
             raise ValueError('{} is not an observer of {}'
@@ -42,7 +52,7 @@ class Event(object):
 
     @asyncio.coroutine
     def fire(self, *args, **kwargs):
-        """Call all observer callbacks with the same arguments."""
+        """Fire this event, calling all observers with the same arguments."""
         logger.debug('Fired {}'.format(self))
         for observer in self._observers:
             gen = observer(*args, **kwargs)
