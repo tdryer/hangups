@@ -17,9 +17,10 @@ script:
     # Skip lint on Python 3.6 because Pylint isn't compatible yet.
     - if [[ $TRAVIS_PYTHON_VERSION != '3.6' ]]; then python setup.py --quiet lint; fi
     - python setup.py --quiet test
-    - pip install --quiet docutils
-    # This check fails on Travis with older versions of Python for some reason.
-    - if [[ $TRAVIS_PYTHON_VERSION = '3.6' ]]; then python setup.py check --metadata --restructuredtext --strict; fi
+    - pip install --quiet docutils==0.13.1
+    # docutils requires Python >= 3.4.3, but Travis uses 3.4.2:
+    # https://github.com/travis-ci/travis-ci/issues/7028
+    - if [[ $TRAVIS_PYTHON_VERSION != '3.4' ]]; then python setup.py check --metadata --restructuredtext --strict; fi
 
 # allow container-based infrastructure
 sudo: false
