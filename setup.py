@@ -67,8 +67,7 @@ install_requires = [
     'readlike>=0.1',
     'requests==2.6.0',
     'ReParser==1.4.3',
-    # use alpha protobuf for official Python 3 support
-    'protobuf==3.0.0a3',
+    'protobuf>=3.1.0,<3.2.0',
     'urwid==1.3.1',
     'MechanicalSoup==0.4.0',
 ]
