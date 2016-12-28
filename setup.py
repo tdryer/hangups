@@ -19,7 +19,7 @@ class PytestCommand(TestCommand):
 
     def finalize_options(self):
         TestCommand.finalize_options(self)
-        self.test_args = []
+        self.test_args = ['hangups']
         self.test_suite = True
 
     def run_tests(self):
@@ -49,8 +49,8 @@ class Pep8Command(TestCommand):
         self.test_suite = True
 
     def run_tests(self):
-        import pep8
-        style_guide = pep8.StyleGuide(config_file='setup.cfg')
+        import pycodestyle
+        style_guide = pycodestyle.StyleGuide(config_file='setup.cfg')
         report = style_guide.check_files(['hangups'])
         if report.total_errors:
             sys.exit(1)
@@ -105,10 +105,9 @@ setup(
     packages=['hangups', 'hangups.ui'],
     install_requires=install_requires,
     tests_require=[
-        # >= 2.7.3 required for Python 3.5 support
-        'pytest==2.8.7',
-        'pylint==1.5.4',
-        'pep8==1.7.0',
+        'pytest==3.0.5',
+        'pylint==1.6.4',
+        'pycodestyle==2.2.0',
         'httpretty==0.8.14',
     ],
     cmdclass={
