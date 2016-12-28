@@ -61,7 +61,7 @@ with open('README.rst') as f:
 
 
 install_requires = [
-    'ConfigArgParse==0.10.0',
+    'ConfigArgParse==0.11.0',
     'aiohttp>=1.2,<1.3',
     'appdirs==1.4.0',
     'readlike>=0.1',
