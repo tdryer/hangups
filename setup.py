@@ -4,8 +4,9 @@ import os
 import sys
 
 
-if sys.version_info < (3, 3):
-    raise RuntimeError("hangups requires Python 3.3+")
+if sys.version_info < (3, 4, 2):
+    # This is the minimum version supported by aiohttp.
+    raise RuntimeError("hangups requires Python 3.4.2+")
 
 
 # Find __version__ without import that requires dependencies to be installed:
@@ -61,7 +62,7 @@ with open('README.rst') as f:
 
 install_requires = [
     'ConfigArgParse==0.10.0',
-    'aiohttp==0.17.3',
+    'aiohttp>=1.2,<1.3',
     'appdirs==1.4.0',
     'readlike>=0.1',
     'requests==2.6.0',
@@ -96,9 +97,9 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Communications :: Chat',
         'Environment :: Console :: Curses',
     ],
