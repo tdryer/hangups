@@ -3,6 +3,7 @@ python:
     - '3.3'
     - '3.4'
     - '3.5'
+    - '3.6'
 
 # commands to install dependencies
 install:
@@ -14,11 +15,12 @@ script:
     # version of pytest that hangups requires.
     - pip uninstall --quiet --yes pytest py
     - python setup.py --quiet style
-    - python setup.py --quiet lint
+    # Skip lint on Python 3.6 because Pylint isn't compatible yet.
+    - if [[ $TRAVIS_PYTHON_VERSION != '3.6' ]]; then python setup.py --quiet lint; fi
     - python setup.py --quiet test
     - pip install --quiet docutils
     # This check fails on Travis with older versions of Python for some reason.
-    - if [[ $TRAVIS_PYTHON_VERSION = '3.5' ]]; then python setup.py check --metadata --restructuredtext --strict; fi
+    - if [[ $TRAVIS_PYTHON_VERSION = '3.6' ]]; then python setup.py check --metadata --restructuredtext --strict; fi
 
 # allow container-based infrastructure
 sudo: false
