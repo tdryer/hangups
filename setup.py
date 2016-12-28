@@ -64,7 +64,7 @@ install_requires = [
     'ConfigArgParse==0.11.0',
     'aiohttp>=1.2,<1.3',
     'appdirs==1.4.0',
-    'readlike>=0.1',
+    'readlike==0.1.2',
     'requests==2.6.0',
     'ReParser==1.4.3',
     'protobuf>=3.1.0,<3.2.0',
