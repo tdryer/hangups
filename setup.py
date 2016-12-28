@@ -69,7 +69,7 @@ install_requires = [
     'ReParser==1.4.3',
     'protobuf>=3.1.0,<3.2.0',
     'urwid==1.3.1',
-    'MechanicalSoup==0.4.0',
+    'MechanicalSoup==0.6.0',
 ]
 
 
