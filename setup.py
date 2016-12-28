@@ -60,6 +60,10 @@ with open('README.rst') as f:
     readme = f.read()
 
 
+# Dependencies should be specified as a specific version or version range that
+# is unlikely to break compatibility in the future. This is required to prevent
+# hangups from breaking when new versions of dependencies are released,
+# especially for end-users (non-developers) who use pip to install hangups.
 install_requires = [
     'ConfigArgParse==0.11.0',
     'aiohttp>=1.2,<1.3',
