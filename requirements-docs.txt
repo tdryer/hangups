@@ -1,0 +1,5 @@
+# Extra requirements for building the documentation. Read the Docs is
+# configured to use this file.
+
+Sphinx>=1.5.1, <1.6
+sphinxcontrib-asyncio==0.2.0
