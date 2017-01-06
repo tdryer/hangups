@@ -1562,6 +1562,7 @@ message SyncAllNewEventsResponse {
 
 message SyncRecentConversationsRequest {
   optional RequestHeader request_header = 1;
+  optional uint64 last_event_timestamp = 2;
   optional uint64 max_conversations = 3;
   optional uint64 max_events_per_conversation = 4;
   repeated SyncFilter sync_filter = 5;
