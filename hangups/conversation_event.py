@@ -13,12 +13,13 @@ chat_message_parser = message_parser.ChatMessageParser()
 
 
 class ConversationEvent(object):
-
     """An event which becomes part of the permanent record of a conversation.
 
-    This corresponds to hangouts_pb2.Event.
+    This is a wrapper for the ``Event`` message, which may contain one of many
+    subtypes, represented here as other subclasses.
 
-    This is the base class for such events.
+    Args:
+        event: ``Event`` message.
     """
 
     def __init__(self, event):
@@ -26,29 +27,45 @@ class ConversationEvent(object):
 
     @property
     def timestamp(self):
-        """A timestamp of when the event occurred."""
+        """When the event occurred (:class:`datetime.datetime`)."""
         return parsers.from_timestamp(self._event.timestamp)
 
     @property
     def user_id(self):
-        """A UserID indicating who created the event."""
+        """Who created the event (:class:`~hangups.user.UserID`)."""
         return user.UserID(chat_id=self._event.sender_id.chat_id,
                            gaia_id=self._event.sender_id.gaia_id)
 
     @property
     def conversation_id(self):
-        """The ID of the conversation the event belongs to."""
+        """ID of the conversation containing the event (:class:`str`)."""
         return self._event.conversation_id.id
 
     @property
     def id_(self):
-        """The ID of the ConversationEvent."""
+        """ID of this event (:class:`str`)."""
         return self._event.event_id
 
 
 class ChatMessageSegment(object):
+    """A segment of a chat message in :class:`ChatMessageEvent`.
 
-    """A segment of a chat message."""
+    Args:
+        text (str): Text of the segment.
+        segment_type: (optional) One of ``SEGMENT_TYPE_TEXT``,
+            ``SEGMENT_TYPE_LINE_BREAK``, or ``SEGMENT_TYPE_LINK``. Defaults to
+            ``SEGMENT_TYPE_TEXT``, or ``SEGMENT_TYPE_LINK`` if ``link_target``
+            is specified.
+        is_bold (bool): (optional) Whether the text is bold. Defaults to
+            ``False``.
+        is_italic (bool): (optional) Whether the text is italic. Defaults to
+            ``False``.
+        is_strikethrough (bool): (optional) Whether the text is struck through.
+            Defaults to ``False``.
+        is_underline (bool): (optional) Whether the text is underlined.
+            Defaults to ``False``.
+        link_target (str): (option) URL to link to. Defaults to ``None``.
+    """
 
     def __init__(self, text, segment_type=None,
                  is_bold=False, is_italic=False, is_strikethrough=False,
@@ -69,10 +86,15 @@ class ChatMessageSegment(object):
 
     @staticmethod
     def from_str(text):
-        """Generate ChatMessageSegment list parsed from a string.
+        """Construct :class:`ChatMessageSegment` list parsed from a string.
 
-        This method handles automatically finding line breaks, URLs and
-        parsing simple formatting markup (simplified Markdown and HTML).
+        Args:
+            text (str): Text to parse. May contain line breaks, URLs and
+                formatting markup (simplified Markdown and HTML) to be
+                converted into equivalent segments.
+
+        Returns:
+            List of :class:`ChatMessageSegment` objects.
         """
         segment_list = chat_message_parser.parse(text)
         return [ChatMessageSegment(segment.text, **segment.params)
@@ -80,7 +102,14 @@ class ChatMessageSegment(object):
 
     @staticmethod
     def deserialize(segment):
-        """Create a chat message segment from hangups_pb2.Segment."""
+        """Construct :class:`ChatMessageSegment` from ``Segment`` message.
+
+        Args:
+            segment: ``Segment`` message to parse.
+
+        Returns:
+            :class:`ChatMessageSegment` object.
+        """
         link_target = segment.link_data.link_target
         return ChatMessageSegment(
             segment.text, segment_type=segment.type,
@@ -92,7 +121,11 @@ class ChatMessageSegment(object):
         )
 
     def serialize(self):
-        """Serialize the segment to protobuf."""
+        """Serialize this segment to a ``Segment`` message.
+
+        Returns:
+            ``Segment`` message.
+        """
         segment = hangouts_pb2.Segment(
             type=self.type_,
             text=self.text,
@@ -109,15 +142,14 @@ class ChatMessageSegment(object):
 
 
 class ChatMessageEvent(ConversationEvent):
+    """An event that adds a new message to a conversation.
 
-    """An event containing a chat message.
-
-    Corresponds to hangouts_pb2.ChatMessage.
+    Corresponds to the ``ChatMessage`` message.
     """
 
     @property
     def text(self):
-        """A textual representation of the message."""
+        """Text of the message without formatting (:class:`str`)."""
         lines = ['']
         for segment in self.segments:
             if segment.type_ == hangouts_pb2.SEGMENT_TYPE_TEXT:
@@ -134,13 +166,13 @@ class ChatMessageEvent(ConversationEvent):
 
     @property
     def segments(self):
-        """List of hangouts_pb2.Segment in the message."""
+        """List of :class:`ChatMessageSegment` in message (:class:`list`)."""
         seg_list = self._event.chat_message.message_content.segment
         return [ChatMessageSegment.deserialize(seg) for seg in seg_list]
 
     @property
     def attachments(self):
-        """Attachments in the message."""
+        """List of attachments in the message (:class:`list`)."""
         raw_attachments = self._event.chat_message.message_content.attachment
         if raw_attachments is None:
             raw_attachments = []
@@ -165,90 +197,103 @@ class ChatMessageEvent(ConversationEvent):
 
 
 class OTREvent(ConversationEvent):
+    """An event that changes a conversation's OTR (history) mode.
 
-    """An event that changes OTR mode.
-
-    Corresponds to hangouts_pb2.OTRModification.
+    Corresponds to the ``OTRModification`` message.
     """
 
     @property
     def new_otr_status(self):
-        """The conversation's new OTR status."""
+        """The conversation's new OTR status.
+
+        May be either ``OFF_THE_RECORD_STATUS_OFF_THE_RECORD`` or
+        ``OFF_THE_RECORD_STATUS_ON_THE_RECORD``.
+        """
         return self._event.otr_modification.new_otr_status
 
     @property
     def old_otr_status(self):
-        """The conversation's old OTR status."""
+        """The conversation's old OTR status.
+
+        May be either ``OFF_THE_RECORD_STATUS_OFF_THE_RECORD`` or
+        ``OFF_THE_RECORD_STATUS_ON_THE_RECORD``.
+        """
         return self._event.otr_modification.old_otr_status
 
 
 class RenameEvent(ConversationEvent):
-
     """An event that renames a conversation.
 
-    Corresponds to hangouts_pb2.ConversationRename.
+    Corresponds to the ``ConversationRename`` message.
     """
 
     @property
     def new_name(self):
-        """The conversation's new name.
+        """The conversation's new name (:class:`str`).
 
-        An empty string if the conversation's name was cleared.
+        May be an empty string if the conversation's name was cleared.
         """
         return self._event.conversation_rename.new_name
 
     @property
     def old_name(self):
-        """The conversation's old name.
+        """The conversation's old name (:class:`str`).
 
-        An empty string if the conversation had no previous name.
+        May be an empty string if the conversation had no previous name.
         """
         return self._event.conversation_rename.old_name
 
 
 class MembershipChangeEvent(ConversationEvent):
-
     """An event that adds or removes a conversation participant.
 
-    Corresponds to hangouts_pb2.MembershipChange.
+    Corresponds to the ``MembershipChange`` message.
     """
 
     @property
     def type_(self):
-        """The membership change type (MembershipChangeType)."""
+        """The type of membership change.
+
+        May be either ``MEMBERSHIP_CHANGE_TYPE_JOIN`` or
+        ``MEMBERSHIP_CHANGE_TYPE_LEAVE``.
+        """
         return self._event.membership_change.type
 
     @property
     def participant_ids(self):
-        """Return the UserIDs involved in the membership change.
-
-        Multiple users may be added to a conversation at the same time.
-        """
+        """:class:`~hangups.user.UserID` of users involved (:class:`list`)."""
         return [user.UserID(chat_id=id_.chat_id, gaia_id=id_.gaia_id)
                 for id_ in self._event.membership_change.participant_ids]
 
 
 class HangoutEvent(ConversationEvent):
+    """An event that is related to a Hangout voice or video call.
 
-    """An event in a Hangout voice/video call.
-
-    Corresponds to hangouts_pb2.HangoutEvent.
+    Corresponds to the ``HangoutEvent`` message.
     """
 
     @property
     def event_type(self):
-        """The Hangout event type (HangoutEventType)."""
+        """The Hangout event type.
+
+        May be one of ``HANGOUT_EVENT_TYPE_START``, ``HANGOUT_EVENT_TYPE_END``,
+        ``HANGOUT_EVENT_TYPE_JOIN``, ``HANGOUT_EVENT_TYPE_LEAVE``,
+        ``HANGOUT_EVENT_TYPE_COMING_SOON``, or ``HANGOUT_EVENT_TYPE_ONGOING``.
+        """
         return self._event.hangout_event.event_type
 
 
 class GroupLinkSharingModificationEvent(ConversationEvent):
-
     """An event that modifies a conversation's group link sharing status.
 
-    Corresponds to hangouts_pb2.GroupLinkSharingModification.
+    Corresponds to the ``GroupLinkSharingModification`` message.
     """
 
     @property
     def new_status(self):
-        """The new group link sharing status (GroupLinkSharingStatus)."""
+        """The new group link sharing status.
+
+        May be either ``GROUP_LINK_SHARING_STATUS_ON`` or
+        ``GROUP_LINK_SHARING_STATUS_OFF``.
+        """
         return self._event.group_link_sharing_modification.new_status

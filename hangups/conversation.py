@@ -12,11 +12,18 @@ logger = logging.getLogger(__name__)
 
 @asyncio.coroutine
 def build_user_conversation_list(client):
-    """Return UserList from initial contact data and an additional request.
+    """Build :class:`~UserList` and :class:`~ConversationList`.
 
-    The initial data contains the user's contacts, but there may be conversions
-    containing users that are not in the contacts. This function takes care of
-    requesting data for those users and constructing the UserList.
+    This method requests data necessary to build the list of conversations and
+    users. Users that are not in the contact list but are participating in a
+    conversation will also be retrieved.
+
+    Args:
+        client (Client): Connected client.
+
+    Returns:
+        (:class:`~UserList`, :class:`~ConversationList`):
+            Tuple of built objects.
     """
 
     # Retrieve recent conversations so we can preemptively look up their
@@ -90,11 +97,12 @@ def build_user_conversation_list(client):
 
 
 class Conversation(object):
+    """A single chat conversation.
 
-    """Wrapper around Client for working with a single chat conversation."""
+    Use :class:`ConversationList` methods to get instances of this class.
+    """
 
     def __init__(self, client, user_list, conversation, events=[]):
-        """Initialize a new Conversation."""
         # pylint: disable=dangerous-default-value
         self._client = client  # Client
         self._user_list = user_list  # UserList
@@ -108,20 +116,118 @@ class Conversation(object):
             if event_.event_type != hangouts_pb2.EVENT_TYPE_OBSERVED_EVENT:
                 self.add_event(event_)
 
-        # Event fired when a user starts or stops typing with arguments
-        # (typing_message).
-        self.on_typing = event.Event('Conversation.on_typing')
-        # Event fired when a new ConversationEvent arrives with arguments
-        # (ConversationEvent).
         self.on_event = event.Event('Conversation.on_event')
-        # Event fired when a watermark (read timestamp) is updated with
-        # arguments (WatermarkNotification).
+        """
+        :class:`~hangups.event.Event` fired when an event occurs in this
+        conversation.
+
+        Args:
+            conv_event: :class:`ConversationEvent` that occurred.
+        """
+
+        self.on_typing = event.Event('Conversation.on_typing')
+        """
+        :class:`~hangups.event.Event` fired when a users starts or stops typing
+        in this conversation.
+
+        Args:
+            typing_message: :class:`~hangups.parsers.TypingStatusMessage` that
+                occurred.
+        """
+
         self.on_watermark_notification = event.Event(
             'Conversation.on_watermark_notification'
         )
+        """
+        :class:`~hangups.event.Event` fired when a watermark (read timestamp)
+        is updated for this conversation.
+
+        Args:
+            watermark_notification:
+                :class:`~hangups.parsers.WatermarkNotification` that occurred.
+        """
+
         self.on_watermark_notification.add_observer(
             self._on_watermark_notification
         )
+
+    @property
+    def id_(self):
+        """The conversation's ID (:class:`str`)."""
+        return self._conversation.conversation_id.id
+
+    @property
+    def users(self):
+        """List of conversation participants (:class:`~hangups.user.User`)."""
+        return [self._user_list.get_user(user.UserID(chat_id=part.id.chat_id,
+                                                     gaia_id=part.id.gaia_id))
+                for part in self._conversation.participant_data]
+
+    @property
+    def name(self):
+        """The conversation's custom name (:class:`str`)
+
+        May be ``None`` if conversation has no custom name.
+        """
+        custom_name = self._conversation.name
+        return None if custom_name == '' else custom_name
+
+    @property
+    def last_modified(self):
+        """When conversation was last modified (:class:`datetime.datetime`)."""
+        timestamp = self._conversation.self_conversation_state.sort_timestamp
+        # timestamp can be None for some reason when there is an ongoing video
+        # hangout
+        if timestamp is None:
+            timestamp = 0
+        return parsers.from_timestamp(timestamp)
+
+    @property
+    def latest_read_timestamp(self):
+        """Timestamp of latest read event (:class:`datetime.datetime`)."""
+        timestamp = (self._conversation.self_conversation_state.
+                     self_read_state.latest_read_timestamp)
+        return parsers.from_timestamp(timestamp)
+
+    @property
+    def events(self):
+        """Loaded events sorted oldest to newest.
+
+        (list of :class:`ConversationEvent`).
+        """
+        return list(self._events)
+
+    @property
+    def unread_events(self):
+        """Loaded events which are unread sorted oldest to newest.
+
+        Some Hangouts clients don't update the read timestamp for certain event
+        types, such as membership changes, so this may return more unread
+        events than these clients will show. There's also a delay between
+        sending a message and the user's own message being considered read.
+
+        (list of :class:`ConversationEvent`).
+        """
+        return [conv_event for conv_event in self._events
+                if conv_event.timestamp > self.latest_read_timestamp]
+
+    @property
+    def is_archived(self):
+        """``True`` if this conversation has been archived."""
+        return (hangouts_pb2.CONVERSATION_VIEW_ARCHIVED in
+                self._conversation.self_conversation_state.view)
+
+    @property
+    def is_quiet(self):
+        """``True`` if notification level for this conversation is quiet."""
+        level = self._conversation.self_conversation_state.notification_level
+        return level == hangouts_pb2.NOTIFICATION_LEVEL_QUIET
+
+    @property
+    def is_off_the_record(self):
+        """``True`` if conversation is off the record (history is disabled)."""
+        status = self._conversation.otr_status
+        return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
 
     def _on_watermark_notification(self, notif):
         """Update the conversations latest_read_timestamp."""
@@ -136,7 +242,14 @@ class Conversation(object):
             )
 
     def update_conversation(self, conversation):
-        """Update the internal Conversation."""
+        """Update the internal state of the conversation.
+
+        This method is used by :class:`ConversationList` to maintain this
+        instance.
+
+        Args:
+            conversation: ``Conversation`` message.
+        """
         # StateUpdate.conversation is actually a delta; fields that aren't
         # specified are assumed to be unchanged. Until this class is
         # refactored, hide this by saving and restoring previous values where
@@ -180,9 +293,16 @@ class Conversation(object):
         return cls(event_)
 
     def add_event(self, event_):
-        """Add an Event to the Conversation.
+        """Add an event to the conversation.
 
-        Returns an instance of ConversationEvent or subclass.
+        This method is used by :class:`ConversationList` to maintain this
+        instance.
+
+        Args:
+            event_: ``Event`` message.
+
+        Returns:
+            :class:`ConversationEvent` representing the event.
         """
         conv_event = self._wrap_event(event_)
         if conv_event.id_ not in self._events_dict:
@@ -196,7 +316,17 @@ class Conversation(object):
         return conv_event
 
     def get_user(self, user_id):
-        """Return the User instance with the given UserID."""
+        """Get user by its ID.
+
+        Args:
+            user_id (~hangups.user.UserID): ID of user to return.
+
+        Raises:
+            KeyError: If the user ID is not found.
+
+        Returns:
+            :class:`~hangups.user.User` with matching ID.
+        """
         return self._user_list.get_user(user_id)
 
     def _get_default_delivery_medium(self):
@@ -241,20 +371,21 @@ class Conversation(object):
         the correct order when this method is called multiple times
         asynchronously.
 
-        segments is a list of ChatMessageSegments to include in the message.
+        Args:
+            segments: List of :class:`ChatMessageSegment` objects to include in
+                the message.
+            image_file: (optional) File-like object containing an image to be
+                attached to the message.
+            image_id: (optional) ID of an Picasa photo to be attached to the
+                message. If you specify both ``image_file`` and ``image_id``
+                together, ``image_file`` takes precedence and ``image_id`` will
+                be ignored.
+            image_user_id: (optional) Picasa user ID, required only if
+                ``image_id`` refers to an image from a different Picasa user,
+                such as Google's sticker user.
 
-        image_file is an optional file-like object containing an image to be
-        attached to the message.
-
-        image_id is an optional ID of an Picasa photo to be attached to the
-        message (if you specify both image_file and image_id together,
-        image_file takes precedence and supplied image_id will be ignored).
-
-        image_user_id is an optional Picasa user ID, required only if image_id
-        refers to an image from another Picasa user (eg. Google's sticker
-        user).
-
-        Raises hangups.NetworkError if the message can not be sent.
+        Raises:
+            NetworkError: If the message cannot be sent.
         """
         with (yield from self._send_message_lock):
             if image_file:
@@ -283,9 +414,10 @@ class Conversation(object):
 
     @asyncio.coroutine
     def leave(self):
-        """Leave conversation.
+        """Leave this conversation.
 
-        Raises hangups.NetworkError if conversation cannot be left.
+        Raises:
+            NetworkError: If conversation cannot be left.
         """
         is_group_conversation = (self._conversation.type ==
                                  hangouts_pb2.CONVERSATION_TYPE_GROUP)
@@ -315,13 +447,17 @@ class Conversation(object):
 
     @asyncio.coroutine
     def rename(self, name):
-        """Rename the conversation.
+        """Rename this conversation.
 
         Hangouts only officially supports renaming group conversations, so
         custom names for one-to-one conversations may or may not appear in all
         first party clients.
 
-        Raises hangups.NetworkError if conversation cannot be renamed.
+        Args:
+            name (str): New name.
+
+        Raises:
+            NetworkError: If conversation cannot be renamed.
         """
         yield from self._client.rename_conversation(
             hangouts_pb2.RenameConversationRequest(
@@ -333,12 +469,14 @@ class Conversation(object):
 
     @asyncio.coroutine
     def set_notification_level(self, level):
-        """Set the notification level of the conversation.
+        """Set the notification level of this conversation.
 
-        Pass hangouts_pb2.NOTIFICATION_LEVEL_QUIET to disable notifications, or
-        hangouts_pb2.NOTIFICATION_LEVEL_RING to enable them.
+        Args:
+            level: ``NOTIFICATION_LEVEL_QUIET`` to disable notifications, or
+                ``NOTIFICATION_LEVEL_RING`` to enable them.
 
-        Raises hangups.NetworkError if the request fails.
+        Raises:
+            NetworkError: If the request fails.
         """
         yield from self._client.set_conversation_notification_level(
             hangouts_pb2.SetConversationNotificationLevelRequest(
@@ -350,12 +488,17 @@ class Conversation(object):
 
     @asyncio.coroutine
     def set_typing(self, typing=hangouts_pb2.TYPING_TYPE_STARTED):
-        """Set typing status.
+        """Set your typing status in this conversation.
 
-        TODO: Add rate-limiting to avoid unnecessary requests.
+        Args:
+            typing: (optional) ``TYPING_TYPE_STARTED``, ``TYPING_TYPE_PAUSED``,
+                or ``TYPING_TYPE_STOPPED`` to start, pause, or stop typing,
+                respectively. Defaults to ``TYPING_TYPE_STARTED``.
 
-        Raises hangups.NetworkError if typing status cannot be set.
+        Raises:
+            NetworkError: If typing status cannot be set.
         """
+        # TODO: Add rate-limiting to avoid unnecessary requests.
         try:
             yield from self._client.set_typing(
                 hangouts_pb2.SetTypingRequest(
@@ -372,11 +515,14 @@ class Conversation(object):
     def update_read_timestamp(self, read_timestamp=None):
         """Update the timestamp of the latest event which has been read.
 
-        By default, the timestamp of the newest event is used.
-
         This method will avoid making an API request if it will have no effect.
 
-        Raises hangups.NetworkError if the timestamp can not be updated.
+        Args:
+            read_timestamp (datetime.datetime): (optional) Timestamp to set.
+                Defaults to the timestamp of the newest event.
+
+        Raises:
+            NetworkError: If the timestamp cannot be updated.
         """
         if read_timestamp is None:
             read_timestamp = self.events[-1].timestamp
@@ -408,17 +554,22 @@ class Conversation(object):
 
     @asyncio.coroutine
     def get_events(self, event_id=None, max_events=50):
-        """Return list of ConversationEvents ordered newest-first.
+        """Get events from this conversation.
 
-        If event_id is specified, return events preceding this event.
+        Makes a request to load historical events if necessary.
 
-        This method will make an API request to load historical events if
-        necessary. If the beginning of the conversation is reached, an empty
-        list will be returned.
+        Args:
+            event_id (str): (optional) If provided, return events preceding
+                this event, otherwise return the newest events.
+            max_events (int): Maximum number of events to return. Defaults to
+                50.
 
-        Raises KeyError if event_id does not correspond to a known event.
+        Returns:
+            List of :class:`ConversationEvent` instances, ordered newest-first.
 
-        Raises hangups.NetworkError if the events could not be requested.
+        Raises:
+            KeyError: If ``event_id`` does not correspond to a known event.
+            NetworkError: If the events could not be requested.
         """
         if event_id is None:
             # If no event_id is provided, return the newest events in this
@@ -473,14 +624,19 @@ class Conversation(object):
         return conv_events
 
     def next_event(self, event_id, prev=False):
-        """Return ConversationEvent following the event with given event_id.
+        """Get the event following another event in this conversation.
 
-        If prev is True, return the previous event rather than the following
-        one.
+        Args:
+            event_id (str): ID of the event.
+            prev (bool): If ``True``, return the previous event rather than the
+                next event. Defaults to ``False``.
 
-        Raises KeyError if no such ConversationEvent is known.
+        Raises:
+            KeyError: If no such :class:`ConversationEvent` is known.
 
-        Return None if there is no following event.
+        Returns:
+            :class:`ConversationEvent` or ``None`` if there is no following
+            event.
         """
         i = self.events.index(self._events_dict[event_id])
         if prev and i > 0:
@@ -491,88 +647,34 @@ class Conversation(object):
             return None
 
     def get_event(self, event_id):
-        """Return ConversationEvent with the given event_id.
+        """Get an event in this conversation by its ID.
 
-        Raises KeyError if no such ConversationEvent is known.
+        Args:
+            event_id (str): ID of the event.
+
+        Raises:
+            KeyError: If no such :class:`ConversationEvent` is known.
+
+        Returns:
+            :class:`ConversationEvent` with the given ID.
         """
         return self._events_dict[event_id]
 
-    @property
-    def id_(self):
-        """The conversation's ID."""
-        return self._conversation.conversation_id.id
-
-    @property
-    def users(self):
-        """User instances of the conversation's current participants."""
-        return [self._user_list.get_user(user.UserID(chat_id=part.id.chat_id,
-                                                     gaia_id=part.id.gaia_id))
-                for part in self._conversation.participant_data]
-
-    @property
-    def name(self):
-        """The conversation's custom name, or None if it doesn't have one."""
-        custom_name = self._conversation.name
-        return None if custom_name == '' else custom_name
-
-    @property
-    def last_modified(self):
-        """datetime timestamp of when the conversation was last modified."""
-        timestamp = self._conversation.self_conversation_state.sort_timestamp
-        # timestamp can be None for some reason when there is an ongoing video
-        # hangout
-        if timestamp is None:
-            timestamp = 0
-        return parsers.from_timestamp(timestamp)
-
-    @property
-    def latest_read_timestamp(self):
-        """datetime timestamp of the last read ConversationEvent."""
-        timestamp = (self._conversation.self_conversation_state.
-                     self_read_state.latest_read_timestamp)
-        return parsers.from_timestamp(timestamp)
-
-    @property
-    def events(self):
-        """The list of ConversationEvents, sorted oldest to newest."""
-        return list(self._events)
-
-    @property
-    def unread_events(self):
-        """List of ConversationEvents that are unread.
-
-        Events are sorted oldest to newest.
-
-        Note that some Hangouts clients don't update the read timestamp for
-        certain event types, such as membership changes, so this method may
-        return more unread events than these clients will show. There's also a
-        delay between sending a message and the user's own message being
-        considered read.
-        """
-        return [conv_event for conv_event in self._events
-                if conv_event.timestamp > self.latest_read_timestamp]
-
-    @property
-    def is_archived(self):
-        """True if this conversation has been archived."""
-        return (hangouts_pb2.CONVERSATION_VIEW_ARCHIVED in
-                self._conversation.self_conversation_state.view)
-
-    @property
-    def is_quiet(self):
-        """True if notification level for this conversation is quiet."""
-        level = self._conversation.self_conversation_state.notification_level
-        return level == hangouts_pb2.NOTIFICATION_LEVEL_QUIET
-
-    @property
-    def is_off_the_record(self):
-        """True if conversation is off the record (history is disabled)."""
-        status = self._conversation.otr_status
-        return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
-
 
 class ConversationList(object):
-    """Wrapper around Client that maintains a list of Conversations."""
+    """Maintains a list of the user's conversations.
+
+    Using :func:`build_user_conversation_list` to initialize this class is
+    recommended.
+
+    Args:
+        client: The connected :class:`Client`.
+        conv_states: List of ``ConversationState`` messages used to initialize
+            the list of conversations.
+        user_list: :class:`UserList` object.
+        sync_timestamp (datetime.datetime): The time when ``conv_states`` was
+            synced.
+    """
 
     def __init__(self, client, conv_states, user_list, sync_timestamp):
         self._client = client  # Client
@@ -583,40 +685,82 @@ class ConversationList(object):
         # Initialize the list of conversations from Client's list of
         # hangouts_pb2.ConversationState.
         for conv_state in conv_states:
-            self.add_conversation(conv_state.conversation, conv_state.event)
+            self._add_conversation(conv_state.conversation, conv_state.event)
 
         self._client.on_state_update.add_observer(self._on_state_update)
         self._client.on_connect.add_observer(self._sync)
         self._client.on_reconnect.add_observer(self._sync)
 
-        # Event fired when a new ConversationEvent arrives with arguments
-        # (ConversationEvent).
         self.on_event = event.Event('ConversationList.on_event')
-        # Event fired when a user starts or stops typing with arguments
-        # (typing_message).
+        """
+        :class:`~hangups.event.Event` fired when an event occurs in any
+        conversation.
+
+        Args:
+            conv_event: :class:`ConversationEvent` that occurred.
+        """
+
         self.on_typing = event.Event('ConversationList.on_typing')
-        # Event fired when a watermark (read timestamp) is updated with
-        # arguments (WatermarkNotification).
+        """
+        :class:`~hangups.event.Event` fired when a users starts or stops typing
+        in any conversation.
+
+        Args:
+            typing_message: :class:`~hangups.parsers.TypingStatusMessage` that
+                occurred.
+        """
+
         self.on_watermark_notification = event.Event(
             'ConversationList.on_watermark_notification'
         )
+        """
+        :class:`~hangups.event.Event` fired when a watermark (read timestamp)
+        is updated for any conversation.
+
+        Args:
+            watermark_notification:
+                :class:`~hangups.parsers.WatermarkNotification` that occurred.
+        """
 
     def get_all(self, include_archived=False):
-        """Return list of all Conversations.
+        """Get all the conversations.
 
-        If include_archived is False, do not return any archived conversations.
+        Args:
+            include_archived (bool): (optional) Whether to include archived
+                conversations. Defaults to ``False``.
+
+        Returns:
+            List of all :class:`.Conversation` objects.
         """
         return [conv for conv in self._conv_dict.values()
                 if not conv.is_archived or include_archived]
 
     def get(self, conv_id):
-        """Return a Conversation from its ID.
+        """Get a conversation by its ID.
 
-        Raises KeyError if the conversation ID is invalid.
+        Args:
+            conv_id (str): ID of conversation to return.
+
+        Raises:
+            KeyError: If the conversation ID is not found.
+
+        Returns:
+            :class:`.Conversation` with matching ID.
         """
         return self._conv_dict[conv_id]
 
-    def add_conversation(self, conversation, events=[]):
+    @asyncio.coroutine
+    def leave_conversation(self, conv_id):
+        """Leave a conversation.
+
+        Args:
+            conv_id (str): ID of conversation to leave.
+        """
+        logger.info('Leaving conversation: {}'.format(conv_id))
+        yield from self._conv_dict[conv_id].leave()
+        del self._conv_dict[conv_id]
+
+    def _add_conversation(self, conversation, events=[]):
         """Add new conversation from hangouts_pb2.Conversation"""
         # pylint: disable=dangerous-default-value
         conv_id = conversation.conversation_id.id
@@ -625,13 +769,6 @@ class ConversationList(object):
                             events)
         self._conv_dict[conv_id] = conv
         return conv
-
-    @asyncio.coroutine
-    def leave_conversation(self, conv_id):
-        """Leave conversation and remove it from ConversationList"""
-        logger.info('Leaving conversation: {}'.format(conv_id))
-        yield from self._conv_dict[conv_id].leave()
-        del self._conv_dict[conv_id]
 
     @asyncio.coroutine
     def _on_state_update(self, state_update):
@@ -677,7 +814,7 @@ class ConversationList(object):
         if conv is not None:
             conv.update_conversation(conversation)
         else:
-            self.add_conversation(conversation)
+            self._add_conversation(conversation)
 
     @asyncio.coroutine
     def _handle_set_typing_notification(self, set_typing_notification):
@@ -735,5 +872,5 @@ class ConversationList(object):
                             # as triggering events.
                             yield from self._on_event(event_)
                 else:
-                    self.add_conversation(conv_state.conversation,
-                                          conv_state.event)
+                    self._add_conversation(conv_state.conversation,
+                                           conv_state.event)
