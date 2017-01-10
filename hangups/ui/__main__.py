@@ -36,6 +36,7 @@ COL_SCHEMES = {
         ('msg_self', '', ''),
         ('msg_text', '', ''),
         ('msg_text_self', '', ''),
+        ('msg_selected', 'standout', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'standout', ''),
     },
@@ -47,6 +48,7 @@ COL_SCHEMES = {
         ('msg_text_self', '', ''),
         ('msg_self', 'dark green', ''),
         ('msg_text', '', ''),
+        ('msg_selected', 'standout', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'black,standout,underline', 'light green'),
     },
@@ -477,8 +479,19 @@ class MessageWidget(urwid.WidgetWrap):
         if user is not None:
             text.insert(1, ('msg_self' if user.is_self else 'msg_sender',
                             user.first_name + ': '))
-        self._widget = urwid.Text(text)
-        super().__init__(self._widget)
+        self._widget = urwid.SelectableIcon(text, cursor_position=0)
+        super().__init__(urwid.AttrMap(
+            self._widget, '', {
+                # If the widget is focused, map every other display attribute
+                # to 'msg_selected' so the entire message is highlighted.
+                None: 'msg_selected',
+                'msg_date': 'msg_selected',
+                'msg_text_self': 'msg_selected',
+                'msg_text': 'msg_selected',
+                'msg_self': 'msg_selected',
+                'msg_sender': 'msg_selected',
+            }
+        ))
 
     @staticmethod
     def _get_date_str(timestamp, datetimefmt, show_date=False):

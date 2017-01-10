@@ -37,6 +37,17 @@ def to_timestamp(datetime_timestamp):
 TypingStatusMessage = namedtuple(
     'TypingStatusMessage', ['conv_id', 'user_id', 'timestamp', 'status']
 )
+"""
+A notification about a user's typing status in a conversation.
+
+Args:
+    conv_id (str): ID of the conversation.
+    user_id (hangups.user.UserID): ID of the affected user.
+    timestamp (datetime.datetime): When the notification was generated.
+    status: The new status; one of ``TYPING_TYPE_STARTED``,
+        ``TYPING_TYPE_PAUSED``, or ``TYPING_TYPE_STOPPED``.
+
+"""
 
 
 def parse_typing_status_message(p):
@@ -57,6 +68,13 @@ def parse_typing_status_message(p):
 WatermarkNotification = namedtuple(
     'WatermarkNotification', ['conv_id', 'user_id', 'read_timestamp']
 )
+"""A notification about a user's watermark (read timestamp).
+
+Args:
+    conv_id (str): ID of the conversation.
+    user_id (hangups.user.UserID): ID of the affected user.
+    read_timestamp (datetime.datetime): The new watermark.
+"""
 
 
 def parse_watermark_notification(p):
