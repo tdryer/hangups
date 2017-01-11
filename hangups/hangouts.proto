@@ -1562,6 +1562,8 @@ message SyncAllNewEventsResponse {
 
 message SyncRecentConversationsRequest {
   optional RequestHeader request_header = 1;
+  // Timestamp used for pagination, returns most recent conversations if not
+  // given.
   optional uint64 last_event_timestamp = 2;
   optional uint64 max_conversations = 3;
   optional uint64 max_events_per_conversation = 4;
