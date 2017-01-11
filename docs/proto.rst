@@ -1666,6 +1666,7 @@ SyncRecentConversationsRequest
 Field                               Number Type             Label    Description
 =================================== ====== ================ ======== ===========
 :code:`request_header`              1      `RequestHeader`_ optional            
+:code:`last_event_timestamp`        2      uint64           optional            
 :code:`max_conversations`           3      uint64           optional            
 :code:`max_events_per_conversation` 4      uint64           optional            
 :code:`sync_filter`                 5      `SyncFilter`_    repeated            
