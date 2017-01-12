@@ -42,7 +42,10 @@ def build_user_conversation_list(client):
                     last_event_timestamp=next_timestamp,
                     max_conversations=CONVERSATIONS_PER_REQUEST,
                     max_events_per_conversation=1,
-                    sync_filter=[hangouts_pb2.SYNC_FILTER_INBOX]
+                    sync_filter=[
+                        hangouts_pb2.SYNC_FILTER_INBOX,
+                        hangouts_pb2.SYNC_FILTER_ARCHIVED,
+                    ]
                 )
             )
         )
