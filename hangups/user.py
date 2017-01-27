@@ -77,7 +77,7 @@ class User(object):
             self.full_name = user_.full_name
             self.first_name = user_.first_name
             self.name_type = user_.name_type
-            logging.debug('Added {} name to User "{}": {}'.format(
+            logger.debug('Added {} name to User "{}": {}'.format(
                 self.name_type.name.lower(), self.full_name, self))
 
     @staticmethod
