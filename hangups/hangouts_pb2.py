@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='hangups/hangouts.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n\x16hangups/hangouts.proto\"\\\n\x13\x44oNotDisturbSetting\x12\x16\n\x0e\x64o_not_disturb\x18\x01 \x01(\x08\x12\x1c\n\x14\x65xpiration_timestamp\x18\x02 \x01(\x04\x12\x0f\n\x07version\x18\x03 \x01(\x04\"B\n\x14NotificationSettings\x12*\n\x0c\x64nd_settings\x18\x01 \x01(\x0b\x32\x14.DoNotDisturbSetting\"\x1c\n\x0e\x43onversationId\x12\n\n\x02id\x18\x01 \x01(\t\"1\n\rParticipantId\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63hat_id\x18\x02 \x01(\t\"?\n\x0c\x44\x65viceStatus\x12\x0e\n\x06mobile\x18\x01 \x01(\x08\x12\x0f\n\x07\x64\x65sktop\x18\x02 \x01(\x08\x12\x0e\n\x06tablet\x18\x03 \x01(\x08\"J\n\x08LastSeen\x12 \n\x18last_seen_timestamp_usec\x18\x01 \x01(\x04\x12\x1c\n\x14usec_since_last_seen\x18\x02 \x01(\x04\"\x98\x01\n\x08Presence\x12\x11\n\treachable\x18\x01 \x01(\x08\x12\x11\n\tavailable\x18\x02 \x01(\x08\x12$\n\rdevice_status\x18\x06 \x01(\x0b\x32\r.DeviceStatus\x12\"\n\x0cmood_message\x18\t \x01(\x0b\x32\x0c.MoodMessage\x12\x1c\n\tlast_seen\x18\n \x01(\x0b\x32\t.LastSeen\"N\n\x0ePresenceResult\x12\x1f\n\x07user_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12\x1b\n\x08presence\x18\x02 \x01(\x0b\x32\t.Presence\"7\n\x10\x43lientIdentifier\x12\x10\n\x08resource\x18\x01 \x01(\t\x12\x11\n\theader_id\x18\x02 \x01(\t\"e\n\x13\x43lientPresenceState\x12%\n\nidentifier\x18\x01 \x01(\x0b\x32\x11.ClientIdentifier\x12\'\n\x05state\x18\x02 \x01(\x0e\x32\x18.ClientPresenceStateType\"~\n\x0eUserEventState\x12\x1f\n\x07user_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\t\x12.\n\x12notification_level\x18\x03 \x01(\x0e\x32\x12.NotificationLevel\"T\n\nFormatting\x12\x0c\n\x04\x62old\x18\x01 \x01(\x08\x12\x0e\n\x06italic\x18\x02 \x01(\x08\x12\x15\n\rstrikethrough\x18\x03 \x01(\x08\x12\x11\n\tunderline\x18\x04 \x01(\x08\"\x1f\n\x08LinkData\x12\x13\n\x0blink_target\x18\x01 \x01(\t\"r\n\x07Segment\x12\x1a\n\x04type\x18\x01 \x02(\x0e\x32\x0c.SegmentType\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\x1f\n\nformatting\x18\x03 \x01(\x0b\x32\x0b.Formatting\x12\x1c\n\tlink_data\x18\x04 \x01(\x0b\x32\t.LinkData\"\x89\x03\n\tPlusPhoto\x12\'\n\tthumbnail\x18\x01 \x01(\x0b\x32\x14.PlusPhoto.Thumbnail\x12\x1b\n\x13owner_obfuscated_id\x18\x02 \x01(\t\x12\x10\n\x08\x61lbum_id\x18\x03 \x01(\t\x12\x10\n\x08photo_id\x18\x04 \x01(\t\x12\x0b\n\x03url\x18\x06 \x01(\t\x12\x1c\n\x14original_content_url\x18\n \x01(\t\x12(\n\nmedia_type\x18\r \x01(\x0e\x32\x14.PlusPhoto.MediaType\x12\x11\n\tstream_id\x18\x0e \x03(\t\x1aP\n\tThumbnail\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x11\n\timage_url\x18\x04 \x01(\t\x12\x10\n\x08width_px\x18\n \x01(\x04\x12\x11\n\theight_px\x18\x0b \x01(\x04\"X\n\tMediaType\x12\x16\n\x12MEDIA_TYPE_UNKNOWN\x10\x00\x12\x14\n\x10MEDIA_TYPE_PHOTO\x10\x01\x12\x1d\n\x19MEDIA_TYPE_ANIMATED_PHOTO\x10\x04\"\x81\x01\n\x05Place\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x39\n\x14representative_image\x18\xb9\x01 \x01(\x0b\x32\x1a.Place.RepresentativeImage\x1a\"\n\x13RepresentativeImage\x12\x0b\n\x03url\x18\x02 \x01(\t\"m\n\tEmbedItem\x12\x17\n\x04type\x18\x01 \x03(\x0e\x32\t.ItemType\x12\n\n\x02id\x18\x02 \x01(\t\x12!\n\nplus_photo\x18\x95\x81\x97\r \x01(\x0b\x32\n.PlusPhoto\x12\x18\n\x05place\x18\xe8\xcf\x8a\x11 \x01(\x0b\x32\x06.Place\",\n\nAttachment\x12\x1e\n\nembed_item\x18\x01 \x01(\x0b\x32\n.EmbedItem\"L\n\x0eMessageContent\x12\x19\n\x07segment\x18\x01 \x03(\x0b\x32\x08.Segment\x12\x1f\n\nattachment\x18\x02 \x03(\x0b\x32\x0b.Attachment\".\n\x0f\x45ventAnnotation\x12\x0c\n\x04type\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t\"]\n\x0b\x43hatMessage\x12$\n\nannotation\x18\x02 \x03(\x0b\x32\x10.EventAnnotation\x12(\n\x0fmessage_content\x18\x03 \x01(\x0b\x32\x0f.MessageContent\"`\n\x10MembershipChange\x12#\n\x04type\x18\x01 \x01(\x0e\x32\x15.MembershipChangeType\x12\'\n\x0fparticipant_ids\x18\x03 \x03(\x0b\x32\x0e.ParticipantId\"8\n\x12\x43onversationRename\x12\x10\n\x08new_name\x18\x01 \x01(\t\x12\x10\n\x08old_name\x18\x02 \x01(\t\"]\n\x0cHangoutEvent\x12%\n\nevent_type\x18\x01 \x01(\x0e\x32\x11.HangoutEventType\x12&\n\x0eparticipant_id\x18\x02 \x03(\x0b\x32\x0e.ParticipantId\"\xc5\x01\n\x0fOTRModification\x12+\n\x0eold_otr_status\x18\x01 \x01(\x0e\x32\x13.OffTheRecordStatus\x12+\n\x0enew_otr_status\x18\x02 \x01(\x0e\x32\x13.OffTheRecordStatus\x12+\n\x0eold_otr_toggle\x18\x03 \x01(\x0e\x32\x13.OffTheRecordToggle\x12+\n\x0enew_otr_toggle\x18\x04 \x01(\x0e\x32\x13.OffTheRecordToggle\"E\n\x0cHashModifier\x12\x11\n\tupdate_id\x18\x01 \x01(\t\x12\x11\n\thash_diff\x18\x02 \x01(\x04\x12\x0f\n\x07version\x18\x04 \x01(\x04\"\xe2\x05\n\x05\x45vent\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12!\n\tsender_id\x18\x02 \x01(\x0b\x32\x0e.ParticipantId\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12)\n\x10self_event_state\x18\x04 \x01(\x0b\x32\x0f.UserEventState\x12 \n\x0bsource_type\x18\x06 \x01(\x0e\x32\x0b.SourceType\x12\"\n\x0c\x63hat_message\x18\x07 \x01(\x0b\x32\x0c.ChatMessage\x12,\n\x11membership_change\x18\t \x01(\x0b\x32\x11.MembershipChange\x12\x30\n\x13\x63onversation_rename\x18\n \x01(\x0b\x32\x13.ConversationRename\x12$\n\rhangout_event\x18\x0b \x01(\x0b\x32\r.HangoutEvent\x12\x10\n\x08\x65vent_id\x18\x0c \x01(\t\x12\x1c\n\x14\x65xpiration_timestamp\x18\r \x01(\x04\x12*\n\x10otr_modification\x18\x0e \x01(\x0b\x32\x10.OTRModification\x12\x1f\n\x17\x61\x64vances_sort_timestamp\x18\x0f \x01(\x08\x12\'\n\notr_status\x18\x10 \x01(\x0e\x32\x13.OffTheRecordStatus\x12\x11\n\tpersisted\x18\x11 \x01(\x08\x12$\n\x0bmedium_type\x18\x14 \x01(\x0b\x32\x0f.DeliveryMedium\x12\x1e\n\nevent_type\x18\x17 \x01(\x0e\x32\n.EventType\x12\x15\n\revent_version\x18\x18 \x01(\x04\x12$\n\rhash_modifier\x18\x1a \x01(\x0b\x32\r.HashModifier\x12\x46\n\x1fgroup_link_sharing_modification\x18\x1f \x01(\x0b\x32\x1d.GroupLinkSharingModification\"V\n\rUserReadState\x12&\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12\x1d\n\x15latest_read_timestamp\x18\x02 \x01(\x04\"^\n\x0e\x44\x65liveryMedium\x12(\n\x0bmedium_type\x18\x01 \x01(\x0e\x32\x13.DeliveryMediumType\x12\"\n\x0cphone_number\x18\x02 \x01(\x0b\x32\x0c.PhoneNumber\"Y\n\x14\x44\x65liveryMediumOption\x12(\n\x0f\x64\x65livery_medium\x18\x01 \x01(\x0b\x32\x0f.DeliveryMedium\x12\x17\n\x0f\x63urrent_default\x18\x02 \x01(\x08\"\xa8\x03\n\x15UserConversationState\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\t\x12\'\n\x0fself_read_state\x18\x07 \x01(\x0b\x32\x0e.UserReadState\x12#\n\x06status\x18\x08 \x01(\x0e\x32\x13.ConversationStatus\x12.\n\x12notification_level\x18\t \x01(\x0e\x32\x12.NotificationLevel\x12\x1f\n\x04view\x18\n \x03(\x0e\x32\x11.ConversationView\x12\"\n\ninviter_id\x18\x0b \x01(\x0b\x32\x0e.ParticipantId\x12\x18\n\x10invite_timestamp\x18\x0c \x01(\x04\x12\x16\n\x0esort_timestamp\x18\r \x01(\x04\x12\x18\n\x10\x61\x63tive_timestamp\x18\x0e \x01(\x04\x12,\n\x0finvite_affinity\x18\x0f \x01(\x0e\x32\x13.InvitationAffinity\x12\x35\n\x16\x64\x65livery_medium_option\x18\x11 \x03(\x0b\x32\x15.DeliveryMediumOption\"\xdc\x01\n\x1b\x43onversationParticipantData\x12\x1a\n\x02id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12\x15\n\rfallback_name\x18\x02 \x01(\t\x12,\n\x11invitation_status\x18\x03 \x01(\x0e\x32\x11.InvitationStatus\x12*\n\x10participant_type\x18\x05 \x01(\x0e\x32\x10.ParticipantType\x12\x30\n\x15new_invitation_status\x18\x06 \x01(\x0e\x32\x11.InvitationStatus\"\xcb\x04\n\x0c\x43onversation\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.ConversationType\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x37\n\x17self_conversation_state\x18\x04 \x01(\x0b\x32\x16.UserConversationState\x12\"\n\nread_state\x18\x08 \x03(\x0b\x32\x0e.UserReadState\x12\x1a\n\x12has_active_hangout\x18\t \x01(\x08\x12\'\n\notr_status\x18\n \x01(\x0e\x32\x13.OffTheRecordStatus\x12\'\n\notr_toggle\x18\x0b \x01(\x0e\x32\x13.OffTheRecordToggle\x12&\n\x1e\x63onversation_history_supported\x18\x0c \x01(\x08\x12+\n\x13\x63urrent_participant\x18\r \x03(\x0b\x32\x0e.ParticipantId\x12\x36\n\x10participant_data\x18\x0e \x03(\x0b\x32\x1c.ConversationParticipantData\x12\"\n\x0cnetwork_type\x18\x12 \x03(\x0e\x32\x0c.NetworkType\x12*\n\x13\x66orce_history_state\x18\x13 \x01(\x0e\x32\r.ForceHistory\x12:\n\x19group_link_sharing_status\x18\x16 \x01(\x0e\x32\x17.GroupLinkSharingStatus\"\x1c\n\tEasterEgg\x12\x0f\n\x07message\x18\x01 \x01(\t\"`\n\x10\x42lockStateChange\x12&\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12$\n\x0fnew_block_state\x18\x02 \x01(\x0e\x32\x0b.BlockState\"l\n\x05Photo\x12\x10\n\x08photo_id\x18\x01 \x01(\t\x12%\n\x1d\x64\x65lete_albumless_source_photo\x18\x02 \x01(\x08\x12\x0f\n\x07user_id\x18\x03 \x01(\t\x12\x19\n\x11is_custom_user_id\x18\x04 \x01(\x08\"&\n\rExistingMedia\x12\x15\n\x05photo\x18\x01 \x01(\x0b\x32\x06.Photo\"\xd0\x01\n\x12\x45ventRequestHeader\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\x04\x12)\n\x0c\x65xpected_otr\x18\x03 \x01(\x0e\x32\x13.OffTheRecordStatus\x12(\n\x0f\x64\x65livery_medium\x18\x04 \x01(\x0b\x32\x0f.DeliveryMedium\x12\x1e\n\nevent_type\x18\x05 \x01(\x0e\x32\n.EventType\"\xb9\x01\n\rClientVersion\x12\x1c\n\tclient_id\x18\x01 \x01(\x0e\x32\t.ClientId\x12$\n\nbuild_type\x18\x02 \x01(\x0e\x32\x10.ClientBuildType\x12\x15\n\rmajor_version\x18\x03 \x01(\t\x12\x19\n\x11version_timestamp\x18\x04 \x01(\x04\x12\x19\n\x11\x64\x65vice_os_version\x18\x05 \x01(\t\x12\x17\n\x0f\x64\x65vice_hardware\x18\x06 \x01(\t\"|\n\rRequestHeader\x12&\n\x0e\x63lient_version\x18\x01 \x01(\x0b\x32\x0e.ClientVersion\x12,\n\x11\x63lient_identifier\x18\x02 \x01(\x0b\x32\x11.ClientIdentifier\x12\x15\n\rlanguage_code\x18\x04 \x01(\t\"\x96\x01\n\x0eResponseHeader\x12\x1f\n\x06status\x18\x01 \x01(\x0e\x32\x0f.ResponseStatus\x12\x19\n\x11\x65rror_description\x18\x02 \x01(\t\x12\x11\n\tdebug_url\x18\x03 \x01(\t\x12\x18\n\x10request_trace_id\x18\x04 \x01(\t\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"\xcf\x02\n\x06\x45ntity\x12\x1a\n\x02id\x18\t \x01(\x0b\x32\x0e.ParticipantId\x12\x1b\n\x08presence\x18\x08 \x01(\x0b\x32\t.Presence\x12%\n\nproperties\x18\n \x01(\x0b\x32\x11.EntityProperties\x12%\n\x0b\x65ntity_type\x18\r \x01(\x0e\x32\x10.ParticipantType\x12\x38\n\x16had_past_hangout_state\x18\x10 \x01(\x0e\x32\x18.Entity.PastHangoutState\"\x83\x01\n\x10PastHangoutState\x12\x1e\n\x1aPAST_HANGOUT_STATE_UNKNOWN\x10\x00\x12\'\n#PAST_HANGOUT_STATE_HAD_PAST_HANGOUT\x10\x01\x12&\n\"PAST_HANGOUT_STATE_NO_PAST_HANGOUT\x10\x02\"\xff\x01\n\x10\x45ntityProperties\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.ProfileType\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x11\n\tphoto_url\x18\x04 \x01(\t\x12\r\n\x05\x65mail\x18\x05 \x03(\t\x12\r\n\x05phone\x18\x06 \x03(\t\x12\x17\n\x0fin_users_domain\x18\n \x01(\x08\x12\x17\n\x06gender\x18\x0b \x01(\x0e\x32\x07.Gender\x12)\n\x10photo_url_status\x18\x0c \x01(\x0e\x32\x0f.PhotoUrlStatus\x12\x17\n\x0f\x63\x61nonical_email\x18\x0f \x01(\t\"\xb4\x01\n\x11\x43onversationState\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12#\n\x0c\x63onversation\x18\x02 \x01(\x0b\x32\r.Conversation\x12\x15\n\x05\x65vent\x18\x03 \x03(\x0b\x32\x06.Event\x12\x39\n\x18\x65vent_continuation_token\x18\x05 \x01(\x0b\x32\x17.EventContinuationToken\"g\n\x16\x45ventContinuationToken\x12\x10\n\x08\x65vent_id\x18\x01 \x01(\t\x12\"\n\x1astorage_continuation_token\x18\x02 \x01(\x0c\x12\x17\n\x0f\x65vent_timestamp\x18\x03 \x01(\x04\"a\n\x10\x45ntityLookupSpec\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\r\n\x05phone\x18\x04 \x01(\t\x12\x1e\n\x16\x63reate_offnetwork_gaia\x18\x06 \x01(\x08\"X\n\x10\x43onfigurationBit\x12\x35\n\x16\x63onfiguration_bit_type\x18\x01 \x01(\x0e\x32\x15.ConfigurationBitType\x12\r\n\x05value\x18\x02 \x01(\x08\"W\n\x11RichPresenceState\x12\x42\n\x1fget_rich_presence_enabled_state\x18\x03 \x03(\x0b\x32\x19.RichPresenceEnabledState\"L\n\x18RichPresenceEnabledState\x12\x1f\n\x04type\x18\x01 \x01(\x0e\x32\x11.RichPresenceType\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\"(\n\x11\x44\x65sktopOffSetting\x12\x13\n\x0b\x64\x65sktop_off\x18\x01 \x01(\x08\"7\n\x0f\x44\x65sktopOffState\x12\x13\n\x0b\x64\x65sktop_off\x18\x01 \x01(\x08\x12\x0f\n\x07version\x18\x02 \x01(\x04\":\n\nDndSetting\x12\x16\n\x0e\x64o_not_disturb\x18\x01 \x01(\x08\x12\x14\n\x0ctimeout_secs\x18\x02 \x01(\x04\"T\n\x14PresenceStateSetting\x12\x14\n\x0ctimeout_secs\x18\x01 \x01(\x04\x12&\n\x04type\x18\x02 \x01(\x0e\x32\x18.ClientPresenceStateType\"1\n\x0bMoodMessage\x12\"\n\x0cmood_content\x18\x01 \x01(\x0b\x32\x0c.MoodContent\"(\n\x0bMoodContent\x12\x19\n\x07segment\x18\x01 \x03(\x0b\x32\x08.Segment\"1\n\x0bMoodSetting\x12\"\n\x0cmood_message\x18\x01 \x01(\x0b\x32\x0c.MoodMessage\"/\n\tMoodState\x12\"\n\x0cmood_setting\x18\x04 \x01(\x0b\x32\x0c.MoodSetting\"w\n\x0c\x44\x65leteAction\x12\x1f\n\x17\x64\x65lete_action_timestamp\x18\x01 \x01(\x04\x12$\n\x1c\x64\x65lete_upper_bound_timestamp\x18\x02 \x01(\x04\x12 \n\x0b\x64\x65lete_type\x18\x03 \x01(\x0e\x32\x0b.DeleteType\"3\n\tInviteeID\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\x15\n\rfallback_name\x18\x04 \x01(\t\"4\n\x07\x43ountry\x12\x13\n\x0bregion_code\x18\x01 \x01(\t\x12\x14\n\x0c\x63ountry_code\x18\x02 \x01(\x04\"n\n\x13\x44\x65sktopSoundSetting\x12(\n\x13\x64\x65sktop_sound_state\x18\x01 \x01(\x0e\x32\x0b.SoundState\x12-\n\x18\x64\x65sktop_ring_sound_state\x18\x02 \x01(\x0e\x32\x0b.SoundState\"Z\n\tPhoneData\x12\x15\n\x05phone\x18\x01 \x03(\x0b\x32\x06.Phone\x12\x36\n\x17\x63\x61ller_id_settings_mask\x18\x03 \x01(\x0e\x32\x15.CallerIdSettingsMask\"\xdc\x01\n\x05Phone\x12\"\n\x0cphone_number\x18\x01 \x01(\x0b\x32\x0c.PhoneNumber\x12\x14\n\x0cgoogle_voice\x18\x02 \x01(\x08\x12\x35\n\x13verification_status\x18\x03 \x01(\x0e\x32\x18.PhoneVerificationStatus\x12\x14\n\x0c\x64iscoverable\x18\x04 \x01(\x08\x12;\n\x16\x64iscoverability_status\x18\x05 \x01(\x0e\x32\x1b.PhoneDiscoverabilityStatus\x12\x0f\n\x07primary\x18\x06 \x01(\x08\"\xb1\x01\n\x08I18nData\x12\x17\n\x0fnational_number\x18\x01 \x01(\t\x12\x1c\n\x14international_number\x18\x02 \x01(\t\x12\x14\n\x0c\x63ountry_code\x18\x03 \x01(\x04\x12\x13\n\x0bregion_code\x18\x04 \x01(\t\x12\x10\n\x08is_valid\x18\x05 \x01(\x08\x12\x31\n\x11validation_result\x18\x06 \x01(\x0e\x32\x16.PhoneValidationResult\"9\n\x0bPhoneNumber\x12\x0c\n\x04\x65\x31\x36\x34\x18\x01 \x01(\t\x12\x1c\n\ti18n_data\x18\x02 \x01(\x0b\x32\t.I18nData\">\n\x19SuggestedContactGroupHash\x12\x13\n\x0bmax_results\x18\x01 \x01(\x04\x12\x0c\n\x04hash\x18\x02 \x01(\x0c\"Y\n\x10SuggestedContact\x12\x17\n\x06\x65ntity\x18\x01 \x01(\x0b\x32\x07.Entity\x12,\n\x11invitation_status\x18\x02 \x01(\x0e\x32\x11.InvitationStatus\"_\n\x15SuggestedContactGroup\x12\x14\n\x0chash_matched\x18\x01 \x01(\x08\x12\x0c\n\x04hash\x18\x02 \x01(\x0c\x12\"\n\x07\x63ontact\x18\x03 \x03(\x0b\x32\x11.SuggestedContact\"K\n\x1cGroupLinkSharingModification\x12+\n\nnew_status\x18\x01 \x01(\x0e\x32\x17.GroupLinkSharingStatus\"\xb2\x08\n\x0bStateUpdate\x12/\n\x13state_update_header\x18\x01 \x01(\x0b\x32\x12.StateUpdateHeader\x12#\n\x0c\x63onversation\x18\r \x01(\x0b\x32\r.Conversation\x12>\n\x19\x63onversation_notification\x18\x02 \x01(\x0b\x32\x19.ConversationNotificationH\x00\x12\x30\n\x12\x65vent_notification\x18\x03 \x01(\x0b\x32\x12.EventNotificationH\x00\x12\x33\n\x12\x66ocus_notification\x18\x04 \x01(\x0b\x32\x15.SetFocusNotificationH\x00\x12\x35\n\x13typing_notification\x18\x05 \x01(\x0b\x32\x16.SetTypingNotificationH\x00\x12X\n\x1fnotification_level_notification\x18\x06 \x01(\x0b\x32-.SetConversationNotificationLevelNotificationH\x00\x12\x42\n\x1creply_to_invite_notification\x18\x07 \x01(\x0b\x32\x1a.ReplyToInviteNotificationH\x00\x12\x38\n\x16watermark_notification\x18\x08 \x01(\x0b\x32\x16.WatermarkNotificationH\x00\x12:\n\x11view_modification\x18\x0b \x01(\x0b\x32\x1d.ConversationViewModificationH\x00\x12\x39\n\x17\x65\x61ster_egg_notification\x18\x0c \x01(\x0b\x32\x16.EasterEggNotificationH\x00\x12?\n\x1aself_presence_notification\x18\x0e \x01(\x0b\x32\x19.SelfPresenceNotificationH\x00\x12\x38\n\x13\x64\x65lete_notification\x18\x0f \x01(\x0b\x32\x19.DeleteActionNotificationH\x00\x12\x36\n\x15presence_notification\x18\x10 \x01(\x0b\x32\x15.PresenceNotificationH\x00\x12\x30\n\x12\x62lock_notification\x18\x11 \x01(\x0b\x32\x12.BlockNotificationH\x00\x12P\n!notification_setting_notification\x18\x13 \x01(\x0b\x32#.SetNotificationSettingNotificationH\x00\x12Y\n(rich_presence_enabled_state_notification\x18\x14 \x01(\x0b\x32%.RichPresenceEnabledStateNotificationH\x00\x42\x0e\n\x0cstate_update\"\xb1\x01\n\x11StateUpdateHeader\x12/\n\x13\x61\x63tive_client_state\x18\x01 \x01(\x0e\x32\x12.ActiveClientState\x12\x18\n\x10request_trace_id\x18\x03 \x01(\t\x12\x34\n\x15notification_settings\x18\x04 \x01(\x0b\x32\x15.NotificationSettings\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"1\n\x0b\x42\x61tchUpdate\x12\"\n\x0cstate_update\x18\x01 \x03(\x0b\x32\x0c.StateUpdate\"?\n\x18\x43onversationNotification\x12#\n\x0c\x63onversation\x18\x01 \x01(\x0b\x32\r.Conversation\"*\n\x11\x45ventNotification\x12\x15\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x06.Event\"\xae\x01\n\x14SetFocusNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12!\n\tsender_id\x18\x02 \x01(\x0b\x32\x0e.ParticipantId\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x18\n\x04type\x18\x04 \x01(\x0e\x32\n.FocusType\x12\x1c\n\x06\x64\x65vice\x18\x05 \x01(\x0e\x32\x0c.FocusDevice\"\x92\x01\n\x15SetTypingNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12!\n\tsender_id\x18\x02 \x01(\x0b\x32\x0e.ParticipantId\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x19\n\x04type\x18\x04 \x01(\x0e\x32\x0b.TypingType\"\x8e\x01\n,SetConversationNotificationLevelNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12!\n\x05level\x18\x02 \x01(\x0e\x32\x12.NotificationLevel\x12\x11\n\ttimestamp\x18\x04 \x01(\x04\"g\n\x19ReplyToInviteNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12 \n\x04type\x18\x02 \x01(\x0e\x32\x12.ReplyToInviteType\"\x83\x01\n\x15WatermarkNotification\x12!\n\tsender_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x1d\n\x15latest_read_timestamp\x18\x03 \x01(\x04\"\x92\x01\n\x1c\x43onversationViewModification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12#\n\x08old_view\x18\x02 \x01(\x0e\x32\x11.ConversationView\x12#\n\x08new_view\x18\x03 \x01(\x0e\x32\x11.ConversationView\"\x84\x01\n\x15\x45\x61sterEggNotification\x12!\n\tsender_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x1e\n\neaster_egg\x18\x03 \x01(\x0b\x32\n.EasterEgg\"\x83\x02\n\x18SelfPresenceNotification\x12\x33\n\x15\x63lient_presence_state\x18\x01 \x01(\x0b\x32\x14.ClientPresenceState\x12\x34\n\x16\x64o_not_disturb_setting\x18\x03 \x01(\x0b\x32\x14.DoNotDisturbSetting\x12/\n\x13\x64\x65sktop_off_setting\x18\x04 \x01(\x0b\x32\x12.DesktopOffSetting\x12+\n\x11\x64\x65sktop_off_state\x18\x05 \x01(\x0b\x32\x10.DesktopOffState\x12\x1e\n\nmood_state\x18\x06 \x01(\x0b\x32\n.MoodState\"j\n\x18\x44\x65leteActionNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12$\n\rdelete_action\x18\x02 \x01(\x0b\x32\r.DeleteAction\"9\n\x14PresenceNotification\x12!\n\x08presence\x18\x01 \x03(\x0b\x32\x0f.PresenceResult\"B\n\x11\x42lockNotification\x12-\n\x12\x62lock_state_change\x18\x01 \x03(\x0b\x32\x11.BlockStateChange\"\x87\x01\n\"SetNotificationSettingNotification\x12,\n\x11\x63onfiguration_bit\x18\x01 \x03(\x0b\x32\x11.ConfigurationBit\x12\x33\n\x15\x64\x65sktop_sound_setting\x18\x02 \x01(\x0b\x32\x14.DesktopSoundSetting\"f\n$RichPresenceEnabledStateNotification\x12>\n\x1brich_presence_enabled_state\x18\x01 \x03(\x0b\x32\x19.RichPresenceEnabledState\"<\n\x10\x43onversationSpec\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\"H\n\x11OffnetworkAddress\x12$\n\x04type\x18\x01 \x01(\x0e\x32\x16.OffnetworkAddressType\x12\r\n\x05\x65mail\x18\x03 \x01(\t\"O\n\x0c\x45ntityResult\x12&\n\x0blookup_spec\x18\x01 \x01(\x0b\x32\x11.EntityLookupSpec\x12\x17\n\x06\x65ntity\x18\x02 \x03(\x0b\x32\x07.Entity\"\x8b\x01\n\x0e\x41\x64\x64UserRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1e\n\ninvitee_id\x18\x03 \x03(\x0b\x32\n.InviteeID\x12\x31\n\x14\x65vent_request_header\x18\x05 \x01(\x0b\x32\x13.EventRequestHeader\"Z\n\x0f\x41\x64\x64UserResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x05 \x01(\x0b\x32\x06.Event\"\xaf\x01\n\x19\x43reateConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.ConversationType\x12\x1b\n\x13\x63lient_generated_id\x18\x03 \x01(\x04\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x1e\n\ninvitee_id\x18\x05 \x03(\x0b\x32\n.InviteeID\"\x8d\x01\n\x1a\x43reateConversationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12#\n\x0c\x63onversation\x18\x02 \x01(\x0b\x32\r.Conversation\x12 \n\x18new_conversation_created\x18\x07 \x01(\x08\"\x93\x01\n\x19\x44\x65leteConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12$\n\x1c\x64\x65lete_upper_bound_timestamp\x18\x03 \x01(\x04\"l\n\x1a\x44\x65leteConversationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12$\n\rdelete_action\x18\x02 \x01(\x0b\x32\r.DeleteAction\"\x84\x01\n\x10\x45\x61sterEggRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x1e\n\neaster_egg\x18\x03 \x01(\x0b\x32\n.EasterEgg\"P\n\x11\x45\x61sterEggResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x11\n\ttimestamp\x18\x02 \x01(\x04\"\x8c\x02\n\x16GetConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12,\n\x11\x63onversation_spec\x18\x02 \x01(\x0b\x32\x11.ConversationSpec\x12%\n\x1dinclude_conversation_metadata\x18\x03 \x01(\x08\x12\x15\n\rinclude_event\x18\x04 \x01(\x08\x12#\n\x1bmax_events_per_conversation\x18\x06 \x01(\x04\x12\x39\n\x18\x65vent_continuation_token\x18\x07 \x01(\x0b\x32\x17.EventContinuationToken\"s\n\x17GetConversationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12.\n\x12\x63onversation_state\x18\x02 \x01(\x0b\x32\x12.ConversationState\"l\n\x14GetEntityByIdRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12,\n\x11\x62\x61tch_lookup_spec\x18\x03 \x03(\x0b\x32\x11.EntityLookupSpec\"\x80\x01\n\x15GetEntityByIdResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x17\n\x06\x65ntity\x18\x02 \x03(\x0b\x32\x07.Entity\x12$\n\rentity_result\x18\x03 \x03(\x0b\x32\r.EntityResult\"r\n\x1eGetGroupConversationUrlRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\"k\n\x1fGetGroupConversationUrlResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1e\n\x16group_conversation_url\x18\x02 \x01(\t\"\xa8\x03\n\x1bGetSuggestedEntitiesRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x11\n\tmax_count\x18\x04 \x01(\x04\x12-\n\tfavorites\x18\x08 \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12=\n\x19\x63ontacts_you_hangout_with\x18\t \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12>\n\x1aother_contacts_on_hangouts\x18\n \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12\x32\n\x0eother_contacts\x18\x0b \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12\x36\n\x12\x64ismissed_contacts\x18\x0c \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12\x34\n\x10pinned_favorites\x18\r \x01(\x0b\x32\x1a.SuggestedContactGroupHash\"\x99\x03\n\x1cGetSuggestedEntitiesResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x17\n\x06\x65ntity\x18\x02 \x03(\x0b\x32\x07.Entity\x12)\n\tfavorites\x18\x04 \x01(\x0b\x32\x16.SuggestedContactGroup\x12\x39\n\x19\x63ontacts_you_hangout_with\x18\x05 \x01(\x0b\x32\x16.SuggestedContactGroup\x12:\n\x1aother_contacts_on_hangouts\x18\x06 \x01(\x0b\x32\x16.SuggestedContactGroup\x12.\n\x0eother_contacts\x18\x07 \x01(\x0b\x32\x16.SuggestedContactGroup\x12\x32\n\x12\x64ismissed_contacts\x18\x08 \x01(\x0b\x32\x16.SuggestedContactGroup\x12\x30\n\x10pinned_favorites\x18\t \x01(\x0b\x32\x16.SuggestedContactGroup\"<\n\x12GetSelfInfoRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\xed\x03\n\x13GetSelfInfoResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1c\n\x0bself_entity\x18\x02 \x01(\x0b\x32\x07.Entity\x12\x16\n\x0eis_known_minor\x18\x03 \x01(\x08\x12\'\n\tdnd_state\x18\x05 \x01(\x0b\x32\x14.DoNotDisturbSetting\x12/\n\x13\x64\x65sktop_off_setting\x18\x06 \x01(\x0b\x32\x12.DesktopOffSetting\x12\x1e\n\nphone_data\x18\x07 \x01(\x0b\x32\n.PhoneData\x12,\n\x11\x63onfiguration_bit\x18\x08 \x03(\x0b\x32\x11.ConfigurationBit\x12+\n\x11\x64\x65sktop_off_state\x18\t \x01(\x0b\x32\x10.DesktopOffState\x12\x18\n\x10google_plus_user\x18\n \x01(\x08\x12\x33\n\x15\x64\x65sktop_sound_setting\x18\x0b \x01(\x0b\x32\x14.DesktopSoundSetting\x12/\n\x13rich_presence_state\x18\x0c \x01(\x0b\x32\x12.RichPresenceState\x12!\n\x0f\x64\x65\x66\x61ult_country\x18\x13 \x01(\x0b\x32\x08.Country\"\x86\x01\n\x14QueryPresenceRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12&\n\x0eparticipant_id\x18\x02 \x03(\x0b\x32\x0e.ParticipantId\x12\x1e\n\nfield_mask\x18\x03 \x03(\x0e\x32\n.FieldMask\"k\n\x15QueryPresenceResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12(\n\x0fpresence_result\x18\x02 \x03(\x0b\x32\x0f.PresenceResult\"\x96\x01\n\x11RemoveUserRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12&\n\x0eparticipant_id\x18\x03 \x01(\x0b\x32\x0e.ParticipantId\x12\x31\n\x14\x65vent_request_header\x18\x05 \x01(\x0b\x32\x13.EventRequestHeader\"]\n\x12RemoveUserResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x04 \x01(\x0b\x32\x06.Event\"\x88\x01\n\x19RenameConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x10\n\x08new_name\x18\x03 \x01(\t\x12\x31\n\x14\x65vent_request_header\x18\x05 \x01(\x0b\x32\x13.EventRequestHeader\"e\n\x1aRenameConversationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x04 \x01(\x0b\x32\x06.Event\"a\n\x15SearchEntitiesRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\r\n\x05query\x18\x03 \x01(\t\x12\x11\n\tmax_count\x18\x04 \x01(\x04\"[\n\x16SearchEntitiesResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x17\n\x06\x65ntity\x18\x02 \x03(\x0b\x32\x07.Entity\"\xeb\x01\n\x16SendChatMessageRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12$\n\nannotation\x18\x05 \x03(\x0b\x32\x10.EventAnnotation\x12(\n\x0fmessage_content\x18\x06 \x01(\x0b\x32\x0f.MessageContent\x12&\n\x0e\x65xisting_media\x18\x07 \x01(\x0b\x32\x0e.ExistingMedia\x12\x31\n\x14\x65vent_request_header\x18\x08 \x01(\x0b\x32\x13.EventRequestHeader\"b\n\x17SendChatMessageResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x06 \x01(\x0b\x32\x06.Event\"\x9c\x01\n\x16ModifyOTRStatusRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\'\n\notr_status\x18\x03 \x01(\x0e\x32\x13.OffTheRecordStatus\x12\x31\n\x14\x65vent_request_header\x18\x05 \x01(\x0b\x32\x13.EventRequestHeader\"b\n\x17ModifyOTRStatusResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x04 \x01(\x0b\x32\x06.Event\"v\n\x1fSendOffnetworkInvitationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12+\n\x0finvitee_address\x18\x02 \x01(\x0b\x32\x12.OffnetworkAddress\"L\n SendOffnetworkInvitationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\"{\n\x16SetActiveClientRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x11\n\tis_active\x18\x02 \x01(\x08\x12\x10\n\x08\x66ull_jid\x18\x03 \x01(\t\x12\x14\n\x0ctimeout_secs\x18\x04 \x01(\x04\"C\n\x17SetActiveClientResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\"E\n\x1bSetConversationLevelRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"H\n\x1cSetConversationLevelResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\"\x9e\x01\n\'SetConversationNotificationLevelRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12!\n\x05level\x18\x03 \x01(\x0e\x32\x12.NotificationLevel\"g\n(SetConversationNotificationLevelResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x11\n\ttimestamp\x18\x02 \x01(\x04\"\x93\x01\n\x0fSetFocusRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x18\n\x04type\x18\x03 \x01(\x0e\x32\n.FocusType\x12\x14\n\x0ctimeout_secs\x18\x04 \x01(\r\"O\n\x10SetFocusResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x11\n\ttimestamp\x18\x02 \x01(\x04\"\xba\x01\n!SetGroupLinkSharingEnabledRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x31\n\x14\x65vent_request_header\x18\x02 \x01(\x0b\x32\x13.EventRequestHeader\x12:\n\x19group_link_sharing_status\x18\x04 \x01(\x0e\x32\x17.GroupLinkSharingStatus\"\x9a\x01\n\"SetGroupLinkSharingEnabledResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x02 \x01(\x0b\x32\x06.Event\x12+\n\x14updated_conversation\x18\x03 \x01(\x0b\x32\r.Conversation\"\xea\x01\n\x12SetPresenceRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x35\n\x16presence_state_setting\x18\x02 \x01(\x0b\x32\x15.PresenceStateSetting\x12 \n\x0b\x64nd_setting\x18\x03 \x01(\x0b\x32\x0b.DndSetting\x12/\n\x13\x64\x65sktop_off_setting\x18\x05 \x01(\x0b\x32\x12.DesktopOffSetting\x12\"\n\x0cmood_setting\x18\x08 \x01(\x0b\x32\x0c.MoodSetting\"?\n\x13SetPresenceResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\"\x7f\n\x10SetTypingRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x19\n\x04type\x18\x03 \x01(\x0e\x32\x0b.TypingType\"P\n\x11SetTypingResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x11\n\ttimestamp\x18\x02 \x01(\x04\"\x7f\n\x17SyncAllNewEventsRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1b\n\x13last_sync_timestamp\x18\x02 \x01(\x04\x12\x1f\n\x17max_response_size_bytes\x18\x08 \x01(\x04\"\x8c\x01\n\x18SyncAllNewEventsResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x16\n\x0esync_timestamp\x18\x02 \x01(\x04\x12.\n\x12\x63onversation_state\x18\x03 \x03(\x0b\x32\x12.ConversationState\"\xc8\x01\n\x1eSyncRecentConversationsRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1c\n\x14last_event_timestamp\x18\x02 \x01(\x04\x12\x19\n\x11max_conversations\x18\x03 \x01(\x04\x12#\n\x1bmax_events_per_conversation\x18\x04 \x01(\x04\x12 \n\x0bsync_filter\x18\x05 \x03(\x0e\x32\x0b.SyncFilter\"\xb7\x01\n\x1fSyncRecentConversationsResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x16\n\x0esync_timestamp\x18\x02 \x01(\x04\x12.\n\x12\x63onversation_state\x18\x03 \x03(\x0b\x32\x12.ConversationState\x12\"\n\x1a\x63ontinuation_end_timestamp\x18\x04 \x01(\x04\"\x87\x01\n\x16UpdateWatermarkRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x1b\n\x13last_read_timestamp\x18\x03 \x01(\x04\"C\n\x17UpdateWatermarkResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader*\x7f\n\x11\x41\x63tiveClientState\x12!\n\x1d\x41\x43TIVE_CLIENT_STATE_NO_ACTIVE\x10\x00\x12!\n\x1d\x41\x43TIVE_CLIENT_STATE_IS_ACTIVE\x10\x01\x12$\n ACTIVE_CLIENT_STATE_OTHER_ACTIVE\x10\x02*U\n\tFocusType\x12\x16\n\x12\x46OCUS_TYPE_UNKNOWN\x10\x00\x12\x16\n\x12\x46OCUS_TYPE_FOCUSED\x10\x01\x12\x18\n\x14\x46OCUS_TYPE_UNFOCUSED\x10\x02*_\n\x0b\x46ocusDevice\x12\x1c\n\x18\x46OCUS_DEVICE_UNSPECIFIED\x10\x00\x12\x18\n\x14\x46OCUS_DEVICE_DESKTOP\x10\x14\x12\x18\n\x13\x46OCUS_DEVICE_MOBILE\x10\xac\x02*o\n\nTypingType\x12\x17\n\x13TYPING_TYPE_UNKNOWN\x10\x00\x12\x17\n\x13TYPING_TYPE_STARTED\x10\x01\x12\x16\n\x12TYPING_TYPE_PAUSED\x10\x02\x12\x17\n\x13TYPING_TYPE_STOPPED\x10\x03*\xae\x01\n\x17\x43lientPresenceStateType\x12!\n\x1d\x43LIENT_PRESENCE_STATE_UNKNOWN\x10\x00\x12\x1e\n\x1a\x43LIENT_PRESENCE_STATE_NONE\x10\x01\x12&\n\"CLIENT_PRESENCE_STATE_DESKTOP_IDLE\x10\x1e\x12(\n$CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE\x10(*n\n\x11NotificationLevel\x12\x1e\n\x1aNOTIFICATION_LEVEL_UNKNOWN\x10\x00\x12\x1c\n\x18NOTIFICATION_LEVEL_QUIET\x10\n\x12\x1b\n\x17NOTIFICATION_LEVEL_RING\x10\x1e*X\n\x0bSegmentType\x12\x15\n\x11SEGMENT_TYPE_TEXT\x10\x00\x12\x1b\n\x17SEGMENT_TYPE_LINE_BREAK\x10\x01\x12\x15\n\x11SEGMENT_TYPE_LINK\x10\x02*i\n\x08ItemType\x12\x13\n\x0fITEM_TYPE_THING\x10\x00\x12\x19\n\x14ITEM_TYPE_PLUS_PHOTO\x10\xf9\x01\x12\x14\n\x0fITEM_TYPE_PLACE\x10\xcf\x02\x12\x17\n\x12ITEM_TYPE_PLACE_V2\x10\xd4\x02*Y\n\x14MembershipChangeType\x12\x1f\n\x1bMEMBERSHIP_CHANGE_TYPE_JOIN\x10\x01\x12 \n\x1cMEMBERSHIP_CHANGE_TYPE_LEAVE\x10\x02*\xeb\x01\n\x10HangoutEventType\x12\x1e\n\x1aHANGOUT_EVENT_TYPE_UNKNOWN\x10\x00\x12\x1c\n\x18HANGOUT_EVENT_TYPE_START\x10\x01\x12\x1a\n\x16HANGOUT_EVENT_TYPE_END\x10\x02\x12\x1b\n\x17HANGOUT_EVENT_TYPE_JOIN\x10\x03\x12\x1c\n\x18HANGOUT_EVENT_TYPE_LEAVE\x10\x04\x12\"\n\x1eHANGOUT_EVENT_TYPE_COMING_SOON\x10\x05\x12\x1e\n\x1aHANGOUT_EVENT_TYPE_ONGOING\x10\x06*~\n\x12OffTheRecordToggle\x12!\n\x1dOFF_THE_RECORD_TOGGLE_UNKNOWN\x10\x00\x12!\n\x1dOFF_THE_RECORD_TOGGLE_ENABLED\x10\x01\x12\"\n\x1eOFF_THE_RECORD_TOGGLE_DISABLED\x10\x02*\x8a\x01\n\x12OffTheRecordStatus\x12!\n\x1dOFF_THE_RECORD_STATUS_UNKNOWN\x10\x00\x12(\n$OFF_THE_RECORD_STATUS_OFF_THE_RECORD\x10\x01\x12\'\n#OFF_THE_RECORD_STATUS_ON_THE_RECORD\x10\x02*%\n\nSourceType\x12\x17\n\x13SOURCE_TYPE_UNKNOWN\x10\x00*\xc2\x03\n\tEventType\x12\x16\n\x12\x45VENT_TYPE_UNKNOWN\x10\x00\x12#\n\x1f\x45VENT_TYPE_REGULAR_CHAT_MESSAGE\x10\x01\x12\x12\n\x0e\x45VENT_TYPE_SMS\x10\x02\x12\x18\n\x14\x45VENT_TYPE_VOICEMAIL\x10\x03\x12\x17\n\x13\x45VENT_TYPE_ADD_USER\x10\x04\x12\x1a\n\x16\x45VENT_TYPE_REMOVE_USER\x10\x05\x12\"\n\x1e\x45VENT_TYPE_CONVERSATION_RENAME\x10\x06\x12\x16\n\x12\x45VENT_TYPE_HANGOUT\x10\x07\x12\x19\n\x15\x45VENT_TYPE_PHONE_CALL\x10\x08\x12\x1f\n\x1b\x45VENT_TYPE_OTR_MODIFICATION\x10\t\x12\x1c\n\x18\x45VENT_TYPE_PLAN_MUTATION\x10\n\x12\x12\n\x0e\x45VENT_TYPE_MMS\x10\x0b\x12\x1c\n\x18\x45VENT_TYPE_DEPRECATED_12\x10\x0c\x12\x1d\n\x19\x45VENT_TYPE_OBSERVED_EVENT\x10\r\x12.\n*EVENT_TYPE_GROUP_LINK_SHARING_MODIFICATION\x10\x0e*p\n\x10\x43onversationType\x12\x1d\n\x19\x43ONVERSATION_TYPE_UNKNOWN\x10\x00\x12 \n\x1c\x43ONVERSATION_TYPE_ONE_TO_ONE\x10\x01\x12\x1b\n\x17\x43ONVERSATION_TYPE_GROUP\x10\x02*\x94\x01\n\x12\x43onversationStatus\x12\x1f\n\x1b\x43ONVERSATION_STATUS_UNKNOWN\x10\x00\x12\x1f\n\x1b\x43ONVERSATION_STATUS_INVITED\x10\x01\x12\x1e\n\x1a\x43ONVERSATION_STATUS_ACTIVE\x10\x02\x12\x1c\n\x18\x43ONVERSATION_STATUS_LEFT\x10\x03*n\n\x10\x43onversationView\x12\x1d\n\x19\x43ONVERSATION_VIEW_UNKNOWN\x10\x00\x12\x1b\n\x17\x43ONVERSATION_VIEW_INBOX\x10\x01\x12\x1e\n\x1a\x43ONVERSATION_VIEW_ARCHIVED\x10\x02*\x8d\x01\n\x12\x44\x65liveryMediumType\x12\x1b\n\x17\x44\x45LIVERY_MEDIUM_UNKNOWN\x10\x00\x12\x19\n\x15\x44\x45LIVERY_MEDIUM_BABEL\x10\x01\x12 \n\x1c\x44\x45LIVERY_MEDIUM_GOOGLE_VOICE\x10\x02\x12\x1d\n\x19\x44\x45LIVERY_MEDIUM_LOCAL_SMS\x10\x03*d\n\x12InvitationAffinity\x12\x1b\n\x17INVITE_AFFINITY_UNKNOWN\x10\x00\x12\x18\n\x14INVITE_AFFINITY_HIGH\x10\x01\x12\x17\n\x13INVITE_AFFINITY_LOW\x10\x02*m\n\x0fParticipantType\x12\x1c\n\x18PARTICIPANT_TYPE_UNKNOWN\x10\x00\x12\x19\n\x15PARTICIPANT_TYPE_GAIA\x10\x02\x12!\n\x1dPARTICIPANT_TYPE_GOOGLE_VOICE\x10\x03*p\n\x10InvitationStatus\x12\x1d\n\x19INVITATION_STATUS_UNKNOWN\x10\x00\x12\x1d\n\x19INVITATION_STATUS_PENDING\x10\x01\x12\x1e\n\x1aINVITATION_STATUS_ACCEPTED\x10\x02*?\n\x0c\x46orceHistory\x12\x19\n\x15\x46ORCE_HISTORY_UNKNOWN\x10\x00\x12\x14\n\x10\x46ORCE_HISTORY_NO\x10\x01*^\n\x0bNetworkType\x12\x18\n\x14NETWORK_TYPE_UNKNOWN\x10\x00\x12\x16\n\x12NETWORK_TYPE_BABEL\x10\x01\x12\x1d\n\x19NETWORK_TYPE_GOOGLE_VOICE\x10\x02*U\n\nBlockState\x12\x17\n\x13\x42LOCK_STATE_UNKNOWN\x10\x00\x12\x15\n\x11\x42LOCK_STATE_BLOCK\x10\x01\x12\x17\n\x13\x42LOCK_STATE_UNBLOCK\x10\x02*x\n\x11ReplyToInviteType\x12 \n\x1cREPLY_TO_INVITE_TYPE_UNKNOWN\x10\x00\x12\x1f\n\x1bREPLY_TO_INVITE_TYPE_ACCEPT\x10\x01\x12 \n\x1cREPLY_TO_INVITE_TYPE_DECLINE\x10\x02*\xca\x01\n\x08\x43lientId\x12\x15\n\x11\x43LIENT_ID_UNKNOWN\x10\x00\x12\x15\n\x11\x43LIENT_ID_ANDROID\x10\x01\x12\x11\n\rCLIENT_ID_IOS\x10\x02\x12\x14\n\x10\x43LIENT_ID_CHROME\x10\x03\x12\x17\n\x13\x43LIENT_ID_WEB_GPLUS\x10\x05\x12\x17\n\x13\x43LIENT_ID_WEB_GMAIL\x10\x06\x12\x19\n\x15\x43LIENT_ID_ULTRAVIOLET\x10\r\x12\x1a\n\x16\x43LIENT_ID_WEB_HANGOUTS\x10,*g\n\x0f\x43lientBuildType\x12\x16\n\x12\x42UILD_TYPE_UNKNOWN\x10\x00\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_WEB\x10\x01\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_APP\x10\x03*\x90\x01\n\x0eResponseStatus\x12\x1b\n\x17RESPONSE_STATUS_UNKNOWN\x10\x00\x12\x16\n\x12RESPONSE_STATUS_OK\x10\x01\x12$\n RESPONSE_STATUS_UNEXPECTED_ERROR\x10\x03\x12#\n\x1fRESPONSE_STATUS_INVALID_REQUEST\x10\x04*q\n\x0ePhotoUrlStatus\x12\x1c\n\x18PHOTO_URL_STATUS_UNKNOWN\x10\x00\x12 \n\x1cPHOTO_URL_STATUS_PLACEHOLDER\x10\x01\x12\x1f\n\x1bPHOTO_URL_STATUS_USER_PHOTO\x10\x02*@\n\x06Gender\x12\x12\n\x0eGENDER_UNKNOWN\x10\x00\x12\x0f\n\x0bGENDER_MALE\x10\x01\x12\x11\n\rGENDER_FEMALE\x10\x02*>\n\x0bProfileType\x12\x15\n\x11PROFILE_TYPE_NONE\x10\x00\x12\x18\n\x14PROFILE_TYPE_ES_USER\x10\x01*\x81\x0c\n\x14\x43onfigurationBitType\x12\"\n\x1e\x43ONFIGURATION_BIT_TYPE_UNKNOWN\x10\x00\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_1\x10\x01\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_2\x10\x02\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_3\x10\x03\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_4\x10\x04\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_5\x10\x05\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_6\x10\x06\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_7\x10\x07\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_8\x10\x08\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_9\x10\t\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_10\x10\n\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_11\x10\x0b\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_12\x10\x0c\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_13\x10\r\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_14\x10\x0e\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_15\x10\x0f\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_16\x10\x10\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_17\x10\x11\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_18\x10\x12\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_19\x10\x13\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_20\x10\x14\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_21\x10\x15\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_22\x10\x16\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_23\x10\x17\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_24\x10\x18\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_25\x10\x19\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_26\x10\x1a\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_27\x10\x1b\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_28\x10\x1c\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_29\x10\x1d\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_30\x10\x1e\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_31\x10\x1f\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_32\x10 \x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_33\x10!\x12@\n<CONFIGURATION_BIT_TYPE_DESKTOP_AUTO_EMOJI_CONVERSION_ENABLED\x10\"\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_35\x10#\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_36\x10$\x12\x37\n3CONFIGURATION_BIT_TYPE_DESKTOP_COMPACT_MODE_ENABLED\x10&*\xff\x01\n\x10RichPresenceType\x12\x1e\n\x1aRICH_PRESENCE_TYPE_UNKNOWN\x10\x00\x12$\n RICH_PRESENCE_TYPE_IN_CALL_STATE\x10\x01\x12 \n\x1cRICH_PRESENCE_TYPE_UNKNOWN_3\x10\x03\x12 \n\x1cRICH_PRESENCE_TYPE_UNKNOWN_4\x10\x04\x12 \n\x1cRICH_PRESENCE_TYPE_UNKNOWN_5\x10\x05\x12\x1d\n\x19RICH_PRESENCE_TYPE_DEVICE\x10\x02\x12 \n\x1cRICH_PRESENCE_TYPE_LAST_SEEN\x10\x06*\x9d\x01\n\tFieldMask\x12\x18\n\x14\x46IELD_MASK_REACHABLE\x10\x01\x12\x18\n\x14\x46IELD_MASK_AVAILABLE\x10\x02\x12\x13\n\x0f\x46IELD_MASK_MOOD\x10\x03\x12\x16\n\x12\x46IELD_MASK_IN_CALL\x10\x06\x12\x15\n\x11\x46IELD_MASK_DEVICE\x10\x07\x12\x18\n\x14\x46IELD_MASK_LAST_SEEN\x10\n*B\n\nDeleteType\x12\x17\n\x13\x44\x45LETE_TYPE_UNKNOWN\x10\x00\x12\x1b\n\x17\x44\x45LETE_TYPE_UPPER_BOUND\x10\x01*V\n\nSyncFilter\x12\x17\n\x13SYNC_FILTER_UNKNOWN\x10\x00\x12\x15\n\x11SYNC_FILTER_INBOX\x10\x01\x12\x18\n\x14SYNC_FILTER_ARCHIVED\x10\x02*N\n\nSoundState\x12\x17\n\x13SOUND_STATE_UNKNOWN\x10\x00\x12\x12\n\x0eSOUND_STATE_ON\x10\x01\x12\x13\n\x0fSOUND_STATE_OFF\x10\x02*a\n\x14\x43\x61llerIdSettingsMask\x12#\n\x1f\x43\x41LLER_ID_SETTINGS_MASK_UNKNOWN\x10\x00\x12$\n CALLER_ID_SETTINGS_MASK_PROVIDED\x10\x01*h\n\x17PhoneVerificationStatus\x12%\n!PHONE_VERIFICATION_STATUS_UNKNOWN\x10\x00\x12&\n\"PHONE_VERIFICATION_STATUS_VERIFIED\x10\x01*\x86\x01\n\x1aPhoneDiscoverabilityStatus\x12(\n$PHONE_DISCOVERABILITY_STATUS_UNKNOWN\x10\x00\x12>\n:PHONE_DISCOVERABILITY_STATUS_OPTED_IN_BUT_NOT_DISCOVERABLE\x10\x02*@\n\x15PhoneValidationResult\x12\'\n#PHONE_VALIDATION_RESULT_IS_POSSIBLE\x10\x00*_\n\x15OffnetworkAddressType\x12#\n\x1fOFFNETWORK_ADDRESS_TYPE_UNKNOWN\x10\x00\x12!\n\x1dOFFNETWORK_ADDRESS_TYPE_EMAIL\x10\x01*\x84\x01\n\x16GroupLinkSharingStatus\x12%\n!GROUP_LINK_SHARING_STATUS_UNKNOWN\x10\x00\x12 \n\x1cGROUP_LINK_SHARING_STATUS_ON\x10\x01\x12!\n\x1dGROUP_LINK_SHARING_STATUS_OFF\x10\x02')
+  serialized_pb=_b('\n\x16hangups/hangouts.proto\"\\\n\x13\x44oNotDisturbSetting\x12\x16\n\x0e\x64o_not_disturb\x18\x01 \x01(\x08\x12\x1c\n\x14\x65xpiration_timestamp\x18\x02 \x01(\x04\x12\x0f\n\x07version\x18\x03 \x01(\x04\"B\n\x14NotificationSettings\x12*\n\x0c\x64nd_settings\x18\x01 \x01(\x0b\x32\x14.DoNotDisturbSetting\"\x1c\n\x0e\x43onversationId\x12\n\n\x02id\x18\x01 \x01(\t\"1\n\rParticipantId\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63hat_id\x18\x02 \x01(\t\"?\n\x0c\x44\x65viceStatus\x12\x0e\n\x06mobile\x18\x01 \x01(\x08\x12\x0f\n\x07\x64\x65sktop\x18\x02 \x01(\x08\x12\x0e\n\x06tablet\x18\x03 \x01(\x08\"J\n\x08LastSeen\x12 \n\x18last_seen_timestamp_usec\x18\x01 \x01(\x04\x12\x1c\n\x14usec_since_last_seen\x18\x02 \x01(\x04\"\x98\x01\n\x08Presence\x12\x11\n\treachable\x18\x01 \x01(\x08\x12\x11\n\tavailable\x18\x02 \x01(\x08\x12$\n\rdevice_status\x18\x06 \x01(\x0b\x32\r.DeviceStatus\x12\"\n\x0cmood_message\x18\t \x01(\x0b\x32\x0c.MoodMessage\x12\x1c\n\tlast_seen\x18\n \x01(\x0b\x32\t.LastSeen\"N\n\x0ePresenceResult\x12\x1f\n\x07user_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12\x1b\n\x08presence\x18\x02 \x01(\x0b\x32\t.Presence\"7\n\x10\x43lientIdentifier\x12\x10\n\x08resource\x18\x01 \x01(\t\x12\x11\n\theader_id\x18\x02 \x01(\t\"e\n\x13\x43lientPresenceState\x12%\n\nidentifier\x18\x01 \x01(\x0b\x32\x11.ClientIdentifier\x12\'\n\x05state\x18\x02 \x01(\x0e\x32\x18.ClientPresenceStateType\"~\n\x0eUserEventState\x12\x1f\n\x07user_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\t\x12.\n\x12notification_level\x18\x03 \x01(\x0e\x32\x12.NotificationLevel\"T\n\nFormatting\x12\x0c\n\x04\x62old\x18\x01 \x01(\x08\x12\x0e\n\x06italic\x18\x02 \x01(\x08\x12\x15\n\rstrikethrough\x18\x03 \x01(\x08\x12\x11\n\tunderline\x18\x04 \x01(\x08\"\x1f\n\x08LinkData\x12\x13\n\x0blink_target\x18\x01 \x01(\t\"r\n\x07Segment\x12\x1a\n\x04type\x18\x01 \x02(\x0e\x32\x0c.SegmentType\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\x1f\n\nformatting\x18\x03 \x01(\x0b\x32\x0b.Formatting\x12\x1c\n\tlink_data\x18\x04 \x01(\x0b\x32\t.LinkData\"\x89\x03\n\tPlusPhoto\x12\'\n\tthumbnail\x18\x01 \x01(\x0b\x32\x14.PlusPhoto.Thumbnail\x12\x1b\n\x13owner_obfuscated_id\x18\x02 \x01(\t\x12\x10\n\x08\x61lbum_id\x18\x03 \x01(\t\x12\x10\n\x08photo_id\x18\x04 \x01(\t\x12\x0b\n\x03url\x18\x06 \x01(\t\x12\x1c\n\x14original_content_url\x18\n \x01(\t\x12(\n\nmedia_type\x18\r \x01(\x0e\x32\x14.PlusPhoto.MediaType\x12\x11\n\tstream_id\x18\x0e \x03(\t\x1aP\n\tThumbnail\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x11\n\timage_url\x18\x04 \x01(\t\x12\x10\n\x08width_px\x18\n \x01(\x04\x12\x11\n\theight_px\x18\x0b \x01(\x04\"X\n\tMediaType\x12\x16\n\x12MEDIA_TYPE_UNKNOWN\x10\x00\x12\x14\n\x10MEDIA_TYPE_PHOTO\x10\x01\x12\x1d\n\x19MEDIA_TYPE_ANIMATED_PHOTO\x10\x04\"\xe8\x03\n\x05Place\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12(\n\x0c\x64isplay_info\x18\x18 \x01(\x0b\x32\x12.Place.DisplayInfo\x12*\n\rlocation_info\x18\x19 \x01(\x0b\x32\x13.Place.LocationInfo\x12\x39\n\x14representative_image\x18\xb9\x01 \x01(\x0b\x32\x1a.Place.RepresentativeImage\x1a\x62\n\x0b\x44isplayInfo\x12\x36\n\x0b\x64\x65scription\x18\xe2\xbb\x95\x11 \x01(\x0b\x32\x1e.Place.DisplayInfo.Description\x1a\x1b\n\x0b\x44\x65scription\x12\x0c\n\x04text\x18# \x01(\t\x1a\x61\n\x0cLocationInfo\x12-\n\x06latlng\x18\xed\x9d\xc2\x11 \x01(\x0b\x32\x1a.Place.LocationInfo.LatLng\x1a\"\n\x06LatLng\x12\x0b\n\x03lat\x18$ \x01(\x01\x12\x0b\n\x03lng\x18% \x01(\x01\x1al\n\x13RepresentativeImage\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x32\n\x05image\x18\xc9\xca\x99\x13 \x01(\x0b\x32 .Place.RepresentativeImage.Image\x1a\x14\n\x05Image\x12\x0b\n\x03url\x18\x01 \x01(\t\"m\n\tEmbedItem\x12\x17\n\x04type\x18\x01 \x03(\x0e\x32\t.ItemType\x12\n\n\x02id\x18\x02 \x01(\t\x12!\n\nplus_photo\x18\x95\x81\x97\r \x01(\x0b\x32\n.PlusPhoto\x12\x18\n\x05place\x18\xe8\xcf\x8a\x11 \x01(\x0b\x32\x06.Place\",\n\nAttachment\x12\x1e\n\nembed_item\x18\x01 \x01(\x0b\x32\n.EmbedItem\"L\n\x0eMessageContent\x12\x19\n\x07segment\x18\x01 \x03(\x0b\x32\x08.Segment\x12\x1f\n\nattachment\x18\x02 \x03(\x0b\x32\x0b.Attachment\".\n\x0f\x45ventAnnotation\x12\x0c\n\x04type\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t\"]\n\x0b\x43hatMessage\x12$\n\nannotation\x18\x02 \x03(\x0b\x32\x10.EventAnnotation\x12(\n\x0fmessage_content\x18\x03 \x01(\x0b\x32\x0f.MessageContent\"`\n\x10MembershipChange\x12#\n\x04type\x18\x01 \x01(\x0e\x32\x15.MembershipChangeType\x12\'\n\x0fparticipant_ids\x18\x03 \x03(\x0b\x32\x0e.ParticipantId\"8\n\x12\x43onversationRename\x12\x10\n\x08new_name\x18\x01 \x01(\t\x12\x10\n\x08old_name\x18\x02 \x01(\t\"]\n\x0cHangoutEvent\x12%\n\nevent_type\x18\x01 \x01(\x0e\x32\x11.HangoutEventType\x12&\n\x0eparticipant_id\x18\x02 \x03(\x0b\x32\x0e.ParticipantId\"\xc5\x01\n\x0fOTRModification\x12+\n\x0eold_otr_status\x18\x01 \x01(\x0e\x32\x13.OffTheRecordStatus\x12+\n\x0enew_otr_status\x18\x02 \x01(\x0e\x32\x13.OffTheRecordStatus\x12+\n\x0eold_otr_toggle\x18\x03 \x01(\x0e\x32\x13.OffTheRecordToggle\x12+\n\x0enew_otr_toggle\x18\x04 \x01(\x0e\x32\x13.OffTheRecordToggle\"E\n\x0cHashModifier\x12\x11\n\tupdate_id\x18\x01 \x01(\t\x12\x11\n\thash_diff\x18\x02 \x01(\x04\x12\x0f\n\x07version\x18\x04 \x01(\x04\"\xe2\x05\n\x05\x45vent\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12!\n\tsender_id\x18\x02 \x01(\x0b\x32\x0e.ParticipantId\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12)\n\x10self_event_state\x18\x04 \x01(\x0b\x32\x0f.UserEventState\x12 \n\x0bsource_type\x18\x06 \x01(\x0e\x32\x0b.SourceType\x12\"\n\x0c\x63hat_message\x18\x07 \x01(\x0b\x32\x0c.ChatMessage\x12,\n\x11membership_change\x18\t \x01(\x0b\x32\x11.MembershipChange\x12\x30\n\x13\x63onversation_rename\x18\n \x01(\x0b\x32\x13.ConversationRename\x12$\n\rhangout_event\x18\x0b \x01(\x0b\x32\r.HangoutEvent\x12\x10\n\x08\x65vent_id\x18\x0c \x01(\t\x12\x1c\n\x14\x65xpiration_timestamp\x18\r \x01(\x04\x12*\n\x10otr_modification\x18\x0e \x01(\x0b\x32\x10.OTRModification\x12\x1f\n\x17\x61\x64vances_sort_timestamp\x18\x0f \x01(\x08\x12\'\n\notr_status\x18\x10 \x01(\x0e\x32\x13.OffTheRecordStatus\x12\x11\n\tpersisted\x18\x11 \x01(\x08\x12$\n\x0bmedium_type\x18\x14 \x01(\x0b\x32\x0f.DeliveryMedium\x12\x1e\n\nevent_type\x18\x17 \x01(\x0e\x32\n.EventType\x12\x15\n\revent_version\x18\x18 \x01(\x04\x12$\n\rhash_modifier\x18\x1a \x01(\x0b\x32\r.HashModifier\x12\x46\n\x1fgroup_link_sharing_modification\x18\x1f \x01(\x0b\x32\x1d.GroupLinkSharingModification\"V\n\rUserReadState\x12&\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12\x1d\n\x15latest_read_timestamp\x18\x02 \x01(\x04\"^\n\x0e\x44\x65liveryMedium\x12(\n\x0bmedium_type\x18\x01 \x01(\x0e\x32\x13.DeliveryMediumType\x12\"\n\x0cphone_number\x18\x02 \x01(\x0b\x32\x0c.PhoneNumber\"Y\n\x14\x44\x65liveryMediumOption\x12(\n\x0f\x64\x65livery_medium\x18\x01 \x01(\x0b\x32\x0f.DeliveryMedium\x12\x17\n\x0f\x63urrent_default\x18\x02 \x01(\x08\"\xa8\x03\n\x15UserConversationState\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\t\x12\'\n\x0fself_read_state\x18\x07 \x01(\x0b\x32\x0e.UserReadState\x12#\n\x06status\x18\x08 \x01(\x0e\x32\x13.ConversationStatus\x12.\n\x12notification_level\x18\t \x01(\x0e\x32\x12.NotificationLevel\x12\x1f\n\x04view\x18\n \x03(\x0e\x32\x11.ConversationView\x12\"\n\ninviter_id\x18\x0b \x01(\x0b\x32\x0e.ParticipantId\x12\x18\n\x10invite_timestamp\x18\x0c \x01(\x04\x12\x16\n\x0esort_timestamp\x18\r \x01(\x04\x12\x18\n\x10\x61\x63tive_timestamp\x18\x0e \x01(\x04\x12,\n\x0finvite_affinity\x18\x0f \x01(\x0e\x32\x13.InvitationAffinity\x12\x35\n\x16\x64\x65livery_medium_option\x18\x11 \x03(\x0b\x32\x15.DeliveryMediumOption\"\xdc\x01\n\x1b\x43onversationParticipantData\x12\x1a\n\x02id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12\x15\n\rfallback_name\x18\x02 \x01(\t\x12,\n\x11invitation_status\x18\x03 \x01(\x0e\x32\x11.InvitationStatus\x12*\n\x10participant_type\x18\x05 \x01(\x0e\x32\x10.ParticipantType\x12\x30\n\x15new_invitation_status\x18\x06 \x01(\x0e\x32\x11.InvitationStatus\"\xcb\x04\n\x0c\x43onversation\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.ConversationType\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x37\n\x17self_conversation_state\x18\x04 \x01(\x0b\x32\x16.UserConversationState\x12\"\n\nread_state\x18\x08 \x03(\x0b\x32\x0e.UserReadState\x12\x1a\n\x12has_active_hangout\x18\t \x01(\x08\x12\'\n\notr_status\x18\n \x01(\x0e\x32\x13.OffTheRecordStatus\x12\'\n\notr_toggle\x18\x0b \x01(\x0e\x32\x13.OffTheRecordToggle\x12&\n\x1e\x63onversation_history_supported\x18\x0c \x01(\x08\x12+\n\x13\x63urrent_participant\x18\r \x03(\x0b\x32\x0e.ParticipantId\x12\x36\n\x10participant_data\x18\x0e \x03(\x0b\x32\x1c.ConversationParticipantData\x12\"\n\x0cnetwork_type\x18\x12 \x03(\x0e\x32\x0c.NetworkType\x12*\n\x13\x66orce_history_state\x18\x13 \x01(\x0e\x32\r.ForceHistory\x12:\n\x19group_link_sharing_status\x18\x16 \x01(\x0e\x32\x17.GroupLinkSharingStatus\"\x1c\n\tEasterEgg\x12\x0f\n\x07message\x18\x01 \x01(\t\"`\n\x10\x42lockStateChange\x12&\n\x0eparticipant_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12$\n\x0fnew_block_state\x18\x02 \x01(\x0e\x32\x0b.BlockState\"l\n\x05Photo\x12\x10\n\x08photo_id\x18\x01 \x01(\t\x12%\n\x1d\x64\x65lete_albumless_source_photo\x18\x02 \x01(\x08\x12\x0f\n\x07user_id\x18\x03 \x01(\t\x12\x19\n\x11is_custom_user_id\x18\x04 \x01(\x08\"&\n\rExistingMedia\x12\x15\n\x05photo\x18\x01 \x01(\x0b\x32\x06.Photo\"\xd0\x01\n\x12\x45ventRequestHeader\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12\x1b\n\x13\x63lient_generated_id\x18\x02 \x01(\x04\x12)\n\x0c\x65xpected_otr\x18\x03 \x01(\x0e\x32\x13.OffTheRecordStatus\x12(\n\x0f\x64\x65livery_medium\x18\x04 \x01(\x0b\x32\x0f.DeliveryMedium\x12\x1e\n\nevent_type\x18\x05 \x01(\x0e\x32\n.EventType\"\xb9\x01\n\rClientVersion\x12\x1c\n\tclient_id\x18\x01 \x01(\x0e\x32\t.ClientId\x12$\n\nbuild_type\x18\x02 \x01(\x0e\x32\x10.ClientBuildType\x12\x15\n\rmajor_version\x18\x03 \x01(\t\x12\x19\n\x11version_timestamp\x18\x04 \x01(\x04\x12\x19\n\x11\x64\x65vice_os_version\x18\x05 \x01(\t\x12\x17\n\x0f\x64\x65vice_hardware\x18\x06 \x01(\t\"|\n\rRequestHeader\x12&\n\x0e\x63lient_version\x18\x01 \x01(\x0b\x32\x0e.ClientVersion\x12,\n\x11\x63lient_identifier\x18\x02 \x01(\x0b\x32\x11.ClientIdentifier\x12\x15\n\rlanguage_code\x18\x04 \x01(\t\"\x96\x01\n\x0eResponseHeader\x12\x1f\n\x06status\x18\x01 \x01(\x0e\x32\x0f.ResponseStatus\x12\x19\n\x11\x65rror_description\x18\x02 \x01(\t\x12\x11\n\tdebug_url\x18\x03 \x01(\t\x12\x18\n\x10request_trace_id\x18\x04 \x01(\t\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"\xcf\x02\n\x06\x45ntity\x12\x1a\n\x02id\x18\t \x01(\x0b\x32\x0e.ParticipantId\x12\x1b\n\x08presence\x18\x08 \x01(\x0b\x32\t.Presence\x12%\n\nproperties\x18\n \x01(\x0b\x32\x11.EntityProperties\x12%\n\x0b\x65ntity_type\x18\r \x01(\x0e\x32\x10.ParticipantType\x12\x38\n\x16had_past_hangout_state\x18\x10 \x01(\x0e\x32\x18.Entity.PastHangoutState\"\x83\x01\n\x10PastHangoutState\x12\x1e\n\x1aPAST_HANGOUT_STATE_UNKNOWN\x10\x00\x12\'\n#PAST_HANGOUT_STATE_HAD_PAST_HANGOUT\x10\x01\x12&\n\"PAST_HANGOUT_STATE_NO_PAST_HANGOUT\x10\x02\"\xff\x01\n\x10\x45ntityProperties\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.ProfileType\x12\x14\n\x0c\x64isplay_name\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x11\n\tphoto_url\x18\x04 \x01(\t\x12\r\n\x05\x65mail\x18\x05 \x03(\t\x12\r\n\x05phone\x18\x06 \x03(\t\x12\x17\n\x0fin_users_domain\x18\n \x01(\x08\x12\x17\n\x06gender\x18\x0b \x01(\x0e\x32\x07.Gender\x12)\n\x10photo_url_status\x18\x0c \x01(\x0e\x32\x0f.PhotoUrlStatus\x12\x17\n\x0f\x63\x61nonical_email\x18\x0f \x01(\t\"\xb4\x01\n\x11\x43onversationState\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12#\n\x0c\x63onversation\x18\x02 \x01(\x0b\x32\r.Conversation\x12\x15\n\x05\x65vent\x18\x03 \x03(\x0b\x32\x06.Event\x12\x39\n\x18\x65vent_continuation_token\x18\x05 \x01(\x0b\x32\x17.EventContinuationToken\"g\n\x16\x45ventContinuationToken\x12\x10\n\x08\x65vent_id\x18\x01 \x01(\t\x12\"\n\x1astorage_continuation_token\x18\x02 \x01(\x0c\x12\x17\n\x0f\x65vent_timestamp\x18\x03 \x01(\x04\"a\n\x10\x45ntityLookupSpec\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\r\n\x05phone\x18\x04 \x01(\t\x12\x1e\n\x16\x63reate_offnetwork_gaia\x18\x06 \x01(\x08\"X\n\x10\x43onfigurationBit\x12\x35\n\x16\x63onfiguration_bit_type\x18\x01 \x01(\x0e\x32\x15.ConfigurationBitType\x12\r\n\x05value\x18\x02 \x01(\x08\"W\n\x11RichPresenceState\x12\x42\n\x1fget_rich_presence_enabled_state\x18\x03 \x03(\x0b\x32\x19.RichPresenceEnabledState\"L\n\x18RichPresenceEnabledState\x12\x1f\n\x04type\x18\x01 \x01(\x0e\x32\x11.RichPresenceType\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\"(\n\x11\x44\x65sktopOffSetting\x12\x13\n\x0b\x64\x65sktop_off\x18\x01 \x01(\x08\"7\n\x0f\x44\x65sktopOffState\x12\x13\n\x0b\x64\x65sktop_off\x18\x01 \x01(\x08\x12\x0f\n\x07version\x18\x02 \x01(\x04\":\n\nDndSetting\x12\x16\n\x0e\x64o_not_disturb\x18\x01 \x01(\x08\x12\x14\n\x0ctimeout_secs\x18\x02 \x01(\x04\"T\n\x14PresenceStateSetting\x12\x14\n\x0ctimeout_secs\x18\x01 \x01(\x04\x12&\n\x04type\x18\x02 \x01(\x0e\x32\x18.ClientPresenceStateType\"1\n\x0bMoodMessage\x12\"\n\x0cmood_content\x18\x01 \x01(\x0b\x32\x0c.MoodContent\"(\n\x0bMoodContent\x12\x19\n\x07segment\x18\x01 \x03(\x0b\x32\x08.Segment\"1\n\x0bMoodSetting\x12\"\n\x0cmood_message\x18\x01 \x01(\x0b\x32\x0c.MoodMessage\"/\n\tMoodState\x12\"\n\x0cmood_setting\x18\x04 \x01(\x0b\x32\x0c.MoodSetting\"w\n\x0c\x44\x65leteAction\x12\x1f\n\x17\x64\x65lete_action_timestamp\x18\x01 \x01(\x04\x12$\n\x1c\x64\x65lete_upper_bound_timestamp\x18\x02 \x01(\x04\x12 \n\x0b\x64\x65lete_type\x18\x03 \x01(\x0e\x32\x0b.DeleteType\"3\n\tInviteeID\x12\x0f\n\x07gaia_id\x18\x01 \x01(\t\x12\x15\n\rfallback_name\x18\x04 \x01(\t\"4\n\x07\x43ountry\x12\x13\n\x0bregion_code\x18\x01 \x01(\t\x12\x14\n\x0c\x63ountry_code\x18\x02 \x01(\x04\"n\n\x13\x44\x65sktopSoundSetting\x12(\n\x13\x64\x65sktop_sound_state\x18\x01 \x01(\x0e\x32\x0b.SoundState\x12-\n\x18\x64\x65sktop_ring_sound_state\x18\x02 \x01(\x0e\x32\x0b.SoundState\"Z\n\tPhoneData\x12\x15\n\x05phone\x18\x01 \x03(\x0b\x32\x06.Phone\x12\x36\n\x17\x63\x61ller_id_settings_mask\x18\x03 \x01(\x0e\x32\x15.CallerIdSettingsMask\"\xdc\x01\n\x05Phone\x12\"\n\x0cphone_number\x18\x01 \x01(\x0b\x32\x0c.PhoneNumber\x12\x14\n\x0cgoogle_voice\x18\x02 \x01(\x08\x12\x35\n\x13verification_status\x18\x03 \x01(\x0e\x32\x18.PhoneVerificationStatus\x12\x14\n\x0c\x64iscoverable\x18\x04 \x01(\x08\x12;\n\x16\x64iscoverability_status\x18\x05 \x01(\x0e\x32\x1b.PhoneDiscoverabilityStatus\x12\x0f\n\x07primary\x18\x06 \x01(\x08\"\xb1\x01\n\x08I18nData\x12\x17\n\x0fnational_number\x18\x01 \x01(\t\x12\x1c\n\x14international_number\x18\x02 \x01(\t\x12\x14\n\x0c\x63ountry_code\x18\x03 \x01(\x04\x12\x13\n\x0bregion_code\x18\x04 \x01(\t\x12\x10\n\x08is_valid\x18\x05 \x01(\x08\x12\x31\n\x11validation_result\x18\x06 \x01(\x0e\x32\x16.PhoneValidationResult\"9\n\x0bPhoneNumber\x12\x0c\n\x04\x65\x31\x36\x34\x18\x01 \x01(\t\x12\x1c\n\ti18n_data\x18\x02 \x01(\x0b\x32\t.I18nData\">\n\x19SuggestedContactGroupHash\x12\x13\n\x0bmax_results\x18\x01 \x01(\x04\x12\x0c\n\x04hash\x18\x02 \x01(\x0c\"Y\n\x10SuggestedContact\x12\x17\n\x06\x65ntity\x18\x01 \x01(\x0b\x32\x07.Entity\x12,\n\x11invitation_status\x18\x02 \x01(\x0e\x32\x11.InvitationStatus\"_\n\x15SuggestedContactGroup\x12\x14\n\x0chash_matched\x18\x01 \x01(\x08\x12\x0c\n\x04hash\x18\x02 \x01(\x0c\x12\"\n\x07\x63ontact\x18\x03 \x03(\x0b\x32\x11.SuggestedContact\"K\n\x1cGroupLinkSharingModification\x12+\n\nnew_status\x18\x01 \x01(\x0e\x32\x17.GroupLinkSharingStatus\"\xb2\x08\n\x0bStateUpdate\x12/\n\x13state_update_header\x18\x01 \x01(\x0b\x32\x12.StateUpdateHeader\x12#\n\x0c\x63onversation\x18\r \x01(\x0b\x32\r.Conversation\x12>\n\x19\x63onversation_notification\x18\x02 \x01(\x0b\x32\x19.ConversationNotificationH\x00\x12\x30\n\x12\x65vent_notification\x18\x03 \x01(\x0b\x32\x12.EventNotificationH\x00\x12\x33\n\x12\x66ocus_notification\x18\x04 \x01(\x0b\x32\x15.SetFocusNotificationH\x00\x12\x35\n\x13typing_notification\x18\x05 \x01(\x0b\x32\x16.SetTypingNotificationH\x00\x12X\n\x1fnotification_level_notification\x18\x06 \x01(\x0b\x32-.SetConversationNotificationLevelNotificationH\x00\x12\x42\n\x1creply_to_invite_notification\x18\x07 \x01(\x0b\x32\x1a.ReplyToInviteNotificationH\x00\x12\x38\n\x16watermark_notification\x18\x08 \x01(\x0b\x32\x16.WatermarkNotificationH\x00\x12:\n\x11view_modification\x18\x0b \x01(\x0b\x32\x1d.ConversationViewModificationH\x00\x12\x39\n\x17\x65\x61ster_egg_notification\x18\x0c \x01(\x0b\x32\x16.EasterEggNotificationH\x00\x12?\n\x1aself_presence_notification\x18\x0e \x01(\x0b\x32\x19.SelfPresenceNotificationH\x00\x12\x38\n\x13\x64\x65lete_notification\x18\x0f \x01(\x0b\x32\x19.DeleteActionNotificationH\x00\x12\x36\n\x15presence_notification\x18\x10 \x01(\x0b\x32\x15.PresenceNotificationH\x00\x12\x30\n\x12\x62lock_notification\x18\x11 \x01(\x0b\x32\x12.BlockNotificationH\x00\x12P\n!notification_setting_notification\x18\x13 \x01(\x0b\x32#.SetNotificationSettingNotificationH\x00\x12Y\n(rich_presence_enabled_state_notification\x18\x14 \x01(\x0b\x32%.RichPresenceEnabledStateNotificationH\x00\x42\x0e\n\x0cstate_update\"\xb1\x01\n\x11StateUpdateHeader\x12/\n\x13\x61\x63tive_client_state\x18\x01 \x01(\x0e\x32\x12.ActiveClientState\x12\x18\n\x10request_trace_id\x18\x03 \x01(\t\x12\x34\n\x15notification_settings\x18\x04 \x01(\x0b\x32\x15.NotificationSettings\x12\x1b\n\x13\x63urrent_server_time\x18\x05 \x01(\x04\"1\n\x0b\x42\x61tchUpdate\x12\"\n\x0cstate_update\x18\x01 \x03(\x0b\x32\x0c.StateUpdate\"?\n\x18\x43onversationNotification\x12#\n\x0c\x63onversation\x18\x01 \x01(\x0b\x32\r.Conversation\"*\n\x11\x45ventNotification\x12\x15\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x06.Event\"\xae\x01\n\x14SetFocusNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12!\n\tsender_id\x18\x02 \x01(\x0b\x32\x0e.ParticipantId\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x18\n\x04type\x18\x04 \x01(\x0e\x32\n.FocusType\x12\x1c\n\x06\x64\x65vice\x18\x05 \x01(\x0e\x32\x0c.FocusDevice\"\x92\x01\n\x15SetTypingNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12!\n\tsender_id\x18\x02 \x01(\x0b\x32\x0e.ParticipantId\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12\x19\n\x04type\x18\x04 \x01(\x0e\x32\x0b.TypingType\"\x8e\x01\n,SetConversationNotificationLevelNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12!\n\x05level\x18\x02 \x01(\x0e\x32\x12.NotificationLevel\x12\x11\n\ttimestamp\x18\x04 \x01(\x04\"g\n\x19ReplyToInviteNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12 \n\x04type\x18\x02 \x01(\x0e\x32\x12.ReplyToInviteType\"\x83\x01\n\x15WatermarkNotification\x12!\n\tsender_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x1d\n\x15latest_read_timestamp\x18\x03 \x01(\x04\"\x92\x01\n\x1c\x43onversationViewModification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12#\n\x08old_view\x18\x02 \x01(\x0e\x32\x11.ConversationView\x12#\n\x08new_view\x18\x03 \x01(\x0e\x32\x11.ConversationView\"\x84\x01\n\x15\x45\x61sterEggNotification\x12!\n\tsender_id\x18\x01 \x01(\x0b\x32\x0e.ParticipantId\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x1e\n\neaster_egg\x18\x03 \x01(\x0b\x32\n.EasterEgg\"\x83\x02\n\x18SelfPresenceNotification\x12\x33\n\x15\x63lient_presence_state\x18\x01 \x01(\x0b\x32\x14.ClientPresenceState\x12\x34\n\x16\x64o_not_disturb_setting\x18\x03 \x01(\x0b\x32\x14.DoNotDisturbSetting\x12/\n\x13\x64\x65sktop_off_setting\x18\x04 \x01(\x0b\x32\x12.DesktopOffSetting\x12+\n\x11\x64\x65sktop_off_state\x18\x05 \x01(\x0b\x32\x10.DesktopOffState\x12\x1e\n\nmood_state\x18\x06 \x01(\x0b\x32\n.MoodState\"j\n\x18\x44\x65leteActionNotification\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\x12$\n\rdelete_action\x18\x02 \x01(\x0b\x32\r.DeleteAction\"9\n\x14PresenceNotification\x12!\n\x08presence\x18\x01 \x03(\x0b\x32\x0f.PresenceResult\"B\n\x11\x42lockNotification\x12-\n\x12\x62lock_state_change\x18\x01 \x03(\x0b\x32\x11.BlockStateChange\"\x87\x01\n\"SetNotificationSettingNotification\x12,\n\x11\x63onfiguration_bit\x18\x01 \x03(\x0b\x32\x11.ConfigurationBit\x12\x33\n\x15\x64\x65sktop_sound_setting\x18\x02 \x01(\x0b\x32\x14.DesktopSoundSetting\"f\n$RichPresenceEnabledStateNotification\x12>\n\x1brich_presence_enabled_state\x18\x01 \x03(\x0b\x32\x19.RichPresenceEnabledState\"<\n\x10\x43onversationSpec\x12(\n\x0f\x63onversation_id\x18\x01 \x01(\x0b\x32\x0f.ConversationId\"H\n\x11OffnetworkAddress\x12$\n\x04type\x18\x01 \x01(\x0e\x32\x16.OffnetworkAddressType\x12\r\n\x05\x65mail\x18\x03 \x01(\t\"O\n\x0c\x45ntityResult\x12&\n\x0blookup_spec\x18\x01 \x01(\x0b\x32\x11.EntityLookupSpec\x12\x17\n\x06\x65ntity\x18\x02 \x03(\x0b\x32\x07.Entity\"\x8b\x01\n\x0e\x41\x64\x64UserRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1e\n\ninvitee_id\x18\x03 \x03(\x0b\x32\n.InviteeID\x12\x31\n\x14\x65vent_request_header\x18\x05 \x01(\x0b\x32\x13.EventRequestHeader\"Z\n\x0f\x41\x64\x64UserResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x05 \x01(\x0b\x32\x06.Event\"\xaf\x01\n\x19\x43reateConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.ConversationType\x12\x1b\n\x13\x63lient_generated_id\x18\x03 \x01(\x04\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x1e\n\ninvitee_id\x18\x05 \x03(\x0b\x32\n.InviteeID\"\x8d\x01\n\x1a\x43reateConversationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12#\n\x0c\x63onversation\x18\x02 \x01(\x0b\x32\r.Conversation\x12 \n\x18new_conversation_created\x18\x07 \x01(\x08\"\x93\x01\n\x19\x44\x65leteConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12$\n\x1c\x64\x65lete_upper_bound_timestamp\x18\x03 \x01(\x04\"l\n\x1a\x44\x65leteConversationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12$\n\rdelete_action\x18\x02 \x01(\x0b\x32\r.DeleteAction\"\x84\x01\n\x10\x45\x61sterEggRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x1e\n\neaster_egg\x18\x03 \x01(\x0b\x32\n.EasterEgg\"P\n\x11\x45\x61sterEggResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x11\n\ttimestamp\x18\x02 \x01(\x04\"\x8c\x02\n\x16GetConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12,\n\x11\x63onversation_spec\x18\x02 \x01(\x0b\x32\x11.ConversationSpec\x12%\n\x1dinclude_conversation_metadata\x18\x03 \x01(\x08\x12\x15\n\rinclude_event\x18\x04 \x01(\x08\x12#\n\x1bmax_events_per_conversation\x18\x06 \x01(\x04\x12\x39\n\x18\x65vent_continuation_token\x18\x07 \x01(\x0b\x32\x17.EventContinuationToken\"s\n\x17GetConversationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12.\n\x12\x63onversation_state\x18\x02 \x01(\x0b\x32\x12.ConversationState\"l\n\x14GetEntityByIdRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12,\n\x11\x62\x61tch_lookup_spec\x18\x03 \x03(\x0b\x32\x11.EntityLookupSpec\"\x80\x01\n\x15GetEntityByIdResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x17\n\x06\x65ntity\x18\x02 \x03(\x0b\x32\x07.Entity\x12$\n\rentity_result\x18\x03 \x03(\x0b\x32\r.EntityResult\"r\n\x1eGetGroupConversationUrlRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\"k\n\x1fGetGroupConversationUrlResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1e\n\x16group_conversation_url\x18\x02 \x01(\t\"\xa8\x03\n\x1bGetSuggestedEntitiesRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x11\n\tmax_count\x18\x04 \x01(\x04\x12-\n\tfavorites\x18\x08 \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12=\n\x19\x63ontacts_you_hangout_with\x18\t \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12>\n\x1aother_contacts_on_hangouts\x18\n \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12\x32\n\x0eother_contacts\x18\x0b \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12\x36\n\x12\x64ismissed_contacts\x18\x0c \x01(\x0b\x32\x1a.SuggestedContactGroupHash\x12\x34\n\x10pinned_favorites\x18\r \x01(\x0b\x32\x1a.SuggestedContactGroupHash\"\x99\x03\n\x1cGetSuggestedEntitiesResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x17\n\x06\x65ntity\x18\x02 \x03(\x0b\x32\x07.Entity\x12)\n\tfavorites\x18\x04 \x01(\x0b\x32\x16.SuggestedContactGroup\x12\x39\n\x19\x63ontacts_you_hangout_with\x18\x05 \x01(\x0b\x32\x16.SuggestedContactGroup\x12:\n\x1aother_contacts_on_hangouts\x18\x06 \x01(\x0b\x32\x16.SuggestedContactGroup\x12.\n\x0eother_contacts\x18\x07 \x01(\x0b\x32\x16.SuggestedContactGroup\x12\x32\n\x12\x64ismissed_contacts\x18\x08 \x01(\x0b\x32\x16.SuggestedContactGroup\x12\x30\n\x10pinned_favorites\x18\t \x01(\x0b\x32\x16.SuggestedContactGroup\"<\n\x12GetSelfInfoRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"\xed\x03\n\x13GetSelfInfoResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1c\n\x0bself_entity\x18\x02 \x01(\x0b\x32\x07.Entity\x12\x16\n\x0eis_known_minor\x18\x03 \x01(\x08\x12\'\n\tdnd_state\x18\x05 \x01(\x0b\x32\x14.DoNotDisturbSetting\x12/\n\x13\x64\x65sktop_off_setting\x18\x06 \x01(\x0b\x32\x12.DesktopOffSetting\x12\x1e\n\nphone_data\x18\x07 \x01(\x0b\x32\n.PhoneData\x12,\n\x11\x63onfiguration_bit\x18\x08 \x03(\x0b\x32\x11.ConfigurationBit\x12+\n\x11\x64\x65sktop_off_state\x18\t \x01(\x0b\x32\x10.DesktopOffState\x12\x18\n\x10google_plus_user\x18\n \x01(\x08\x12\x33\n\x15\x64\x65sktop_sound_setting\x18\x0b \x01(\x0b\x32\x14.DesktopSoundSetting\x12/\n\x13rich_presence_state\x18\x0c \x01(\x0b\x32\x12.RichPresenceState\x12!\n\x0f\x64\x65\x66\x61ult_country\x18\x13 \x01(\x0b\x32\x08.Country\"\x86\x01\n\x14QueryPresenceRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12&\n\x0eparticipant_id\x18\x02 \x03(\x0b\x32\x0e.ParticipantId\x12\x1e\n\nfield_mask\x18\x03 \x03(\x0e\x32\n.FieldMask\"k\n\x15QueryPresenceResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12(\n\x0fpresence_result\x18\x02 \x03(\x0b\x32\x0f.PresenceResult\"\x96\x01\n\x11RemoveUserRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12&\n\x0eparticipant_id\x18\x03 \x01(\x0b\x32\x0e.ParticipantId\x12\x31\n\x14\x65vent_request_header\x18\x05 \x01(\x0b\x32\x13.EventRequestHeader\"]\n\x12RemoveUserResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x04 \x01(\x0b\x32\x06.Event\"\x88\x01\n\x19RenameConversationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x10\n\x08new_name\x18\x03 \x01(\t\x12\x31\n\x14\x65vent_request_header\x18\x05 \x01(\x0b\x32\x13.EventRequestHeader\"e\n\x1aRenameConversationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x04 \x01(\x0b\x32\x06.Event\"a\n\x15SearchEntitiesRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\r\n\x05query\x18\x03 \x01(\t\x12\x11\n\tmax_count\x18\x04 \x01(\x04\"[\n\x16SearchEntitiesResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x17\n\x06\x65ntity\x18\x02 \x03(\x0b\x32\x07.Entity\"!\n\x08Location\x12\x15\n\x05place\x18\x01 \x01(\x0b\x32\x06.Place\"\xa9\x02\n\x16SendChatMessageRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12$\n\nannotation\x18\x05 \x03(\x0b\x32\x10.EventAnnotation\x12(\n\x0fmessage_content\x18\x06 \x01(\x0b\x32\x0f.MessageContent\x12&\n\x0e\x65xisting_media\x18\x07 \x01(\x0b\x32\x0e.ExistingMedia\x12\x31\n\x14\x65vent_request_header\x18\x08 \x01(\x0b\x32\x13.EventRequestHeader\x12\x1f\n\x07user_id\x18\t \x01(\x0b\x32\x0e.ParticipantId\x12\x1b\n\x08location\x18\n \x01(\x0b\x32\t.Location\"b\n\x17SendChatMessageResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x06 \x01(\x0b\x32\x06.Event\"\x9c\x01\n\x16ModifyOTRStatusRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\'\n\notr_status\x18\x03 \x01(\x0e\x32\x13.OffTheRecordStatus\x12\x31\n\x14\x65vent_request_header\x18\x05 \x01(\x0b\x32\x13.EventRequestHeader\"b\n\x17ModifyOTRStatusResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x04 \x01(\x0b\x32\x06.Event\"v\n\x1fSendOffnetworkInvitationRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12+\n\x0finvitee_address\x18\x02 \x01(\x0b\x32\x12.OffnetworkAddress\"L\n SendOffnetworkInvitationResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\"{\n\x16SetActiveClientRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x11\n\tis_active\x18\x02 \x01(\x08\x12\x10\n\x08\x66ull_jid\x18\x03 \x01(\t\x12\x14\n\x0ctimeout_secs\x18\x04 \x01(\x04\"C\n\x17SetActiveClientResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\"E\n\x1bSetConversationLevelRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\"H\n\x1cSetConversationLevelResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\"\x9e\x01\n\'SetConversationNotificationLevelRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12!\n\x05level\x18\x03 \x01(\x0e\x32\x12.NotificationLevel\"g\n(SetConversationNotificationLevelResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x11\n\ttimestamp\x18\x02 \x01(\x04\"\x93\x01\n\x0fSetFocusRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x18\n\x04type\x18\x03 \x01(\x0e\x32\n.FocusType\x12\x14\n\x0ctimeout_secs\x18\x04 \x01(\r\"O\n\x10SetFocusResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x11\n\ttimestamp\x18\x02 \x01(\x04\"\xba\x01\n!SetGroupLinkSharingEnabledRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x31\n\x14\x65vent_request_header\x18\x02 \x01(\x0b\x32\x13.EventRequestHeader\x12:\n\x19group_link_sharing_status\x18\x04 \x01(\x0e\x32\x17.GroupLinkSharingStatus\"\x9a\x01\n\"SetGroupLinkSharingEnabledResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x1d\n\rcreated_event\x18\x02 \x01(\x0b\x32\x06.Event\x12+\n\x14updated_conversation\x18\x03 \x01(\x0b\x32\r.Conversation\"\xea\x01\n\x12SetPresenceRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x35\n\x16presence_state_setting\x18\x02 \x01(\x0b\x32\x15.PresenceStateSetting\x12 \n\x0b\x64nd_setting\x18\x03 \x01(\x0b\x32\x0b.DndSetting\x12/\n\x13\x64\x65sktop_off_setting\x18\x05 \x01(\x0b\x32\x12.DesktopOffSetting\x12\"\n\x0cmood_setting\x18\x08 \x01(\x0b\x32\x0c.MoodSetting\"?\n\x13SetPresenceResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\"\x7f\n\x10SetTypingRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x19\n\x04type\x18\x03 \x01(\x0e\x32\x0b.TypingType\"P\n\x11SetTypingResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x11\n\ttimestamp\x18\x02 \x01(\x04\"\x7f\n\x17SyncAllNewEventsRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1b\n\x13last_sync_timestamp\x18\x02 \x01(\x04\x12\x1f\n\x17max_response_size_bytes\x18\x08 \x01(\x04\"\x8c\x01\n\x18SyncAllNewEventsResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x16\n\x0esync_timestamp\x18\x02 \x01(\x04\x12.\n\x12\x63onversation_state\x18\x03 \x03(\x0b\x32\x12.ConversationState\"\xc8\x01\n\x1eSyncRecentConversationsRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12\x1c\n\x14last_event_timestamp\x18\x02 \x01(\x04\x12\x19\n\x11max_conversations\x18\x03 \x01(\x04\x12#\n\x1bmax_events_per_conversation\x18\x04 \x01(\x04\x12 \n\x0bsync_filter\x18\x05 \x03(\x0e\x32\x0b.SyncFilter\"\xb7\x01\n\x1fSyncRecentConversationsResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader\x12\x16\n\x0esync_timestamp\x18\x02 \x01(\x04\x12.\n\x12\x63onversation_state\x18\x03 \x03(\x0b\x32\x12.ConversationState\x12\"\n\x1a\x63ontinuation_end_timestamp\x18\x04 \x01(\x04\"\x87\x01\n\x16UpdateWatermarkRequest\x12&\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x0e.RequestHeader\x12(\n\x0f\x63onversation_id\x18\x02 \x01(\x0b\x32\x0f.ConversationId\x12\x1b\n\x13last_read_timestamp\x18\x03 \x01(\x04\"C\n\x17UpdateWatermarkResponse\x12(\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x0f.ResponseHeader*\x7f\n\x11\x41\x63tiveClientState\x12!\n\x1d\x41\x43TIVE_CLIENT_STATE_NO_ACTIVE\x10\x00\x12!\n\x1d\x41\x43TIVE_CLIENT_STATE_IS_ACTIVE\x10\x01\x12$\n ACTIVE_CLIENT_STATE_OTHER_ACTIVE\x10\x02*U\n\tFocusType\x12\x16\n\x12\x46OCUS_TYPE_UNKNOWN\x10\x00\x12\x16\n\x12\x46OCUS_TYPE_FOCUSED\x10\x01\x12\x18\n\x14\x46OCUS_TYPE_UNFOCUSED\x10\x02*_\n\x0b\x46ocusDevice\x12\x1c\n\x18\x46OCUS_DEVICE_UNSPECIFIED\x10\x00\x12\x18\n\x14\x46OCUS_DEVICE_DESKTOP\x10\x14\x12\x18\n\x13\x46OCUS_DEVICE_MOBILE\x10\xac\x02*o\n\nTypingType\x12\x17\n\x13TYPING_TYPE_UNKNOWN\x10\x00\x12\x17\n\x13TYPING_TYPE_STARTED\x10\x01\x12\x16\n\x12TYPING_TYPE_PAUSED\x10\x02\x12\x17\n\x13TYPING_TYPE_STOPPED\x10\x03*\xae\x01\n\x17\x43lientPresenceStateType\x12!\n\x1d\x43LIENT_PRESENCE_STATE_UNKNOWN\x10\x00\x12\x1e\n\x1a\x43LIENT_PRESENCE_STATE_NONE\x10\x01\x12&\n\"CLIENT_PRESENCE_STATE_DESKTOP_IDLE\x10\x1e\x12(\n$CLIENT_PRESENCE_STATE_DESKTOP_ACTIVE\x10(*n\n\x11NotificationLevel\x12\x1e\n\x1aNOTIFICATION_LEVEL_UNKNOWN\x10\x00\x12\x1c\n\x18NOTIFICATION_LEVEL_QUIET\x10\n\x12\x1b\n\x17NOTIFICATION_LEVEL_RING\x10\x1e*X\n\x0bSegmentType\x12\x15\n\x11SEGMENT_TYPE_TEXT\x10\x00\x12\x1b\n\x17SEGMENT_TYPE_LINE_BREAK\x10\x01\x12\x15\n\x11SEGMENT_TYPE_LINK\x10\x02*i\n\x08ItemType\x12\x13\n\x0fITEM_TYPE_THING\x10\x00\x12\x19\n\x14ITEM_TYPE_PLUS_PHOTO\x10\xf9\x01\x12\x14\n\x0fITEM_TYPE_PLACE\x10\xcf\x02\x12\x17\n\x12ITEM_TYPE_PLACE_V2\x10\xd4\x02*Y\n\x14MembershipChangeType\x12\x1f\n\x1bMEMBERSHIP_CHANGE_TYPE_JOIN\x10\x01\x12 \n\x1cMEMBERSHIP_CHANGE_TYPE_LEAVE\x10\x02*\xeb\x01\n\x10HangoutEventType\x12\x1e\n\x1aHANGOUT_EVENT_TYPE_UNKNOWN\x10\x00\x12\x1c\n\x18HANGOUT_EVENT_TYPE_START\x10\x01\x12\x1a\n\x16HANGOUT_EVENT_TYPE_END\x10\x02\x12\x1b\n\x17HANGOUT_EVENT_TYPE_JOIN\x10\x03\x12\x1c\n\x18HANGOUT_EVENT_TYPE_LEAVE\x10\x04\x12\"\n\x1eHANGOUT_EVENT_TYPE_COMING_SOON\x10\x05\x12\x1e\n\x1aHANGOUT_EVENT_TYPE_ONGOING\x10\x06*~\n\x12OffTheRecordToggle\x12!\n\x1dOFF_THE_RECORD_TOGGLE_UNKNOWN\x10\x00\x12!\n\x1dOFF_THE_RECORD_TOGGLE_ENABLED\x10\x01\x12\"\n\x1eOFF_THE_RECORD_TOGGLE_DISABLED\x10\x02*\x8a\x01\n\x12OffTheRecordStatus\x12!\n\x1dOFF_THE_RECORD_STATUS_UNKNOWN\x10\x00\x12(\n$OFF_THE_RECORD_STATUS_OFF_THE_RECORD\x10\x01\x12\'\n#OFF_THE_RECORD_STATUS_ON_THE_RECORD\x10\x02*%\n\nSourceType\x12\x17\n\x13SOURCE_TYPE_UNKNOWN\x10\x00*\xc2\x03\n\tEventType\x12\x16\n\x12\x45VENT_TYPE_UNKNOWN\x10\x00\x12#\n\x1f\x45VENT_TYPE_REGULAR_CHAT_MESSAGE\x10\x01\x12\x12\n\x0e\x45VENT_TYPE_SMS\x10\x02\x12\x18\n\x14\x45VENT_TYPE_VOICEMAIL\x10\x03\x12\x17\n\x13\x45VENT_TYPE_ADD_USER\x10\x04\x12\x1a\n\x16\x45VENT_TYPE_REMOVE_USER\x10\x05\x12\"\n\x1e\x45VENT_TYPE_CONVERSATION_RENAME\x10\x06\x12\x16\n\x12\x45VENT_TYPE_HANGOUT\x10\x07\x12\x19\n\x15\x45VENT_TYPE_PHONE_CALL\x10\x08\x12\x1f\n\x1b\x45VENT_TYPE_OTR_MODIFICATION\x10\t\x12\x1c\n\x18\x45VENT_TYPE_PLAN_MUTATION\x10\n\x12\x12\n\x0e\x45VENT_TYPE_MMS\x10\x0b\x12\x1c\n\x18\x45VENT_TYPE_DEPRECATED_12\x10\x0c\x12\x1d\n\x19\x45VENT_TYPE_OBSERVED_EVENT\x10\r\x12.\n*EVENT_TYPE_GROUP_LINK_SHARING_MODIFICATION\x10\x0e*p\n\x10\x43onversationType\x12\x1d\n\x19\x43ONVERSATION_TYPE_UNKNOWN\x10\x00\x12 \n\x1c\x43ONVERSATION_TYPE_ONE_TO_ONE\x10\x01\x12\x1b\n\x17\x43ONVERSATION_TYPE_GROUP\x10\x02*\x94\x01\n\x12\x43onversationStatus\x12\x1f\n\x1b\x43ONVERSATION_STATUS_UNKNOWN\x10\x00\x12\x1f\n\x1b\x43ONVERSATION_STATUS_INVITED\x10\x01\x12\x1e\n\x1a\x43ONVERSATION_STATUS_ACTIVE\x10\x02\x12\x1c\n\x18\x43ONVERSATION_STATUS_LEFT\x10\x03*n\n\x10\x43onversationView\x12\x1d\n\x19\x43ONVERSATION_VIEW_UNKNOWN\x10\x00\x12\x1b\n\x17\x43ONVERSATION_VIEW_INBOX\x10\x01\x12\x1e\n\x1a\x43ONVERSATION_VIEW_ARCHIVED\x10\x02*\x8d\x01\n\x12\x44\x65liveryMediumType\x12\x1b\n\x17\x44\x45LIVERY_MEDIUM_UNKNOWN\x10\x00\x12\x19\n\x15\x44\x45LIVERY_MEDIUM_BABEL\x10\x01\x12 \n\x1c\x44\x45LIVERY_MEDIUM_GOOGLE_VOICE\x10\x02\x12\x1d\n\x19\x44\x45LIVERY_MEDIUM_LOCAL_SMS\x10\x03*d\n\x12InvitationAffinity\x12\x1b\n\x17INVITE_AFFINITY_UNKNOWN\x10\x00\x12\x18\n\x14INVITE_AFFINITY_HIGH\x10\x01\x12\x17\n\x13INVITE_AFFINITY_LOW\x10\x02*m\n\x0fParticipantType\x12\x1c\n\x18PARTICIPANT_TYPE_UNKNOWN\x10\x00\x12\x19\n\x15PARTICIPANT_TYPE_GAIA\x10\x02\x12!\n\x1dPARTICIPANT_TYPE_GOOGLE_VOICE\x10\x03*p\n\x10InvitationStatus\x12\x1d\n\x19INVITATION_STATUS_UNKNOWN\x10\x00\x12\x1d\n\x19INVITATION_STATUS_PENDING\x10\x01\x12\x1e\n\x1aINVITATION_STATUS_ACCEPTED\x10\x02*?\n\x0c\x46orceHistory\x12\x19\n\x15\x46ORCE_HISTORY_UNKNOWN\x10\x00\x12\x14\n\x10\x46ORCE_HISTORY_NO\x10\x01*^\n\x0bNetworkType\x12\x18\n\x14NETWORK_TYPE_UNKNOWN\x10\x00\x12\x16\n\x12NETWORK_TYPE_BABEL\x10\x01\x12\x1d\n\x19NETWORK_TYPE_GOOGLE_VOICE\x10\x02*U\n\nBlockState\x12\x17\n\x13\x42LOCK_STATE_UNKNOWN\x10\x00\x12\x15\n\x11\x42LOCK_STATE_BLOCK\x10\x01\x12\x17\n\x13\x42LOCK_STATE_UNBLOCK\x10\x02*x\n\x11ReplyToInviteType\x12 \n\x1cREPLY_TO_INVITE_TYPE_UNKNOWN\x10\x00\x12\x1f\n\x1bREPLY_TO_INVITE_TYPE_ACCEPT\x10\x01\x12 \n\x1cREPLY_TO_INVITE_TYPE_DECLINE\x10\x02*\xca\x01\n\x08\x43lientId\x12\x15\n\x11\x43LIENT_ID_UNKNOWN\x10\x00\x12\x15\n\x11\x43LIENT_ID_ANDROID\x10\x01\x12\x11\n\rCLIENT_ID_IOS\x10\x02\x12\x14\n\x10\x43LIENT_ID_CHROME\x10\x03\x12\x17\n\x13\x43LIENT_ID_WEB_GPLUS\x10\x05\x12\x17\n\x13\x43LIENT_ID_WEB_GMAIL\x10\x06\x12\x19\n\x15\x43LIENT_ID_ULTRAVIOLET\x10\r\x12\x1a\n\x16\x43LIENT_ID_WEB_HANGOUTS\x10,*g\n\x0f\x43lientBuildType\x12\x16\n\x12\x42UILD_TYPE_UNKNOWN\x10\x00\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_WEB\x10\x01\x12\x1d\n\x19\x42UILD_TYPE_PRODUCTION_APP\x10\x03*\x90\x01\n\x0eResponseStatus\x12\x1b\n\x17RESPONSE_STATUS_UNKNOWN\x10\x00\x12\x16\n\x12RESPONSE_STATUS_OK\x10\x01\x12$\n RESPONSE_STATUS_UNEXPECTED_ERROR\x10\x03\x12#\n\x1fRESPONSE_STATUS_INVALID_REQUEST\x10\x04*q\n\x0ePhotoUrlStatus\x12\x1c\n\x18PHOTO_URL_STATUS_UNKNOWN\x10\x00\x12 \n\x1cPHOTO_URL_STATUS_PLACEHOLDER\x10\x01\x12\x1f\n\x1bPHOTO_URL_STATUS_USER_PHOTO\x10\x02*@\n\x06Gender\x12\x12\n\x0eGENDER_UNKNOWN\x10\x00\x12\x0f\n\x0bGENDER_MALE\x10\x01\x12\x11\n\rGENDER_FEMALE\x10\x02*>\n\x0bProfileType\x12\x15\n\x11PROFILE_TYPE_NONE\x10\x00\x12\x18\n\x14PROFILE_TYPE_ES_USER\x10\x01*\x81\x0c\n\x14\x43onfigurationBitType\x12\"\n\x1e\x43ONFIGURATION_BIT_TYPE_UNKNOWN\x10\x00\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_1\x10\x01\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_2\x10\x02\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_3\x10\x03\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_4\x10\x04\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_5\x10\x05\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_6\x10\x06\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_7\x10\x07\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_8\x10\x08\x12$\n CONFIGURATION_BIT_TYPE_UNKNOWN_9\x10\t\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_10\x10\n\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_11\x10\x0b\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_12\x10\x0c\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_13\x10\r\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_14\x10\x0e\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_15\x10\x0f\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_16\x10\x10\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_17\x10\x11\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_18\x10\x12\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_19\x10\x13\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_20\x10\x14\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_21\x10\x15\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_22\x10\x16\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_23\x10\x17\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_24\x10\x18\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_25\x10\x19\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_26\x10\x1a\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_27\x10\x1b\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_28\x10\x1c\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_29\x10\x1d\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_30\x10\x1e\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_31\x10\x1f\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_32\x10 \x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_33\x10!\x12@\n<CONFIGURATION_BIT_TYPE_DESKTOP_AUTO_EMOJI_CONVERSION_ENABLED\x10\"\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_35\x10#\x12%\n!CONFIGURATION_BIT_TYPE_UNKNOWN_36\x10$\x12\x37\n3CONFIGURATION_BIT_TYPE_DESKTOP_COMPACT_MODE_ENABLED\x10&*\xff\x01\n\x10RichPresenceType\x12\x1e\n\x1aRICH_PRESENCE_TYPE_UNKNOWN\x10\x00\x12$\n RICH_PRESENCE_TYPE_IN_CALL_STATE\x10\x01\x12 \n\x1cRICH_PRESENCE_TYPE_UNKNOWN_3\x10\x03\x12 \n\x1cRICH_PRESENCE_TYPE_UNKNOWN_4\x10\x04\x12 \n\x1cRICH_PRESENCE_TYPE_UNKNOWN_5\x10\x05\x12\x1d\n\x19RICH_PRESENCE_TYPE_DEVICE\x10\x02\x12 \n\x1cRICH_PRESENCE_TYPE_LAST_SEEN\x10\x06*\x9d\x01\n\tFieldMask\x12\x18\n\x14\x46IELD_MASK_REACHABLE\x10\x01\x12\x18\n\x14\x46IELD_MASK_AVAILABLE\x10\x02\x12\x13\n\x0f\x46IELD_MASK_MOOD\x10\x03\x12\x16\n\x12\x46IELD_MASK_IN_CALL\x10\x06\x12\x15\n\x11\x46IELD_MASK_DEVICE\x10\x07\x12\x18\n\x14\x46IELD_MASK_LAST_SEEN\x10\n*B\n\nDeleteType\x12\x17\n\x13\x44\x45LETE_TYPE_UNKNOWN\x10\x00\x12\x1b\n\x17\x44\x45LETE_TYPE_UPPER_BOUND\x10\x01*V\n\nSyncFilter\x12\x17\n\x13SYNC_FILTER_UNKNOWN\x10\x00\x12\x15\n\x11SYNC_FILTER_INBOX\x10\x01\x12\x18\n\x14SYNC_FILTER_ARCHIVED\x10\x02*N\n\nSoundState\x12\x17\n\x13SOUND_STATE_UNKNOWN\x10\x00\x12\x12\n\x0eSOUND_STATE_ON\x10\x01\x12\x13\n\x0fSOUND_STATE_OFF\x10\x02*a\n\x14\x43\x61llerIdSettingsMask\x12#\n\x1f\x43\x41LLER_ID_SETTINGS_MASK_UNKNOWN\x10\x00\x12$\n CALLER_ID_SETTINGS_MASK_PROVIDED\x10\x01*h\n\x17PhoneVerificationStatus\x12%\n!PHONE_VERIFICATION_STATUS_UNKNOWN\x10\x00\x12&\n\"PHONE_VERIFICATION_STATUS_VERIFIED\x10\x01*\x86\x01\n\x1aPhoneDiscoverabilityStatus\x12(\n$PHONE_DISCOVERABILITY_STATUS_UNKNOWN\x10\x00\x12>\n:PHONE_DISCOVERABILITY_STATUS_OPTED_IN_BUT_NOT_DISCOVERABLE\x10\x02*@\n\x15PhoneValidationResult\x12\'\n#PHONE_VALIDATION_RESULT_IS_POSSIBLE\x10\x00*_\n\x15OffnetworkAddressType\x12#\n\x1fOFFNETWORK_ADDRESS_TYPE_UNKNOWN\x10\x00\x12!\n\x1dOFFNETWORK_ADDRESS_TYPE_EMAIL\x10\x01*\x84\x01\n\x16GroupLinkSharingStatus\x12%\n!GROUP_LINK_SHARING_STATUS_UNKNOWN\x10\x00\x12 \n\x1cGROUP_LINK_SHARING_STATUS_ON\x10\x01\x12!\n\x1dGROUP_LINK_SHARING_STATUS_OFF\x10\x02')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -45,8 +45,8 @@ _ACTIVECLIENTSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=19646,
-  serialized_end=19773,
+  serialized_start=20102,
+  serialized_end=20229,
 )
 _sym_db.RegisterEnumDescriptor(_ACTIVECLIENTSTATE)
 
@@ -72,8 +72,8 @@ _FOCUSTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=19775,
-  serialized_end=19860,
+  serialized_start=20231,
+  serialized_end=20316,
 )
 _sym_db.RegisterEnumDescriptor(_FOCUSTYPE)
 
@@ -99,8 +99,8 @@ _FOCUSDEVICE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=19862,
-  serialized_end=19957,
+  serialized_start=20318,
+  serialized_end=20413,
 )
 _sym_db.RegisterEnumDescriptor(_FOCUSDEVICE)
 
@@ -130,8 +130,8 @@ _TYPINGTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=19959,
-  serialized_end=20070,
+  serialized_start=20415,
+  serialized_end=20526,
 )
 _sym_db.RegisterEnumDescriptor(_TYPINGTYPE)
 
@@ -161,8 +161,8 @@ _CLIENTPRESENCESTATETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=20073,
-  serialized_end=20247,
+  serialized_start=20529,
+  serialized_end=20703,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTPRESENCESTATETYPE)
 
@@ -188,8 +188,8 @@ _NOTIFICATIONLEVEL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=20249,
-  serialized_end=20359,
+  serialized_start=20705,
+  serialized_end=20815,
 )
 _sym_db.RegisterEnumDescriptor(_NOTIFICATIONLEVEL)
 
@@ -215,8 +215,8 @@ _SEGMENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=20361,
-  serialized_end=20449,
+  serialized_start=20817,
+  serialized_end=20905,
 )
 _sym_db.RegisterEnumDescriptor(_SEGMENTTYPE)
 
@@ -246,8 +246,8 @@ _ITEMTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=20451,
-  serialized_end=20556,
+  serialized_start=20907,
+  serialized_end=21012,
 )
 _sym_db.RegisterEnumDescriptor(_ITEMTYPE)
 
@@ -269,8 +269,8 @@ _MEMBERSHIPCHANGETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=20558,
-  serialized_end=20647,
+  serialized_start=21014,
+  serialized_end=21103,
 )
 _sym_db.RegisterEnumDescriptor(_MEMBERSHIPCHANGETYPE)
 
@@ -312,8 +312,8 @@ _HANGOUTEVENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=20650,
-  serialized_end=20885,
+  serialized_start=21106,
+  serialized_end=21341,
 )
 _sym_db.RegisterEnumDescriptor(_HANGOUTEVENTTYPE)
 
@@ -339,8 +339,8 @@ _OFFTHERECORDTOGGLE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=20887,
-  serialized_end=21013,
+  serialized_start=21343,
+  serialized_end=21469,
 )
 _sym_db.RegisterEnumDescriptor(_OFFTHERECORDTOGGLE)
 
@@ -366,8 +366,8 @@ _OFFTHERECORDSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=21016,
-  serialized_end=21154,
+  serialized_start=21472,
+  serialized_end=21610,
 )
 _sym_db.RegisterEnumDescriptor(_OFFTHERECORDSTATUS)
 
@@ -385,8 +385,8 @@ _SOURCETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=21156,
-  serialized_end=21193,
+  serialized_start=21612,
+  serialized_end=21649,
 )
 _sym_db.RegisterEnumDescriptor(_SOURCETYPE)
 
@@ -460,8 +460,8 @@ _EVENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=21196,
-  serialized_end=21646,
+  serialized_start=21652,
+  serialized_end=22102,
 )
 _sym_db.RegisterEnumDescriptor(_EVENTTYPE)
 
@@ -487,8 +487,8 @@ _CONVERSATIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=21648,
-  serialized_end=21760,
+  serialized_start=22104,
+  serialized_end=22216,
 )
 _sym_db.RegisterEnumDescriptor(_CONVERSATIONTYPE)
 
@@ -518,8 +518,8 @@ _CONVERSATIONSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=21763,
-  serialized_end=21911,
+  serialized_start=22219,
+  serialized_end=22367,
 )
 _sym_db.RegisterEnumDescriptor(_CONVERSATIONSTATUS)
 
@@ -545,8 +545,8 @@ _CONVERSATIONVIEW = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=21913,
-  serialized_end=22023,
+  serialized_start=22369,
+  serialized_end=22479,
 )
 _sym_db.RegisterEnumDescriptor(_CONVERSATIONVIEW)
 
@@ -576,8 +576,8 @@ _DELIVERYMEDIUMTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22026,
-  serialized_end=22167,
+  serialized_start=22482,
+  serialized_end=22623,
 )
 _sym_db.RegisterEnumDescriptor(_DELIVERYMEDIUMTYPE)
 
@@ -603,8 +603,8 @@ _INVITATIONAFFINITY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22169,
-  serialized_end=22269,
+  serialized_start=22625,
+  serialized_end=22725,
 )
 _sym_db.RegisterEnumDescriptor(_INVITATIONAFFINITY)
 
@@ -630,8 +630,8 @@ _PARTICIPANTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22271,
-  serialized_end=22380,
+  serialized_start=22727,
+  serialized_end=22836,
 )
 _sym_db.RegisterEnumDescriptor(_PARTICIPANTTYPE)
 
@@ -657,8 +657,8 @@ _INVITATIONSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22382,
-  serialized_end=22494,
+  serialized_start=22838,
+  serialized_end=22950,
 )
 _sym_db.RegisterEnumDescriptor(_INVITATIONSTATUS)
 
@@ -680,8 +680,8 @@ _FORCEHISTORY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22496,
-  serialized_end=22559,
+  serialized_start=22952,
+  serialized_end=23015,
 )
 _sym_db.RegisterEnumDescriptor(_FORCEHISTORY)
 
@@ -707,8 +707,8 @@ _NETWORKTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22561,
-  serialized_end=22655,
+  serialized_start=23017,
+  serialized_end=23111,
 )
 _sym_db.RegisterEnumDescriptor(_NETWORKTYPE)
 
@@ -734,8 +734,8 @@ _BLOCKSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22657,
-  serialized_end=22742,
+  serialized_start=23113,
+  serialized_end=23198,
 )
 _sym_db.RegisterEnumDescriptor(_BLOCKSTATE)
 
@@ -761,8 +761,8 @@ _REPLYTOINVITETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22744,
-  serialized_end=22864,
+  serialized_start=23200,
+  serialized_end=23320,
 )
 _sym_db.RegisterEnumDescriptor(_REPLYTOINVITETYPE)
 
@@ -808,8 +808,8 @@ _CLIENTID = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=22867,
-  serialized_end=23069,
+  serialized_start=23323,
+  serialized_end=23525,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTID)
 
@@ -835,8 +835,8 @@ _CLIENTBUILDTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=23071,
-  serialized_end=23174,
+  serialized_start=23527,
+  serialized_end=23630,
 )
 _sym_db.RegisterEnumDescriptor(_CLIENTBUILDTYPE)
 
@@ -866,8 +866,8 @@ _RESPONSESTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=23177,
-  serialized_end=23321,
+  serialized_start=23633,
+  serialized_end=23777,
 )
 _sym_db.RegisterEnumDescriptor(_RESPONSESTATUS)
 
@@ -893,8 +893,8 @@ _PHOTOURLSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=23323,
-  serialized_end=23436,
+  serialized_start=23779,
+  serialized_end=23892,
 )
 _sym_db.RegisterEnumDescriptor(_PHOTOURLSTATUS)
 
@@ -920,8 +920,8 @@ _GENDER = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=23438,
-  serialized_end=23502,
+  serialized_start=23894,
+  serialized_end=23958,
 )
 _sym_db.RegisterEnumDescriptor(_GENDER)
 
@@ -943,8 +943,8 @@ _PROFILETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=23504,
-  serialized_end=23566,
+  serialized_start=23960,
+  serialized_end=24022,
 )
 _sym_db.RegisterEnumDescriptor(_PROFILETYPE)
 
@@ -1110,8 +1110,8 @@ _CONFIGURATIONBITTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=23569,
-  serialized_end=25106,
+  serialized_start=24025,
+  serialized_end=25562,
 )
 _sym_db.RegisterEnumDescriptor(_CONFIGURATIONBITTYPE)
 
@@ -1153,8 +1153,8 @@ _RICHPRESENCETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=25109,
-  serialized_end=25364,
+  serialized_start=25565,
+  serialized_end=25820,
 )
 _sym_db.RegisterEnumDescriptor(_RICHPRESENCETYPE)
 
@@ -1192,8 +1192,8 @@ _FIELDMASK = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=25367,
-  serialized_end=25524,
+  serialized_start=25823,
+  serialized_end=25980,
 )
 _sym_db.RegisterEnumDescriptor(_FIELDMASK)
 
@@ -1215,8 +1215,8 @@ _DELETETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=25526,
-  serialized_end=25592,
+  serialized_start=25982,
+  serialized_end=26048,
 )
 _sym_db.RegisterEnumDescriptor(_DELETETYPE)
 
@@ -1242,8 +1242,8 @@ _SYNCFILTER = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=25594,
-  serialized_end=25680,
+  serialized_start=26050,
+  serialized_end=26136,
 )
 _sym_db.RegisterEnumDescriptor(_SYNCFILTER)
 
@@ -1269,8 +1269,8 @@ _SOUNDSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=25682,
-  serialized_end=25760,
+  serialized_start=26138,
+  serialized_end=26216,
 )
 _sym_db.RegisterEnumDescriptor(_SOUNDSTATE)
 
@@ -1292,8 +1292,8 @@ _CALLERIDSETTINGSMASK = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=25762,
-  serialized_end=25859,
+  serialized_start=26218,
+  serialized_end=26315,
 )
 _sym_db.RegisterEnumDescriptor(_CALLERIDSETTINGSMASK)
 
@@ -1315,8 +1315,8 @@ _PHONEVERIFICATIONSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=25861,
-  serialized_end=25965,
+  serialized_start=26317,
+  serialized_end=26421,
 )
 _sym_db.RegisterEnumDescriptor(_PHONEVERIFICATIONSTATUS)
 
@@ -1338,8 +1338,8 @@ _PHONEDISCOVERABILITYSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=25968,
-  serialized_end=26102,
+  serialized_start=26424,
+  serialized_end=26558,
 )
 _sym_db.RegisterEnumDescriptor(_PHONEDISCOVERABILITYSTATUS)
 
@@ -1357,8 +1357,8 @@ _PHONEVALIDATIONRESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=26104,
-  serialized_end=26168,
+  serialized_start=26560,
+  serialized_end=26624,
 )
 _sym_db.RegisterEnumDescriptor(_PHONEVALIDATIONRESULT)
 
@@ -1380,8 +1380,8 @@ _OFFNETWORKADDRESSTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=26170,
-  serialized_end=26265,
+  serialized_start=26626,
+  serialized_end=26721,
 )
 _sym_db.RegisterEnumDescriptor(_OFFNETWORKADDRESSTYPE)
 
@@ -1407,8 +1407,8 @@ _GROUPLINKSHARINGSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=26268,
-  serialized_end=26400,
+  serialized_start=26724,
+  serialized_end=26856,
 )
 _sym_db.RegisterEnumDescriptor(_GROUPLINKSHARINGSTATUS)
 
@@ -1648,8 +1648,8 @@ _ENTITY_PASTHANGOUTSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6013,
-  serialized_end=6144,
+  serialized_start=6372,
+  serialized_end=6503,
 )
 _sym_db.RegisterEnumDescriptor(_ENTITY_PASTHANGOUTSTATE)
 
@@ -2367,16 +2367,16 @@ _PLUSPHOTO = _descriptor.Descriptor(
 )
 
 
-_PLACE_REPRESENTATIVEIMAGE = _descriptor.Descriptor(
-  name='RepresentativeImage',
-  full_name='Place.RepresentativeImage',
+_PLACE_DISPLAYINFO_DESCRIPTION = _descriptor.Descriptor(
+  name='Description',
+  full_name='Place.DisplayInfo.Description',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='url', full_name='Place.RepresentativeImage.url', index=0,
-      number=2, type=9, cpp_type=9, label=1,
+      name='text', full_name='Place.DisplayInfo.Description.text', index=0,
+      number=35, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -2393,8 +2393,172 @@ _PLACE_REPRESENTATIVEIMAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1660,
-  serialized_end=1694,
+  serialized_start=1817,
+  serialized_end=1844,
+)
+
+_PLACE_DISPLAYINFO = _descriptor.Descriptor(
+  name='DisplayInfo',
+  full_name='Place.DisplayInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='description', full_name='Place.DisplayInfo.description', index=0,
+      number=36003298, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_PLACE_DISPLAYINFO_DESCRIPTION, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1746,
+  serialized_end=1844,
+)
+
+_PLACE_LOCATIONINFO_LATLNG = _descriptor.Descriptor(
+  name='LatLng',
+  full_name='Place.LocationInfo.LatLng',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='lat', full_name='Place.LocationInfo.LatLng.lat', index=0,
+      number=36, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='lng', full_name='Place.LocationInfo.LatLng.lng', index=1,
+      number=37, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1909,
+  serialized_end=1943,
+)
+
+_PLACE_LOCATIONINFO = _descriptor.Descriptor(
+  name='LocationInfo',
+  full_name='Place.LocationInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='latlng', full_name='Place.LocationInfo.latlng', index=0,
+      number=36736749, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_PLACE_LOCATIONINFO_LATLNG, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1846,
+  serialized_end=1943,
+)
+
+_PLACE_REPRESENTATIVEIMAGE_IMAGE = _descriptor.Descriptor(
+  name='Image',
+  full_name='Place.RepresentativeImage.Image',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='url', full_name='Place.RepresentativeImage.Image.url', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2033,
+  serialized_end=2053,
+)
+
+_PLACE_REPRESENTATIVEIMAGE = _descriptor.Descriptor(
+  name='RepresentativeImage',
+  full_name='Place.RepresentativeImage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='url', full_name='Place.RepresentativeImage.url', index=0,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='image', full_name='Place.RepresentativeImage.image', index=1,
+      number=40265033, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_PLACE_REPRESENTATIVEIMAGE_IMAGE, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1945,
+  serialized_end=2053,
 )
 
 _PLACE = _descriptor.Descriptor(
@@ -2419,7 +2583,21 @@ _PLACE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='representative_image', full_name='Place.representative_image', index=2,
+      name='display_info', full_name='Place.display_info', index=2,
+      number=24, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='location_info', full_name='Place.location_info', index=3,
+      number=25, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='representative_image', full_name='Place.representative_image', index=4,
       number=185, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -2428,7 +2606,7 @@ _PLACE = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_PLACE_REPRESENTATIVEIMAGE, ],
+  nested_types=[_PLACE_DISPLAYINFO, _PLACE_LOCATIONINFO, _PLACE_REPRESENTATIVEIMAGE, ],
   enum_types=[
   ],
   options=None,
@@ -2438,7 +2616,7 @@ _PLACE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1565,
-  serialized_end=1694,
+  serialized_end=2053,
 )
 
 
@@ -2489,8 +2667,8 @@ _EMBEDITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1696,
-  serialized_end=1805,
+  serialized_start=2055,
+  serialized_end=2164,
 )
 
 
@@ -2520,8 +2698,8 @@ _ATTACHMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1807,
-  serialized_end=1851,
+  serialized_start=2166,
+  serialized_end=2210,
 )
 
 
@@ -2558,8 +2736,8 @@ _MESSAGECONTENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1853,
-  serialized_end=1929,
+  serialized_start=2212,
+  serialized_end=2288,
 )
 
 
@@ -2596,8 +2774,8 @@ _EVENTANNOTATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1931,
-  serialized_end=1977,
+  serialized_start=2290,
+  serialized_end=2336,
 )
 
 
@@ -2634,8 +2812,8 @@ _CHATMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1979,
-  serialized_end=2072,
+  serialized_start=2338,
+  serialized_end=2431,
 )
 
 
@@ -2672,8 +2850,8 @@ _MEMBERSHIPCHANGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2074,
-  serialized_end=2170,
+  serialized_start=2433,
+  serialized_end=2529,
 )
 
 
@@ -2710,8 +2888,8 @@ _CONVERSATIONRENAME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2172,
-  serialized_end=2228,
+  serialized_start=2531,
+  serialized_end=2587,
 )
 
 
@@ -2748,8 +2926,8 @@ _HANGOUTEVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2230,
-  serialized_end=2323,
+  serialized_start=2589,
+  serialized_end=2682,
 )
 
 
@@ -2800,8 +2978,8 @@ _OTRMODIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2326,
-  serialized_end=2523,
+  serialized_start=2685,
+  serialized_end=2882,
 )
 
 
@@ -2845,8 +3023,8 @@ _HASHMODIFIER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2525,
-  serialized_end=2594,
+  serialized_start=2884,
+  serialized_end=2953,
 )
 
 
@@ -3009,8 +3187,8 @@ _EVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2597,
-  serialized_end=3335,
+  serialized_start=2956,
+  serialized_end=3694,
 )
 
 
@@ -3047,8 +3225,8 @@ _USERREADSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3337,
-  serialized_end=3423,
+  serialized_start=3696,
+  serialized_end=3782,
 )
 
 
@@ -3085,8 +3263,8 @@ _DELIVERYMEDIUM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3425,
-  serialized_end=3519,
+  serialized_start=3784,
+  serialized_end=3878,
 )
 
 
@@ -3123,8 +3301,8 @@ _DELIVERYMEDIUMOPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3521,
-  serialized_end=3610,
+  serialized_start=3880,
+  serialized_end=3969,
 )
 
 
@@ -3224,8 +3402,8 @@ _USERCONVERSATIONSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3613,
-  serialized_end=4037,
+  serialized_start=3972,
+  serialized_end=4396,
 )
 
 
@@ -3283,8 +3461,8 @@ _CONVERSATIONPARTICIPANTDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4040,
-  serialized_end=4260,
+  serialized_start=4399,
+  serialized_end=4619,
 )
 
 
@@ -3405,8 +3583,8 @@ _CONVERSATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4263,
-  serialized_end=4850,
+  serialized_start=4622,
+  serialized_end=5209,
 )
 
 
@@ -3436,8 +3614,8 @@ _EASTEREGG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4852,
-  serialized_end=4880,
+  serialized_start=5211,
+  serialized_end=5239,
 )
 
 
@@ -3474,8 +3652,8 @@ _BLOCKSTATECHANGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4882,
-  serialized_end=4978,
+  serialized_start=5241,
+  serialized_end=5337,
 )
 
 
@@ -3526,8 +3704,8 @@ _PHOTO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4980,
-  serialized_end=5088,
+  serialized_start=5339,
+  serialized_end=5447,
 )
 
 
@@ -3557,8 +3735,8 @@ _EXISTINGMEDIA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5090,
-  serialized_end=5128,
+  serialized_start=5449,
+  serialized_end=5487,
 )
 
 
@@ -3616,8 +3794,8 @@ _EVENTREQUESTHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5131,
-  serialized_end=5339,
+  serialized_start=5490,
+  serialized_end=5698,
 )
 
 
@@ -3682,8 +3860,8 @@ _CLIENTVERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5342,
-  serialized_end=5527,
+  serialized_start=5701,
+  serialized_end=5886,
 )
 
 
@@ -3727,8 +3905,8 @@ _REQUESTHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5529,
-  serialized_end=5653,
+  serialized_start=5888,
+  serialized_end=6012,
 )
 
 
@@ -3786,8 +3964,8 @@ _RESPONSEHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5656,
-  serialized_end=5806,
+  serialized_start=6015,
+  serialized_end=6165,
 )
 
 
@@ -3846,8 +4024,8 @@ _ENTITY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5809,
-  serialized_end=6144,
+  serialized_start=6168,
+  serialized_end=6503,
 )
 
 
@@ -3940,8 +4118,8 @@ _ENTITYPROPERTIES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6147,
-  serialized_end=6402,
+  serialized_start=6506,
+  serialized_end=6761,
 )
 
 
@@ -3992,8 +4170,8 @@ _CONVERSATIONSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6405,
-  serialized_end=6585,
+  serialized_start=6764,
+  serialized_end=6944,
 )
 
 
@@ -4037,8 +4215,8 @@ _EVENTCONTINUATIONTOKEN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6587,
-  serialized_end=6690,
+  serialized_start=6946,
+  serialized_end=7049,
 )
 
 
@@ -4089,8 +4267,8 @@ _ENTITYLOOKUPSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6692,
-  serialized_end=6789,
+  serialized_start=7051,
+  serialized_end=7148,
 )
 
 
@@ -4127,8 +4305,8 @@ _CONFIGURATIONBIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6791,
-  serialized_end=6879,
+  serialized_start=7150,
+  serialized_end=7238,
 )
 
 
@@ -4158,8 +4336,8 @@ _RICHPRESENCESTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6881,
-  serialized_end=6968,
+  serialized_start=7240,
+  serialized_end=7327,
 )
 
 
@@ -4196,8 +4374,8 @@ _RICHPRESENCEENABLEDSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6970,
-  serialized_end=7046,
+  serialized_start=7329,
+  serialized_end=7405,
 )
 
 
@@ -4227,8 +4405,8 @@ _DESKTOPOFFSETTING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7048,
-  serialized_end=7088,
+  serialized_start=7407,
+  serialized_end=7447,
 )
 
 
@@ -4265,8 +4443,8 @@ _DESKTOPOFFSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7090,
-  serialized_end=7145,
+  serialized_start=7449,
+  serialized_end=7504,
 )
 
 
@@ -4303,8 +4481,8 @@ _DNDSETTING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7147,
-  serialized_end=7205,
+  serialized_start=7506,
+  serialized_end=7564,
 )
 
 
@@ -4341,8 +4519,8 @@ _PRESENCESTATESETTING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7207,
-  serialized_end=7291,
+  serialized_start=7566,
+  serialized_end=7650,
 )
 
 
@@ -4372,8 +4550,8 @@ _MOODMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7293,
-  serialized_end=7342,
+  serialized_start=7652,
+  serialized_end=7701,
 )
 
 
@@ -4403,8 +4581,8 @@ _MOODCONTENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7344,
-  serialized_end=7384,
+  serialized_start=7703,
+  serialized_end=7743,
 )
 
 
@@ -4434,8 +4612,8 @@ _MOODSETTING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7386,
-  serialized_end=7435,
+  serialized_start=7745,
+  serialized_end=7794,
 )
 
 
@@ -4465,8 +4643,8 @@ _MOODSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7437,
-  serialized_end=7484,
+  serialized_start=7796,
+  serialized_end=7843,
 )
 
 
@@ -4510,8 +4688,8 @@ _DELETEACTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7486,
-  serialized_end=7605,
+  serialized_start=7845,
+  serialized_end=7964,
 )
 
 
@@ -4548,8 +4726,8 @@ _INVITEEID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7607,
-  serialized_end=7658,
+  serialized_start=7966,
+  serialized_end=8017,
 )
 
 
@@ -4586,8 +4764,8 @@ _COUNTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7660,
-  serialized_end=7712,
+  serialized_start=8019,
+  serialized_end=8071,
 )
 
 
@@ -4624,8 +4802,8 @@ _DESKTOPSOUNDSETTING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7714,
-  serialized_end=7824,
+  serialized_start=8073,
+  serialized_end=8183,
 )
 
 
@@ -4662,8 +4840,8 @@ _PHONEDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7826,
-  serialized_end=7916,
+  serialized_start=8185,
+  serialized_end=8275,
 )
 
 
@@ -4728,8 +4906,8 @@ _PHONE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7919,
-  serialized_end=8139,
+  serialized_start=8278,
+  serialized_end=8498,
 )
 
 
@@ -4794,8 +4972,8 @@ _I18NDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8142,
-  serialized_end=8319,
+  serialized_start=8501,
+  serialized_end=8678,
 )
 
 
@@ -4832,8 +5010,8 @@ _PHONENUMBER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8321,
-  serialized_end=8378,
+  serialized_start=8680,
+  serialized_end=8737,
 )
 
 
@@ -4870,8 +5048,8 @@ _SUGGESTEDCONTACTGROUPHASH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8380,
-  serialized_end=8442,
+  serialized_start=8739,
+  serialized_end=8801,
 )
 
 
@@ -4908,8 +5086,8 @@ _SUGGESTEDCONTACT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8444,
-  serialized_end=8533,
+  serialized_start=8803,
+  serialized_end=8892,
 )
 
 
@@ -4953,8 +5131,8 @@ _SUGGESTEDCONTACTGROUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8535,
-  serialized_end=8630,
+  serialized_start=8894,
+  serialized_end=8989,
 )
 
 
@@ -4984,8 +5162,8 @@ _GROUPLINKSHARINGMODIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8632,
-  serialized_end=8707,
+  serialized_start=8991,
+  serialized_end=9066,
 )
 
 
@@ -5130,8 +5308,8 @@ _STATEUPDATE = _descriptor.Descriptor(
       name='state_update', full_name='StateUpdate.state_update',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=8710,
-  serialized_end=9784,
+  serialized_start=9069,
+  serialized_end=10143,
 )
 
 
@@ -5182,8 +5360,8 @@ _STATEUPDATEHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9787,
-  serialized_end=9964,
+  serialized_start=10146,
+  serialized_end=10323,
 )
 
 
@@ -5213,8 +5391,8 @@ _BATCHUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9966,
-  serialized_end=10015,
+  serialized_start=10325,
+  serialized_end=10374,
 )
 
 
@@ -5244,8 +5422,8 @@ _CONVERSATIONNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10017,
-  serialized_end=10080,
+  serialized_start=10376,
+  serialized_end=10439,
 )
 
 
@@ -5275,8 +5453,8 @@ _EVENTNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10082,
-  serialized_end=10124,
+  serialized_start=10441,
+  serialized_end=10483,
 )
 
 
@@ -5334,8 +5512,8 @@ _SETFOCUSNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10127,
-  serialized_end=10301,
+  serialized_start=10486,
+  serialized_end=10660,
 )
 
 
@@ -5386,8 +5564,8 @@ _SETTYPINGNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10304,
-  serialized_end=10450,
+  serialized_start=10663,
+  serialized_end=10809,
 )
 
 
@@ -5431,8 +5609,8 @@ _SETCONVERSATIONNOTIFICATIONLEVELNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10453,
-  serialized_end=10595,
+  serialized_start=10812,
+  serialized_end=10954,
 )
 
 
@@ -5469,8 +5647,8 @@ _REPLYTOINVITENOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10597,
-  serialized_end=10700,
+  serialized_start=10956,
+  serialized_end=11059,
 )
 
 
@@ -5514,8 +5692,8 @@ _WATERMARKNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10703,
-  serialized_end=10834,
+  serialized_start=11062,
+  serialized_end=11193,
 )
 
 
@@ -5559,8 +5737,8 @@ _CONVERSATIONVIEWMODIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10837,
-  serialized_end=10983,
+  serialized_start=11196,
+  serialized_end=11342,
 )
 
 
@@ -5604,8 +5782,8 @@ _EASTEREGGNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10986,
-  serialized_end=11118,
+  serialized_start=11345,
+  serialized_end=11477,
 )
 
 
@@ -5663,8 +5841,8 @@ _SELFPRESENCENOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11121,
-  serialized_end=11380,
+  serialized_start=11480,
+  serialized_end=11739,
 )
 
 
@@ -5701,8 +5879,8 @@ _DELETEACTIONNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11382,
-  serialized_end=11488,
+  serialized_start=11741,
+  serialized_end=11847,
 )
 
 
@@ -5732,8 +5910,8 @@ _PRESENCENOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11490,
-  serialized_end=11547,
+  serialized_start=11849,
+  serialized_end=11906,
 )
 
 
@@ -5763,8 +5941,8 @@ _BLOCKNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11549,
-  serialized_end=11615,
+  serialized_start=11908,
+  serialized_end=11974,
 )
 
 
@@ -5801,8 +5979,8 @@ _SETNOTIFICATIONSETTINGNOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11618,
-  serialized_end=11753,
+  serialized_start=11977,
+  serialized_end=12112,
 )
 
 
@@ -5832,8 +6010,8 @@ _RICHPRESENCEENABLEDSTATENOTIFICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11755,
-  serialized_end=11857,
+  serialized_start=12114,
+  serialized_end=12216,
 )
 
 
@@ -5863,8 +6041,8 @@ _CONVERSATIONSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11859,
-  serialized_end=11919,
+  serialized_start=12218,
+  serialized_end=12278,
 )
 
 
@@ -5901,8 +6079,8 @@ _OFFNETWORKADDRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11921,
-  serialized_end=11993,
+  serialized_start=12280,
+  serialized_end=12352,
 )
 
 
@@ -5939,8 +6117,8 @@ _ENTITYRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11995,
-  serialized_end=12074,
+  serialized_start=12354,
+  serialized_end=12433,
 )
 
 
@@ -5984,8 +6162,8 @@ _ADDUSERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12077,
-  serialized_end=12216,
+  serialized_start=12436,
+  serialized_end=12575,
 )
 
 
@@ -6022,8 +6200,8 @@ _ADDUSERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12218,
-  serialized_end=12308,
+  serialized_start=12577,
+  serialized_end=12667,
 )
 
 
@@ -6081,8 +6259,8 @@ _CREATECONVERSATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12311,
-  serialized_end=12486,
+  serialized_start=12670,
+  serialized_end=12845,
 )
 
 
@@ -6126,8 +6304,8 @@ _CREATECONVERSATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12489,
-  serialized_end=12630,
+  serialized_start=12848,
+  serialized_end=12989,
 )
 
 
@@ -6171,8 +6349,8 @@ _DELETECONVERSATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12633,
-  serialized_end=12780,
+  serialized_start=12992,
+  serialized_end=13139,
 )
 
 
@@ -6209,8 +6387,8 @@ _DELETECONVERSATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12782,
-  serialized_end=12890,
+  serialized_start=13141,
+  serialized_end=13249,
 )
 
 
@@ -6254,8 +6432,8 @@ _EASTEREGGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12893,
-  serialized_end=13025,
+  serialized_start=13252,
+  serialized_end=13384,
 )
 
 
@@ -6292,8 +6470,8 @@ _EASTEREGGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13027,
-  serialized_end=13107,
+  serialized_start=13386,
+  serialized_end=13466,
 )
 
 
@@ -6358,8 +6536,8 @@ _GETCONVERSATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13110,
-  serialized_end=13378,
+  serialized_start=13469,
+  serialized_end=13737,
 )
 
 
@@ -6396,8 +6574,8 @@ _GETCONVERSATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13380,
-  serialized_end=13495,
+  serialized_start=13739,
+  serialized_end=13854,
 )
 
 
@@ -6434,8 +6612,8 @@ _GETENTITYBYIDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13497,
-  serialized_end=13605,
+  serialized_start=13856,
+  serialized_end=13964,
 )
 
 
@@ -6479,8 +6657,8 @@ _GETENTITYBYIDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13608,
-  serialized_end=13736,
+  serialized_start=13967,
+  serialized_end=14095,
 )
 
 
@@ -6517,8 +6695,8 @@ _GETGROUPCONVERSATIONURLREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13738,
-  serialized_end=13852,
+  serialized_start=14097,
+  serialized_end=14211,
 )
 
 
@@ -6555,8 +6733,8 @@ _GETGROUPCONVERSATIONURLRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13854,
-  serialized_end=13961,
+  serialized_start=14213,
+  serialized_end=14320,
 )
 
 
@@ -6635,8 +6813,8 @@ _GETSUGGESTEDENTITIESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13964,
-  serialized_end=14388,
+  serialized_start=14323,
+  serialized_end=14747,
 )
 
 
@@ -6715,8 +6893,8 @@ _GETSUGGESTEDENTITIESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14391,
-  serialized_end=14800,
+  serialized_start=14750,
+  serialized_end=15159,
 )
 
 
@@ -6746,8 +6924,8 @@ _GETSELFINFOREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14802,
-  serialized_end=14862,
+  serialized_start=15161,
+  serialized_end=15221,
 )
 
 
@@ -6854,8 +7032,8 @@ _GETSELFINFORESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14865,
-  serialized_end=15358,
+  serialized_start=15224,
+  serialized_end=15717,
 )
 
 
@@ -6899,8 +7077,8 @@ _QUERYPRESENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15361,
-  serialized_end=15495,
+  serialized_start=15720,
+  serialized_end=15854,
 )
 
 
@@ -6937,8 +7115,8 @@ _QUERYPRESENCERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15497,
-  serialized_end=15604,
+  serialized_start=15856,
+  serialized_end=15963,
 )
 
 
@@ -6982,8 +7160,8 @@ _REMOVEUSERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15607,
-  serialized_end=15757,
+  serialized_start=15966,
+  serialized_end=16116,
 )
 
 
@@ -7020,8 +7198,8 @@ _REMOVEUSERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15759,
-  serialized_end=15852,
+  serialized_start=16118,
+  serialized_end=16211,
 )
 
 
@@ -7065,8 +7243,8 @@ _RENAMECONVERSATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15855,
-  serialized_end=15991,
+  serialized_start=16214,
+  serialized_end=16350,
 )
 
 
@@ -7103,8 +7281,8 @@ _RENAMECONVERSATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15993,
-  serialized_end=16094,
+  serialized_start=16352,
+  serialized_end=16453,
 )
 
 
@@ -7148,8 +7326,8 @@ _SEARCHENTITIESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16096,
-  serialized_end=16193,
+  serialized_start=16455,
+  serialized_end=16552,
 )
 
 
@@ -7186,8 +7364,39 @@ _SEARCHENTITIESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16195,
-  serialized_end=16286,
+  serialized_start=16554,
+  serialized_end=16645,
+)
+
+
+_LOCATION = _descriptor.Descriptor(
+  name='Location',
+  full_name='Location',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='place', full_name='Location.place', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=16647,
+  serialized_end=16680,
 )
 
 
@@ -7233,6 +7442,20 @@ _SENDCHATMESSAGEREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='SendChatMessageRequest.user_id', index=5,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='location', full_name='SendChatMessageRequest.location', index=6,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -7245,8 +7468,8 @@ _SENDCHATMESSAGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16289,
-  serialized_end=16524,
+  serialized_start=16683,
+  serialized_end=16980,
 )
 
 
@@ -7283,8 +7506,8 @@ _SENDCHATMESSAGERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16526,
-  serialized_end=16624,
+  serialized_start=16982,
+  serialized_end=17080,
 )
 
 
@@ -7328,8 +7551,8 @@ _MODIFYOTRSTATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16627,
-  serialized_end=16783,
+  serialized_start=17083,
+  serialized_end=17239,
 )
 
 
@@ -7366,8 +7589,8 @@ _MODIFYOTRSTATUSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16785,
-  serialized_end=16883,
+  serialized_start=17241,
+  serialized_end=17339,
 )
 
 
@@ -7404,8 +7627,8 @@ _SENDOFFNETWORKINVITATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16885,
-  serialized_end=17003,
+  serialized_start=17341,
+  serialized_end=17459,
 )
 
 
@@ -7435,8 +7658,8 @@ _SENDOFFNETWORKINVITATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17005,
-  serialized_end=17081,
+  serialized_start=17461,
+  serialized_end=17537,
 )
 
 
@@ -7487,8 +7710,8 @@ _SETACTIVECLIENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17083,
-  serialized_end=17206,
+  serialized_start=17539,
+  serialized_end=17662,
 )
 
 
@@ -7518,8 +7741,8 @@ _SETACTIVECLIENTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17208,
-  serialized_end=17275,
+  serialized_start=17664,
+  serialized_end=17731,
 )
 
 
@@ -7549,8 +7772,8 @@ _SETCONVERSATIONLEVELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17277,
-  serialized_end=17346,
+  serialized_start=17733,
+  serialized_end=17802,
 )
 
 
@@ -7580,8 +7803,8 @@ _SETCONVERSATIONLEVELRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17348,
-  serialized_end=17420,
+  serialized_start=17804,
+  serialized_end=17876,
 )
 
 
@@ -7625,8 +7848,8 @@ _SETCONVERSATIONNOTIFICATIONLEVELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17423,
-  serialized_end=17581,
+  serialized_start=17879,
+  serialized_end=18037,
 )
 
 
@@ -7663,8 +7886,8 @@ _SETCONVERSATIONNOTIFICATIONLEVELRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17583,
-  serialized_end=17686,
+  serialized_start=18039,
+  serialized_end=18142,
 )
 
 
@@ -7715,8 +7938,8 @@ _SETFOCUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17689,
-  serialized_end=17836,
+  serialized_start=18145,
+  serialized_end=18292,
 )
 
 
@@ -7753,8 +7976,8 @@ _SETFOCUSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17838,
-  serialized_end=17917,
+  serialized_start=18294,
+  serialized_end=18373,
 )
 
 
@@ -7798,8 +8021,8 @@ _SETGROUPLINKSHARINGENABLEDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17920,
-  serialized_end=18106,
+  serialized_start=18376,
+  serialized_end=18562,
 )
 
 
@@ -7843,8 +8066,8 @@ _SETGROUPLINKSHARINGENABLEDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18109,
-  serialized_end=18263,
+  serialized_start=18565,
+  serialized_end=18719,
 )
 
 
@@ -7902,8 +8125,8 @@ _SETPRESENCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18266,
-  serialized_end=18500,
+  serialized_start=18722,
+  serialized_end=18956,
 )
 
 
@@ -7933,8 +8156,8 @@ _SETPRESENCERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18502,
-  serialized_end=18565,
+  serialized_start=18958,
+  serialized_end=19021,
 )
 
 
@@ -7978,8 +8201,8 @@ _SETTYPINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18567,
-  serialized_end=18694,
+  serialized_start=19023,
+  serialized_end=19150,
 )
 
 
@@ -8016,8 +8239,8 @@ _SETTYPINGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18696,
-  serialized_end=18776,
+  serialized_start=19152,
+  serialized_end=19232,
 )
 
 
@@ -8061,8 +8284,8 @@ _SYNCALLNEWEVENTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18778,
-  serialized_end=18905,
+  serialized_start=19234,
+  serialized_end=19361,
 )
 
 
@@ -8106,8 +8329,8 @@ _SYNCALLNEWEVENTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18908,
-  serialized_end=19048,
+  serialized_start=19364,
+  serialized_end=19504,
 )
 
 
@@ -8165,8 +8388,8 @@ _SYNCRECENTCONVERSATIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19051,
-  serialized_end=19251,
+  serialized_start=19507,
+  serialized_end=19707,
 )
 
 
@@ -8217,8 +8440,8 @@ _SYNCRECENTCONVERSATIONSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19254,
-  serialized_end=19437,
+  serialized_start=19710,
+  serialized_end=19893,
 )
 
 
@@ -8262,8 +8485,8 @@ _UPDATEWATERMARKREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19440,
-  serialized_end=19575,
+  serialized_start=19896,
+  serialized_end=20031,
 )
 
 
@@ -8293,8 +8516,8 @@ _UPDATEWATERMARKRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19577,
-  serialized_end=19644,
+  serialized_start=20033,
+  serialized_end=20100,
 )
 
 _NOTIFICATIONSETTINGS.fields_by_name['dnd_settings'].message_type = _DONOTDISTURBSETTING
@@ -8314,7 +8537,17 @@ _PLUSPHOTO_THUMBNAIL.containing_type = _PLUSPHOTO
 _PLUSPHOTO.fields_by_name['thumbnail'].message_type = _PLUSPHOTO_THUMBNAIL
 _PLUSPHOTO.fields_by_name['media_type'].enum_type = _PLUSPHOTO_MEDIATYPE
 _PLUSPHOTO_MEDIATYPE.containing_type = _PLUSPHOTO
+_PLACE_DISPLAYINFO_DESCRIPTION.containing_type = _PLACE_DISPLAYINFO
+_PLACE_DISPLAYINFO.fields_by_name['description'].message_type = _PLACE_DISPLAYINFO_DESCRIPTION
+_PLACE_DISPLAYINFO.containing_type = _PLACE
+_PLACE_LOCATIONINFO_LATLNG.containing_type = _PLACE_LOCATIONINFO
+_PLACE_LOCATIONINFO.fields_by_name['latlng'].message_type = _PLACE_LOCATIONINFO_LATLNG
+_PLACE_LOCATIONINFO.containing_type = _PLACE
+_PLACE_REPRESENTATIVEIMAGE_IMAGE.containing_type = _PLACE_REPRESENTATIVEIMAGE
+_PLACE_REPRESENTATIVEIMAGE.fields_by_name['image'].message_type = _PLACE_REPRESENTATIVEIMAGE_IMAGE
 _PLACE_REPRESENTATIVEIMAGE.containing_type = _PLACE
+_PLACE.fields_by_name['display_info'].message_type = _PLACE_DISPLAYINFO
+_PLACE.fields_by_name['location_info'].message_type = _PLACE_LOCATIONINFO
 _PLACE.fields_by_name['representative_image'].message_type = _PLACE_REPRESENTATIVEIMAGE
 _EMBEDITEM.fields_by_name['type'].enum_type = _ITEMTYPE
 _EMBEDITEM.fields_by_name['plus_photo'].message_type = _PLUSPHOTO
@@ -8595,11 +8828,14 @@ _RENAMECONVERSATIONRESPONSE.fields_by_name['created_event'].message_type = _EVEN
 _SEARCHENTITIESREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
 _SEARCHENTITIESRESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
 _SEARCHENTITIESRESPONSE.fields_by_name['entity'].message_type = _ENTITY
+_LOCATION.fields_by_name['place'].message_type = _PLACE
 _SENDCHATMESSAGEREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
 _SENDCHATMESSAGEREQUEST.fields_by_name['annotation'].message_type = _EVENTANNOTATION
 _SENDCHATMESSAGEREQUEST.fields_by_name['message_content'].message_type = _MESSAGECONTENT
 _SENDCHATMESSAGEREQUEST.fields_by_name['existing_media'].message_type = _EXISTINGMEDIA
 _SENDCHATMESSAGEREQUEST.fields_by_name['event_request_header'].message_type = _EVENTREQUESTHEADER
+_SENDCHATMESSAGEREQUEST.fields_by_name['user_id'].message_type = _PARTICIPANTID
+_SENDCHATMESSAGEREQUEST.fields_by_name['location'].message_type = _LOCATION
 _SENDCHATMESSAGERESPONSE.fields_by_name['response_header'].message_type = _RESPONSEHEADER
 _SENDCHATMESSAGERESPONSE.fields_by_name['created_event'].message_type = _EVENT
 _MODIFYOTRSTATUSREQUEST.fields_by_name['request_header'].message_type = _REQUESTHEADER
@@ -8764,6 +9000,7 @@ DESCRIPTOR.message_types_by_name['RenameConversationRequest'] = _RENAMECONVERSAT
 DESCRIPTOR.message_types_by_name['RenameConversationResponse'] = _RENAMECONVERSATIONRESPONSE
 DESCRIPTOR.message_types_by_name['SearchEntitiesRequest'] = _SEARCHENTITIESREQUEST
 DESCRIPTOR.message_types_by_name['SearchEntitiesResponse'] = _SEARCHENTITIESRESPONSE
+DESCRIPTOR.message_types_by_name['Location'] = _LOCATION
 DESCRIPTOR.message_types_by_name['SendChatMessageRequest'] = _SENDCHATMESSAGEREQUEST
 DESCRIPTOR.message_types_by_name['SendChatMessageResponse'] = _SENDCHATMESSAGERESPONSE
 DESCRIPTOR.message_types_by_name['ModifyOTRStatusRequest'] = _MODIFYOTRSTATUSREQUEST
@@ -8949,7 +9186,42 @@ _sym_db.RegisterMessage(PlusPhoto.Thumbnail)
 
 Place = _reflection.GeneratedProtocolMessageType('Place', (_message.Message,), dict(
 
+  DisplayInfo = _reflection.GeneratedProtocolMessageType('DisplayInfo', (_message.Message,), dict(
+
+    Description = _reflection.GeneratedProtocolMessageType('Description', (_message.Message,), dict(
+      DESCRIPTOR = _PLACE_DISPLAYINFO_DESCRIPTION,
+      __module__ = 'hangups.hangouts_pb2'
+      # @@protoc_insertion_point(class_scope:Place.DisplayInfo.Description)
+      ))
+    ,
+    DESCRIPTOR = _PLACE_DISPLAYINFO,
+    __module__ = 'hangups.hangouts_pb2'
+    # @@protoc_insertion_point(class_scope:Place.DisplayInfo)
+    ))
+  ,
+
+  LocationInfo = _reflection.GeneratedProtocolMessageType('LocationInfo', (_message.Message,), dict(
+
+    LatLng = _reflection.GeneratedProtocolMessageType('LatLng', (_message.Message,), dict(
+      DESCRIPTOR = _PLACE_LOCATIONINFO_LATLNG,
+      __module__ = 'hangups.hangouts_pb2'
+      # @@protoc_insertion_point(class_scope:Place.LocationInfo.LatLng)
+      ))
+    ,
+    DESCRIPTOR = _PLACE_LOCATIONINFO,
+    __module__ = 'hangups.hangouts_pb2'
+    # @@protoc_insertion_point(class_scope:Place.LocationInfo)
+    ))
+  ,
+
   RepresentativeImage = _reflection.GeneratedProtocolMessageType('RepresentativeImage', (_message.Message,), dict(
+
+    Image = _reflection.GeneratedProtocolMessageType('Image', (_message.Message,), dict(
+      DESCRIPTOR = _PLACE_REPRESENTATIVEIMAGE_IMAGE,
+      __module__ = 'hangups.hangouts_pb2'
+      # @@protoc_insertion_point(class_scope:Place.RepresentativeImage.Image)
+      ))
+    ,
     DESCRIPTOR = _PLACE_REPRESENTATIVEIMAGE,
     __module__ = 'hangups.hangouts_pb2'
     # @@protoc_insertion_point(class_scope:Place.RepresentativeImage)
@@ -8960,7 +9232,12 @@ Place = _reflection.GeneratedProtocolMessageType('Place', (_message.Message,), d
   # @@protoc_insertion_point(class_scope:Place)
   ))
 _sym_db.RegisterMessage(Place)
+_sym_db.RegisterMessage(Place.DisplayInfo)
+_sym_db.RegisterMessage(Place.DisplayInfo.Description)
+_sym_db.RegisterMessage(Place.LocationInfo)
+_sym_db.RegisterMessage(Place.LocationInfo.LatLng)
 _sym_db.RegisterMessage(Place.RepresentativeImage)
+_sym_db.RegisterMessage(Place.RepresentativeImage.Image)
 
 EmbedItem = _reflection.GeneratedProtocolMessageType('EmbedItem', (_message.Message,), dict(
   DESCRIPTOR = _EMBEDITEM,
@@ -9661,6 +9938,13 @@ SearchEntitiesResponse = _reflection.GeneratedProtocolMessageType('SearchEntitie
   # @@protoc_insertion_point(class_scope:SearchEntitiesResponse)
   ))
 _sym_db.RegisterMessage(SearchEntitiesResponse)
+
+Location = _reflection.GeneratedProtocolMessageType('Location', (_message.Message,), dict(
+  DESCRIPTOR = _LOCATION,
+  __module__ = 'hangups.hangouts_pb2'
+  # @@protoc_insertion_point(class_scope:Location)
+  ))
+_sym_db.RegisterMessage(Location)
 
 SendChatMessageRequest = _reflection.GeneratedProtocolMessageType('SendChatMessageRequest', (_message.Message,), dict(
   DESCRIPTOR = _SENDCHATMESSAGEREQUEST,
