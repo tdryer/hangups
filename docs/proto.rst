@@ -214,19 +214,68 @@ Field                        Number Type                         Label    Descri
 ============================ ====== ============================ ======== =================================================
 :code:`url`                  1      string                       optional Google Maps URL pointing to the map coordinates. 
 :code:`name`                 3      string                       optional Name of map location.                            
+:code:`display_info`         24     `Place.DisplayInfo`_         optional                                                  
+:code:`location_info`        25     `Place.LocationInfo`_        optional                                                  
 :code:`representative_image` 185    `Place.RepresentativeImage`_ optional Representative image of the place (map with pin).
 ============================ ====== ============================ ======== =================================================
+
+Place.DisplayInfo
+-----------------
+
+=================== ======== ================================ ======== ===========
+Field               Number   Type                             Label    Description
+=================== ======== ================================ ======== ===========
+:code:`description` 36003298 `Place.DisplayInfo.Description`_ optional            
+=================== ======== ================================ ======== ===========
+
+Place.DisplayInfo.Description
+-----------------------------
+
+============ ====== ====== ======== ===========
+Field        Number Type   Label    Description
+============ ====== ====== ======== ===========
+:code:`text` 35     string optional            
+============ ====== ====== ======== ===========
+
+Place.LocationInfo
+------------------
+
+============== ======== ============================ ======== ===========
+Field          Number   Type                         Label    Description
+============== ======== ============================ ======== ===========
+:code:`latlng` 36736749 `Place.LocationInfo.LatLng`_ optional            
+============== ======== ============================ ======== ===========
+
+Place.LocationInfo.LatLng
+-------------------------
+
+=========== ====== ====== ======== ===========
+Field       Number Type   Label    Description
+=========== ====== ====== ======== ===========
+:code:`lat` 36     double optional            
+:code:`lng` 37     double optional            
+=========== ====== ====== ======== ===========
 
 Place.RepresentativeImage
 -------------------------
 
 Representative image of a place.
 
-=========== ====== ====== ======== =============
-Field       Number Type   Label    Description  
-=========== ====== ====== ======== =============
-:code:`url` 2      string optional URL of image.
-=========== ====== ====== ======== =============
+============= ======== ================================== ======== =============
+Field         Number   Type                               Label    Description  
+============= ======== ================================== ======== =============
+:code:`url`   2        string                             optional URL of image.
+:code:`image` 40265033 `Place.RepresentativeImage.Image`_ optional              
+============= ======== ================================== ======== =============
+
+Place.RepresentativeImage.Image
+-------------------------------
+
+=========== ====== ====== ======== ===========
+Field       Number Type   Label    Description
+=========== ====== ====== ======== ===========
+:code:`url` 1      string optional            
+=========== ====== ====== ======== ===========
 
 EmbedItem
 ---------
@@ -1425,18 +1474,29 @@ Field                   Number Type              Label    Description
 :code:`entity`          2      `Entity`_         repeated            
 ======================= ====== ================= ======== ===========
 
+Location
+--------
+
+============= ====== ======== ======== ===========
+Field         Number Type     Label    Description
+============= ====== ======== ======== ===========
+:code:`place` 1      `Place`_ optional            
+============= ====== ======== ======== ===========
+
 SendChatMessageRequest
 ----------------------
 
-============================ ====== ===================== ======== ===========
-Field                        Number Type                  Label    Description
-============================ ====== ===================== ======== ===========
-:code:`request_header`       1      `RequestHeader`_      optional            
-:code:`annotation`           5      `EventAnnotation`_    repeated            
-:code:`message_content`      6      `MessageContent`_     optional            
-:code:`existing_media`       7      `ExistingMedia`_      optional            
-:code:`event_request_header` 8      `EventRequestHeader`_ optional            
-============================ ====== ===================== ======== ===========
+============================ ====== ===================== ======== ================
+Field                        Number Type                  Label    Description     
+============================ ====== ===================== ======== ================
+:code:`request_header`       1      `RequestHeader`_      optional                 
+:code:`annotation`           5      `EventAnnotation`_    repeated                 
+:code:`message_content`      6      `MessageContent`_     optional                 
+:code:`existing_media`       7      `ExistingMedia`_      optional                 
+:code:`event_request_header` 8      `EventRequestHeader`_ optional                 
+:code:`user_id`              9      `ParticipantId`_      optional                 
+:code:`location`             10     `Location`_           optional TODO: incomplete
+============================ ====== ===================== ======== ================
 
 SendChatMessageResponse
 -----------------------
