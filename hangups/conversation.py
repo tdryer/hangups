@@ -4,6 +4,7 @@ import asyncio
 import datetime
 import logging
 import math
+import collections
 
 from hangups import (parsers, event, user, conversation_event, exceptions,
                      hangouts_pb2)
@@ -29,8 +30,12 @@ def build_user_conversation_list(client):
             Tuple of built objects.
     """
 
+    # Store all the conversations in an OrderedDict to avoid duplication
+    # if a request for a page of conversations includes a conversation
+    # we've already seen
+    conv_states = collections.OrderedDict()
+
     # Retrieve conversations in groups of CONVERSATIONS_PER_REQUEST.
-    conv_states = []
     sync_timestamp, next_timestamp = None, None
     last_synced = CONVERSATIONS_PER_REQUEST
 
@@ -50,14 +55,28 @@ def build_user_conversation_list(client):
             )
         )
 
-        # Add these conversations to the list of states
+        # Add these conversations to the dict of states
         response_conv_states = response.conversation_state
         min_timestamp = float('inf')
         for conv_state in response_conv_states:
-            conv_event = conv_state.event[0]
-            if conv_event.timestamp < min_timestamp:
-                min_timestamp = conv_event.timestamp
-            conv_states.append(conv_state)
+            timestamp = None
+            conversation_id = conv_state.conversation_id.id
+            self_conv_state = conv_state.conversation.self_conversation_state
+            if self_conv_state:
+                # Use the timestamp from our conversation state
+                timestamp = self_conv_state.sort_timestamp
+
+            if not timestamp:
+                # No idea when this conversation occurred. Disregard its
+                # timestamp completely.
+                logger.warning(('Unable to obtain an event timestamp for '
+                                'conversation {}').format(conversation_id))
+            elif timestamp < min_timestamp:
+                # Got a valid timestamp; update the minimum found so far.
+                min_timestamp = timestamp
+
+            # Add this conversation to the conversation dict
+            conv_states[conversation_id] = conv_state
 
         # Update the number of conversations synced and sync timestamp
         last_synced = len(response_conv_states)
@@ -79,6 +98,8 @@ def build_user_conversation_list(client):
             next_timestamp = 0
             break
 
+    # Create the final deduplicated conversation list
+    conv_states = list(conv_states.values())
     logger.info('Synced {} total conversations'.format(len(conv_states)))
 
     # Retrieve entities participating in all conversations.
