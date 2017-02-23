@@ -18,11 +18,16 @@ For help with command line arguments, run::
 Logging in
 ----------
 
-The first time you start hangups, you will need to log in to your Google
-account. hangups supports logging in using `OAuth 2.0`_. You will be prompted
-to open a link in your browser. Google will prompt you to authorize the
-application, and then provide an authorization code. Copy and paste the
-authorization code into hangups to complete the process.
+The first time you start hangups, you need to log into your Google account.
+
+.. caution::
+    Never give your Google account credentials to any application or device
+    that you don't trust. Logging into Google grants hangups unrestricted
+    access to your account. hangups works this way because Google does not
+    provide any other method to access the Hangouts API.
+
+You will be prompted to enter your Google email address, password, and
+verification code (if applicable).
 
 After a successful login, hangups will save a refresh token allowing it to
 login automatically. By default, the token is saved to a file in an OS-specific
@@ -32,7 +37,7 @@ cache directory. The default token file path can be viewed using :code:`hangups
 
   hangups --token-path /path/to/refresh_token.txt
 
-hangups may be deauthorized from your Google account from the `Google recently
+hangups may be deauthorized from your Google account using the `Google recently
 used devices page`_. hangups will be listed as "iOS".
 
 .. _OAuth 2.0: http://oauth.net/2/
