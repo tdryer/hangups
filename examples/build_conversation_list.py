@@ -16,16 +16,30 @@ def sync_recent_conversations(client, _):
     all_conversations = conversation_list.get_all(include_archived=True)
 
     print('{} known users'.format(len(all_users)))
-    for user in all_users:
-        print('    {}: {}'.format(user.full_name, user.id_.gaia_id))
+    for idx, user in enumerate(all_users):
+        name = user.full_name
+        gaia_id = user.id_.gaia_id
+        print('    ({}) {}: {}'.format(idx + 1, name, gaia_id))
 
     print('{} known conversations'.format(len(all_conversations)))
-    for conversation in all_conversations:
+    for idx, conversation in enumerate(all_conversations):
+        cid = conversation.id_
+
         if conversation.name:
-            name = conversation.name
+            # This conversation is named
+            name = '{} ({})'.format(conversation.name, cid)
         else:
-            name = 'Unnamed conversation ({})'.format(conversation.id_)
-        print('    {}'.format(name))
+            # This conversation isn't named; just generate a name from
+            # the full names of users in the conversation that aren't us.
+            users = ', '.join(
+                map(lambda u: u.full_name,
+                    filter(lambda u: u.id_ != user_list._self_user.id_,
+                           conversation.users)
+                )
+            )
+            name = 'Conversation with {} ({})'.format(users, cid)
+
+        print('    ({}) {}'.format(idx + 1, name))
 
 
 if __name__ == '__main__':
