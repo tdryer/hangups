@@ -1574,7 +1574,7 @@ message SyncRecentConversationsResponse {
   optional ResponseHeader response_header = 1;
   optional uint64 sync_timestamp = 2;
   repeated ConversationState conversation_state = 3;
-  optional EventContinuationToken event_continuation_token = 4;
+  optional uint64 continuation_end_timestamp = 4;
 }
 
 message UpdateWatermarkRequest {

@@ -1675,14 +1675,14 @@ Field                               Number Type             Label    Description
 SyncRecentConversationsResponse
 -------------------------------
 
-================================ ====== ========================= ======== ===========
-Field                            Number Type                      Label    Description
-================================ ====== ========================= ======== ===========
-:code:`response_header`          1      `ResponseHeader`_         optional            
-:code:`sync_timestamp`           2      uint64                    optional            
-:code:`conversation_state`       3      `ConversationState`_      repeated            
-:code:`event_continuation_token` 4      `EventContinuationToken`_ optional            
-================================ ====== ========================= ======== ===========
+================================== ====== ==================== ======== ===========
+Field                              Number Type                 Label    Description
+================================== ====== ==================== ======== ===========
+:code:`response_header`            1      `ResponseHeader`_    optional            
+:code:`sync_timestamp`             2      uint64               optional            
+:code:`conversation_state`         3      `ConversationState`_ repeated            
+:code:`continuation_end_timestamp` 4      uint64               optional            
+================================== ====== ==================== ======== ===========
 
 UpdateWatermarkRequest
 ----------------------

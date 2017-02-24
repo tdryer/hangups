@@ -3,7 +3,6 @@
 import asyncio
 import datetime
 import logging
-import math
 
 from hangups import (parsers, event, user, conversation_event, exceptions,
                      hangouts_pb2)
@@ -11,6 +10,7 @@ from hangups import (parsers, event, user, conversation_event, exceptions,
 logger = logging.getLogger(__name__)
 
 CONVERSATIONS_PER_REQUEST = 100
+MAX_CONVERSATION_PAGES = 100
 
 
 @asyncio.coroutine
@@ -28,58 +28,7 @@ def build_user_conversation_list(client):
         (:class:`~UserList`, :class:`~ConversationList`):
             Tuple of built objects.
     """
-
-    # Retrieve conversations in groups of CONVERSATIONS_PER_REQUEST.
-    conv_states = []
-    sync_timestamp, next_timestamp = None, None
-    last_synced = CONVERSATIONS_PER_REQUEST
-
-    while last_synced == CONVERSATIONS_PER_REQUEST:
-        response = (
-            yield from client.sync_recent_conversations(
-                hangouts_pb2.SyncRecentConversationsRequest(
-                    request_header=client.get_request_header(),
-                    last_event_timestamp=next_timestamp,
-                    max_conversations=CONVERSATIONS_PER_REQUEST,
-                    max_events_per_conversation=1,
-                    sync_filter=[
-                        hangouts_pb2.SYNC_FILTER_INBOX,
-                        hangouts_pb2.SYNC_FILTER_ARCHIVED,
-                    ]
-                )
-            )
-        )
-
-        # Add these conversations to the list of states
-        response_conv_states = response.conversation_state
-        min_timestamp = float('inf')
-        for conv_state in response_conv_states:
-            conv_event = conv_state.event[0]
-            if conv_event.timestamp < min_timestamp:
-                min_timestamp = conv_event.timestamp
-            conv_states.append(conv_state)
-
-        # Update the number of conversations synced and sync timestamp
-        last_synced = len(response_conv_states)
-        sync_timestamp = parsers.from_timestamp(
-            # SyncRecentConversations seems to return a sync_timestamp 4
-            # minutes before the present. To prevent SyncAllNewEvents later
-            # breaking requesting events older than what we already have, use
-            # current_server_time instead.
-            response.response_header.current_server_time
-        )
-
-        logger.debug('Added {} conversations'.format(last_synced))
-
-        if math.isfinite(min_timestamp):
-            # Start syncing conversations just before this one
-            next_timestamp = min_timestamp - 1
-        else:
-            # No minimum timestamp; abort.
-            next_timestamp = 0
-            break
-
-    logger.info('Synced {} total conversations'.format(len(conv_states)))
+    conv_states, sync_timestamp = yield from _sync_all_conversations(client)
 
     # Retrieve entities participating in all conversations.
     required_user_ids = set()
@@ -128,6 +77,56 @@ def build_user_conversation_list(client):
     conversation_list = ConversationList(client, conv_states,
                                          user_list, sync_timestamp)
     return (user_list, conversation_list)
+
+
+@asyncio.coroutine
+def _sync_all_conversations(client):
+    """Sync all conversations by making paginated requests.
+
+    Conversations are ordered by ascending sort timestamp.
+
+    Args:
+        client (Client): Connected client.
+
+    Raises:
+        NetworkError: If the requests fail.
+
+    Returns:
+        tuple of list of ``ConversationState`` messages and sync timestamp
+    """
+    conv_states = []
+    sync_timestamp = None
+    request = hangouts_pb2.SyncRecentConversationsRequest(
+        request_header=client.get_request_header(),
+        max_conversations=CONVERSATIONS_PER_REQUEST,
+        max_events_per_conversation=1,
+        sync_filter=[
+            hangouts_pb2.SYNC_FILTER_INBOX,
+            hangouts_pb2.SYNC_FILTER_ARCHIVED,
+        ]
+    )
+    for _ in range(MAX_CONVERSATION_PAGES):
+        logger.info(
+            'Requesting conversations page %s', request.last_event_timestamp
+        )
+        response = yield from client.sync_recent_conversations(request)
+        conv_states = list(response.conversation_state) + conv_states
+        sync_timestamp = parsers.from_timestamp(
+            # SyncRecentConversations seems to return a sync_timestamp 4
+            # minutes before the present. To prevent SyncAllNewEvents later
+            # breaking requesting events older than what we already have, use
+            # current_server_time instead.
+            response.response_header.current_server_time
+        )
+        if response.continuation_end_timestamp == 0:
+            logger.info('Reached final conversations page')
+            break
+        else:
+            request.last_event_timestamp = response.continuation_end_timestamp
+    else:
+        logger.warning('Exceeded maximum number of conversation pages')
+    logger.info('Synced %s total conversations', len(conv_states))
+    return conv_states, sync_timestamp
 
 
 class Conversation(object):
@@ -798,7 +797,7 @@ class ConversationList(object):
         """Add new conversation from hangouts_pb2.Conversation"""
         # pylint: disable=dangerous-default-value
         conv_id = conversation.conversation_id.id
-        logger.info('Adding new conversation: {}'.format(conv_id))
+        logger.debug('Adding new conversation: {}'.format(conv_id))
         conv = Conversation(self._client, self._user_list, conversation,
                             events)
         self._conv_dict[conv_id] = conv
