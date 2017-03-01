@@ -477,6 +477,55 @@ class Conversation:
                 logger.warning('Failed to send message: {}'.format(e))
                 raise
 
+    async def add_user(self, *user_ids):
+        """Add one or more users to this conversation.
+
+        Args:
+            user_ids (str...): IDs of the new users.
+
+        Raises:
+            TypeError: If conversation is not a group.
+            NetworkError: If conversation cannot be invited to.
+        """
+        if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
+            raise TypeError('Conversation is not a group')
+        try:
+            await self._client.add_user(
+                hangouts_pb2.AddUserRequest(
+                    request_header=self._client.get_request_header(),
+                    event_request_header=self._get_event_request_header(),
+                    invitee_id=[hangouts_pb2.InviteeID(gaia_id=user_id)
+                                for user_id in user_ids],
+                )
+            )
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to add user: {}'.format(e))
+            raise
+
+    async def remove_user(self, user_id):
+        """Remove a user from this conversation.
+
+        Args:
+            user_id (str): ID of the existing user.
+
+        Raises:
+            TypeError: If conversation is not a group.
+            NetworkError: If conversation cannot be removed from.
+        """
+        if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
+            raise TypeError('Conversation is not a group')
+        try:
+            await self._client.remove_user(
+                hangouts_pb2.RemoveUserRequest(
+                    request_header=self._client.get_request_header(),
+                    event_request_header=self._get_event_request_header(),
+                    participant_id=hangouts_pb2.ParticipantId(gaia_id=user_id),
+                )
+            )
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to remove user: {}'.format(e))
+            raise
+
     async def leave(self):
         """Leave this conversation.
 
@@ -547,6 +596,29 @@ class Conversation:
                 level=level,
             )
         )
+
+    async def modify_otr_status(self, otr=hangouts_pb2.
+                                OFF_THE_RECORD_STATUS_OFF_THE_RECORD):
+        """Set the OTR mode of this conversation.
+
+        Args:
+            otr: ``OFF_THE_RECORD_STATUS_OFF_THE_RECORD`` to disable history,
+                or ``OFF_THE_RECORD_STATUS_ON_THE_RECORD`` enable it.
+
+        Raises:
+            NetworkError: If the request fails.
+        """
+        try:
+            await self._client.modify_otr_status(
+                hangouts_pb2.ModifyOTRStatusRequest(
+                    request_header=self._client.get_request_header(),
+                    otr_status=otr,
+                    event_request_header=self._get_event_request_header(),
+                )
+            )
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to set OTR mode: {}'.format(e))
+            raise
 
     async def set_typing(self, typing=hangouts_pb2.TYPING_TYPE_STARTED):
         """Set your typing status in this conversation.
