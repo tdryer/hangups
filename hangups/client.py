@@ -33,9 +33,19 @@ class Client(object):
     Args:
         cookies (dict): Google session cookies. Get these using
             :func:`get_auth`.
+        max_retries (int): (optional) Maximum number of connection attempts
+            hangups will make before giving up. Defaults to 5.
+        retry_backoff_base (int): (optional) The base term for the exponential
+            backoff. The following equation is used when calculating the number
+            of seconds to wait prior to each retry:
+            retry_backoff_base^(# of retries attempted thus far)
+            Defaults to 2.
     """
 
-    def __init__(self, cookies):
+    def __init__(self, cookies, max_retries=5, retry_backoff_base=2):
+        self._max_retries = max_retries
+        self._retry_backoff_base = retry_backoff_base
+
         self.on_connect = event.Event('Client.on_connect')
         """
         :class:`~hangups.event.Event` fired when the client connects for the
@@ -69,7 +79,13 @@ class Client(object):
         else:
             self._connector = aiohttp.TCPConnector()
 
-        self._channel = channel.Channel(self._cookies, self._connector)
+        self._channel = (
+            channel.Channel(self._cookies,
+                            self._connector,
+                            max_retries=self._max_retries,
+                            retry_backoff_base=self._retry_backoff_base)
+        )
+
         # Future for Channel.listen
         self._listen_future = None
 

@@ -145,7 +145,7 @@ class Channel(object):
     # Public methods
     ##########################################################################
 
-    def __init__(self, cookies, connector):
+    def __init__(self, cookies, connector, max_retries, retry_backoff_base):
         """Create a new channel."""
 
         # Event fired when channel connects with arguments ():
@@ -156,6 +156,9 @@ class Channel(object):
         self.on_disconnect = event.Event('Channel.on_disconnect')
         # Event fired when an array is received with arguments (array):
         self.on_receive_array = event.Event('Channel.on_receive_array')
+
+        self._max_retries = max_retries
+        self._retry_backoff_base = retry_backoff_base
 
         # True if the channel is currently connected:
         self._is_connected = False
@@ -184,15 +187,16 @@ class Channel(object):
         This method only returns when the connection has been closed due to an
         error.
         """
-        MAX_RETRIES = 5  # maximum number of times to retry after a failure
-        retries = MAX_RETRIES  # number of remaining retries
+        retries = self._max_retries  # number of remaining retries
         need_new_sid = True  # whether a new SID is needed
 
         while retries >= 0:
             # After the first failed retry, back off exponentially longer after
             # each attempt.
-            if retries + 1 < MAX_RETRIES:
-                backoff_seconds = 2 ** (MAX_RETRIES - retries)
+            if retries + 1 < self._max_retries:
+                backoff_seconds = (
+                    self._retry_backoff_base ** (self._max_retries - retries)
+                )
                 logger.info('Backing off for {} seconds'
                             .format(backoff_seconds))
                 yield from asyncio.sleep(backoff_seconds)
@@ -218,7 +222,7 @@ class Channel(object):
             else:
                 # The connection closed successfully, so reset the number of
                 # retries.
-                retries = MAX_RETRIES
+                retries = self._max_retries
 
             # If the request ended with an error, the client must account for
             # messages being dropped during this time.
