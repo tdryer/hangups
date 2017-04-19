@@ -187,18 +187,16 @@ class Channel(object):
         This method only returns when the connection has been closed due to an
         error.
         """
-        retries = self._max_retries  # number of remaining retries
+        retries = 0  # Number of retries attempted so far
         need_new_sid = True  # whether a new SID is needed
 
-        while retries >= 0:
+        while retries <= self._max_retries:
             # After the first failed retry, back off exponentially longer after
             # each attempt.
-            if retries + 1 < self._max_retries:
-                backoff_seconds = (
-                    self._retry_backoff_base ** (self._max_retries - retries)
-                )
-                logger.info('Backing off for {} seconds'
-                            .format(backoff_seconds))
+            if retries > 0:
+                backoff_seconds = self._retry_backoff_base ** retries
+                logger.warning('Backing off for {} seconds'
+                               .format(backoff_seconds))
                 yield from asyncio.sleep(backoff_seconds)
 
             # Request a new SID if we don't have one yet, or the previous one
@@ -213,7 +211,8 @@ class Channel(object):
                 yield from self._longpoll_request()
             except (UnknownSIDError, exceptions.NetworkError) as e:
                 logger.warning('Long-polling request failed: {}'.format(e))
-                retries -= 1
+                retries += 1
+                logger.warning('retry attempt count is now {}'.format(retries))
                 if self._is_connected:
                     self._is_connected = False
                     yield from self.on_disconnect.fire()
@@ -222,7 +221,7 @@ class Channel(object):
             else:
                 # The connection closed successfully, so reset the number of
                 # retries.
-                retries = self._max_retries
+                retries = 0
 
             # If the request ended with an error, the client must account for
             # messages being dropped during this time.
