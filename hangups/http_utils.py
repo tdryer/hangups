@@ -39,10 +39,10 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
                          res.reason, body)
         except asyncio.TimeoutError:
             error_msg = 'Request timed out'
-        except aiohttp.ClientError as e:
-            error_msg = 'Request connection error: {}'.format(e)
         except aiohttp.ServerDisconnectedError as e:
             error_msg = 'Server disconnected error: {}'.format(e)
+        except aiohttp.ClientError as e:
+            error_msg = 'Request connection error: {}'.format(e)
         else:
             error_msg = None
             break
