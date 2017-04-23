@@ -11,8 +11,7 @@ if sys.version_info < (3, 4, 2):
 
 # Find __version__ without import that requires dependencies to be installed:
 exec(open(os.path.join(
-    os.path.dirname(__file__), 'hangups/version.py'
-)).read())
+    os.path.dirname(__file__), 'hangups/version.py')).read())
 
 
 class PytestCommand(TestCommand):
