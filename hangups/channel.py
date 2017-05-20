@@ -325,6 +325,11 @@ class Channel(object):
             try:
                 chunk = yield from asyncio.wait_for(
                     res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT)
+                if not chunk:
+                    break
+
+                yield from self._on_push_data(chunk)
+
             except asyncio.TimeoutError:
                 raise exceptions.NetworkError('Request timed out')
             except aiohttp.ServerDisconnectedError as err:
@@ -339,10 +344,6 @@ class Channel(object):
                 if not chunk:
                     # Prevent ResourceWarning when channel is disconnected.
                     res.close()
-            if not chunk:
-                break
-
-            yield from self._on_push_data(chunk)
 
     @asyncio.coroutine
     def _on_push_data(self, data_bytes):
