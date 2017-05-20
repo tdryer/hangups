@@ -46,6 +46,9 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
         else:
             error_msg = None
             break
+        finally:
+            if 'res' in locals():
+                res.close()
         logger.info('Request attempt %d failed: %s', retry_num, error_msg)
     if error_msg:
         logger.info('Request failed after %d attempts', MAX_RETRIES)
