@@ -303,47 +303,46 @@ class Channel(object):
             res = yield from asyncio.wait_for(aiohttp.request(
                 'get', CHANNEL_URL_PREFIX.format('channel/bind'),
                 params=params, cookies=self._cookies, headers=headers,
-                connector=self._connector
-            ), CONNECT_TIMEOUT)
+                connector=self._connector), CONNECT_TIMEOUT)
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
-        except aiohttp.ServerDisconnectedError as e:
-            raise exceptions.NetworkError('Server disconnected error: {}'
-                                          .format(e))
-        except aiohttp.ClientError as e:
-            raise exceptions.NetworkError('Request connection error: {}'
-                                          .format(e))
-        if res.status == 400 and res.reason == 'Unknown SID':
-            raise UnknownSIDError('SID became invalid')
-        elif res.status != 200:
+        except aiohttp.ServerDisconnectedError as err:
             raise exceptions.NetworkError(
-                'Request return unexpected status: {}: {}'
-                .format(res.status, res.reason)
-            )
+                'Server disconnected error: %s' % err)
+        except aiohttp.ClientError as err:
+            raise exceptions.NetworkError('Request connection error: %s' % err)
+        finally:
+            if 'res' in locals() and res.status != 200:
+                res.close()
+                if res.status == 400 and res.reason == 'Unknown SID':
+                    raise UnknownSIDError('SID became invalid')
+                raise exceptions.NetworkError(
+                    'Request return unexpected status: {}: {}'.format(
+                        res.status, res.reason))
+
         while True:
+            chunk = None
             try:
                 chunk = yield from asyncio.wait_for(
-                    res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT
-                )
+                    res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT)
             except asyncio.TimeoutError:
                 raise exceptions.NetworkError('Request timed out')
-            except aiohttp.ServerDisconnectedError as e:
+            except aiohttp.ServerDisconnectedError as err:
                 raise exceptions.NetworkError('Server disconnected error: {}'
-                                              .format(e))
-            except aiohttp.ClientError as e:
+                                              .format(err))
+            except aiohttp.ClientError as err:
                 raise exceptions.NetworkError('Request connection error: {}'
-                                              .format(e))
+                                              .format(err))
             except asyncio.CancelledError:
-                # Prevent ResourceWarning when channel is disconnected.
-                res.close()
                 raise
-            if chunk:
-                yield from self._on_push_data(chunk)
-            else:
-                # Close the response to allow the connection to be reused for
-                # the next request.
-                res.close()
+            finally:
+                if not chunk:
+                    # Prevent ResourceWarning when channel is disconnected.
+                    res.close()
+            if not chunk:
                 break
+
+            yield from self._on_push_data(chunk)
 
     @asyncio.coroutine
     def _on_push_data(self, data_bytes):
