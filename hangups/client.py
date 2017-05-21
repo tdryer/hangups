@@ -238,6 +238,81 @@ class Client(object):
                             .format(ACTIVE_TIMEOUT_SECS))
 
     @asyncio.coroutine
+    def upload_image_raw(self, image_file, filename=None):
+        """upload an image to Google to get a public url and an image id
+
+        Args:
+            image_file: file-like object, containing the raw image data
+            filename: string, (opt) image name including the file extension
+
+        Returns:
+            tuple: the image id to attach to a chat message and the public url
+
+        Raises:
+            exceptions.NetworkError: image upload failed
+        """
+        def _get_session_status(res):
+            """parse the response to get the sessionStatus of the request
+
+            Args:
+                res: http_utils.FetchResponse instance, the upload response
+
+            Returns:
+                dict, sessionStatus of the response
+
+            Raises:
+                exceptions.NetworkError: the upload failed
+            """
+            response = json.loads(res.body.decode())
+            if 'sessionStatus' not in response:
+                try:
+                    reason = (response['errorMessage']['additionalInfo']
+                              ['uploader_service.GoogleRupioAdditionalInfo']
+                              ['completionInfo']['message'])
+                except KeyError:
+                    reason = 'unknown reason'
+                raise exceptions.NetworkError(
+                    'image upload failed: %s' % reason)
+            return response['sessionStatus']
+
+        image_filename = filename or os.path.basename(image_file.name)
+        image_data = image_file.read()
+
+        # request an upload URL
+        res = yield from self._base_request(
+            IMAGE_UPLOAD_URL,
+            'application/x-www-form-urlencoded;charset=UTF-8', 'json',
+            json.dumps({"protocolVersion": "0.8",
+                        "createSessionRequest": {
+                            "fields": [{
+                                "external": {"name": "file",
+                                             "filename": image_filename,
+                                             "put": {},
+                                             "size": len(image_data)}}]}}))
+
+        try:
+            upload_url = (_get_session_status(res)['externalFieldTransfers']
+                          [0]['putInfo']['url'])
+        except KeyError:
+            raise exceptions.NetworkError(
+                'image upload failed: can not aquire an upload url')
+
+        # upload the image data using the upload_url to get the upload info
+        res = yield from self._base_request(
+            upload_url, 'application/octet-stream', 'json', image_data)
+
+        try:
+            raw_info = (_get_session_status(res)['additionalInfo']
+                        ['uploader_service.GoogleRupioAdditionalInfo']
+                        ['completionInfo']['customerSpecificInfo'])
+
+            return raw_info['photoid'], raw_info['url']
+
+        except KeyError:
+            raise exceptions.NetworkError(
+                'image upload failed: can not fetch upload info')
+
+    @asyncio.coroutine
     def upload_image(self, image_file, filename=None):
         """Upload an image that can be later attached to a chat message.
 
@@ -251,39 +326,7 @@ class Client(object):
         Returns:
             ID of the uploaded image.
         """
-        image_filename = (filename if filename
-                          else os.path.basename(image_file.name))
-        image_data = image_file.read()
-
-        # Create image and request upload URL
-        res1 = yield from self._base_request(
-            IMAGE_UPLOAD_URL,
-            'application/x-www-form-urlencoded;charset=UTF-8',
-            'json',
-            json.dumps({
-                "protocolVersion": "0.8",
-                "createSessionRequest": {
-                    "fields": [{
-                        "external": {
-                            "name": "file",
-                            "filename": image_filename,
-                            "put": {},
-                            "size": len(image_data),
-                        }
-                    }]
-                }
-            }))
-        upload_url = (json.loads(res1.body.decode())['sessionStatus']
-                      ['externalFieldTransfers'][0]['putInfo']['url'])
-
-        # Upload image data and get image ID
-        res2 = yield from self._base_request(
-            upload_url, 'application/octet-stream', 'json', image_data
-        )
-        return (json.loads(res2.body.decode())['sessionStatus']
-                ['additionalInfo']
-                ['uploader_service.GoogleRupioAdditionalInfo']
-                ['completionInfo']['customerSpecificInfo']['photoid'])
+        return (yield from self.upload_image_raw(image_file, filename))[0]
 
     ##########################################################################
     # Private methods
