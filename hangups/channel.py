@@ -304,6 +304,22 @@ class Channel(object):
                 'get', CHANNEL_URL_PREFIX.format('channel/bind'),
                 params=params, cookies=self._cookies, headers=headers,
                 connector=self._connector), CONNECT_TIMEOUT)
+
+            if res.status != 200:
+                if res.status == 400 and res.reason == 'Unknown SID':
+                    raise UnknownSIDError('SID became invalid')
+                raise exceptions.NetworkError(
+                    'Request return unexpected status: {}: {}'.format(
+                        res.status, res.reason))
+
+            while True:
+                chunk = yield from asyncio.wait_for(
+                    res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT)
+                if not chunk:
+                    break
+
+                yield from self._on_push_data(chunk)
+
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
         except aiohttp.ServerDisconnectedError as err:
@@ -312,38 +328,8 @@ class Channel(object):
         except aiohttp.ClientError as err:
             raise exceptions.NetworkError('Request connection error: %s' % err)
         finally:
-            if 'res' in locals() and res.status != 200:
+            if 'res' in locals():
                 res.close()
-                if res.status == 400 and res.reason == 'Unknown SID':
-                    raise UnknownSIDError('SID became invalid')
-                raise exceptions.NetworkError(
-                    'Request return unexpected status: {}: {}'.format(
-                        res.status, res.reason))
-
-        while True:
-            chunk = None
-            try:
-                chunk = yield from asyncio.wait_for(
-                    res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT)
-                if not chunk:
-                    break
-
-                yield from self._on_push_data(chunk)
-
-            except asyncio.TimeoutError:
-                raise exceptions.NetworkError('Request timed out')
-            except aiohttp.ServerDisconnectedError as err:
-                raise exceptions.NetworkError('Server disconnected error: {}'
-                                              .format(err))
-            except aiohttp.ClientError as err:
-                raise exceptions.NetworkError('Request connection error: {}'
-                                              .format(err))
-            except asyncio.CancelledError:
-                raise
-            finally:
-                if not chunk:
-                    # Prevent ResourceWarning when channel is disconnected.
-                    res.close()
 
     @asyncio.coroutine
     def _on_push_data(self, data_bytes):
