@@ -169,7 +169,7 @@ class UserList(object):
         except KeyError:
             logger.warning('UserList returning unknown User for UserID {}'
                            .format(user_id))
-            return User(user_id, DEFAULT_NAME, None, None, [], False)
+            return User(user_id, None, None, None, [], False)
 
     def get_all(self):
         """Get all known users.
