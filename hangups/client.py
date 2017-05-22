@@ -266,9 +266,10 @@ class Client(object):
             response = json.loads(res.body.decode())
             if 'sessionStatus' not in response:
                 try:
-                    reason = (response['errorMessage']['additionalInfo']
-                              ['uploader_service.GoogleRupioAdditionalInfo']
-                              ['completionInfo']['message'])
+                    info = (response['errorMessage']['additionalInfo']
+                            ['uploader_service.GoogleRupioAdditionalInfo']
+                            ['completionInfo'])
+                    reason = '%s : %s' % (info['status'], info['message'])
                 except KeyError:
                     reason = 'unknown reason'
                 raise exceptions.NetworkError(
