@@ -79,6 +79,7 @@ message DeviceStatus {
 
 message LastSeen {
   optional uint64 last_seen_timestamp_usec = 1;
+  optional uint64 usec_since_last_seen = 2;
 }
 
 message Presence {

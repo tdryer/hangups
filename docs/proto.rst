@@ -67,6 +67,7 @@ LastSeen
 Field                            Number Type   Label    Description
 ================================ ====== ====== ======== ===========
 :code:`last_seen_timestamp_usec` 1      uint64 optional            
+:code:`usec_since_last_seen`     2      uint64 optional            
 ================================ ====== ====== ======== ===========
 
 Presence
