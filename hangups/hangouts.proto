@@ -232,17 +232,40 @@ message PlusPhoto {
 
 // Place that can be embedded in a chat message via Google Maps.
 message Place {
+  message DisplayInfo {
+    message Description {
+      optional string text = 35;
+    }
+
+    optional Description description = 36003298;
+  }
+
+  message LocationInfo {
+    message LatLng {
+      optional double lat = 36;
+      optional double lng = 37;
+    }
+
+    optional LatLng latlng = 36736749;
+  }
 
   // Representative image of a place.
   message RepresentativeImage {
+    message Image {
+      optional string url = 1;
+    }
+
     // URL of image.
     optional string url = 2;
+    optional Image image = 40265033;
   }
 
   // Google Maps URL pointing to the map coordinates.
   optional string url = 1;
   // Name of map location.
   optional string name = 3;
+  optional DisplayInfo display_info = 24;
+  optional LocationInfo location_info = 25;
   // Representative image of the place (map with pin).
   optional RepresentativeImage representative_image = 185;
 }
@@ -1413,13 +1436,18 @@ message SearchEntitiesResponse {
   repeated Entity entity = 2;
 }
 
+message Location {
+  optional Place place = 1;
+}
+
 message SendChatMessageRequest {
   optional RequestHeader request_header = 1;
   repeated EventAnnotation annotation = 5;
   optional MessageContent message_content = 6;
   optional ExistingMedia existing_media = 7;
   optional EventRequestHeader event_request_header = 8;
-
+  optional ParticipantId user_id = 9;
+  optional Location location = 10;
   // TODO: incomplete
 }
 
