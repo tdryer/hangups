@@ -805,43 +805,77 @@ class ConversationList(object):
 
     @asyncio.coroutine
     def _on_state_update(self, state_update):
-        """Receive a StateUpdate and fan out to Conversations."""
+        """Receive a StateUpdate and fan out to Conversations.
+
+        Args:
+            state_update: hangouts_pb2.StateUpdate instance
+        """
         # Handle updating a conversation
         if state_update.HasField('conversation'):
             self._handle_conversation(state_update.conversation)
+
         # Handle the notification
         notification_type = state_update.WhichOneof('state_update')
+        if notification_type not in ('typing_notification',
+                                     'watermark_notification',
+                                     'event_notification'):
+            return
+
+        conv_id = (state_update.event_notification.event.conversation_id.id
+                   if notification_type == 'event_notification' else
+                   getattr(state_update, notification_type).conversation_id.id)
+
+        conv = self._conv_dict.get(conv_id, None)
+
+        if conv is None:
+            logger.debug('conversation %s not found', conv_id)
+            try:
+                res = yield from self._client.get_conversation(
+                    hangouts_pb2.GetConversationRequest(
+                        request_header=self._client.get_request_header(),
+                        conversation_spec=hangouts_pb2.ConversationSpec(
+                            conversation_id=hangouts_pb2.ConversationId(
+                                id=conv_id)),
+                        include_event=False))
+            except exceptions.NetworkError as err:
+                logger.warning('failed to fetch unknown conversation %s: %s',
+                               conv_id, err)
+                return
+            conv = self._add_conversation(res.conversation_state.conversation)
+
         if notification_type == 'typing_notification':
             yield from self._handle_set_typing_notification(
-                state_update.typing_notification
-            )
+                state_update.typing_notification, conv)
+
         elif notification_type == 'watermark_notification':
             yield from self._handle_watermark_notification(
-                state_update.watermark_notification
-            )
+                state_update.watermark_notification, conv)
+
         elif notification_type == 'event_notification':
             yield from self._on_event(
-                state_update.event_notification.event
-            )
+                state_update.event_notification.event, conv)
 
     @asyncio.coroutine
-    def _on_event(self, event_):
-        """Receive a hangouts_pb2.Event and fan out to Conversations."""
+    def _on_event(self, event_, conv):
+        """Receive a hangouts_pb2.Event and fan out to Conversations.
+
+        Args:
+            event_: hangouts_pb2.Event instance
+            conv: Conversation instance
+        """
         self._sync_timestamp = parsers.from_timestamp(event_.timestamp)
-        try:
-            conv = self._conv_dict[event_.conversation_id.id]
-        except KeyError:
-            logger.warning('Received Event for unknown conversation {}'
-                           .format(event_.conversation_id.id))
-        else:
-            conv_event = conv.add_event(event_)
-            # conv_event may be None if the event was a duplicate.
-            if conv_event is not None:
-                yield from self.on_event.fire(conv_event)
-                yield from conv.on_event.fire(conv_event)
+        conv_event = conv.add_event(event_)
+        # conv_event may be None if the event was a duplicate.
+        if conv_event is not None:
+            yield from self.on_event.fire(conv_event)
+            yield from conv.on_event.fire(conv_event)
 
     def _handle_conversation(self, conversation):
-        """Receive Conversation and create or update the conversation."""
+        """Receive Conversation and create or update the conversation.
+
+        Args:
+            conversation: hangouts_pb2.Conversation instance
+        """
         conv_id = conversation.conversation_id.id
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
@@ -850,30 +884,29 @@ class ConversationList(object):
             self._add_conversation(conversation)
 
     @asyncio.coroutine
-    def _handle_set_typing_notification(self, set_typing_notification):
-        """Receive SetTypingNotification and update the conversation."""
-        conv_id = set_typing_notification.conversation_id.id
-        conv = self._conv_dict.get(conv_id, None)
-        if conv is not None:
-            res = parsers.parse_typing_status_message(set_typing_notification)
-            yield from self.on_typing.fire(res)
-            yield from conv.on_typing.fire(res)
-        else:
-            logger.warning('Received SetTypingNotification for '
-                           'unknown conversation {}'.format(conv_id))
+    def _handle_set_typing_notification(self, set_typing_notification, conv):
+        """Receive SetTypingNotification and update the conversation.
+
+        Args:
+            set_typing_notification: hangouts_pb2.SetTypingNotification
+                instance
+            conv: Conversation instance
+        """
+        res = parsers.parse_typing_status_message(set_typing_notification)
+        yield from self.on_typing.fire(res)
+        yield from conv.on_typing.fire(res)
 
     @asyncio.coroutine
-    def _handle_watermark_notification(self, watermark_notification):
-        """Receive WatermarkNotification and update the conversation."""
-        conv_id = watermark_notification.conversation_id.id
-        conv = self._conv_dict.get(conv_id, None)
-        if conv is not None:
-            res = parsers.parse_watermark_notification(watermark_notification)
-            yield from self.on_watermark_notification.fire(res)
-            yield from conv.on_watermark_notification.fire(res)
-        else:
-            logger.warning('Received WatermarkNotification for '
-                           'unknown conversation {}'.format(conv_id))
+    def _handle_watermark_notification(self, watermark_notification, conv):
+        """Receive WatermarkNotification and update the conversation.
+
+        Args:
+            watermark_notification: hangouts_pb2.WatermarkNotification instance
+            conv: Conversation instance
+        """
+        res = parsers.parse_watermark_notification(watermark_notification)
+        yield from self.on_watermark_notification.fire(res)
+        yield from conv.on_watermark_notification.fire(res)
 
     @asyncio.coroutine
     def _sync(self):
@@ -903,7 +936,7 @@ class ConversationList(object):
                         if timestamp > self._sync_timestamp:
                             # This updates the sync_timestamp for us, as well
                             # as triggering events.
-                            yield from self._on_event(event_)
+                            yield from self._on_event(event_, conv)
                 else:
                     self._add_conversation(conv_state.conversation,
                                            conv_state.event)
