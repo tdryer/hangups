@@ -268,7 +268,7 @@ class Client(object):
                 try:
                     info = (response['errorMessage']['additionalInfo']
                             ['uploader_service.GoogleRupioAdditionalInfo']
-                            ['completionInfo'])
+                            ['completionInfo']['customerSpecificInfo'])
                     reason = '%s : %s' % (info['status'], info['message'])
                 except KeyError:
                     reason = 'unknown reason'
