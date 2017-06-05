@@ -198,7 +198,7 @@ class ChatUI(object):
 
     def _on_quit(self):
         """Handle the user quitting the application."""
-        future = asyncio.async(self._client.disconnect())
+        future = asyncio.ensure_future(self._client.disconnect())
         future.add_done_callback(lambda future: future.result())
 
 
@@ -233,7 +233,7 @@ class RenameConversationDialog(urwid.WidgetWrap):
 
     def _rename(self, name, callback):
         """Rename conversation and call callback."""
-        future = asyncio.async(self._conversation.rename(name))
+        future = asyncio.ensure_future(self._conversation.rename(name))
         future.add_done_callback(lambda future: future.result())
         callback()
 
@@ -640,7 +640,7 @@ class ConversationEventListWalker(urwid.ListWalker):
                 # TODO: Show the full date the conversation was created.
                 return urwid.Text('No more messages', align='center')
             else:
-                future = asyncio.async(self._load())
+                future = asyncio.ensure_future(self._load())
                 future.add_done_callback(lambda future: future.result())
                 return urwid.Text('Loading...', align='center')
         try:
@@ -747,11 +747,11 @@ class ConversationWidget(urwid.WidgetWrap):
     def keypress(self, size, key):
         """Handle marking messages as read and keeping client active."""
         # Set the client as active.
-        future = asyncio.async(self._client.set_active())
+        future = asyncio.ensure_future(self._client.set_active())
         future.add_done_callback(lambda future: future.result())
 
         # Mark the newest event as read.
-        future = asyncio.async(self._conversation.update_read_timestamp())
+        future = asyncio.ensure_future(self._conversation.update_read_timestamp())
         future.add_done_callback(lambda future: future.result())
 
         return super().keypress(size, key)
@@ -778,7 +778,7 @@ class ConversationWidget(urwid.WidgetWrap):
         # XXX: Exception handling here is still a bit broken. Uncaught
         # exceptions in _on_message_sent will only be logged.
         segments = hangups.ChatMessageSegment.from_str(text)
-        asyncio.async(
+        asyncio.ensure_future(
             self._conversation.send_message(segments, image_file=image_file)
         ).add_done_callback(self._on_message_sent)
 
