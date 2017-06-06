@@ -32,9 +32,9 @@ LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 ORIGIN_URL = 'https://talkgadget.google.com'
 CHANNEL_URL_PREFIX = 'https://0.client-channel.google.com/client-channel/{}'
 CONNECT_TIMEOUT = 30
-# Long-polling requests send heartbeats every 15 seconds, so if we miss two in
-# a row, consider the connection dead.
-PUSH_TIMEOUT = 30
+# Long-polling requests send heartbeats every 15-30 seconds, so if we miss two
+# in a row, consider the connection dead.
+PUSH_TIMEOUT = 60
 MAX_READ_BYTES = 1024 * 1024
 
 
@@ -195,8 +195,7 @@ class Channel(object):
             # each attempt.
             if retries > 0:
                 backoff_seconds = self._retry_backoff_base ** retries
-                logger.warning('Backing off for {} seconds'
-                               .format(backoff_seconds))
+                logger.info('Backing off for %s seconds', backoff_seconds)
                 yield from asyncio.sleep(backoff_seconds)
 
             # Request a new SID if we don't have one yet, or the previous one
