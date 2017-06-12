@@ -233,42 +233,16 @@ message PlusPhoto {
 
 // Place that can be embedded in a chat message via Google Maps.
 message Place {
-  message DisplayInfo {
-    message Description {
-      optional string text = 35;
-    }
-
-    optional Description description = 36003298;
-  }
-
-  message LocationInfo {
-    message LatLng {
-      optional double lat = 36;
-      optional double lng = 37;
-    }
-
-    optional LatLng latlng = 36736749;
-  }
-
-  // Representative image of a place.
-  message RepresentativeImage {
-    message Image {
-      optional string url = 1;
-    }
-
-    // URL of image.
-    optional string url = 2;
-    optional Image image = 40265033;
-  }
-
-  // Google Maps URL pointing to the map coordinates.
+  // Google Maps URL pointing to the place coordinates.
   optional string url = 1;
-  // Name of map location.
+  // Name of the place.
   optional string name = 3;
-  optional DisplayInfo display_info = 24;
-  optional LocationInfo location_info = 25;
+  // Address of the place.
+  optional EmbedItem address = 24;
+  // Geographic location of the place.
+  optional EmbedItem geo = 25;
   // Representative image of the place (map with pin).
-  optional RepresentativeImage representative_image = 185;
+  optional EmbedItem representative_image = 185;
 }
 
 // An item of some type embedded in a chat message.
@@ -281,6 +255,23 @@ message EmbedItem {
   optional PlusPhoto plus_photo = 27639957;
   // Embedded Google Map of a place.
   optional Place place = 35825640;
+  // Embedded postal address.
+  optional PostalAddress postal_address = 36003298;
+  // Embedded geographical coordinates.
+  optional GeoCoordinates geo_coordinates = 36736749;
+  // Embedded image.
+  optional Image image = 40265033;
+
+  message PostalAddress {
+    optional string street_address = 35;
+  }
+  message GeoCoordinates {
+    optional double latitude = 36;
+    optional double longitude = 37;
+  }
+  message Image {
+    optional string url = 1;
+  }
 }
 
 // An attachment for a chat message.

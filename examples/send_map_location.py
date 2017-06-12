@@ -1,4 +1,4 @@
-"""Example of using hangups to send map location to a conversation."""
+"""Example of using hangups to send chat message containing a map location."""
 
 import asyncio
 
@@ -9,8 +9,6 @@ from common import run_example
 
 @asyncio.coroutine
 def send_map_location(client, args):
-    lat, lng = (float(l) for l in args.location.split(','))
-
     request = hangups.hangouts_pb2.SendChatMessageRequest(
         request_header=client.get_request_header(),
         event_request_header=hangups.hangouts_pb2.EventRequestHeader(
@@ -21,16 +19,16 @@ def send_map_location(client, args):
         ),
         location=hangups.hangouts_pb2.Location(
             place=hangups.hangouts_pb2.Place(
-                location_info=hangups.hangouts_pb2.Place.LocationInfo(
-                    latlng=hangups.hangouts_pb2.Place.LocationInfo.LatLng(
-                        lat=lat,
-                        lng=lng
+                name=args.name,
+                address=hangups.hangouts_pb2.EmbedItem(
+                    postal_address=hangups.hangouts_pb2.EmbedItem.PostalAddress(
+                        street_address=args.address
                     ),
                 ),
-                name=args.name,
-                display_info=hangups.hangouts_pb2.Place.DisplayInfo(
-                    description=hangups.hangouts_pb2.Place.DisplayInfo.Description(
-                        text=args.description
+                geo=hangups.hangouts_pb2.EmbedItem(
+                    geo_coordinates=hangups.hangouts_pb2.EmbedItem.GeoCoordinates(
+                        latitude=float(args.latitude),
+                        longitude=float(args.longitude)
                     ),
                 ),
             ),
@@ -40,5 +38,7 @@ def send_map_location(client, args):
 
 
 if __name__ == '__main__':
-    run_example(send_map_location,
-                '--conversation-id', '--location', '--name', '--description')
+    run_example(
+        send_map_location, '--conversation-id', '--latitude', '--longitude',
+        '--name', '--address'
+    )
