@@ -185,9 +185,8 @@ class UserList(object):
 
         existing = self._user_dict.get(user_.id_)
         if existing is None:
-            logging.warning('Adding fallback User with {} name "{}": {}'
-                            .format(user_.name_type.name.lower(),
-                                    user_.full_name, user_))
+            logger.warning('Adding fallback User with %s name "%s"',
+                           user_.name_type.name.lower(), user_.full_name)
             self._user_dict[user_.id_] = user_
             return user_
         else:
