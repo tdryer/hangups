@@ -812,7 +812,7 @@ class ConversationList(object):
         """
         # Handle updating a conversation
         if state_update.HasField('conversation'):
-            self._handle_conversation(state_update.conversation)
+            yield from self._handle_conversation(state_update.conversation)
 
         # Handle the notification
         notification_type = state_update.WhichOneof('state_update')
@@ -877,6 +877,7 @@ class ConversationList(object):
             yield from self.on_event.fire(conv_event)
             yield from conv.on_event.fire(conv_event)
 
+    @asyncio.coroutine
     def _handle_conversation(self, conversation):
         """Receive Conversation and create or update the conversation.
 
@@ -887,6 +888,14 @@ class ConversationList(object):
         conv = self._conv_dict.get(conv_id, None)
         if conv is not None:
             conv.update_conversation(conversation)
+
+        elif not (len(conversation.self_conversation_state
+                      .delivery_medium_option)
+                  and (conversation.self_conversation_state.self_read_state
+                       .latest_read_timestamp)):
+            # this is a delta, critical entrys are missing
+            yield from self._fetch_conversation(conv_id)
+
         else:
             self._add_conversation(conversation)
 
