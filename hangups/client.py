@@ -3,6 +3,7 @@
 import asyncio
 import base64
 import binascii
+import collections
 import json
 import logging
 import os
@@ -238,44 +239,22 @@ class Client(object):
                             .format(ACTIVE_TIMEOUT_SECS))
 
     @asyncio.coroutine
-    def upload_image_raw(self, image_file, filename=None):
-        """upload an image to Google to get a public url and an image id
+    def upload_image(self, image_file, filename=None,
+                     return_uploaded_image=False):
+        """Upload an image that can be later attached to a chat message.
 
         Args:
-            image_file: file-like object, containing the raw image data
-            filename: string, (opt) image name including the file extension
-
-        Returns:
-            tuple: the image id to attach to a chat message and the public url
+            image_file: A file-like object containing an image.
+            filename (str): (optional) Custom name for the uploaded file.
+            return_uploaded_image (bool): (optional) If True, return
+                :class:`.UploadedImage` instead of image ID. Defaults to False.
 
         Raises:
-            exceptions.NetworkError: image upload failed
+            hangups.NetworkError: If the upload request failed.
+
+        Returns:
+            :class:`.UploadedImage` instance, or ID of the uploaded image.
         """
-        def _get_session_status(res):
-            """parse the response to get the sessionStatus of the request
-
-            Args:
-                res: http_utils.FetchResponse instance, the upload response
-
-            Returns:
-                dict, sessionStatus of the response
-
-            Raises:
-                exceptions.NetworkError: the upload failed
-            """
-            response = json.loads(res.body.decode())
-            if 'sessionStatus' not in response:
-                try:
-                    info = (response['errorMessage']['additionalInfo']
-                            ['uploader_service.GoogleRupioAdditionalInfo']
-                            ['completionInfo']['customerSpecificInfo'])
-                    reason = '%s : %s' % (info['status'], info['message'])
-                except KeyError:
-                    reason = 'unknown reason'
-                raise exceptions.NetworkError(
-                    'image upload failed: %s' % reason)
-            return response['sessionStatus']
-
         image_filename = filename or os.path.basename(image_file.name)
         image_data = image_file.read()
 
@@ -283,55 +262,83 @@ class Client(object):
         res = yield from self._base_request(
             IMAGE_UPLOAD_URL,
             'application/x-www-form-urlencoded;charset=UTF-8', 'json',
-            json.dumps({"protocolVersion": "0.8",
-                        "createSessionRequest": {
-                            "fields": [{
-                                "external": {"name": "file",
-                                             "filename": image_filename,
-                                             "put": {},
-                                             "size": len(image_data)}}]}}))
+            json.dumps({
+                "protocolVersion": "0.8",
+                "createSessionRequest": {
+                    "fields": [{
+                        "external": {
+                            "name": "file",
+                            "filename": image_filename,
+                            "put": {},
+                            "size": len(image_data)
+                        }
+                    }]
+                }
+            })
+        )
 
         try:
-            upload_url = (_get_session_status(res)['externalFieldTransfers']
-                          [0]['putInfo']['url'])
+            upload_url = self._get_upload_session_status(res)[
+                'externalFieldTransfers'
+            ][0]['putInfo']['url']
         except KeyError:
             raise exceptions.NetworkError(
-                'image upload failed: can not aquire an upload url')
+                'image upload failed: can not acquire an upload url'
+            )
 
         # upload the image data using the upload_url to get the upload info
         res = yield from self._base_request(
-            upload_url, 'application/octet-stream', 'json', image_data)
+            upload_url, 'application/octet-stream', 'json', image_data
+        )
 
         try:
-            raw_info = (_get_session_status(res)['additionalInfo']
-                        ['uploader_service.GoogleRupioAdditionalInfo']
-                        ['completionInfo']['customerSpecificInfo'])
-
-            return raw_info['photoid'], raw_info['url']
-
+            raw_info = (
+                self._get_upload_session_status(res)['additionalInfo']
+                ['uploader_service.GoogleRupioAdditionalInfo']
+                ['completionInfo']['customerSpecificInfo']
+            )
+            image_id = raw_info['photoid']
+            url = raw_info['url']
         except KeyError:
             raise exceptions.NetworkError(
-                'image upload failed: can not fetch upload info')
+                'image upload failed: can not fetch upload info'
+            )
 
-    @asyncio.coroutine
-    def upload_image(self, image_file, filename=None):
-        """Upload an image that can be later attached to a chat message.
-
-        Args:
-            image_file: A file-like object containing an image.
-            filename (str): (optional) Custom name for the uploaded file.
-
-        Raises:
-            hangups.NetworkError: If the upload request failed.
-
-        Returns:
-            ID of the uploaded image.
-        """
-        return (yield from self.upload_image_raw(image_file, filename))[0]
+        result = UploadedImage(image_id=image_id, url=url)
+        return result if return_uploaded_image else result.image_id
 
     ##########################################################################
     # Private methods
     ##########################################################################
+
+    @staticmethod
+    def _get_upload_session_status(res):
+        """Parse the image upload response to obtain status.
+
+        Args:
+            res: http_utils.FetchResponse instance, the upload response
+
+        Returns:
+            dict, sessionStatus of the response
+
+        Raises:
+            hangups.NetworkError: If the upload request failed.
+        """
+        response = json.loads(res.body.decode())
+        if 'sessionStatus' not in response:
+            try:
+                info = (
+                    response['errorMessage']['additionalInfo']
+                    ['uploader_service.GoogleRupioAdditionalInfo']
+                    ['completionInfo']['customerSpecificInfo']
+                )
+                reason = '{} : {}'.format(info['status'], info['message'])
+            except KeyError:
+                reason = 'unknown reason'
+            raise exceptions.NetworkError('image upload failed: {}'.format(
+                reason
+            ))
+        return response['sessionStatus']
 
     def _get_cookie(self, name):
         """Return a cookie for raise error if that cookie was not provided."""
@@ -707,3 +714,12 @@ class Client(object):
         yield from self._pb_request('conversations/updatewatermark',
                                     update_watermark_request, response)
         return response
+
+
+UploadedImage = collections.namedtuple('UploadedImage', ['image_id', 'url'])
+"""Details about an uploaded image.
+
+Args:
+    image_id (str): Image ID of uploaded image.
+    url (str): URL of uploaded image.
+"""

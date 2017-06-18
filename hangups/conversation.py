@@ -423,10 +423,13 @@ class Conversation(object):
         with (yield from self._send_message_lock):
             if image_file:
                 try:
-                    image_id = yield from self._client.upload_image(image_file)
+                    uploaded_image = yield from self._client.upload_image(
+                        image_file, return_uploaded_image=True
+                    )
                 except exceptions.NetworkError as e:
                     logger.warning('Failed to upload image: {}'.format(e))
                     raise
+                image_id = uploaded_image.image_id
             try:
                 request = hangouts_pb2.SendChatMessageRequest(
                     request_header=self._client.get_request_header(),

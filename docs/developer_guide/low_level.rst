@@ -24,6 +24,8 @@ Client
 .. autoclass:: hangups.Client
     :members:
 
+.. autoclass:: hangups.client.UploadedImage
+
 Exceptions
 ----------
 
