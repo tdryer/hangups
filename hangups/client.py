@@ -239,7 +239,7 @@ class Client(object):
                             .format(ACTIVE_TIMEOUT_SECS))
 
     @asyncio.coroutine
-    def upload_image(self, image_file, filename=None,
+    def upload_image(self, image_file, filename=None, *,
                      return_uploaded_image=False):
         """Upload an image that can be later attached to a chat message.
 
