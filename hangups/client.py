@@ -73,16 +73,11 @@ class Client(object):
             state_update: A ``StateUpdate`` message.
         """
 
-        self._cookies = cookies
         self._proxy = os.environ.get('HTTP_PROXY')
-        self._connector = aiohttp.TCPConnector()
 
-        self._channel = (
-            channel.Channel(self._cookies,
-                            self._connector,
-                            max_retries=self._max_retries,
-                            retry_backoff_base=self._retry_backoff_base)
-        )
+        self.__cookies = cookies
+        self._session = None
+        self._channel = None
 
         # Future for Channel.listen
         self._listen_future = None
@@ -112,6 +107,11 @@ class Client(object):
         # ActiveClientState enum int value or None:
         self._active_client_state = None
 
+    def __del__(self):
+        """explicit cleanup"""
+        if self._session is not None:
+            self._session.close()
+
     ##########################################################################
     # Public methods
     ##########################################################################
@@ -123,6 +123,12 @@ class Client(object):
         Returns when an error has occurred, or :func:`disconnect` has been
         called.
         """
+        self._session = http_utils.ClientSession(cookies=self.__cookies)
+        self.__cookies = None
+        self._channel = channel.Channel(
+            self._session, max_retries=self._max_retries,
+            retry_backoff_base=self._retry_backoff_base)
+
         # Forward the Channel events to the Client events.
         self._channel.on_connect.add_observer(self.on_connect.fire)
         self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
@@ -136,7 +142,6 @@ class Client(object):
             yield from self._listen_future
         except asyncio.CancelledError:
             pass
-        self._connector.close()
         logger.info('Client.connect returning because Channel.listen returned')
 
     @asyncio.coroutine
@@ -337,6 +342,16 @@ class Client(object):
             ))
         return response['sessionStatus']
 
+    @property
+    def _cookies(self):
+        """get all cookies of the session
+
+        Returns:
+            dict, cookie name as key and cookie value as data
+        """
+        return {cookie.key: cookie.value
+                for cookie in self._session.cookie_jar}
+
     def _get_cookie(self, name):
         """Return a cookie for raise error if that cookie was not provided."""
         try:
@@ -468,9 +483,6 @@ class Client(object):
         # This header is required for Protocol Buffer responses, which causes
         # them to be base64 encoded:
         headers['X-Goog-Encode-Response-If-Executable'] = 'base64'
-        required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
-        cookies = {cookie: self._get_cookie(cookie)
-                   for cookie in required_cookies}
         params = {
             # "alternative representation type" (desired response format).
             'alt': response_type,
@@ -478,9 +490,9 @@ class Client(object):
             # Unauthenticated Use Exceeded. Continued use requires signup").
             'key': API_KEY,
         }
-        res = yield from http_utils.fetch(
-            'post', url, headers=headers, cookies=cookies, params=params,
-            data=data, connector=self._connector, proxy=self._proxy
+        res = yield from self._session.fetch(
+            'post', url, headers=headers, params=params,
+            data=data, proxy=self._proxy
         )
         return res
 

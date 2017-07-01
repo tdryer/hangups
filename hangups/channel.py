@@ -146,8 +146,14 @@ class Channel(object):
     # Public methods
     ##########################################################################
 
-    def __init__(self, cookies, connector, max_retries, retry_backoff_base):
-        """Create a new channel."""
+    def __init__(self, session, max_retries, retry_backoff_base):
+        """Create a new channel.
+
+        Args:
+            session: aiohttp.ClientSession instance
+            max_retries: int, retries for continued failed requests
+            retry_backoff_base: int, base to calculate the exponential delay
+        """
 
         # Event fired when channel connects with arguments ():
         self.on_connect = event.Event('Channel.on_connect')
@@ -165,18 +171,26 @@ class Channel(object):
         self._is_connected = False
         # True if the on_connect event has been called at least once:
         self._on_connect_called = False
-        # Request cookies dictionary:
-        self._cookies = cookies
         # Parser for assembling messages:
         self._chunk_parser = None
-        # aiohttp connector for keep-alive:
-        self._connector = connector
         # proxy url used to bridge requests:
         self._proxy = os.environ.get('HTTP_PROXY')
+        # aiohttp session for keep-alive and cookie transport:
+        self._session = session
 
         # Discovered parameters:
         self._sid_param = None
         self._gsessionid_param = None
+
+    @property
+    def _cookies(self):
+        """get all cookies of the session
+
+        Returns:
+            dict, cookie name as key and cookie value as data
+        """
+        return {cookie.key: cookie.value
+                for cookie in self._session.cookie_jar}
 
     @property
     def is_connected(self):
@@ -246,9 +260,8 @@ class Channel(object):
         for map_num, map_ in enumerate(map_list):
             for map_key, map_val in map_.items():
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
-        res = yield from http_utils.fetch(
+        res = yield from self._session.fetch(
             'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            cookies=self._cookies, connector=self._connector,
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params=params, data=data_dict, proxy=self._proxy
         )
@@ -302,11 +315,11 @@ class Channel(object):
         headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
         try:
-            res = yield from asyncio.wait_for(aiohttp.request(
-                'get', CHANNEL_URL_PREFIX.format('channel/bind'),
-                params=params, cookies=self._cookies, headers=headers,
-                connector=self._connector, proxy=self._proxy
-            ), CONNECT_TIMEOUT)
+            res = yield from asyncio.wait_for(
+                self._session.get(CHANNEL_URL_PREFIX.format('channel/bind'),
+                                  params=params, headers=headers,
+                                  proxy=self._proxy),
+                CONNECT_TIMEOUT)
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
         except aiohttp.ServerDisconnectedError as e:
