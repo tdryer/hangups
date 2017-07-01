@@ -73,8 +73,6 @@ class Client(object):
             state_update: A ``StateUpdate`` message.
         """
 
-        self._proxy = os.environ.get('HTTP_PROXY')
-
         self.__cookies = cookies
         self._session = None
         self._channel = None
@@ -123,7 +121,8 @@ class Client(object):
         Returns when an error has occurred, or :func:`disconnect` has been
         called.
         """
-        self._session = http_utils.ClientSession(cookies=self.__cookies)
+        self._session = http_utils.ClientSession(
+            cookies=self.__cookies, proxy=os.environ.get('HTTP_PROXY'))
         self.__cookies = None
         self._channel = channel.Channel(
             self._session, max_retries=self._max_retries,
@@ -491,8 +490,7 @@ class Client(object):
             'key': API_KEY,
         }
         res = yield from self._session.fetch(
-            'post', url, headers=headers, params=params,
-            data=data, proxy=self._proxy
+            'post', url, headers=headers, params=params, data=data,
         )
         return res
 

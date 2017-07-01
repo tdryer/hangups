@@ -21,11 +21,10 @@ import codecs
 import hashlib
 import json
 import logging
-import os
 import re
 import time
 
-from hangups import http_utils, event, exceptions
+from hangups import event, exceptions
 
 logger = logging.getLogger(__name__)
 Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
@@ -173,8 +172,6 @@ class Channel(object):
         self._on_connect_called = False
         # Parser for assembling messages:
         self._chunk_parser = None
-        # proxy url used to bridge requests:
-        self._proxy = os.environ.get('HTTP_PROXY')
         # aiohttp session for keep-alive and cookie transport:
         self._session = session
 
@@ -263,7 +260,7 @@ class Channel(object):
         res = yield from self._session.fetch(
             'post', CHANNEL_URL_PREFIX.format('channel/bind'),
             headers=get_authorization_headers(self._cookies['SAPISID']),
-            params=params, data=data_dict, proxy=self._proxy
+            params=params, data=data_dict
         )
         return res
 
@@ -317,8 +314,7 @@ class Channel(object):
         try:
             res = yield from asyncio.wait_for(
                 self._session.get(CHANNEL_URL_PREFIX.format('channel/bind'),
-                                  params=params, headers=headers,
-                                  proxy=self._proxy),
+                                  params=params, headers=headers),
                 CONNECT_TIMEOUT)
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')

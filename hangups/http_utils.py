@@ -20,13 +20,33 @@ class ClientSession(aiohttp.ClientSession):
 
     Args:
         cookies: dict, initial cookies for authentication
+        proxy: string, proxy url used for the request
     """
-    def __init__(self, cookies=None):
+    def __init__(self, cookies=None, proxy=None):
+        self._proxy = proxy
         super().__init__(cookies=cookies)
 
     @asyncio.coroutine
-    def fetch(self, method, url, params=None, headers=None, data=None,
-              proxy=None):
+    def _request(self, method, url, **kwargs):
+        """perform a single http request
+
+        Args:
+            method: string, HTTP request method
+            url: string, target URI
+            kwargs: dict, see ``aiohttp.ClientSession._request``
+
+        Returns:
+            aiohttp.ClientResponse instance
+
+        Raises:
+            see ``aiohttp.ClientSession._request``
+        """
+        # pylint:disable=arguments-differ
+        kwargs.setdefault('proxy', self._proxy)
+        return (yield from super()._request(method, url, **kwargs))
+
+    @asyncio.coroutine
+    def fetch(self, method, url, params=None, headers=None, data=None):
         """Make an HTTP request.
 
         If a request times out or one encounters a connection issue, it will be
@@ -38,7 +58,6 @@ class ClientSession(aiohttp.ClientSession):
             params: dict, URI parameters
             headers: dict, request header
             data: dict, request post data
-            proxy: string, proxy url used for the request
 
         Returns:
             a FetchResponse instance.
@@ -52,7 +71,7 @@ class ClientSession(aiohttp.ClientSession):
                 res = yield from asyncio.wait_for(
                     self.request(
                         method, url, params=params, headers=headers, data=data,
-                        proxy=proxy),
+                    ),
                     CONNECT_TIMEOUT)
                 body = yield from asyncio.wait_for(res.read(), REQUEST_TIMEOUT)
                 logger.debug('Received response %d %s:\n%r',
