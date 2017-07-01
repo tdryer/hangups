@@ -12,8 +12,7 @@ CONNECT_TIMEOUT = 30
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
 
-FetchResponse = collections.namedtuple('FetchResponse', ['code', 'body',
-                                                         'cookies'])
+FetchResponse = collections.namedtuple('FetchResponse', ['code', 'body'])
 
 
 @asyncio.coroutine
@@ -57,5 +56,4 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
             'Request return unexpected status: {}: {}'
             .format(res.status, res.reason))
 
-    cookie_dict = {name: morsel.value for name, morsel in res.cookies.items()}
-    return FetchResponse(res.status, body, cookie_dict)
+    return FetchResponse(res.status, body)
