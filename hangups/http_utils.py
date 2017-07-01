@@ -16,21 +16,20 @@ FetchResponse = collections.namedtuple('FetchResponse', ['code', 'body'])
 
 
 @asyncio.coroutine
-def fetch(method, url, params=None, headers=None, cookies=None, data=None,
-          connector=None, proxy=None):
+def fetch(session, method, url, params=None, headers=None, data=None,
+          proxy=None):
     """Make an HTTP request.
 
     If the request times out or one encounters a connection issue, it will be
     retried MAX_RETRIES times before finally raising hangups.NetworkError.
 
     Args:
+        session: aiohttp.ClientSession instance with cookies
         method: string, request method
         url: string, target URI
         params: dict, URI parameters
         headers: dict, request header
-        cookies: dict, cookies used for the request
         data: dict, request post data
-        connector: aiohttp.TCPConnector instance
         proxy: string, proxy url used for the request
 
     Returns:
@@ -43,9 +42,8 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
     for retry_num in range(MAX_RETRIES):
         try:
             res = yield from asyncio.wait_for(
-                aiohttp.request(
-                    method, url, params=params, headers=headers,
-                    cookies=cookies, data=data, connector=connector,
+                session.request(
+                    method, url, params=params, headers=headers, data=data,
                     proxy=proxy),
                 CONNECT_TIMEOUT)
             body = yield from asyncio.wait_for(res.read(), REQUEST_TIMEOUT)
