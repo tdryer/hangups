@@ -260,8 +260,8 @@ class Channel(object):
         for map_num, map_ in enumerate(map_list):
             for map_key, map_val in map_.items():
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
-        res = yield from http_utils.fetch(
-            self._session, 'post', CHANNEL_URL_PREFIX.format('channel/bind'),
+        res = yield from self._session.fetch(
+            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params=params, data=data_dict, proxy=self._proxy
         )

@@ -123,7 +123,7 @@ class Client(object):
         Returns when an error has occurred, or :func:`disconnect` has been
         called.
         """
-        self._session = aiohttp.ClientSession(cookies=self.__cookies)
+        self._session = http_utils.ClientSession(cookies=self.__cookies)
         self.__cookies = None
         self._channel = channel.Channel(
             self._session, max_retries=self._max_retries,
@@ -490,8 +490,8 @@ class Client(object):
             # Unauthenticated Use Exceeded. Continued use requires signup").
             'key': API_KEY,
         }
-        res = yield from http_utils.fetch(
-            self._session, 'post', url, headers=headers, params=params,
+        res = yield from self._session.fetch(
+            'post', url, headers=headers, params=params,
             data=data, proxy=self._proxy
         )
         return res
