@@ -74,11 +74,8 @@ class Client(object):
         """
 
         self._cookies = cookies
-        proxy = os.environ.get('HTTP_PROXY')
-        if proxy:
-            self._connector = aiohttp.ProxyConnector(proxy)
-        else:
-            self._connector = aiohttp.TCPConnector()
+        self._proxy = os.environ.get('HTTP_PROXY')
+        self._connector = aiohttp.TCPConnector()
 
         self._channel = (
             channel.Channel(self._cookies,
@@ -483,7 +480,7 @@ class Client(object):
         }
         res = yield from http_utils.fetch(
             'post', url, headers=headers, cookies=cookies, params=params,
-            data=data, connector=self._connector
+            data=data, connector=self._connector, proxy=self._proxy
         )
         return res
 

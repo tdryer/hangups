@@ -21,6 +21,7 @@ import codecs
 import hashlib
 import json
 import logging
+import os
 import re
 import time
 
@@ -170,6 +171,8 @@ class Channel(object):
         self._chunk_parser = None
         # aiohttp connector for keep-alive:
         self._connector = connector
+        # proxy url used to bridge requests:
+        self._proxy = os.environ.get('HTTP_PROXY')
 
         # Discovered parameters:
         self._sid_param = None
@@ -247,7 +250,7 @@ class Channel(object):
             'post', CHANNEL_URL_PREFIX.format('channel/bind'),
             cookies=self._cookies, connector=self._connector,
             headers=get_authorization_headers(self._cookies['SAPISID']),
-            params=params, data=data_dict,
+            params=params, data=data_dict, proxy=self._proxy
         )
         return res
 
@@ -302,7 +305,7 @@ class Channel(object):
             res = yield from asyncio.wait_for(aiohttp.request(
                 'get', CHANNEL_URL_PREFIX.format('channel/bind'),
                 params=params, cookies=self._cookies, headers=headers,
-                connector=self._connector
+                connector=self._connector, proxy=self._proxy
             ), CONNECT_TIMEOUT)
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')

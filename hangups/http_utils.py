@@ -18,22 +18,38 @@ FetchResponse = collections.namedtuple('FetchResponse', ['code', 'body',
 
 @asyncio.coroutine
 def fetch(method, url, params=None, headers=None, cookies=None, data=None,
-          connector=None):
+          connector=None, proxy=None):
     """Make an HTTP request.
 
-    If the request times out or a encounters a connection issue, it will be
+    If the request times out or one encounters a connection issue, it will be
     retried MAX_RETRIES times before finally raising hangups.NetworkError.
 
-    Returns FetchResponse.
+    Args:
+        method: string, request method
+        url: string, target URI
+        params: dict, URI parameters
+        headers: dict, request header
+        cookies: dict, cookies used for the request
+        data: dict, request post data
+        connector: aiohttp.TCPConnector instance
+        proxy: string, proxy url used for the request
+
+    Returns:
+        a FetchResponse instance.
+
+    Raises:
+        hangups.NetworkError: request invalid or timed out
     """
     logger.debug('Sending request %s %s:\n%r', method, url, data)
     error_msg = None
     for retry_num in range(MAX_RETRIES):
         try:
-            res = yield from asyncio.wait_for(aiohttp.request(
-                method, url, params=params, headers=headers, cookies=cookies,
-                data=data, connector=connector
-            ), CONNECT_TIMEOUT)
+            res = yield from asyncio.wait_for(
+                aiohttp.request(
+                    method, url, params=params, headers=headers,
+                    cookies=cookies, data=data, connector=connector,
+                    proxy=proxy),
+                CONNECT_TIMEOUT)
             body = yield from asyncio.wait_for(res.read(), REQUEST_TIMEOUT)
             logger.debug('Received response %d %s:\n%r', res.status,
                          res.reason, body)
