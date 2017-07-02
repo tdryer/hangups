@@ -5,7 +5,7 @@ import asyncio
 import collections
 import logging
 
-from . import exceptions
+from hangups import exceptions
 
 logger = logging.getLogger(__name__)
 CONNECT_TIMEOUT = 30

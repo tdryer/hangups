@@ -6,7 +6,7 @@ through property methods, which prefer logging warnings to raising exceptions.
 
 import logging
 
-from . import parsers, message_parser, user, hangouts_pb2
+from hangups import parsers, message_parser, user, hangouts_pb2
 
 logger = logging.getLogger(__name__)
 chat_message_parser = message_parser.ChatMessageParser()

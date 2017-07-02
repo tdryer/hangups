@@ -20,7 +20,7 @@ import urllib.parse
 import mechanicalsoup
 import requests
 
-from . import version
+from hangups import version
 
 logger = logging.getLogger(__name__)
 # Set the logging level for requests to at least INFO, since the DEBUG level

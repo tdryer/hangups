@@ -13,8 +13,8 @@ import time
 import aiohttp
 import google.protobuf.message
 
-from . import (exceptions, http_utils, channel, event, hangouts_pb2, pblite,
-               version)
+from hangups import (exceptions, http_utils, channel, event, hangouts_pb2,
+                     pblite, version)
 
 logger = logging.getLogger(__name__)
 IMAGE_UPLOAD_URL = 'https://docs.google.com/upload/photos/resumable'

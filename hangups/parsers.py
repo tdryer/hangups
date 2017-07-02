@@ -4,7 +4,7 @@ from collections import namedtuple
 import datetime
 import logging
 
-from . import user
+from hangups import user
 
 
 logger = logging.getLogger(__name__)

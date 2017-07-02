@@ -24,7 +24,7 @@ import logging
 import re
 import time
 
-from . import http_utils, event, exceptions
+from hangups import http_utils, event, exceptions
 
 logger = logging.getLogger(__name__)
 Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
