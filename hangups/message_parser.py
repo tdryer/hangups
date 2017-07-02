@@ -4,7 +4,7 @@ import re
 
 from reparser import Parser, Token, MatchGroup
 
-from hangups import hangouts_pb2
+from . import hangouts_pb2
 
 
 # Common regex patterns

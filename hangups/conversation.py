@@ -4,8 +4,8 @@ import asyncio
 import datetime
 import logging
 
-from hangups import (parsers, event, user, conversation_event, exceptions,
-                     hangouts_pb2)
+from . import (parsers, event, user, conversation_event, exceptions,
+               hangouts_pb2)
 
 logger = logging.getLogger(__name__)
 
