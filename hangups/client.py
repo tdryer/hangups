@@ -348,15 +348,7 @@ class Client(object):
         Returns:
             dict, cookie name as key and cookie value as data
         """
-        return {cookie.key: cookie.value
-                for cookie in self._session.cookie_jar}
-
-    def _get_cookie(self, name):
-        """Return a cookie for raise error if that cookie was not provided."""
-        try:
-            return self._cookies[name]
-        except KeyError:
-            raise KeyError("Cookie '{}' is required".format(name))
+        return self._session.cookies
 
     @asyncio.coroutine
     def _on_receive_array(self, array):
@@ -476,8 +468,7 @@ class Client(object):
         Raises:
             NetworkError: If the request fails.
         """
-        sapisid_cookie = self._get_cookie('SAPISID')
-        headers = channel.get_authorization_headers(sapisid_cookie)
+        headers = {}
         headers['content-type'] = content_type
         # This header is required for Protocol Buffer responses, which causes
         # them to be base64 encoded:

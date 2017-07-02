@@ -5,7 +5,7 @@ import asyncio
 import collections
 import logging
 
-from hangups import exceptions
+from hangups import exceptions, channel
 
 logger = logging.getLogger(__name__)
 CONNECT_TIMEOUT = 30
@@ -26,9 +26,36 @@ class ClientSession(aiohttp.ClientSession):
         self._proxy = proxy
         super().__init__(cookies=cookies)
 
+    @property
+    def cookies(self):
+        """get all cookies of the session
+
+        Returns:
+            dict, cookie name as key and cookie value as data
+        """
+        return {cookie.key: cookie.value
+                for cookie in self._cookie_jar}
+
+    def _get_cookie(self, name):
+        """get a cookie or raise an error for a missing one
+
+        Args:
+            name: string, the requested cookie name
+
+        Returns:
+            string, requested cookie value
+
+        Raises:
+            KeyError: the requested cookie was not set by the server
+        """
+        for cookie in self._cookie_jar:
+            if cookie.key == name:
+                return cookie.value
+        raise KeyError("Cookie '{}' is required".format(name))
+
     @asyncio.coroutine
     def _request(self, method, url, **kwargs):
-        """perform a single http request
+        """perform a single http request with authorization header for google
 
         Args:
             method: string, HTTP request method
@@ -42,6 +69,9 @@ class ClientSession(aiohttp.ClientSession):
             see ``aiohttp.ClientSession._request``
         """
         # pylint:disable=arguments-differ
+        kwargs['headers'] = kwargs.get('headers') or {}
+        kwargs['headers'].update(
+            channel.get_authorization_headers(self._get_cookie('SAPISID')))
         kwargs.setdefault('proxy', self._proxy)
         return (yield from super()._request(method, url, **kwargs))
 

@@ -180,16 +180,6 @@ class Channel(object):
         self._gsessionid_param = None
 
     @property
-    def _cookies(self):
-        """get all cookies of the session
-
-        Returns:
-            dict, cookie name as key and cookie value as data
-        """
-        return {cookie.key: cookie.value
-                for cookie in self._session.cookie_jar}
-
-    @property
     def is_connected(self):
         """Whether the channel is currently connected."""
         return self._is_connected
@@ -259,7 +249,6 @@ class Channel(object):
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
         res = yield from self._session.fetch(
             'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            headers=get_authorization_headers(self._cookies['SAPISID']),
             params=params, data=data_dict
         )
         return res
@@ -309,12 +298,11 @@ class Channel(object):
             'ctype': 'hangouts',  # client type
             'TYPE': 'xmlhttp',  # type of request
         }
-        headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
         try:
             res = yield from asyncio.wait_for(
                 self._session.get(CHANNEL_URL_PREFIX.format('channel/bind'),
-                                  params=params, headers=headers),
+                                  params=params),
                 CONNECT_TIMEOUT)
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
