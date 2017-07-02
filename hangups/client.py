@@ -10,7 +10,6 @@ import os
 import random
 import time
 
-import aiohttp
 import google.protobuf.message
 
 from hangups import (exceptions, http_utils, channel, event, hangouts_pb2,
