@@ -209,7 +209,7 @@ class WidgetBase(urwid.WidgetWrap):
     """
     def keypress(self, size, key):
         """forward the call"""
-        #TODO(das7pad) add custom key mapping here
+        # TODO(das7pad) add custom key mapping here
         # pylint:disable=not-callable, useless-super-delegation
         return super().keypress(size, key)
 
