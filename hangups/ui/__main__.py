@@ -444,7 +444,7 @@ class StatusLineWidget(urwid.WidgetWrap):
                         if status == hangups.TYPING_TYPE_STARTED]
         displayed_names = [user.first_name for user in typing_users
                            if not user.is_self]
-        if len(displayed_names) > 0:
+        if displayed_names:
             typing_message = '{} {} typing...'.format(
                 ', '.join(sorted(displayed_names)),
                 'is' if len(displayed_names) == 1 else 'are'
@@ -588,7 +588,7 @@ class ConversationEventListWalker(urwid.ListWalker):
 
         # Focus position is the first event ID, or POSITION_LOADING.
         self._focus_position = (conversation.events[-1].id_
-                                if len(conversation.events) > 0
+                                if conversation.events
                                 else self.POSITION_LOADING)
 
         self._conversation.on_event.add_observer(self._handle_event)
@@ -617,10 +617,9 @@ class ConversationEventListWalker(urwid.ListWalker):
                 )
             except (IndexError, hangups.NetworkError):
                 conv_events = []
-            if len(conv_events) == 0:
+            if not conv_events:
                 self._first_loaded = True
-            if (self._focus_position == self.POSITION_LOADING and
-                    len(conv_events) > 0):
+            if self._focus_position == self.POSITION_LOADING and conv_events:
                 # If the loading indicator is still focused, and we loaded more
                 # events, set focus on the first new event so the loaded
                 # indicator is replaced.
@@ -760,7 +759,7 @@ class ConversationWidget(urwid.WidgetWrap):
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
         # Ignore if the user hasn't typed a message.
-        if len(text) == 0:
+        if not text:
             return
         elif text.startswith('/image') and len(text.split(' ')) == 2:
             # Temporary UI for testing image uploads
