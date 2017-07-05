@@ -109,6 +109,7 @@ class ChatUI(object):
             finally:
                 # Ensure urwid cleans up properly and doesn't wreck the
                 # terminal.
+                loop.run_until_complete(self._client.disconnect())
                 self._urwid_loop.stop()
                 loop.close()
 

@@ -149,6 +149,14 @@ class Client(object):
         When disconnection is complete, :func:`connect` will return.
         """
         logger.info('Disconnecting gracefully...')
+
+        # ignore a previous Exception
+        # pylint:disable=protected-access
+        if self._listen_future._exception is not None:
+            logger.info('disconnect: discard %s',
+                        repr(self._listen_future._exception))
+            self._client._listen_future._exception = None
+
         self._listen_future.cancel()
         try:
             yield from self._listen_future
