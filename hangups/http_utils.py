@@ -29,6 +29,7 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
     logger.debug('Sending request %s %s:\n%r', method, url, data)
     error_msg = None
     for retry_num in range(MAX_RETRIES):
+        res = None
         try:
             res = yield from asyncio.wait_for(aiohttp.request(
                 method, url, params=params, headers=headers, cookies=cookies,
@@ -47,7 +48,7 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
             error_msg = None
             break
         finally:
-            if 'res' in locals():
+            if res is not None:
                 res.release()
         logger.info('Request attempt %d failed: %s', retry_num, error_msg)
     if error_msg:

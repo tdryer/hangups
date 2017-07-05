@@ -299,6 +299,7 @@ class Channel(object):
         }
         headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
+        res = None
         try:
             res = yield from asyncio.wait_for(aiohttp.request(
                 'get', CHANNEL_URL_PREFIX.format('channel/bind'),
@@ -328,7 +329,7 @@ class Channel(object):
         except aiohttp.ClientError as err:
             raise exceptions.NetworkError('Request connection error: %s' % err)
         finally:
-            if 'res' in locals():
+            if res is not None:
                 res.release()
 
     @asyncio.coroutine
