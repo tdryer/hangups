@@ -329,7 +329,7 @@ class Channel(object):
             raise exceptions.NetworkError('Request connection error: %s' % err)
         finally:
             if 'res' in locals():
-                res.close()
+                res.release()
 
     @asyncio.coroutine
     def _on_push_data(self, data_bytes):
