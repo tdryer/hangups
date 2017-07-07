@@ -262,6 +262,15 @@ class Conversation(object):
         status = self._conversation.otr_status
         return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
 
+    @property
+    def is_sending(self):
+        """check whether we are currently sending
+
+        Returns:
+            boolean, True while we are sending, otherwise False
+        """
+        return self._send_message_lock.locked()
+
     def _on_watermark_notification(self, notif):
         """Update the conversations latest_read_timestamp."""
         if self.get_user(notif.user_id).is_self:
