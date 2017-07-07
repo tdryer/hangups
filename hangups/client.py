@@ -115,6 +115,10 @@ class Client(object):
         # ActiveClientState enum int value or None:
         self._active_client_state = None
 
+    def __del__(self):
+        """explicit cleanup"""
+        self._connector.close()
+
     ##########################################################################
     # Public methods
     ##########################################################################
@@ -139,7 +143,6 @@ class Client(object):
             yield from self._listen_future
         except asyncio.CancelledError:
             pass
-        self._connector.close()
         logger.info('Client.connect returning because Channel.listen returned')
 
     @asyncio.coroutine
