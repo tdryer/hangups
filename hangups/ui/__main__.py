@@ -110,6 +110,7 @@ class ChatUI(object):
                 # Ensure urwid cleans up properly and doesn't wreck the
                 # terminal.
                 loop.run_until_complete(self._client.disconnect())
+                loop.run_until_complete(self._cleanup())
                 self._urwid_loop.stop()
                 loop.close()
 
@@ -201,6 +202,18 @@ class ChatUI(object):
         """Handle the user quitting the application."""
         future = asyncio.async(self._client.disconnect())
         future.add_done_callback(lambda future: future.result())
+
+    @asyncio.coroutine
+    def _cleanup(self):
+        """delay until all conversations finished sending"""
+        self._urwid_loop.widget = LoadingWidget('Disconnecting...')
+        delay = 0
+        while any(conv.is_sending for conv in self._conv_list.get_all()):
+            delay = 3
+            yield from asyncio.sleep(0.1)
+
+        # additional delay to allow connection cleanup
+        yield from asyncio.sleep(delay)
 
 
 class LoadingWidget(urwid.WidgetWrap):
