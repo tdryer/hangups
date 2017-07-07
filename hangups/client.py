@@ -150,12 +150,13 @@ class Client(object):
         """
         logger.info('Disconnecting gracefully...')
 
-        # ignore a previous Exception
-        # pylint:disable=protected-access
-        if self._listen_future._exception is not None:
-            logger.info('disconnect: discard %s',
-                        repr(self._listen_future._exception))
-            self._client._listen_future._exception = None
+        # catch a previous Exception
+        if (not self._listen_future.cancelled()
+                and self._listen_future.done()
+                and self._listen_future.exception() is not None):
+            logger.info('disconnect: channel already disconnected from %s',
+                        repr(self._listen_future.exception()))
+            return
 
         self._listen_future.cancel()
         try:
