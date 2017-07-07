@@ -204,12 +204,16 @@ class ChatUI(object):
 
 
 class LoadingWidget(urwid.WidgetWrap):
-    """Widget that shows a loading indicator."""
+    """Widget that shows a loading indicator.
 
-    def __init__(self):
+    Args:
+        message: string, a custom message describing the delay
+    """
+
+    def __init__(self, message='Connecting...'):
         # show message in the center of the screen
         super().__init__(urwid.Filler(
-            urwid.Text('Connecting...', align='center')
+            urwid.Text(message, align='center')
         ))
 
 
