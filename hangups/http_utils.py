@@ -29,13 +29,15 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
     logger.debug('Sending request %s %s:\n%r', method, url, data)
     error_msg = None
     for retry_num in range(MAX_RETRIES):
-        res = None
         try:
             res = yield from asyncio.wait_for(aiohttp.request(
                 method, url, params=params, headers=headers, cookies=cookies,
                 data=data, connector=connector
             ), CONNECT_TIMEOUT)
-            body = yield from asyncio.wait_for(res.read(), REQUEST_TIMEOUT)
+            try:
+                body = yield from asyncio.wait_for(res.read(), REQUEST_TIMEOUT)
+            finally:
+                res.release()
             logger.debug('Received response %d %s:\n%r', res.status,
                          res.reason, body)
         except asyncio.TimeoutError:
@@ -47,9 +49,6 @@ def fetch(method, url, params=None, headers=None, cookies=None, data=None,
         else:
             error_msg = None
             break
-        finally:
-            if res is not None:
-                res.release()
         logger.info('Request attempt %d failed: %s', retry_num, error_msg)
     if error_msg:
         logger.info('Request failed after %d attempts', MAX_RETRIES)
