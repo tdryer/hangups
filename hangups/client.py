@@ -72,16 +72,22 @@ class Client(object):
         Args:
             state_update: A ``StateUpdate`` message.
         """
-        # Google session cookies:
+
         self._cookies = cookies
+        proxy = os.environ.get('HTTP_PROXY')
+        if proxy:
+            self._connector = aiohttp.ProxyConnector(proxy)
+        else:
+            self._connector = aiohttp.TCPConnector()
 
-        # aiohttp.ClientSession instance (populated by connect method):
-        self._session = None
+        self._channel = (
+            channel.Channel(self._cookies,
+                            self._connector,
+                            max_retries=self._max_retries,
+                            retry_backoff_base=self._retry_backoff_base)
+        )
 
-        # Channel instance (populated by connect method):
-        self._channel = None
-
-        # Future for Channel.listen (populated by connect method):
+        # Future for Channel.listen
         self._listen_future = None
 
         self._request_header = hangouts_pb2.RequestHeader(
@@ -120,31 +126,21 @@ class Client(object):
         Returns when an error has occurred, or :func:`disconnect` has been
         called.
         """
-        self._session = aiohttp.ClientSession(cookies=self._cookies)
-        try:
-            self._channel = channel.Channel(
-                self._cookies, self._session, max_retries=self._max_retries,
-                retry_backoff_base=self._retry_backoff_base
-            )
-            # Forward the Channel events to the Client events.
-            self._channel.on_connect.add_observer(self.on_connect.fire)
-            self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
-            self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
-            self._channel.on_receive_array.add_observer(self._on_receive_array)
+        # Forward the Channel events to the Client events.
+        self._channel.on_connect.add_observer(self.on_connect.fire)
+        self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
+        self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
+        self._channel.on_receive_array.add_observer(self._on_receive_array)
 
-            # Wrap the coroutine in a Future so it can be cancelled.
-            self._listen_future = asyncio.async(self._channel.listen())
-            # Listen for StateUpdate messages from the Channel until it
-            # disconnects.
-            try:
-                yield from self._listen_future
-            except asyncio.CancelledError:
-                pass
-            logger.info(
-                'Client.connect returning because Channel.listen returned'
-            )
-        finally:
-            self._session.close()
+        # Listen for StateUpdate messages from the Channel until it
+        # disconnects.
+        self._listen_future = asyncio.async(self._channel.listen())
+        try:
+            yield from self._listen_future
+        except asyncio.CancelledError:
+            pass
+        self._connector.close()
+        logger.info('Client.connect returning because Channel.listen returned')
 
     @asyncio.coroutine
     def disconnect(self):
@@ -475,6 +471,9 @@ class Client(object):
         # This header is required for Protocol Buffer responses, which causes
         # them to be base64 encoded:
         headers['X-Goog-Encode-Response-If-Executable'] = 'base64'
+        required_cookies = ['SAPISID', 'HSID', 'SSID', 'APISID', 'SID']
+        cookies = {cookie: self._get_cookie(cookie)
+                   for cookie in required_cookies}
         params = {
             # "alternative representation type" (desired response format).
             'alt': response_type,
@@ -483,8 +482,8 @@ class Client(object):
             'key': API_KEY,
         }
         res = yield from http_utils.fetch(
-            self._session, 'post', url, headers=headers, params=params,
-            data=data
+            'post', url, headers=headers, cookies=cookies, params=params,
+            data=data, connector=self._connector
         )
         return res
 

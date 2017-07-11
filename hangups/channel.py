@@ -21,7 +21,6 @@ import codecs
 import hashlib
 import json
 import logging
-import os
 import re
 import time
 
@@ -146,7 +145,7 @@ class Channel(object):
     # Public methods
     ##########################################################################
 
-    def __init__(self, cookies, session, max_retries, retry_backoff_base):
+    def __init__(self, cookies, connector, max_retries, retry_backoff_base):
         """Create a new channel."""
 
         # Event fired when channel connects with arguments ():
@@ -169,8 +168,8 @@ class Channel(object):
         self._cookies = cookies
         # Parser for assembling messages:
         self._chunk_parser = None
-        # aiohttp session for keep-alive and cookies:
-        self._session = session
+        # aiohttp connector for keep-alive:
+        self._connector = connector
 
         # Discovered parameters:
         self._sid_param = None
@@ -245,7 +244,8 @@ class Channel(object):
             for map_key, map_val in map_.items():
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
         res = yield from http_utils.fetch(
-            self._session, 'post', CHANNEL_URL_PREFIX.format('channel/bind'),
+            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
+            cookies=self._cookies, connector=self._connector,
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params=params, data=data_dict,
         )
@@ -299,11 +299,11 @@ class Channel(object):
         headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
         try:
-            res = yield from asyncio.wait_for(self._session.get(
-                CHANNEL_URL_PREFIX.format('channel/bind'),
-                params=params, headers=headers,
-                proxy=os.environ.get('HTTP_PROXY')
-            ), CONNECT_TIMEOUT)
+            res = yield from asyncio.wait_for(aiohttp.request(
+                'get', CHANNEL_URL_PREFIX.format('channel/bind'),
+                params=params, cookies=self._cookies, headers=headers,
+                connector=self._connector), CONNECT_TIMEOUT)
+
             try:
                 if res.status != 200:
                     if res.status == 400 and res.reason == 'Unknown SID':
