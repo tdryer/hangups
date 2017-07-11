@@ -27,6 +27,7 @@ disable=
     redefined-variable-type,
     too-many-statements,
     too-many-lines,
+    no-else-return,
 
 [FORMAT]
 
