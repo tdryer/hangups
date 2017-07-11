@@ -651,9 +651,10 @@ class ConversationEventListWalker(urwid.ListWalker):
             if self._first_loaded:
                 # TODO: Show the full date the conversation was created.
                 return urwid.Text('No more messages', align='center')
-            future = asyncio.async(self._load())
-            future.add_done_callback(lambda future: future.result())
-            return urwid.Text('Loading...', align='center')
+            else:
+                future = asyncio.async(self._load())
+                future.add_done_callback(lambda future: future.result())
+                return urwid.Text('Loading...', align='center')
         try:
             # When creating the widget, also pass the previous event so a
             # timestamp can be shown if this event occurred on a different day.

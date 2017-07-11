@@ -190,8 +190,9 @@ class UserList(object):
                                     user_.full_name, user_))
             self._user_dict[user_.id_] = user_
             return user_
-        existing.upgrade_name(user_)
-        return existing
+        else:
+            existing.upgrade_name(user_)
+            return existing
 
     def _on_state_update(self, state_update):
         """Receive a StateUpdate"""

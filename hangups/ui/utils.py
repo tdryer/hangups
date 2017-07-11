@@ -38,7 +38,8 @@ def get_conv_name(conv, truncate=False, show_unread=False):
         elif truncate and len(participants) > 2:
             return (', '.join(names[:2] + ['+{}'.format(len(names) - 2)]) +
                     postfix)
-        return ', '.join(names) + postfix
+        else:
+            return ', '.join(names) + postfix
 
 
 def add_color_to_scheme(scheme, name, foreground, background, palette_colors):

@@ -679,7 +679,8 @@ class Conversation(object):
             return self.events[i - 1]
         elif not prev and i + 1 < len(self.events):
             return self.events[i + 1]
-        return None
+        else:
+            return None
 
     def get_event(self, event_id):
         """Get an event in this conversation by its ID.
@@ -871,7 +872,8 @@ class ConversationList(object):
                 )
             )
             return self._add_conversation(res.conversation_state.conversation)
-        return conv
+        else:
+            return conv
 
     @asyncio.coroutine
     def _on_event(self, event_):
