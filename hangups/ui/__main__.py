@@ -205,6 +205,10 @@ class ChatUI(object):
 class WidgetBase(urwid.WidgetWrap):
     """Base for UI Widgets
 
+    This class overrides the property definition for the method ``keypress`` in
+     ``urwid.WidgetWrap``.
+    Using a method that overrides the property saves many pylint suppressions.
+
     Args:
         target: urwid.Widget instance
     """
