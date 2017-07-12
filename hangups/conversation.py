@@ -290,7 +290,7 @@ class Conversation(object):
 
         # delivery_medium_option
         new_state = conversation.self_conversation_state
-        if len(new_state.delivery_medium_option) == 0:
+        if not new_state.delivery_medium_option:
             old_state = self._conversation.self_conversation_state
             new_state.delivery_medium_option.extend(
                 old_state.delivery_medium_option

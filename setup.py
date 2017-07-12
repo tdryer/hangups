@@ -110,7 +110,7 @@ setup(
     install_requires=install_requires,
     tests_require=[
         'pytest==3.0.5',
-        'pylint==1.6.4',
+        'pylint==1.7.2',
         'pycodestyle==2.2.0',
         'httpretty==0.8.14',
     ],

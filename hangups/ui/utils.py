@@ -31,7 +31,7 @@ def get_conv_name(conv, truncate=False, show_unread=False):
             key=lambda user: user.id_
         )
         names = [user.first_name for user in participants]
-        if len(participants) == 0:
+        if not participants:
             return "Empty Conversation" + postfix
         if len(participants) == 1:
             return participants[0].full_name + postfix

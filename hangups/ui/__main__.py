@@ -202,7 +202,24 @@ class ChatUI(object):
         future.add_done_callback(lambda future: future.result())
 
 
-class LoadingWidget(urwid.WidgetWrap):
+class WidgetBase(urwid.WidgetWrap):
+    """Base for UI Widgets
+
+    This class overrides the property definition for the method ``keypress`` in
+     ``urwid.WidgetWrap``.
+    Using a method that overrides the property saves many pylint suppressions.
+
+    Args:
+        target: urwid.Widget instance
+    """
+    def keypress(self, size, key):
+        """forward the call"""
+        # TODO(das7pad) add custom key mapping here
+        # pylint:disable=not-callable, useless-super-delegation
+        return super().keypress(size, key)
+
+
+class LoadingWidget(WidgetBase):
     """Widget that shows a loading indicator."""
 
     def __init__(self):
@@ -212,7 +229,7 @@ class LoadingWidget(urwid.WidgetWrap):
         ))
 
 
-class RenameConversationDialog(urwid.WidgetWrap):
+class RenameConversationDialog(WidgetBase):
     """Dialog widget for renaming a conversation."""
 
     def __init__(self, conversation, on_cancel, on_save):
@@ -238,7 +255,7 @@ class RenameConversationDialog(urwid.WidgetWrap):
         callback()
 
 
-class ConversationMenu(urwid.WidgetWrap):
+class ConversationMenu(WidgetBase):
     """Menu for conversation actions."""
 
     def __init__(self, conversation, close_callback, keybindings):
@@ -279,7 +296,7 @@ class ConversationMenu(urwid.WidgetWrap):
             return key
 
 
-class ConversationButton(urwid.WidgetWrap):
+class ConversationButton(WidgetBase):
     """Button that shows the name and unread message count of conversation."""
 
     def __init__(self, conversation, on_press):
@@ -331,7 +348,7 @@ class ConversationListWalker(urwid.SimpleFocusListWalker):
                   reverse=True)
 
 
-class ConversationPickerWidget(urwid.WidgetWrap):
+class ConversationPickerWidget(WidgetBase):
     """ListBox widget for picking a conversation from a list."""
 
     def __init__(self, conversation_list, on_select, keybindings):
@@ -377,7 +394,7 @@ class ReturnableEdit(urwid.Edit):
             return super().keypress(size, key)
 
 
-class StatusLineWidget(urwid.WidgetWrap):
+class StatusLineWidget(WidgetBase):
     """Widget for showing status messages.
 
     If the client is disconnected, show a reconnecting message. If a temporary
@@ -446,7 +463,7 @@ class StatusLineWidget(urwid.WidgetWrap):
                         if status == hangups.TYPING_TYPE_STARTED]
         displayed_names = [user.first_name for user in typing_users
                            if not user.is_self]
-        if len(displayed_names) > 0:
+        if displayed_names:
             typing_message = '{} {} typing...'.format(
                 ', '.join(sorted(displayed_names)),
                 'is' if len(displayed_names) == 1 else 'are'
@@ -462,7 +479,7 @@ class StatusLineWidget(urwid.WidgetWrap):
             self._widget.set_text(typing_message)
 
 
-class MessageWidget(urwid.WidgetWrap):
+class MessageWidget(WidgetBase):
 
     """Widget for displaying a single message in a conversation."""
 
@@ -590,7 +607,7 @@ class ConversationEventListWalker(urwid.ListWalker):
 
         # Focus position is the first event ID, or POSITION_LOADING.
         self._focus_position = (conversation.events[-1].id_
-                                if len(conversation.events) > 0
+                                if conversation.events
                                 else self.POSITION_LOADING)
 
         self._conversation.on_event.add_observer(self._handle_event)
@@ -619,10 +636,9 @@ class ConversationEventListWalker(urwid.ListWalker):
                 )
             except (IndexError, hangups.NetworkError):
                 conv_events = []
-            if len(conv_events) == 0:
+            if not conv_events:
                 self._first_loaded = True
-            if (self._focus_position == self.POSITION_LOADING and
-                    len(conv_events) > 0):
+            if self._focus_position == self.POSITION_LOADING and conv_events:
                 # If the loading indicator is still focused, and we loaded more
                 # events, set focus on the first new event so the loaded
                 # indicator is replaced.
@@ -703,7 +719,7 @@ class ConversationEventListWalker(urwid.ListWalker):
         return (self[self._focus_position], self._focus_position)
 
 
-class ConversationWidget(urwid.WidgetWrap):
+class ConversationWidget(WidgetBase):
     """Widget for interacting with a conversation."""
 
     def __init__(self, client, conversation, set_title_cb, keybindings,
@@ -765,7 +781,7 @@ class ConversationWidget(urwid.WidgetWrap):
     def _on_return(self, text):
         """Called when the user presses return on the send message widget."""
         # Ignore if the user hasn't typed a message.
-        if len(text) == 0:
+        if not text:
             return
         elif text.startswith('/image') and len(text.split(' ')) == 2:
             # Temporary UI for testing image uploads
@@ -800,7 +816,7 @@ class ConversationWidget(urwid.WidgetWrap):
         self._set_title()
 
 
-class TabbedWindowWidget(urwid.WidgetWrap):
+class TabbedWindowWidget(WidgetBase):
 
     """A widget that displays a list of widgets via a tab bar."""
 
