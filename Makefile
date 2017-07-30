@@ -6,14 +6,20 @@ python = python3
 venv = venv
 
 .PHONY: venv
-venv:
+venv: venv-create venv-deps
+
+.PHONY: venv-create
+venv-create:
 	$(python) -m venv --clear $(venv)
+
+.PHONY: venv-deps
+venv-deps:
 	$(venv)/bin/pip install --upgrade pip
 	$(venv)/bin/pip install --editable .
 	$(venv)/bin/pip install --requirement requirements-dev.txt
 
 .PHONY: test-all
-test-all: style lint test
+test-all: style lint check test
 
 .PHONY: style
 style:
@@ -22,6 +28,10 @@ style:
 .PHONY: lint
 lint:
 	$(venv)/bin/pylint -j 4 --reports=n hangups
+
+.PHONY: check
+check:
+	$(venv)/bin/python setup.py check --metadata --restructuredtext --strict
 
 .PHONY: test
 test:

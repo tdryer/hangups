@@ -6,6 +6,7 @@
 #
 astroid==1.5.3            # via pylint
 click==6.7                # via pip-tools
+docutils==0.13.1
 first==2.0.1              # via pip-tools
 httpretty==0.8.14
 isort==4.2.15             # via pylint
