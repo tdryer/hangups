@@ -1,0 +1,4 @@
+httpretty
+pylint
+pytest-sugar
+-e .
