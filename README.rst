@@ -9,6 +9,10 @@ hangups
     :target: https://hangups.readthedocs.io/
     :alt: Documentation Status
 
+.. image:: https://build.snapcraft.io/badge/tdryer/hangups.svg
+    :target: https://build.snapcraft.io/user/tdryer/hangups
+    :alt: Snap Status
+
 hangups is the first third-party instant messaging client for `Google
 Hangouts`_. It includes both a Python library and a reference client with a
 text-based user interface.
