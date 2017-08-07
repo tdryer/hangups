@@ -434,9 +434,8 @@ enum ConversationType {
 
 message UserReadState {
   optional ParticipantId participant_id = 1;
+  // Timestamp of the user's last read message in the conversation.
   optional uint64 latest_read_timestamp = 2;
-
-  // TODO: is latest_read_timestamp always 0?
 }
 
 enum ConversationStatus {
@@ -532,6 +531,7 @@ message Conversation {
   optional ConversationType type = 2;
   optional string name = 3;
   optional UserConversationState self_conversation_state = 4;
+  // Read state (watermark position) for every conversation participant.
   repeated UserReadState read_state = 8;
   // True if the conversation has an active Hangout.
   optional bool has_active_hangout = 9;
