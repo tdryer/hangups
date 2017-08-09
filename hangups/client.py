@@ -41,6 +41,8 @@ class Client(object):
             retry_backoff_base^(# of retries attempted thus far)
             Defaults to 2.
     """
+    # http_utils.ClientSession instance (populated by .connect()):
+    _session = None
 
     def __init__(self, cookies, max_retries=5, retry_backoff_base=2):
         self._max_retries = max_retries
@@ -72,11 +74,13 @@ class Client(object):
             state_update: A ``StateUpdate`` message.
         """
 
+        # Cookies for the init of our ClientSession:
         self.__cookies = cookies
-        self._session = None
+
+        # channel.Channel instance (populated by .connect()):
         self._channel = None
 
-        # Future for Channel.listen
+        # Future for Channel.listen (populated by .connect()):
         self._listen_future = None
 
         self._request_header = hangouts_pb2.RequestHeader(
@@ -122,7 +126,8 @@ class Client(object):
         """
         self._session = http_utils.ClientSession(
             cookies=self.__cookies, proxy=os.environ.get('HTTP_PROXY'))
-        self.__cookies = None
+        self.__cookies = None   # cleanup: no further usage outside the session
+
         self._channel = channel.Channel(
             self._session, max_retries=self._max_retries,
             retry_backoff_base=self._retry_backoff_base)
