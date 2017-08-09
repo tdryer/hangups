@@ -88,7 +88,7 @@ def decode(message, pblite, ignore_first_item=False):
     # If the last item of the list is a dict, use it as additional field/value
     # mappings. This seems to be an optimization added for dealing with really
     # high field numbers.
-    if len(pblite) > 0 and isinstance(pblite[-1], dict):
+    if pblite and isinstance(pblite[-1], dict):
         extra_fields = {int(field_number): value for field_number, value
                         in pblite[-1].items()}
         pblite = pblite[:-1]

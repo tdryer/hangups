@@ -36,7 +36,7 @@ class User(object):
             full_name = first_name = DEFAULT_NAME
             name_type = NameType.DEFAULT
         elif not any(c.isalpha() for c in full_name):
-            full_name = first_name = full_name
+            first_name = full_name
             name_type = NameType.NUMERIC
         else:
             full_name = full_name if full_name else DEFAULT_NAME
@@ -77,8 +77,8 @@ class User(object):
             self.full_name = user_.full_name
             self.first_name = user_.first_name
             self.name_type = user_.name_type
-            logger.debug('Added {} name to User "{}": {}'.format(
-                self.name_type.name.lower(), self.full_name, self))
+            logger.debug('Added %s name to User "%s": %s',
+                         self.name_type.name.lower(), self.full_name, self)
 
     @staticmethod
     def from_entity(entity, self_user_id):
@@ -147,8 +147,8 @@ class UserList(object):
         # only use them as a fallback.
         for participant in conv_parts:
             self._add_user_from_conv_part(participant)
-        logger.info('UserList initialized with {} user(s)'
-                    .format(len(self._user_dict)))
+        logger.info('UserList initialized with %s user(s)',
+                    len(self._user_dict))
 
         self._client.on_state_update.add_observer(self._on_state_update)
 
@@ -167,9 +167,9 @@ class UserList(object):
         try:
             return self._user_dict[user_id]
         except KeyError:
-            logger.warning('UserList returning unknown User for UserID {}'
-                           .format(user_id))
-            return User(user_id, DEFAULT_NAME, None, None, [], False)
+            logger.warning('UserList returning unknown User for UserID %s',
+                           user_id)
+            return User(user_id, None, None, None, [], False)
 
     def get_all(self):
         """Get all known users.
@@ -185,9 +185,8 @@ class UserList(object):
 
         existing = self._user_dict.get(user_.id_)
         if existing is None:
-            logging.warning('Adding fallback User with {} name "{}": {}'
-                            .format(user_.name_type.name.lower(),
-                                    user_.full_name, user_))
+            logger.warning('Adding fallback User with %s name "%s"',
+                           user_.name_type.name.lower(), user_.full_name)
             self._user_dict[user_.id_] = user_
             return user_
         else:

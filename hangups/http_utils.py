@@ -103,7 +103,11 @@ class ClientSession(aiohttp.ClientSession):
                         method, url, params=params, headers=headers, data=data,
                     ),
                     CONNECT_TIMEOUT)
-                body = yield from asyncio.wait_for(res.read(), REQUEST_TIMEOUT)
+                try:
+                    body = yield from asyncio.wait_for(
+                        res.read(), REQUEST_TIMEOUT)
+                finally:
+                    res.release()
                 logger.debug('Received response %d %s:\n%r',
                              res.status, res.reason, body)
             except asyncio.TimeoutError:

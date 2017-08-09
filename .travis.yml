@@ -1,28 +1,13 @@
+dist: trusty
+sudo: false
+
 language: python
 python:
     - '3.4'
     - '3.5'
     - '3.6'
 
-install:
-    # Remove the outdated packages that Travis provides so it can install the
-    # version of pytest that hangups requires.
-    - pip uninstall --quiet --yes pytest py
-    # Install runtime requirements
-    - python setup.py --quiet install
-    # Install test requirements
-    - python setup.py --quiet test --dry-run
-    # Install requirement for documentation check
-    - pip install --quiet docutils==0.13.1
+install: make venv-deps venv=$VIRTUAL_ENV
 
-script:
-    - python setup.py --quiet style
-    # Skip lint on Python 3.6 because Pylint isn't compatible yet.
-    - if [[ $TRAVIS_PYTHON_VERSION != '3.6' ]]; then python setup.py --quiet lint; fi
-    - python setup.py --quiet test
-    # docutils requires Python >= 3.4.3, but Travis uses 3.4.2:
-    # https://github.com/travis-ci/travis-ci/issues/7028
-    - if [[ $TRAVIS_PYTHON_VERSION != '3.4' ]]; then python setup.py check --metadata --restructuredtext --strict; fi
+script: make test-all venv=$VIRTUAL_ENV
 
-# allow container-based infrastructure
-sudo: false

@@ -1,5 +1,4 @@
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
 import os
 import sys
 
@@ -13,47 +12,6 @@ if sys.version_info < (3, 4, 2):
 exec(open(os.path.join(
     os.path.dirname(__file__), 'hangups/version.py'
 )).read())
-
-
-class PytestCommand(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = ['hangups']
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
-
-
-class PylintCommand(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pylint.lint
-        # Exits with number of messages.
-        pylint.lint.Run(['--reports=n', 'hangups'])
-
-
-class Pep8Command(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pycodestyle
-        style_guide = pycodestyle.StyleGuide(config_file='setup.cfg')
-        report = style_guide.check_files(['hangups'])
-        if report.total_errors:
-            sys.exit(1)
 
 
 with open('README.rst') as f:
@@ -108,17 +66,6 @@ setup(
     ],
     packages=['hangups', 'hangups.ui'],
     install_requires=install_requires,
-    tests_require=[
-        'pytest==3.0.5',
-        'pylint==1.6.4',
-        'pycodestyle==2.2.0',
-        'httpretty==0.8.14',
-    ],
-    cmdclass={
-        'test': PytestCommand,
-        'lint': PylintCommand,
-        'style': Pep8Command,
-    },
     entry_points={
         'console_scripts': [
             'hangups=hangups.ui.__main__:main',
