@@ -399,12 +399,12 @@ Field                                   Number Type                            L
 UserReadState
 -------------
 
-============================= ====== ================ ======== ===========
-Field                         Number Type             Label    Description
-============================= ====== ================ ======== ===========
-:code:`participant_id`        1      `ParticipantId`_ optional            
-:code:`latest_read_timestamp` 2      uint64           optional            
-============================= ====== ================ ======== ===========
+============================= ====== ================ ======== ==============================================================
+Field                         Number Type             Label    Description                                                   
+============================= ====== ================ ======== ==============================================================
+:code:`participant_id`        1      `ParticipantId`_ optional                                                               
+:code:`latest_read_timestamp` 2      uint64           optional Timestamp of the user's last read message in the conversation.
+============================= ====== ================ ======== ==============================================================
 
 DeliveryMedium
 --------------
@@ -470,7 +470,7 @@ Field                                  Number Type                           Lab
 :code:`type`                           2      `ConversationType`_            optional                                                                       
 :code:`name`                           3      string                         optional                                                                       
 :code:`self_conversation_state`        4      `UserConversationState`_       optional                                                                       
-:code:`read_state`                     8      `UserReadState`_               repeated                                                                       
+:code:`read_state`                     8      `UserReadState`_               repeated Read state (watermark position) for every conversation participant.   
 :code:`has_active_hangout`             9      bool                           optional True if the conversation has an active Hangout.                       
 :code:`otr_status`                     10     `OffTheRecordStatus`_          optional The conversation's "off the record" status.                           
 :code:`otr_toggle`                     11     `OffTheRecordToggle`_          optional Whether the OTR toggle is available to the user for this conversation.

@@ -9,3 +9,4 @@ cookies.txt
 .idea/
 .cache/
 htmlcov/
+venv

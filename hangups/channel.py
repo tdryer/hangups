@@ -21,6 +21,7 @@ import codecs
 import hashlib
 import json
 import logging
+import os
 import re
 import time
 
@@ -145,7 +146,7 @@ class Channel(object):
     # Public methods
     ##########################################################################
 
-    def __init__(self, cookies, connector, max_retries, retry_backoff_base):
+    def __init__(self, cookies, session, max_retries, retry_backoff_base):
         """Create a new channel."""
 
         # Event fired when channel connects with arguments ():
@@ -168,8 +169,8 @@ class Channel(object):
         self._cookies = cookies
         # Parser for assembling messages:
         self._chunk_parser = None
-        # aiohttp connector for keep-alive:
-        self._connector = connector
+        # aiohttp session for keep-alive and cookies:
+        self._session = session
 
         # Discovered parameters:
         self._sid_param = None
@@ -244,8 +245,7 @@ class Channel(object):
             for map_key, map_val in map_.items():
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
         res = yield from http_utils.fetch(
-            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            cookies=self._cookies, connector=self._connector,
+            self._session, 'post', CHANNEL_URL_PREFIX.format('channel/bind'),
             headers=get_authorization_headers(self._cookies['SAPISID']),
             params=params, data=data_dict,
         )
@@ -299,50 +299,36 @@ class Channel(object):
         headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
         try:
-            res = yield from asyncio.wait_for(aiohttp.request(
-                'get', CHANNEL_URL_PREFIX.format('channel/bind'),
-                params=params, cookies=self._cookies, headers=headers,
-                connector=self._connector
+            res = yield from asyncio.wait_for(self._session.get(
+                CHANNEL_URL_PREFIX.format('channel/bind'),
+                params=params, headers=headers,
+                proxy=os.environ.get('HTTP_PROXY')
             ), CONNECT_TIMEOUT)
+            try:
+                if res.status != 200:
+                    if res.status == 400 and res.reason == 'Unknown SID':
+                        raise UnknownSIDError('SID became invalid')
+                    raise exceptions.NetworkError(
+                        'Request return unexpected status: {}: {}'.format(
+                            res.status, res.reason))
+
+                while True:
+                    chunk = yield from asyncio.wait_for(
+                        res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT)
+                    if not chunk:
+                        break
+
+                    yield from self._on_push_data(chunk)
+            finally:
+                res.release()
+
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
-        except aiohttp.ServerDisconnectedError as e:
-            raise exceptions.NetworkError('Server disconnected error: {}'
-                                          .format(e))
-        except aiohttp.ClientError as e:
-            raise exceptions.NetworkError('Request connection error: {}'
-                                          .format(e))
-        if res.status == 400 and res.reason == 'Unknown SID':
-            raise UnknownSIDError('SID became invalid')
-        elif res.status != 200:
+        except aiohttp.ServerDisconnectedError as err:
             raise exceptions.NetworkError(
-                'Request return unexpected status: {}: {}'
-                .format(res.status, res.reason)
-            )
-        while True:
-            try:
-                chunk = yield from asyncio.wait_for(
-                    res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT
-                )
-            except asyncio.TimeoutError:
-                raise exceptions.NetworkError('Request timed out')
-            except aiohttp.ServerDisconnectedError as e:
-                raise exceptions.NetworkError('Server disconnected error: {}'
-                                              .format(e))
-            except aiohttp.ClientError as e:
-                raise exceptions.NetworkError('Request connection error: {}'
-                                              .format(e))
-            except asyncio.CancelledError:
-                # Prevent ResourceWarning when channel is disconnected.
-                res.close()
-                raise
-            if chunk:
-                yield from self._on_push_data(chunk)
-            else:
-                # Close the response to allow the connection to be reused for
-                # the next request.
-                res.close()
-                break
+                'Server disconnected error: %s' % err)
+        except aiohttp.ClientError as err:
+            raise exceptions.NetworkError('Request connection error: %s' % err)
 
     @asyncio.coroutine
     def _on_push_data(self, data_bytes):

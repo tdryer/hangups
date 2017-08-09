@@ -1,5 +1,4 @@
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
 import os
 import sys
 
@@ -15,47 +14,6 @@ exec(open(os.path.join(
 )).read())
 
 
-class PytestCommand(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = ['hangups']
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
-
-
-class PylintCommand(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pylint.lint
-        # Exits with number of messages.
-        pylint.lint.Run(['--reports=n', 'hangups'])
-
-
-class Pep8Command(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pycodestyle
-        style_guide = pycodestyle.StyleGuide(config_file='setup.cfg')
-        report = style_guide.check_files(['hangups'])
-        if report.total_errors:
-            sys.exit(1)
-
-
 with open('README.rst') as f:
     readme = f.read()
 
@@ -66,7 +24,7 @@ with open('README.rst') as f:
 # especially for end-users (non-developers) who use pip to install hangups.
 install_requires = [
     'ConfigArgParse==0.11.0',
-    'aiohttp>=1.3,<2.2',
+    'aiohttp>=1.3,<3',
     'appdirs>=1.4,<1.5',
     'readlike==0.1.2',
     'requests>=2.6.0,<3',  # uses semantic versioning (after 2.6)
@@ -108,17 +66,6 @@ setup(
     ],
     packages=['hangups', 'hangups.ui'],
     install_requires=install_requires,
-    tests_require=[
-        'pytest==3.0.5',
-        'pylint==1.6.4',
-        'pycodestyle==2.2.0',
-        'httpretty==0.8.14',
-    ],
-    cmdclass={
-        'test': PytestCommand,
-        'lint': PylintCommand,
-        'style': Pep8Command,
-    },
     entry_points={
         'console_scripts': [
             'hangups=hangups.ui.__main__:main',
