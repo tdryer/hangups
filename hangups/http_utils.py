@@ -53,27 +53,56 @@ class ClientSession(aiohttp.ClientSession):
                 return cookie.value
         raise KeyError("Cookie '{}' is required".format(name))
 
+    def _update_request(self, kwargs):
+        """add authorization header for google and set the proxy
+
+        Args:
+            kwargs: dict, may contain the key `header`
+
+        Returns:
+            dict, updated kwargs with auth in the header and configured proxy
+        """
+        kwargs['headers'] = kwargs.get('headers') or {}   # headers may be None
+        kwargs['headers'].update(
+            channel.get_authorization_headers(self._get_cookie('SAPISID')))
+        kwargs.setdefault('proxy', self._proxy)
+        return kwargs
+
     @asyncio.coroutine
-    def _request(self, method, url, **kwargs):
-        """perform a single http request with authorization header for google
+    def request(self, method, url, **kwargs):
+        """perform a http request with authorization header for google
 
         Args:
             method: string, HTTP request method
             url: string, target URI
-            kwargs: dict, see ``aiohttp.ClientSession._request``
+            kwargs: dict, see ``aiohttp.ClientSession.request``
 
         Returns:
             aiohttp.ClientResponse instance
 
         Raises:
-            see ``aiohttp.ClientSession._request``
+            see ``aiohttp.ClientSession.request``
+        """
+        kwargs = self._update_request(kwargs)
+        return (yield from super().request(method, url, **kwargs))
+
+    @asyncio.coroutine
+    def get(self, url, **kwargs):
+        """perform a http GET request with authorization header for google
+
+        Args:
+            url: string, target URI
+            kwargs: dict, see ``aiohttp.ClientSession.get``
+
+        Returns:
+            aiohttp.ClientResponse instance
+
+        Raises:
+            see ``aiohttp.ClientSession.request``
         """
         # pylint:disable=arguments-differ
-        kwargs['headers'] = kwargs.get('headers') or {}
-        kwargs['headers'].update(
-            channel.get_authorization_headers(self._get_cookie('SAPISID')))
-        kwargs.setdefault('proxy', self._proxy)
-        return (yield from super()._request(method, url, **kwargs))
+        kwargs = self._update_request(kwargs)
+        return (yield from super().get(url, **kwargs))
 
     @asyncio.coroutine
     def fetch(self, method, url, params=None, headers=None, data=None):
