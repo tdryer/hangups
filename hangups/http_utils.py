@@ -4,6 +4,7 @@ import aiohttp
 import asyncio
 import collections
 import logging
+import urllib.parse
 
 from hangups import exceptions, channel
 
@@ -53,18 +54,27 @@ class ClientSession(aiohttp.ClientSession):
                 return cookie.value
         raise KeyError("Cookie '{}' is required".format(name))
 
-    def _update_request(self, kwargs):
+    def _update_request(self, url, kwargs):
         """add authorization header for google and set the proxy
 
         Args:
-            kwargs: dict, may contain the key `header`
+            url: string, target URI
+            kwargs: dict, may contain the key `headers`
 
         Returns:
             dict, updated kwargs with auth in the header and configured proxy
+
+        Raises:
+            ValueError: the given url is not valid
         """
-        kwargs['headers'] = kwargs.get('headers') or {}   # headers may be None
-        kwargs['headers'].update(
-            channel.get_authorization_headers(self._get_cookie('SAPISID')))
+        hostname = urllib.parse.urlparse(url).hostname
+        if hostname is None:
+            raise ValueError('The given URI "%s" is not valid' % url)
+
+        if hostname.endswith('google.com'):
+            kwargs['headers'] = kwargs.get('headers') or {}
+            kwargs['headers'].update(
+                channel.get_authorization_headers(self._get_cookie('SAPISID')))
         kwargs.setdefault('proxy', self._proxy)
         return kwargs
 
@@ -83,7 +93,7 @@ class ClientSession(aiohttp.ClientSession):
         Raises:
             see ``aiohttp.ClientSession.request``
         """
-        kwargs = self._update_request(kwargs)
+        kwargs = self._update_request(url, kwargs)
         return (yield from super().request(method, url, **kwargs))
 
     @asyncio.coroutine
@@ -101,7 +111,7 @@ class ClientSession(aiohttp.ClientSession):
             see ``aiohttp.ClientSession.request``
         """
         # pylint:disable=arguments-differ
-        kwargs = self._update_request(kwargs)
+        kwargs = self._update_request(url, kwargs)
         return (yield from super().get(url, **kwargs))
 
     @asyncio.coroutine
@@ -143,7 +153,7 @@ class ClientSession(aiohttp.ClientSession):
                 error_msg = 'Request timed out'
             except aiohttp.ServerDisconnectedError as err:
                 error_msg = 'Server disconnected error: {}'.format(err)
-            except aiohttp.ClientError as err:
+            except (aiohttp.ClientError, ValueError) as err:
                 error_msg = 'Request connection error: {}'.format(err)
             else:
                 break
