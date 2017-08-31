@@ -35,7 +35,7 @@ class ClientSession(aiohttp.ClientSession):
             dict, cookie name as key and cookie value as data
         """
         return {cookie.key: cookie.value
-                for cookie in self._cookie_jar}
+                for cookie in self.cookie_jar}
 
     def _get_cookie(self, name):
         """get a cookie or raise an error for a missing one
@@ -49,7 +49,7 @@ class ClientSession(aiohttp.ClientSession):
         Raises:
             KeyError: the requested cookie was not set by the server
         """
-        for cookie in self._cookie_jar:
+        for cookie in self.cookie_jar:
             if cookie.key == name:
                 return cookie.value
         raise KeyError("Cookie '{}' is required".format(name))
