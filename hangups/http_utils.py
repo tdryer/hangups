@@ -16,8 +16,8 @@ MAX_RETRIES = 3
 FetchResponse = collections.namedtuple('FetchResponse', ['code', 'body'])
 
 
-class ClientSession(aiohttp.ClientSession):
-    """Session to file http requests
+class Session(object):
+    """Session container to file http requests
 
     Args:
         cookies: dict, initial cookies for authentication
@@ -25,7 +25,7 @@ class ClientSession(aiohttp.ClientSession):
     """
     def __init__(self, cookies=None, proxy=None):
         self._proxy = proxy
-        super().__init__(cookies=cookies)
+        self._session = aiohttp.ClientSession(cookies=cookies)
 
     @property
     def cookies(self):
@@ -35,7 +35,11 @@ class ClientSession(aiohttp.ClientSession):
             dict, cookie name as key and cookie value as data
         """
         return {cookie.key: cookie.value
-                for cookie in self.cookie_jar}
+                for cookie in self._session.cookie_jar}
+
+    def close(self):
+        """forward the call to the aiohttp.ClientSession"""
+        self._session.close()
 
     def _get_cookie(self, name):
         """get a cookie or raise an error for a missing one
@@ -49,7 +53,7 @@ class ClientSession(aiohttp.ClientSession):
         Raises:
             KeyError: the requested cookie was not set by the server
         """
-        for cookie in self.cookie_jar:
+        for cookie in self._session.cookie_jar:
             if cookie.key == name:
                 return cookie.value
         raise KeyError("Cookie '{}' is required".format(name))
@@ -94,7 +98,7 @@ class ClientSession(aiohttp.ClientSession):
             see ``aiohttp.ClientSession.request``
         """
         kwargs = self._update_request(url, kwargs)
-        return (yield from super().request(method, url, **kwargs))
+        return (yield from self._session.request(method, url, **kwargs))
 
     @asyncio.coroutine
     def get(self, url, **kwargs):
@@ -112,7 +116,7 @@ class ClientSession(aiohttp.ClientSession):
         """
         # pylint:disable=arguments-differ
         kwargs = self._update_request(url, kwargs)
-        return (yield from super().get(url, **kwargs))
+        return (yield from self._session.get(url, **kwargs))
 
     @asyncio.coroutine
     def fetch(self, method, url, params=None, headers=None, data=None):
