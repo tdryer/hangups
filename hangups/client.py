@@ -10,7 +10,6 @@ import os
 import random
 import time
 
-import aiohttp
 import google.protobuf.message
 
 from hangups import (exceptions, http_utils, channel, event, hangouts_pb2,
@@ -72,16 +71,17 @@ class Client(object):
         Args:
             state_update: A ``StateUpdate`` message.
         """
-        # Google session cookies:
-        self._cookies = cookies
 
-        # aiohttp.ClientSession instance (populated by connect method):
+        # http_utils.Session instance (populated by .connect()):
         self._session = None
 
-        # Channel instance (populated by connect method):
+        # Cookies for the init of our Session:
+        self.__cookies = cookies
+
+        # channel.Channel instance (populated by .connect()):
         self._channel = None
 
-        # Future for Channel.listen (populated by connect method):
+        # Future for Channel.listen (populated by .connect()):
         self._listen_future = None
 
         self._request_header = hangouts_pb2.RequestHeader(
@@ -120,31 +120,30 @@ class Client(object):
         Returns when an error has occurred, or :func:`disconnect` has been
         called.
         """
-        self._session = aiohttp.ClientSession(cookies=self._cookies)
-        try:
-            self._channel = channel.Channel(
-                self._cookies, self._session, max_retries=self._max_retries,
-                retry_backoff_base=self._retry_backoff_base
-            )
-            # Forward the Channel events to the Client events.
-            self._channel.on_connect.add_observer(self.on_connect.fire)
-            self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
-            self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
-            self._channel.on_receive_array.add_observer(self._on_receive_array)
+        self._session = http_utils.Session(
+            cookies=self.__cookies, proxy=os.environ.get('HTTP_PROXY'))
+        self.__cookies = None   # cleanup: no further usage outside the session
 
-            # Wrap the coroutine in a Future so it can be cancelled.
-            self._listen_future = asyncio.async(self._channel.listen())
-            # Listen for StateUpdate messages from the Channel until it
-            # disconnects.
-            try:
-                yield from self._listen_future
-            except asyncio.CancelledError:
-                pass
-            logger.info(
-                'Client.connect returning because Channel.listen returned'
-            )
+        self._channel = channel.Channel(
+            self._session, max_retries=self._max_retries,
+            retry_backoff_base=self._retry_backoff_base)
+
+        # Forward the Channel events to the Client events.
+        self._channel.on_connect.add_observer(self.on_connect.fire)
+        self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
+        self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
+        self._channel.on_receive_array.add_observer(self._on_receive_array)
+
+        # Listen for StateUpdate messages from the Channel until it
+        # disconnects.
+        self._listen_future = asyncio.async(self._channel.listen())
+        try:
+            yield from self._listen_future
+        except asyncio.CancelledError:
+            pass
         finally:
             self._session.close()
+        logger.info('Client.connect returning because Channel.listen returned')
 
     @asyncio.coroutine
     def disconnect(self):
@@ -344,12 +343,14 @@ class Client(object):
             ))
         return response['sessionStatus']
 
-    def _get_cookie(self, name):
-        """Return a cookie for raise error if that cookie was not provided."""
-        try:
-            return self._cookies[name]
-        except KeyError:
-            raise KeyError("Cookie '{}' is required".format(name))
+    @property
+    def _cookies(self):
+        """get all cookies of the session
+
+        Returns:
+            dict, cookie name as key and cookie value as data
+        """
+        return self._session.cookies
 
     @asyncio.coroutine
     def _on_receive_array(self, array):
@@ -469,8 +470,7 @@ class Client(object):
         Raises:
             NetworkError: If the request fails.
         """
-        sapisid_cookie = self._get_cookie('SAPISID')
-        headers = channel.get_authorization_headers(sapisid_cookie)
+        headers = {}
         headers['content-type'] = content_type
         # This header is required for Protocol Buffer responses, which causes
         # them to be base64 encoded:
@@ -482,9 +482,8 @@ class Client(object):
             # Unauthenticated Use Exceeded. Continued use requires signup").
             'key': API_KEY,
         }
-        res = yield from http_utils.fetch(
-            self._session, 'post', url, headers=headers, params=params,
-            data=data
+        res = yield from self._session.fetch(
+            'post', url, headers=headers, params=params, data=data,
         )
         return res
 

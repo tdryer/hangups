@@ -21,11 +21,10 @@ import codecs
 import hashlib
 import json
 import logging
-import os
 import re
 import time
 
-from hangups import http_utils, event, exceptions
+from hangups import event, exceptions
 
 logger = logging.getLogger(__name__)
 Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
@@ -146,8 +145,14 @@ class Channel(object):
     # Public methods
     ##########################################################################
 
-    def __init__(self, cookies, session, max_retries, retry_backoff_base):
-        """Create a new channel."""
+    def __init__(self, session, max_retries, retry_backoff_base):
+        """Create a new channel.
+
+        Args:
+            session: aiohttp.ClientSession instance
+            max_retries: int, retries for continued failed requests
+            retry_backoff_base: int, base to calculate the exponential delay
+        """
 
         # Event fired when channel connects with arguments ():
         self.on_connect = event.Event('Channel.on_connect')
@@ -165,11 +170,9 @@ class Channel(object):
         self._is_connected = False
         # True if the on_connect event has been called at least once:
         self._on_connect_called = False
-        # Request cookies dictionary:
-        self._cookies = cookies
         # Parser for assembling messages:
         self._chunk_parser = None
-        # aiohttp session for keep-alive and cookies:
+        # aiohttp session for keep-alive and cookie transport:
         self._session = session
 
         # Discovered parameters:
@@ -244,10 +247,9 @@ class Channel(object):
         for map_num, map_ in enumerate(map_list):
             for map_key, map_val in map_.items():
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
-        res = yield from http_utils.fetch(
-            self._session, 'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            headers=get_authorization_headers(self._cookies['SAPISID']),
-            params=params, data=data_dict,
+        res = yield from self._session.fetch(
+            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
+            params=params, data=data_dict
         )
         return res
 
@@ -296,14 +298,13 @@ class Channel(object):
             'ctype': 'hangouts',  # client type
             'TYPE': 'xmlhttp',  # type of request
         }
-        headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
         try:
-            res = yield from asyncio.wait_for(self._session.get(
-                CHANNEL_URL_PREFIX.format('channel/bind'),
-                params=params, headers=headers,
-                proxy=os.environ.get('HTTP_PROXY')
-            ), CONNECT_TIMEOUT)
+            res = yield from asyncio.wait_for(
+                self._session.get(CHANNEL_URL_PREFIX.format('channel/bind'),
+                                  params=params),
+                CONNECT_TIMEOUT)
+
             try:
                 if res.status != 200:
                     if res.status == 400 and res.reason == 'Unknown SID':
