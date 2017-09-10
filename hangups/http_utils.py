@@ -1,148 +1,65 @@
-"""Utility function for making HTTP requests."""
+"""HTTP request session."""
 
 import aiohttp
 import asyncio
 import collections
+import hashlib
 import logging
+import time
 import urllib.parse
 
-from hangups import exceptions, channel
+from hangups import exceptions
 
 logger = logging.getLogger(__name__)
 CONNECT_TIMEOUT = 30
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
+ORIGIN_URL = 'https://talkgadget.google.com'
 
 FetchResponse = collections.namedtuple('FetchResponse', ['code', 'body'])
 
 
 class Session(object):
-    """Session container to file http requests
+    """Session for making HTTP requests to Google.
 
     Args:
-        cookies: dict, initial cookies for authentication
-        proxy: string, proxy url used for the request
+        cookies (dict): Cookies to authenticate requests with.
+        proxy (str): (optional) HTTP proxy URL to use for requests.
     """
-    def __init__(self, cookies=None, proxy=None):
+
+    def __init__(self, cookies, proxy=None):
         self._proxy = proxy
         self._session = aiohttp.ClientSession(cookies=cookies)
-
-    @property
-    def cookies(self):
-        """get all cookies of the session
-
-        Returns:
-            dict, cookie name as key and cookie value as data
-        """
-        return {cookie.key: cookie.value
-                for cookie in self._session.cookie_jar}
-
-    def close(self):
-        """forward the call to the aiohttp.ClientSession"""
-        self._session.close()
-
-    def _get_cookie(self, name):
-        """get a cookie or raise an error for a missing one
-
-        Args:
-            name: string, the requested cookie name
-
-        Returns:
-            string, requested cookie value
-
-        Raises:
-            KeyError: the requested cookie was not set by the server
-        """
-        for cookie in self._session.cookie_jar:
-            if cookie.key == name:
-                return cookie.value
-        raise KeyError("Cookie '{}' is required".format(name))
-
-    def _update_request(self, url, kwargs):
-        """add authorization header for google and set the proxy
-
-        Args:
-            url: string, target URI
-            kwargs: dict, may contain the key `headers`
-
-        Returns:
-            dict, updated kwargs with auth in the header and configured proxy
-
-        Raises:
-            ValueError: the given url is not valid
-        """
-        hostname = urllib.parse.urlparse(url).hostname
-        if hostname is None:
-            raise ValueError('The given URI "%s" is not valid' % url)
-
-        if hostname.endswith('google.com'):
-            kwargs['headers'] = kwargs.get('headers') or {}
-            kwargs['headers'].update(
-                channel.get_authorization_headers(self._get_cookie('SAPISID')))
-        kwargs.setdefault('proxy', self._proxy)
-        return kwargs
-
-    @asyncio.coroutine
-    def request(self, method, url, **kwargs):
-        """perform a http request with authorization header for google
-
-        Args:
-            method: string, HTTP request method
-            url: string, target URI
-            kwargs: dict, see ``aiohttp.ClientSession.request``
-
-        Returns:
-            aiohttp.ClientResponse instance
-
-        Raises:
-            see ``aiohttp.ClientSession.request``
-        """
-        kwargs = self._update_request(url, kwargs)
-        return (yield from self._session.request(method, url, **kwargs))
-
-    @asyncio.coroutine
-    def get(self, url, **kwargs):
-        """perform a http GET request with authorization header for google
-
-        Args:
-            url: string, target URI
-            kwargs: dict, see ``aiohttp.ClientSession.get``
-
-        Returns:
-            aiohttp.ClientResponse instance
-
-        Raises:
-            see ``aiohttp.ClientSession.request``
-        """
-        # pylint:disable=arguments-differ
-        kwargs = self._update_request(url, kwargs)
-        return (yield from self._session.get(url, **kwargs))
+        sapisid = cookies['SAPISID']
+        self._authorization_headers = _get_authorization_headers(sapisid)
 
     @asyncio.coroutine
     def fetch(self, method, url, params=None, headers=None, data=None):
         """Make an HTTP request.
 
-        If a request times out or one encounters a connection issue, it will be
-        retried MAX_RETRIES times before finally raising hangups.NetworkError.
+        Automatically uses configured HTTP proxy, and adds Google authorization
+        header and cookies.
+
+        Failures will be retried MAX_RETRIES times before raising NetworkError.
 
         Args:
-            method: string, HTTP request method
-            url: string, target URI
-            params: dict, URI parameters
-            headers: dict, request header
-            data: dict, request post data
+            method (str): Request method.
+            url (str): Request URL.
+            params (dict): (optional) Request query string parameters.
+            headers (dict): (optional) Request headers.
+            data: (str): (optional) Request body data.
 
         Returns:
-            a FetchResponse instance.
+            FetchResponse: Response data.
 
         Raises:
-            hangups.NetworkError: request invalid or timed out
+            NetworkError: If the request fails.
         """
         logger.debug('Sending request %s %s:\n%r', method, url, data)
         for retry_num in range(MAX_RETRIES):
             try:
                 res = yield from asyncio.wait_for(
-                    self.request(
+                    self.fetch_raw(
                         method, url, params=params, headers=headers, data=data,
                     ),
                     CONNECT_TIMEOUT)
@@ -175,3 +92,52 @@ class Session(object):
             )
 
         return FetchResponse(res.status, body)
+
+    @asyncio.coroutine
+    def fetch_raw(self, method, url, params=None, headers=None, data=None):
+        """Make an HTTP request using aiohttp directly.
+
+        Automatically uses configured HTTP proxy, and adds Google authorization
+        header and cookies.
+
+        Args:
+            method (str): Request method.
+            url (str): Request URL.
+            params (dict): (optional) Request query string parameters.
+            headers (dict): (optional) Request headers.
+            data: (str): (optional) Request body data.
+
+        Returns:
+            aiohttp.ClientResponse: HTTP response.
+
+        Raises:
+            See ``aiohttp.ClientSession.request``.
+        """
+        # Ensure we don't accidentally send the authorization header to a
+        # non-Google domain:
+        assert urllib.parse.urlparse(url).hostname.endswith('.google.com')
+        headers = headers or {}
+        headers.update(self._authorization_headers)
+        return (yield from self._session.request(
+            method, url, params=params, headers=headers, data=data,
+            proxy=self._proxy
+        ))
+
+    def close(self):
+        """Close the underlying aiohttp.ClientSession."""
+        self._session.close()
+
+
+def _get_authorization_headers(sapisid_cookie):
+    """Return authorization headers for API request."""
+    # It doesn't seem to matter what the url and time are as long as they are
+    # consistent.
+    time_msec = int(time.time() * 1000)
+    auth_string = '{} {} {}'.format(time_msec, sapisid_cookie, ORIGIN_URL)
+    auth_hash = hashlib.sha1(auth_string.encode()).hexdigest()
+    sapisidhash = 'SAPISIDHASH {}_{}'.format(time_msec, auth_hash)
+    return {
+        'authorization': sapisidhash,
+        'x-origin': ORIGIN_URL,
+        'x-goog-authuser': '0',
+    }

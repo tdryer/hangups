@@ -75,8 +75,8 @@ class Client(object):
         # http_utils.Session instance (populated by .connect()):
         self._session = None
 
-        # Cookies for the init of our Session:
-        self.__cookies = cookies
+        # Cookies required to initialize Session:
+        self._cookies = cookies
 
         # channel.Channel instance (populated by .connect()):
         self._channel = None
@@ -120,30 +120,32 @@ class Client(object):
         Returns when an error has occurred, or :func:`disconnect` has been
         called.
         """
-        self._session = http_utils.Session(
-            cookies=self.__cookies, proxy=os.environ.get('HTTP_PROXY'))
-        self.__cookies = None   # cleanup: no further usage outside the session
-
-        self._channel = channel.Channel(
-            self._session, max_retries=self._max_retries,
-            retry_backoff_base=self._retry_backoff_base)
-
-        # Forward the Channel events to the Client events.
-        self._channel.on_connect.add_observer(self.on_connect.fire)
-        self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
-        self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
-        self._channel.on_receive_array.add_observer(self._on_receive_array)
-
-        # Listen for StateUpdate messages from the Channel until it
-        # disconnects.
-        self._listen_future = asyncio.async(self._channel.listen())
+        proxy = os.environ.get('HTTP_PROXY')
+        self._session = http_utils.Session(self._cookies, proxy=proxy)
         try:
-            yield from self._listen_future
-        except asyncio.CancelledError:
-            pass
+            self._channel = channel.Channel(
+                self._session, self._max_retries, self._retry_backoff_base
+            )
+
+            # Forward the Channel events to the Client events.
+            self._channel.on_connect.add_observer(self.on_connect.fire)
+            self._channel.on_reconnect.add_observer(self.on_reconnect.fire)
+            self._channel.on_disconnect.add_observer(self.on_disconnect.fire)
+            self._channel.on_receive_array.add_observer(self._on_receive_array)
+
+            # Wrap the coroutine in a Future so it can be cancelled.
+            self._listen_future = asyncio.async(self._channel.listen())
+            # Listen for StateUpdate messages from the Channel until it
+            # disconnects.
+            try:
+                yield from self._listen_future
+            except asyncio.CancelledError:
+                pass
+            logger.info(
+                'Client.connect returning because Channel.listen returned'
+            )
         finally:
             self._session.close()
-        logger.info('Client.connect returning because Channel.listen returned')
 
     @asyncio.coroutine
     def disconnect(self):
@@ -343,15 +345,6 @@ class Client(object):
             ))
         return response['sessionStatus']
 
-    @property
-    def _cookies(self):
-        """get all cookies of the session
-
-        Returns:
-            dict, cookie name as key and cookie value as data
-        """
-        return self._session.cookies
-
     @asyncio.coroutine
     def _on_receive_array(self, array):
         """Parse channel array and call the appropriate events."""
@@ -470,11 +463,12 @@ class Client(object):
         Raises:
             NetworkError: If the request fails.
         """
-        headers = {}
-        headers['content-type'] = content_type
-        # This header is required for Protocol Buffer responses, which causes
-        # them to be base64 encoded:
-        headers['X-Goog-Encode-Response-If-Executable'] = 'base64'
+        headers = {
+            'content-type': content_type,
+            # This header is required for Protocol Buffer responses. It causes
+            # them to be base64 encoded:
+            'X-Goog-Encode-Response-If-Executable': 'base64',
+        }
         params = {
             # "alternative representation type" (desired response format).
             'alt': response_type,

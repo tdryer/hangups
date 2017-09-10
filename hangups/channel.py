@@ -18,18 +18,15 @@ https://web.archive.org/web/20121226064550/http://code.google.com/p/libevent-bro
 import aiohttp
 import asyncio
 import codecs
-import hashlib
 import json
 import logging
 import re
-import time
 
 from hangups import event, exceptions
 
 logger = logging.getLogger(__name__)
 Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
-ORIGIN_URL = 'https://talkgadget.google.com'
 CHANNEL_URL_PREFIX = 'https://0.client-channel.google.com/client-channel/{}'
 CONNECT_TIMEOUT = 30
 # Long-polling requests send heartbeats every 15-30 seconds, so if we miss two
@@ -43,21 +40,6 @@ class UnknownSIDError(exceptions.HangupsError):
     """hangups channel session expired."""
 
     pass
-
-
-def get_authorization_headers(sapisid_cookie):
-    """Return authorization headers for API request."""
-    # It doesn't seem to matter what the url and time are as long as they are
-    # consistent.
-    time_msec = int(time.time() * 1000)
-    auth_string = '{} {} {}'.format(time_msec, sapisid_cookie, ORIGIN_URL)
-    auth_hash = hashlib.sha1(auth_string.encode()).hexdigest()
-    sapisidhash = 'SAPISIDHASH {}_{}'.format(time_msec, auth_hash)
-    return {
-        'authorization': sapisidhash,
-        'x-origin': ORIGIN_URL,
-        'x-goog-authuser': '0',
-    }
 
 
 def _best_effort_decode(data_bytes):
@@ -149,9 +131,10 @@ class Channel(object):
         """Create a new channel.
 
         Args:
-            session: aiohttp.ClientSession instance
-            max_retries: int, retries for continued failed requests
-            retry_backoff_base: int, base to calculate the exponential delay
+            session (http_utils.Session): Request session.
+            max_retries (int): Number of retries for long-polling request.
+            retry_backoff_base (int): The base term for the long-polling
+                exponential backoff.
         """
 
         # Event fired when channel connects with arguments ():
@@ -172,7 +155,7 @@ class Channel(object):
         self._on_connect_called = False
         # Parser for assembling messages:
         self._chunk_parser = None
-        # aiohttp session for keep-alive and cookie transport:
+        # Session for HTTP requests:
         self._session = session
 
         # Discovered parameters:
@@ -301,9 +284,11 @@ class Channel(object):
         logger.info('Opening new long-polling request')
         try:
             res = yield from asyncio.wait_for(
-                self._session.get(CHANNEL_URL_PREFIX.format('channel/bind'),
-                                  params=params),
-                CONNECT_TIMEOUT)
+                self._session.fetch_raw(
+                    'GET', CHANNEL_URL_PREFIX.format('channel/bind'),
+                    params=params
+                ), CONNECT_TIMEOUT
+            )
 
             try:
                 if res.status != 200:
