@@ -570,7 +570,8 @@ class Conversation(object):
             NetworkError: If the timestamp cannot be updated.
         """
         if read_timestamp is None:
-            read_timestamp = self.events[-1].timestamp
+            read_timestamp = (self.events[-1].timestamp if self.events else
+                              datetime.datetime.now(datetime.timezone.utc))
         if read_timestamp > self.latest_read_timestamp:
             logger.info(
                 'Setting {} latest_read_timestamp from {} to {}'

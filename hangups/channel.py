@@ -18,19 +18,15 @@ https://web.archive.org/web/20121226064550/http://code.google.com/p/libevent-bro
 import aiohttp
 import asyncio
 import codecs
-import hashlib
 import json
 import logging
-import os
 import re
-import time
 
-from hangups import http_utils, event, exceptions
+from hangups import event, exceptions
 
 logger = logging.getLogger(__name__)
 Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
-ORIGIN_URL = 'https://talkgadget.google.com'
 CHANNEL_URL_PREFIX = 'https://0.client-channel.google.com/client-channel/{}'
 CONNECT_TIMEOUT = 30
 # Long-polling requests send heartbeats every 15-30 seconds, so if we miss two
@@ -44,21 +40,6 @@ class UnknownSIDError(exceptions.HangupsError):
     """hangups channel session expired."""
 
     pass
-
-
-def get_authorization_headers(sapisid_cookie):
-    """Return authorization headers for API request."""
-    # It doesn't seem to matter what the url and time are as long as they are
-    # consistent.
-    time_msec = int(time.time() * 1000)
-    auth_string = '{} {} {}'.format(time_msec, sapisid_cookie, ORIGIN_URL)
-    auth_hash = hashlib.sha1(auth_string.encode()).hexdigest()
-    sapisidhash = 'SAPISIDHASH {}_{}'.format(time_msec, auth_hash)
-    return {
-        'authorization': sapisidhash,
-        'x-origin': ORIGIN_URL,
-        'x-goog-authuser': '0',
-    }
 
 
 def _best_effort_decode(data_bytes):
@@ -146,8 +127,15 @@ class Channel(object):
     # Public methods
     ##########################################################################
 
-    def __init__(self, cookies, session, max_retries, retry_backoff_base):
-        """Create a new channel."""
+    def __init__(self, session, max_retries, retry_backoff_base):
+        """Create a new channel.
+
+        Args:
+            session (http_utils.Session): Request session.
+            max_retries (int): Number of retries for long-polling request.
+            retry_backoff_base (int): The base term for the long-polling
+                exponential backoff.
+        """
 
         # Event fired when channel connects with arguments ():
         self.on_connect = event.Event('Channel.on_connect')
@@ -165,11 +153,9 @@ class Channel(object):
         self._is_connected = False
         # True if the on_connect event has been called at least once:
         self._on_connect_called = False
-        # Request cookies dictionary:
-        self._cookies = cookies
         # Parser for assembling messages:
         self._chunk_parser = None
-        # aiohttp session for keep-alive and cookies:
+        # Session for HTTP requests:
         self._session = session
 
         # Discovered parameters:
@@ -244,10 +230,9 @@ class Channel(object):
         for map_num, map_ in enumerate(map_list):
             for map_key, map_val in map_.items():
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
-        res = yield from http_utils.fetch(
-            self._session, 'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            headers=get_authorization_headers(self._cookies['SAPISID']),
-            params=params, data=data_dict,
+        res = yield from self._session.fetch(
+            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
+            params=params, data=data_dict
         )
         return res
 
@@ -296,14 +281,15 @@ class Channel(object):
             'ctype': 'hangouts',  # client type
             'TYPE': 'xmlhttp',  # type of request
         }
-        headers = get_authorization_headers(self._cookies['SAPISID'])
         logger.info('Opening new long-polling request')
         try:
-            res = yield from asyncio.wait_for(self._session.get(
-                CHANNEL_URL_PREFIX.format('channel/bind'),
-                params=params, headers=headers,
-                proxy=os.environ.get('HTTP_PROXY')
-            ), CONNECT_TIMEOUT)
+            res = yield from asyncio.wait_for(
+                self._session.fetch_raw(
+                    'GET', CHANNEL_URL_PREFIX.format('channel/bind'),
+                    params=params
+                ), CONNECT_TIMEOUT
+            )
+
             try:
                 if res.status != 200:
                     if res.status == 400 and res.reason == 'Unknown SID':
