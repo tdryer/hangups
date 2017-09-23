@@ -32,6 +32,7 @@ install_requires = [
     'protobuf>=3.1.0,<3.2.0',
     'urwid==1.3.1',
     'MechanicalSoup==0.6.0',
+    'tld==0.7.9',
 ]
 
 
