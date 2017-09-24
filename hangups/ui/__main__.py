@@ -970,6 +970,12 @@ def main():
     notification_group.add('-D', '--discreet-notifications',
                            action='store_true',
                            help='hide message details in notifications')
+    notification_group.add('-G', '--disable-graphical-notifications',
+                           action='store_true',
+                           help='disable grahical notifications')
+    notification_group.add('-b', '--terminal-bell',
+                           action='store_true',
+                           help='emit terminal bell on notification')
 
     # add color scheme options
     col_group = parser.add_argument_group('Colors')
@@ -1009,7 +1015,9 @@ def main():
                                          palette_colors)
 
     if not args.disable_notifications:
-        notifier = Notifier(args.discreet_notifications)
+        notifier = Notifier(args.discreet_notifications,
+                            not args.disable_graphical_notifications,
+                            args.terminal_bell)
     else:
         notifier = None
 

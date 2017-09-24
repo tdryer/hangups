@@ -1,7 +1,7 @@
 """Graphical notifications for the hangups UI.
 
 TODO:
-    - Support other notification systems (like terminal bell).
+    - Support other notification systems.
     - Support notify-osd's merged notifications. It appears this would require
     using a dbus library so that each notification comes from the same process.
     - Create notifications for other events like (dis)connection
@@ -57,9 +57,11 @@ class Notifier(object):
     previous notification is instantly replaced.
     """
 
-    def __init__(self, discreet_notification):
+    def __init__(self, discreet_notification, graphical, terminal):
         self._replaces_id = 0
         self._discreet_notification = discreet_notification
+        self._graphical_notification = graphical
+        self._terminal_bell = terminal
 
     def on_event(self, conv, conv_event):
         """Create notification for new messages."""
@@ -71,6 +73,12 @@ class Notifier(object):
             not conv.is_quiet,
         ))
         if show_notification:
+            if self._terminal_bell:
+                sys.stdout.write('\a')
+
+            if not self._graphical_notification:
+                return
+
             # We have to escape angle brackets because freedesktop.org
             # notifications support markup.
             if self._discreet_notification:
