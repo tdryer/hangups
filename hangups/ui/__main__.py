@@ -365,6 +365,10 @@ class ConversationPickerWidget(WidgetBase):
             super().keypress(size, 'down')
         elif key == self._keys['up']:
             super().keypress(size, 'up')
+        elif key == self._keys['page_up']:
+            super().keypress(size, 'page up')
+        elif key == self._keys['page_down']:
+            super().keypress(size, 'page down')
         else:
             return key
 
@@ -770,6 +774,11 @@ class ConversationWidget(WidgetBase):
         future = asyncio.async(self._conversation.update_read_timestamp())
         future.add_done_callback(lambda future: future.result())
 
+        if key == self._keys['page_up']:
+            super().keypress(size, 'page up')
+        elif key == self._keys['page_down']:
+            super().keypress(size, 'page down')
+
         return super().keypress(size, key)
 
     def _set_title(self):
@@ -963,6 +972,10 @@ def main():
                   help='keybinding for alternate up key')
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
+    key_group.add('--key-page-up', default='alt u',
+                  help='keybinding for alternate page up')
+    key_group.add('--key-page-down', default='alt d',
+                  help='keybinding for alternate page down')
     notification_group = parser.add_argument_group('Notifications')
     notification_group.add('-n', '--disable-notifications',
                            action='store_true',
@@ -1022,7 +1035,9 @@ def main():
                 'quit': args.key_quit,
                 'menu': args.key_menu,
                 'up': args.key_up,
-                'down': args.key_down
+                'down': args.key_down,
+                'page_up': args.key_page_up,
+                'page_down': args.key_page_down,
             }, col_scheme, palette_colors, datetimefmt, notifier
         )
     except KeyboardInterrupt:
