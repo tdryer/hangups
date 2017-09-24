@@ -2,9 +2,10 @@
 
 from hangups import message_parser, hangouts_pb2
 
+parser = message_parser.ChatMessageParser()
+
 
 def parse_text(text):
-    parser = message_parser.ChatMessageParser()
     return [(s.text, s.params) for s in parser.parse(text)]
 
 
@@ -19,8 +20,12 @@ def test_parse_linebreaks():
 
 
 def test_parse_autolinks():
-    text = ('www.google.com google.com/maps '
-            '(https://en.wikipedia.org/wiki/Parenthesis_(disambiguation))')
+    text = (
+        'www.google.com google.com/maps '
+        '(https://en.wikipedia.org/wiki/Parenthesis_(disambiguation)) '
+        'domains.google http://complete.url.pattern.hangups/ '
+        'hangups:hangups missing.url.pattern.hangups '
+    )
     expected = [
         ('www.google.com', {'link_target': 'http://www.google.com'}),
         (' ', {}),
@@ -29,7 +34,12 @@ def test_parse_autolinks():
         ('https://en.wikipedia.org/wiki/Parenthesis_(disambiguation)',
          {'link_target':
           'https://en.wikipedia.org/wiki/Parenthesis_(disambiguation)'}),
-        (')', {})
+        (') ', {}),
+        ('domains.google', {'link_target': 'http://domains.google'}),
+        (' ', {}),
+        ('http://complete.url.pattern.hangups/',
+         {'link_target': 'http://complete.url.pattern.hangups/'}),
+        (' hangups:hangups missing.url.pattern.hangups ', {}),
     ]
     assert expected == parse_text(text)
 
