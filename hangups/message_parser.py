@@ -8,13 +8,16 @@ from hangups import hangouts_pb2
 
 
 # Common regex patterns
-boundary_chars = r'\s`!()\[\]{{}};:\'".,<>?«»“”‘’*_~='
-b_left = r'(?:(?<=[' + boundary_chars + r'])|(?<=^))'  # Lookbehind
-b_right = r'(?:(?=[' + boundary_chars + r'])|(?=$))'  # Lookahead
+BOUNDARY_CHARS = r'\s`!()\[\]{{}};:\'".,<>?«»“”‘’*_~='
+B_LEFT = r'(?:(?<=[' + BOUNDARY_CHARS + r'])|(?<=^))'  # Lookbehind
+B_RIGHT = r'(?:(?=[' + BOUNDARY_CHARS + r'])|(?=$))'   # Lookahead
+del BOUNDARY_CHARS
 
 # Regex patterns used by token definitions
-markdown_start = b_left + r'(?<!\\){tag}(?!\s)(?!{tag})'
-markdown_end = r'(?<!{tag})(?<!\s)(?<!\\){tag}' + b_right
+MARKDOWN_END = r'(?<![\s\\]){tag}' + B_RIGHT
+MARKDOWN_START = B_LEFT + r'(?<!\\){tag}(?!\s)(?!{tag})(?=.+%s)' % MARKDOWN_END
+del B_LEFT
+del B_RIGHT
 markdown_link = r'(?<!\\)\[(?P<link>.+?)\]\((?P<url>.+?)\)'
 html_start = r'(?i)<{tag}>'
 html_end = r'(?i)</{tag}>'
@@ -43,7 +46,7 @@ markdown_unescape_regex = re.compile(r'\\([*_~=`\[])')
 
 def markdown(tag):
     """Return start and end regex pattern sequences for simple Markdown tag."""
-    return (markdown_start.format(tag=tag), markdown_end.format(tag=tag))
+    return (MARKDOWN_START.format(tag=tag), MARKDOWN_END.format(tag=tag))
 
 
 def html(tag):

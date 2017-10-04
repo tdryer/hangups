@@ -36,7 +36,8 @@ def test_parse_autolinks():
 
 def test_parse_markdown():
     text = ('Test **bold *bolditalic* bold** _italic_ not_italic_not '
-            '~~strike~~ [Google](www.google.com)')
+            '~~strike~~ [Google](www.google.com)'
+            r'**`_bold not italic_`**')
     expected = [('Test ', {}),
                 ('bold ', {'is_bold': True}),
                 ('bolditalic', {'is_bold': True, 'is_italic': True}),
@@ -46,8 +47,12 @@ def test_parse_markdown():
                 (' not_italic_not ', {}),
                 ('strike', {'is_strikethrough': True}),
                 (' ', {}),
-                ('Google', {'link_target': 'http://www.google.com'})]
+                ('Google', {'link_target': 'http://www.google.com'}),
+                ('_bold not italic_', {'is_bold': True})]
     assert expected == parse_text(text)
+
+    text = '*first opened **second opened _third opened __fourth opened'
+    assert [(text, {})] == parse_text(text)
 
 
 def test_parse_html():
