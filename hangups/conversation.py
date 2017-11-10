@@ -300,10 +300,7 @@ class Conversation(object):
         old_timestamp = self.latest_read_timestamp
         self._conversation = conversation
         if parsers.to_timestamp(self.latest_read_timestamp) == 0:
-            self_conversation_state = (
-                self._conversation.self_conversation_state
-            )
-            self_conversation_state.self_read_state.latest_read_timestamp = (
+            new_state.self_read_state.latest_read_timestamp = (
                 parsers.to_timestamp(old_timestamp)
             )
 
