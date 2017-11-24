@@ -68,7 +68,7 @@ Projects using hangups
 .. _wardellchandler/HangoutsBot: https://github.com/wardellchandler/HangoutsBot
 .. _jabber-hangouts-transport: https://github.com/ZeWaren/jabber-hangouts-transport
 .. _ovkulkarni/hangoutsbot: https://github.com/ovkulkarni/hangoutsbot
-.. _defund/pearl: https://github.com/defund
+.. _defund/pearl: https://github.com/defund/pearl
 
 Related projects
 ----------------
