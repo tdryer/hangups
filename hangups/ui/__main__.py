@@ -972,9 +972,9 @@ def main():
                   help='keybinding for alternate up key')
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
-    key_group.add('--key-page-up', default='alt u',
+    key_group.add('--key-page-up', default='ctrl b',
                   help='keybinding for alternate page up')
-    key_group.add('--key-page-down', default='alt d',
+    key_group.add('--key-page-down', default='ctrl f',
                   help='keybinding for alternate page down')
     notification_group = parser.add_argument_group('Notifications')
     notification_group.add('-n', '--disable-notifications',
