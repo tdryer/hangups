@@ -232,7 +232,7 @@ class LoadingWidget(WidgetBase):
 class RenameConversationDialog(WidgetBase):
     """Dialog widget for renaming a conversation."""
 
-    def __init__(self, conversation, on_cancel, on_save):
+    def __init__(self, conversation, on_cancel, on_save, keybindings):
         self._conversation = conversation
         edit = urwid.Edit(edit_text=get_conv_name(conversation))
         items = [
@@ -245,7 +245,7 @@ class RenameConversationDialog(WidgetBase):
             urwid.Button('Cancel', on_press=lambda _: on_cancel()),
         ]
         list_walker = urwid.SimpleFocusListWalker(items)
-        list_box = urwid.ListBox(list_walker)
+        list_box = ListBox(keybindings, list_walker)
         super().__init__(list_box)
 
     def _rename(self, name, callback):
@@ -262,7 +262,8 @@ class ConversationMenu(WidgetBase):
         rename_dialog = RenameConversationDialog(
             conversation,
             lambda: frame.contents.__setitem__('body', (list_box, None)),
-            close_callback
+            close_callback,
+            keybindings
         )
         items = [
             urwid.Text(
@@ -278,22 +279,11 @@ class ConversationMenu(WidgetBase):
             urwid.Button('Back', on_press=lambda _: close_callback()),
         ]
         list_walker = urwid.SimpleFocusListWalker(items)
-        list_box = urwid.ListBox(list_walker)
+        list_box = ListBox(keybindings, list_walker)
         frame = urwid.Frame(list_box)
         padding = urwid.Padding(frame, left=1, right=1)
         line_box = urwid.LineBox(padding, title='Conversation Menu')
         super().__init__(line_box)
-        self._keys = keybindings
-
-    def keypress(self, size, key):
-        # Handle alternate up/down keybindings
-        key = super().keypress(size, key)
-        if key == self._keys['down']:
-            super().keypress(size, 'down')
-        elif key == self._keys['up']:
-            super().keypress(size, 'up')
-        else:
-            return key
 
 
 class ConversationButton(WidgetBase):
@@ -348,25 +338,36 @@ class ConversationListWalker(urwid.SimpleFocusListWalker):
                   reverse=True)
 
 
+class ListBox(WidgetBase):
+    """ListBox widget supporting alternate keybindings."""
+
+    def __init__(self, keybindings, list_walker):
+        self._keybindings = keybindings
+        super().__init__(urwid.ListBox(list_walker))
+
+    def keypress(self, size, key):
+        # Handle alternate up/down keybindings
+        key = super().keypress(size, key)
+        if key == self._keybindings['down']:
+            super().keypress(size, 'down')
+        elif key == self._keybindings['up']:
+            super().keypress(size, 'up')
+        elif key == self._keybindings['page_up']:
+            super().keypress(size, 'page up')
+        elif key == self._keybindings['page_down']:
+            super().keypress(size, 'page down')
+        else:
+            return key
+
+
 class ConversationPickerWidget(WidgetBase):
     """ListBox widget for picking a conversation from a list."""
 
     def __init__(self, conversation_list, on_select, keybindings):
         list_walker = ConversationListWalker(conversation_list, on_select)
-        list_box = urwid.ListBox(list_walker)
+        list_box = ListBox(keybindings, list_walker)
         widget = urwid.Padding(list_box, left=2, right=2)
         super().__init__(widget)
-        self._keys = keybindings
-
-    def keypress(self, size, key):
-        # Handle alternate up/down keybindings
-        key = super().keypress(size, key)
-        if key == self._keys['down']:
-            super().keypress(size, 'down')
-        elif key == self._keys['up']:
-            super().keypress(size, 'up')
-        else:
-            return key
 
 
 class ReturnableEdit(urwid.Edit):
@@ -738,7 +739,7 @@ class ConversationWidget(WidgetBase):
 
         self._list_walker = ConversationEventListWalker(conversation,
                                                         datetimefmt)
-        self._list_box = urwid.ListBox(self._list_walker)
+        self._list_box = ListBox(keybindings, self._list_walker)
         self._status_widget = StatusLineWidget(client, conversation)
         self._widget = urwid.Pile([
             ('weight', 1, self._list_box),
@@ -963,6 +964,10 @@ def main():
                   help='keybinding for alternate up key')
     key_group.add('--key-down', default='j',
                   help='keybinding for alternate down key')
+    key_group.add('--key-page-up', default='ctrl b',
+                  help='keybinding for alternate page up')
+    key_group.add('--key-page-down', default='ctrl f',
+                  help='keybinding for alternate page down')
     notification_group = parser.add_argument_group('Notifications')
     notification_group.add('-n', '--disable-notifications',
                            action='store_true',
@@ -1022,7 +1027,9 @@ def main():
                 'quit': args.key_quit,
                 'menu': args.key_menu,
                 'up': args.key_up,
-                'down': args.key_down
+                'down': args.key_down,
+                'page_up': args.key_page_up,
+                'page_down': args.key_page_down,
             }, col_scheme, palette_colors, datetimefmt, notifier
         )
     except KeyboardInterrupt:
