@@ -12,9 +12,8 @@ import readlike
 
 import hangups
 from hangups.ui.emoticon import replace_emoticons
-from hangups.ui.notify import Notifier
-from hangups.ui.utils import get_conv_name
-from hangups.ui.utils import add_color_to_scheme
+from hangups.ui import notifier
+from hangups.ui.utils import get_conv_name, add_color_to_scheme
 
 
 # hangups used to require a fork of urwid called hangups-urwid which may still
@@ -58,16 +57,22 @@ COL_SCHEME_NAMES = (
     'msg_text', 'msg_text_self', 'status_line', 'tab_background'
 )
 
+DISCREET_NOTIFICATION = notifier.Notification(
+    'hangups', 'Conversation', 'New message'
+)
+
 
 class ChatUI(object):
     """User interface for hangups."""
 
     def __init__(self, refresh_token_path, keybindings, palette,
-                 palette_colors, datetimefmt, notifier):
+                 palette_colors, datetimefmt, notifier_,
+                 discreet_notifications):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
-        self._notifier = notifier
+        self._notifier = notifier_
+        self._discreet_notifications = discreet_notifications
 
         set_terminal_title('hangups')
 
@@ -185,16 +190,20 @@ class ChatUI(object):
         """Open conversation tab for new messages & pass events to notifier."""
         conv = self._conv_list.get(conv_event.conversation_id)
         user = conv.get_user(conv_event.user_id)
-        add_tab = all((
+        if self._discreet_notifications:
+            notification = DISCREET_NOTIFICATION
+        else:
+            notification = notifier.Notification(
+                user.full_name, get_conv_name(conv), conv_event.text
+            )
+        show_notification = all((
             isinstance(conv_event, hangups.ChatMessageEvent),
             not user.is_self,
             not conv.is_quiet,
         ))
-        if add_tab:
+        if show_notification:
             self.add_conversation_tab(conv_event.conversation_id)
-        # Handle notifications
-        if self._notifier is not None:
-            self._notifier.on_event(conv, conv_event)
+            self._notifier.send(notification)
 
     def _on_quit(self):
         """Handle the user quitting the application."""
@@ -206,15 +215,14 @@ class WidgetBase(urwid.WidgetWrap):
     """Base for UI Widgets
 
     This class overrides the property definition for the method ``keypress`` in
-     ``urwid.WidgetWrap``.
-    Using a method that overrides the property saves many pylint suppressions.
+    ``urwid.WidgetWrap``. Using a method that overrides the property saves
+    many pylint suppressions.
 
     Args:
         target: urwid.Widget instance
     """
     def keypress(self, size, key):
         """forward the call"""
-        # TODO(das7pad) add custom key mapping here
         # pylint:disable=not-callable, useless-super-delegation
         return super().keypress(size, key)
 
@@ -912,6 +920,22 @@ def dir_maker(path):
             sys.exit('Failed to create directory: {}'.format(e))
 
 
+NOTIFIER_TYPES = {
+    'none': notifier.Notifier,
+    'default': notifier.DefaultNotifier,
+    'bell': notifier.BellNotifier,
+    'dbus': notifier.DbusNotifier,
+    'apple': notifier.AppleNotifier,
+}
+
+
+def get_notifier(notification_type, disable_notifications):
+    if disable_notifications:
+        return notifier.Notifier()
+    else:
+        return NOTIFIER_TYPES[notification_type]()
+
+
 def main():
     """Main entry point."""
     # Build default paths for files.
@@ -969,12 +993,17 @@ def main():
     key_group.add('--key-page-down', default='ctrl f',
                   help='keybinding for alternate page down')
     notification_group = parser.add_argument_group('Notifications')
+    # deprecated in favor of --notification-type=none:
     notification_group.add('-n', '--disable-notifications',
                            action='store_true',
-                           help='disable desktop notifications')
+                           help=configargparse.SUPPRESS)
     notification_group.add('-D', '--discreet-notifications',
                            action='store_true',
                            help='hide message details in notifications')
+    notification_group.add('--notification-type',
+                           choices=sorted(NOTIFIER_TYPES.keys()),
+                           default='default',
+                           help='type of notifications to create')
 
     # add color scheme options
     col_group = parser.add_argument_group('Colors')
@@ -1013,24 +1042,26 @@ def main():
                                          getattr(args, 'col_' + name + '_bg'),
                                          palette_colors)
 
-    if not args.disable_notifications:
-        notifier = Notifier(args.discreet_notifications)
-    else:
-        notifier = None
+    keybindings = {
+        'next_tab': args.key_next_tab,
+        'prev_tab': args.key_prev_tab,
+        'close_tab': args.key_close_tab,
+        'quit': args.key_quit,
+        'menu': args.key_menu,
+        'up': args.key_up,
+        'down': args.key_down,
+        'page_up': args.key_page_up,
+        'page_down': args.key_page_down,
+    }
+
+    notifier_ = get_notifier(
+        args.notification_type, args.disable_notifications
+    )
 
     try:
         ChatUI(
-            args.token_path, {
-                'next_tab': args.key_next_tab,
-                'prev_tab': args.key_prev_tab,
-                'close_tab': args.key_close_tab,
-                'quit': args.key_quit,
-                'menu': args.key_menu,
-                'up': args.key_up,
-                'down': args.key_down,
-                'page_up': args.key_page_up,
-                'page_down': args.key_page_down,
-            }, col_scheme, palette_colors, datetimefmt, notifier
+            args.token_path, keybindings, col_scheme, palette_colors,
+            datetimefmt, notifier_, args.discreet_notifications
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
