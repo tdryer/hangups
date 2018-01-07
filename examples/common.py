@@ -31,7 +31,7 @@ def run_example(example_coroutine, *extra_args):
         loop.run_until_complete(task)
     except KeyboardInterrupt:
         task.cancel()
-        loop.run_forever()
+        loop.run_until_complete(task)
     finally:
         loop.close()
 
@@ -74,6 +74,8 @@ def _async_main(example_coroutine, client, args):
     # yield the hangups task to handle any exceptions.
     try:
         yield from example_coroutine(client, args)
+    except asyncio.CancelledError:
+        pass
     finally:
         yield from client.disconnect()
         yield from task
