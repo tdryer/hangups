@@ -24,8 +24,8 @@ full name is available.
 class User(object):
     """A chat user.
 
-    Use :class:`UserList` or :class:`ConversationList` methods to get instances
-    of this class.
+    Use :class:`.UserList` or :class:`.ConversationList` methods to get
+    instances of this class.
     """
 
     def __init__(self, user_id, full_name, first_name, photo_url, emails,

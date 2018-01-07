@@ -48,25 +48,23 @@ class Client(object):
 
         self.on_connect = event.Event('Client.on_connect')
         """
-        :class:`~hangups.event.Event` fired when the client connects for the
-        first time.
+        :class:`.Event` fired when the client connects for the first time.
         """
 
         self.on_reconnect = event.Event('Client.on_reconnect')
         """
-        :class:`~hangups.event.Event` fired when the client reconnects after
-        being disconnected.
+        :class:`.Event` fired when the client reconnects after being
+        disconnected.
         """
 
         self.on_disconnect = event.Event('Client.on_disconnect')
         """
-        :class:`~hangups.event.Event` fired when the client is disconnected.
+        :class:`.Event` fired when the client is disconnected.
         """
 
         self.on_state_update = event.Event('Client.on_state_update')
         """
-        :class:`~hangups.event.Event` fired when an update arrives from the
-        server.
+        :class:`.Event` fired when an update arrives from the server.
 
         Args:
             state_update: A ``StateUpdate`` message.

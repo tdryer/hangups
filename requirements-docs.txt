@@ -1,5 +1,12 @@
 # Extra requirements for building the documentation. Read the Docs is
 # configured to use this file.
 
-Sphinx>=1.5.1, <1.6
+Sphinx>=1.6, <1.7
+docutils>=0.14
 sphinxcontrib-asyncio==0.2.0
+
+# Install hangups itself for Sphinx autodoc. The Read the Docs install option
+# will not work because it installs using setuptools to an egg file, which
+# prevents autodoc from finding the source.
+
+--editable .

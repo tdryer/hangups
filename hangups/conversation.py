@@ -15,7 +15,7 @@ MAX_CONVERSATION_PAGES = 100
 
 @asyncio.coroutine
 def build_user_conversation_list(client):
-    """Build :class:`~UserList` and :class:`~ConversationList`.
+    """Build :class:`.UserList` and :class:`.ConversationList`.
 
     This method requests data necessary to build the list of conversations and
     users. Users that are not in the contact list but are participating in a
@@ -25,7 +25,7 @@ def build_user_conversation_list(client):
         client (Client): Connected client.
 
     Returns:
-        (:class:`~UserList`, :class:`~ConversationList`):
+        (:class:`.UserList`, :class:`.ConversationList`):
             Tuple of built objects.
     """
     conv_states, sync_timestamp = yield from _sync_all_conversations(client)
@@ -132,7 +132,7 @@ def _sync_all_conversations(client):
 class Conversation(object):
     """A single chat conversation.
 
-    Use :class:`ConversationList` methods to get instances of this class.
+    Use :class:`.ConversationList` methods to get instances of this class.
     """
 
     def __init__(self, client, user_list, conversation, events=[]):
@@ -151,17 +151,16 @@ class Conversation(object):
 
         self.on_event = event.Event('Conversation.on_event')
         """
-        :class:`~hangups.event.Event` fired when an event occurs in this
-        conversation.
+        :class:`.Event` fired when an event occurs in this conversation.
 
         Args:
-            conv_event: :class:`ConversationEvent` that occurred.
+            conv_event: :class:`.ConversationEvent` that occurred.
         """
 
         self.on_typing = event.Event('Conversation.on_typing')
         """
-        :class:`~hangups.event.Event` fired when a users starts or stops typing
-        in this conversation.
+        :class:`.Event` fired when a users starts or stops typing in this
+        conversation.
 
         Args:
             typing_message: :class:`~hangups.parsers.TypingStatusMessage` that
@@ -172,8 +171,8 @@ class Conversation(object):
             'Conversation.on_watermark_notification'
         )
         """
-        :class:`~hangups.event.Event` fired when a watermark (read timestamp)
-        is updated for this conversation.
+        :class:`.Event` fired when a watermark (read timestamp) is updated for
+        this conversation.
 
         Args:
             watermark_notification:
@@ -226,7 +225,7 @@ class Conversation(object):
     def events(self):
         """Loaded events sorted oldest to newest.
 
-        (list of :class:`ConversationEvent`).
+        (list of :class:`.ConversationEvent`).
         """
         return list(self._events)
 
@@ -239,7 +238,7 @@ class Conversation(object):
         events than these clients will show. There's also a delay between
         sending a message and the user's own message being considered read.
 
-        (list of :class:`ConversationEvent`).
+        (list of :class:`.ConversationEvent`).
         """
         return [conv_event for conv_event in self._events
                 if conv_event.timestamp > self.latest_read_timestamp]
@@ -277,7 +276,7 @@ class Conversation(object):
     def update_conversation(self, conversation):
         """Update the internal state of the conversation.
 
-        This method is used by :class:`ConversationList` to maintain this
+        This method is used by :class:`.ConversationList` to maintain this
         instance.
 
         Args:
@@ -328,14 +327,14 @@ class Conversation(object):
     def add_event(self, event_):
         """Add an event to the conversation.
 
-        This method is used by :class:`ConversationList` to maintain this
+        This method is used by :class:`.ConversationList` to maintain this
         instance.
 
         Args:
             event_: ``Event`` message.
 
         Returns:
-            :class:`ConversationEvent` representing the event.
+            :class:`.ConversationEvent` representing the event.
         """
         conv_event = self._wrap_event(event_)
         if conv_event.id_ not in self._events_dict:
@@ -405,8 +404,8 @@ class Conversation(object):
         asynchronously.
 
         Args:
-            segments: List of :class:`ChatMessageSegment` objects to include in
-                the message.
+            segments: List of :class:`.ChatMessageSegment` objects to include
+                in the message.
             image_file: (optional) File-like object containing an image to be
                 attached to the message.
             image_id: (optional) ID of an Picasa photo to be attached to the
@@ -418,7 +417,7 @@ class Conversation(object):
                 such as Google's sticker user.
 
         Raises:
-            NetworkError: If the message cannot be sent.
+            .NetworkError: If the message cannot be sent.
         """
         with (yield from self._send_message_lock):
             if image_file:
@@ -453,7 +452,7 @@ class Conversation(object):
         """Leave this conversation.
 
         Raises:
-            NetworkError: If conversation cannot be left.
+            .NetworkError: If conversation cannot be left.
         """
         is_group_conversation = (self._conversation.type ==
                                  hangouts_pb2.CONVERSATION_TYPE_GROUP)
@@ -493,7 +492,7 @@ class Conversation(object):
             name (str): New name.
 
         Raises:
-            NetworkError: If conversation cannot be renamed.
+            .NetworkError: If conversation cannot be renamed.
         """
         yield from self._client.rename_conversation(
             hangouts_pb2.RenameConversationRequest(
@@ -512,7 +511,7 @@ class Conversation(object):
                 ``NOTIFICATION_LEVEL_RING`` to enable them.
 
         Raises:
-            NetworkError: If the request fails.
+            .NetworkError: If the request fails.
         """
         yield from self._client.set_conversation_notification_level(
             hangouts_pb2.SetConversationNotificationLevelRequest(
@@ -532,7 +531,7 @@ class Conversation(object):
                 respectively. Defaults to ``TYPING_TYPE_STARTED``.
 
         Raises:
-            NetworkError: If typing status cannot be set.
+            .NetworkError: If typing status cannot be set.
         """
         # TODO: Add rate-limiting to avoid unnecessary requests.
         try:
@@ -558,7 +557,7 @@ class Conversation(object):
                 Defaults to the timestamp of the newest event.
 
         Raises:
-            NetworkError: If the timestamp cannot be updated.
+            .NetworkError: If the timestamp cannot be updated.
         """
         if read_timestamp is None:
             read_timestamp = (self.events[-1].timestamp if self.events else
@@ -602,11 +601,12 @@ class Conversation(object):
                 50.
 
         Returns:
-            List of :class:`ConversationEvent` instances, ordered newest-first.
+            List of :class:`.ConversationEvent` instances, ordered
+            newest-first.
 
         Raises:
             KeyError: If ``event_id`` does not correspond to a known event.
-            NetworkError: If the events could not be requested.
+            .NetworkError: If the events could not be requested.
         """
         if event_id is None:
             # If no event_id is provided, return the newest events in this
@@ -669,10 +669,10 @@ class Conversation(object):
                 next event. Defaults to ``False``.
 
         Raises:
-            KeyError: If no such :class:`ConversationEvent` is known.
+            KeyError: If no such :class:`.ConversationEvent` is known.
 
         Returns:
-            :class:`ConversationEvent` or ``None`` if there is no following
+            :class:`.ConversationEvent` or ``None`` if there is no following
             event.
         """
         i = self.events.index(self._events_dict[event_id])
@@ -690,10 +690,10 @@ class Conversation(object):
             event_id (str): ID of the event.
 
         Raises:
-            KeyError: If no such :class:`ConversationEvent` is known.
+            KeyError: If no such :class:`.ConversationEvent` is known.
 
         Returns:
-            :class:`ConversationEvent` with the given ID.
+            :class:`.ConversationEvent` with the given ID.
         """
         return self._events_dict[event_id]
 
@@ -708,7 +708,7 @@ class ConversationList(object):
         client: The connected :class:`Client`.
         conv_states: List of ``ConversationState`` messages used to initialize
             the list of conversations.
-        user_list: :class:`UserList` object.
+        user_list: :class:`.UserList` object.
         sync_timestamp (datetime.datetime): The time when ``conv_states`` was
             synced.
     """
@@ -730,8 +730,7 @@ class ConversationList(object):
 
         self.on_event = event.Event('ConversationList.on_event')
         """
-        :class:`~hangups.event.Event` fired when an event occurs in any
-        conversation.
+        :class:`.Event` fired when an event occurs in any conversation.
 
         Args:
             conv_event: :class:`ConversationEvent` that occurred.
@@ -739,8 +738,8 @@ class ConversationList(object):
 
         self.on_typing = event.Event('ConversationList.on_typing')
         """
-        :class:`~hangups.event.Event` fired when a users starts or stops typing
-        in any conversation.
+        :class:`.Event` fired when a users starts or stops typing in any
+        conversation.
 
         Args:
             typing_message: :class:`~hangups.parsers.TypingStatusMessage` that
@@ -751,8 +750,8 @@ class ConversationList(object):
             'ConversationList.on_watermark_notification'
         )
         """
-        :class:`~hangups.event.Event` fired when a watermark (read timestamp)
-        is updated for any conversation.
+        :class:`.Event` fired when a watermark (read timestamp) is updated for
+        any conversation.
 
         Args:
             watermark_notification:
