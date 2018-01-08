@@ -138,7 +138,10 @@ class Client(object):
             try:
                 yield from self._listen_future
             except asyncio.CancelledError:
-                pass
+                # If this task is cancelled, we need to cancel our child task
+                # as well. We don't need an additional yield because listen
+                # cancels immediately.
+                self._listen_future.cancel()
             logger.info(
                 'Client.connect returning because Channel.listen returned'
             )
@@ -151,13 +154,10 @@ class Client(object):
 
         When disconnection is complete, :func:`connect` will return.
         """
-        logger.info('Disconnecting gracefully...')
+        logger.info('Graceful disconnect requested')
+        # Cancel the listen task. We don't need an additional yield because
+        # listen cancels immediately.
         self._listen_future.cancel()
-        try:
-            yield from self._listen_future
-        except asyncio.CancelledError:
-            pass
-        logger.info('Disconnected gracefully')
 
     def get_request_header(self):
         """Return ``request_header`` for use when constructing requests.
