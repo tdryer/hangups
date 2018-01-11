@@ -115,7 +115,9 @@ class Session(object):
         """
         # Ensure we don't accidentally send the authorization header to a
         # non-Google domain:
-        assert urllib.parse.urlparse(url).hostname.endswith('.google.com')
+        if not urllib.parse.urlparse(url).hostname.endswith('.google.com'):
+            raise Exception('expected google.com domain')
+
         headers = headers or {}
         headers.update(self._authorization_headers)
         return (yield from self._session.request(
