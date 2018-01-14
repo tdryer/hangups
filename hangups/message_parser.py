@@ -11,13 +11,10 @@ from hangups import hangouts_pb2
 BOUNDARY_CHARS = r'\s`!()\[\]{{}};:\'".,<>?«»“”‘’*_~='
 B_LEFT = r'(?:(?<=[' + BOUNDARY_CHARS + r'])|(?<=^))'  # Lookbehind
 B_RIGHT = r'(?:(?=[' + BOUNDARY_CHARS + r'])|(?=$))'   # Lookahead
-del BOUNDARY_CHARS
 
 # Regex patterns used by token definitions
 MARKDOWN_END = r'(?<![\s\\]){tag}' + B_RIGHT
 MARKDOWN_START = B_LEFT + r'(?<!\\){tag}(?!\s)(?!{tag})(?=.+%s)' % MARKDOWN_END
-del B_LEFT
-del B_RIGHT
 markdown_link = r'(?<!\\)\[(?P<link>.+?)\]\((?P<url>.+?)\)'
 HTML_END = r'(?i)</{tag}>'
 HTML_START = r'(?i)<{tag}>(?=.+%s)' % HTML_END
