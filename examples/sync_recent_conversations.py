@@ -1,21 +1,18 @@
 """Example of using hangups to get recent conversations."""
 
-import asyncio
-
 import hangups
 
 from common import run_example
 
 
-@asyncio.coroutine
-def sync_recent_conversations(client, _):
+async def sync_recent_conversations(client, _):
     request = hangups.hangouts_pb2.SyncRecentConversationsRequest(
         request_header=client.get_request_header(),
         max_conversations=20,
         max_events_per_conversation=1,
         sync_filter=[hangups.hangouts_pb2.SYNC_FILTER_INBOX],
     )
-    res = yield from client.sync_recent_conversations(request)
+    res = await client.sync_recent_conversations(request)
 
     # Sort the returned conversations by recency.
     conv_states = sorted(

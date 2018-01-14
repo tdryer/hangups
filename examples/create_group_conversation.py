@@ -1,14 +1,11 @@
 """Example of using hangups to create a new group conversation."""
 
-import asyncio
-
 import hangups
 
 from common import run_example
 
 
-@asyncio.coroutine
-def send_message(client, args):
+async def send_message(client, args):
     request = hangups.hangouts_pb2.CreateConversationRequest(
         request_header=client.get_request_header(),
         type=hangups.hangouts_pb2.CONVERSATION_TYPE_GROUP,
@@ -20,7 +17,7 @@ def send_message(client, args):
         ],
         name=args.conversation_name
     )
-    res = yield from client.create_conversation(request)
+    res = await client.create_conversation(request)
     print(res)
 
 

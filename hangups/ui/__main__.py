@@ -143,9 +143,8 @@ class ChatUI(object):
                 self._exc_info[1]
             ).with_traceback(self._exc_info[2])
 
-    @asyncio.coroutine
-    def _connect(self):
-        yield from self._client.connect()
+    async def _connect(self):
+        await self._client.connect()
         raise HangupsDisconnected()
 
     def _exception_handler(self, _loop, _context):
@@ -208,11 +207,10 @@ class ChatUI(object):
         # switch to new or existing tab for the conversation
         self.add_conversation_tab(conv_id, switch=True)
 
-    @asyncio.coroutine
-    def _on_connect(self):
+    async def _on_connect(self):
         """Handle connecting for the first time."""
         self._user_list, self._conv_list = (
-            yield from hangups.build_user_conversation_list(self._client)
+            await hangups.build_user_conversation_list(self._client)
         )
         self._conv_list.on_event.add_observer(self._on_event)
 
@@ -271,13 +269,12 @@ class CoroutineQueue:
         assert asyncio.iscoroutine(coro)
         self._queue.put_nowait(coro)
 
-    @asyncio.coroutine
-    def consume(self):
+    async def consume(self):
         """Consume coroutines from the queue by executing them."""
         while True:
-            coro = yield from self._queue.get()
+            coro = await self._queue.get()
             assert asyncio.iscoroutine(coro)
-            yield from coro
+            await coro
 
 
 class WidgetBase(urwid.WidgetWrap):
@@ -704,11 +701,10 @@ class ConversationEventListWalker(urwid.ListWalker):
         else:
             self._modified()
 
-    @asyncio.coroutine
-    def _load(self):
+    async def _load(self):
         """Load more events for this conversation."""
         try:
-            conv_events = yield from self._conversation.get_events(
+            conv_events = await self._conversation.get_events(
                 self._conversation.events[0].id_
             )
         except (IndexError, hangups.NetworkError):
@@ -882,11 +878,10 @@ class ConversationWidget(WidgetBase):
             )
         )
 
-    @asyncio.coroutine
-    def _handle_send_message(self, coro):
+    async def _handle_send_message(self, coro):
         """Handle showing an error if a message fails to send."""
         try:
-            yield from coro
+            await coro
         except hangups.NetworkError:
             self._status_widget.show_message('Failed to send message')
 

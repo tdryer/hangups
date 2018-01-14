@@ -1,14 +1,11 @@
 """Example of using hangups to send chat message containing a map location."""
 
-import asyncio
-
 import hangups
 
 from common import run_example
 
 
-@asyncio.coroutine
-def send_map_location(client, args):
+async def send_map_location(client, args):
     request = hangups.hangouts_pb2.SendChatMessageRequest(
         request_header=client.get_request_header(),
         event_request_header=hangups.hangouts_pb2.EventRequestHeader(
@@ -34,7 +31,7 @@ def send_map_location(client, args):
             ),
         ),
     )
-    yield from client.send_chat_message(request)
+    await client.send_chat_message(request)
 
 
 if __name__ == '__main__':

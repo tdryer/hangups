@@ -3,9 +3,10 @@ import os
 import sys
 
 
-if sys.version_info < (3, 4, 2):
-    # This is the minimum version supported by aiohttp.
-    raise RuntimeError("hangups requires Python 3.4.2+")
+if sys.version_info < (3, 5):
+    # This is the minimum version which has support for `async def`/`await`/
+    # `async with` syntax.
+    raise RuntimeError("hangups requires Python 3.5+")
 
 
 # Find __version__ without import that requires dependencies to be installed:

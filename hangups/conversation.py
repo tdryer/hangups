@@ -13,8 +13,7 @@ CONVERSATIONS_PER_REQUEST = 100
 MAX_CONVERSATION_PAGES = 100
 
 
-@asyncio.coroutine
-def build_user_conversation_list(client):
+async def build_user_conversation_list(client):
     """Build :class:`.UserList` and :class:`.ConversationList`.
 
     This method requests data necessary to build the list of conversations and
@@ -28,7 +27,7 @@ def build_user_conversation_list(client):
         (:class:`.UserList`, :class:`.ConversationList`):
             Tuple of built objects.
     """
-    conv_states, sync_timestamp = yield from _sync_all_conversations(client)
+    conv_states, sync_timestamp = await _sync_all_conversations(client)
 
     # Retrieve entities participating in all conversations.
     required_user_ids = set()
@@ -42,7 +41,7 @@ def build_user_conversation_list(client):
         logger.debug('Need to request additional users: {}'
                      .format(required_user_ids))
         try:
-            response = yield from client.get_entity_by_id(
+            response = await client.get_entity_by_id(
                 hangouts_pb2.GetEntityByIdRequest(
                     request_header=client.get_request_header(),
                     batch_lookup_spec=[
@@ -65,7 +64,7 @@ def build_user_conversation_list(client):
         conv_part_list.extend(conv_state.conversation.participant_data)
 
     # Retrieve self entity.
-    get_self_info_response = yield from client.get_self_info(
+    get_self_info_response = await client.get_self_info(
         hangouts_pb2.GetSelfInfoRequest(
             request_header=client.get_request_header(),
         )
@@ -79,8 +78,7 @@ def build_user_conversation_list(client):
     return (user_list, conversation_list)
 
 
-@asyncio.coroutine
-def _sync_all_conversations(client):
+async def _sync_all_conversations(client):
     """Sync all conversations by making paginated requests.
 
     Conversations are ordered by ascending sort timestamp.
@@ -109,7 +107,7 @@ def _sync_all_conversations(client):
         logger.info(
             'Requesting conversations page %s', request.last_event_timestamp
         )
-        response = yield from client.sync_recent_conversations(request)
+        response = await client.sync_recent_conversations(request)
         conv_states = list(response.conversation_state) + conv_states
         sync_timestamp = parsers.from_timestamp(
             # SyncRecentConversations seems to return a sync_timestamp 4
@@ -391,9 +389,8 @@ class Conversation(object):
             delivery_medium=self._get_default_delivery_medium(),
         )
 
-    @asyncio.coroutine
-    def send_message(self, segments, image_file=None, image_id=None,
-                     image_user_id=None):
+    async def send_message(self, segments, image_file=None, image_id=None,
+                           image_user_id=None):
         """Send a message to this conversation.
 
         A per-conversation lock is acquired to ensure that messages are sent in
@@ -416,10 +413,10 @@ class Conversation(object):
         Raises:
             .NetworkError: If the message cannot be sent.
         """
-        with (yield from self._send_message_lock):
+        with (await self._send_message_lock):
             if image_file:
                 try:
-                    uploaded_image = yield from self._client.upload_image(
+                    uploaded_image = await self._client.upload_image(
                         image_file, return_uploaded_image=True
                     )
                 except exceptions.NetworkError as e:
@@ -439,13 +436,12 @@ class Conversation(object):
                 if image_user_id is not None:
                     request.existing_media.photo.user_id = image_user_id
                     request.existing_media.photo.is_custom_user_id = True
-                yield from self._client.send_chat_message(request)
+                await self._client.send_chat_message(request)
             except exceptions.NetworkError as e:
                 logger.warning('Failed to send message: {}'.format(e))
                 raise
 
-    @asyncio.coroutine
-    def leave(self):
+    async def leave(self):
         """Leave this conversation.
 
         Raises:
@@ -455,14 +451,14 @@ class Conversation(object):
                                  hangouts_pb2.CONVERSATION_TYPE_GROUP)
         try:
             if is_group_conversation:
-                yield from self._client.remove_user(
+                await self._client.remove_user(
                     hangouts_pb2.RemoveUserRequest(
                         request_header=self._client.get_request_header(),
                         event_request_header=self._get_event_request_header(),
                     )
                 )
             else:
-                yield from self._client.delete_conversation(
+                await self._client.delete_conversation(
                     hangouts_pb2.DeleteConversationRequest(
                         request_header=self._client.get_request_header(),
                         conversation_id=hangouts_pb2.ConversationId(
@@ -477,8 +473,7 @@ class Conversation(object):
             logger.warning('Failed to leave conversation: {}'.format(e))
             raise
 
-    @asyncio.coroutine
-    def rename(self, name):
+    async def rename(self, name):
         """Rename this conversation.
 
         Hangouts only officially supports renaming group conversations, so
@@ -491,7 +486,7 @@ class Conversation(object):
         Raises:
             .NetworkError: If conversation cannot be renamed.
         """
-        yield from self._client.rename_conversation(
+        await self._client.rename_conversation(
             hangouts_pb2.RenameConversationRequest(
                 request_header=self._client.get_request_header(),
                 new_name=name,
@@ -499,8 +494,7 @@ class Conversation(object):
             )
         )
 
-    @asyncio.coroutine
-    def set_notification_level(self, level):
+    async def set_notification_level(self, level):
         """Set the notification level of this conversation.
 
         Args:
@@ -510,7 +504,7 @@ class Conversation(object):
         Raises:
             .NetworkError: If the request fails.
         """
-        yield from self._client.set_conversation_notification_level(
+        await self._client.set_conversation_notification_level(
             hangouts_pb2.SetConversationNotificationLevelRequest(
                 request_header=self._client.get_request_header(),
                 conversation_id=hangouts_pb2.ConversationId(id=self.id_),
@@ -518,8 +512,7 @@ class Conversation(object):
             )
         )
 
-    @asyncio.coroutine
-    def set_typing(self, typing=hangouts_pb2.TYPING_TYPE_STARTED):
+    async def set_typing(self, typing=hangouts_pb2.TYPING_TYPE_STARTED):
         """Set your typing status in this conversation.
 
         Args:
@@ -532,7 +525,7 @@ class Conversation(object):
         """
         # TODO: Add rate-limiting to avoid unnecessary requests.
         try:
-            yield from self._client.set_typing(
+            await self._client.set_typing(
                 hangouts_pb2.SetTypingRequest(
                     request_header=self._client.get_request_header(),
                     conversation_id=hangouts_pb2.ConversationId(id=self.id_),
@@ -543,8 +536,7 @@ class Conversation(object):
             logger.warning('Failed to set typing status: {}'.format(e))
             raise
 
-    @asyncio.coroutine
-    def update_read_timestamp(self, read_timestamp=None):
+    async def update_read_timestamp(self, read_timestamp=None):
         """Update the timestamp of the latest event which has been read.
 
         This method will avoid making an API request if it will have no effect.
@@ -570,7 +562,7 @@ class Conversation(object):
                 parsers.to_timestamp(read_timestamp)
             )
             try:
-                yield from self._client.update_watermark(
+                await self._client.update_watermark(
                     hangouts_pb2.UpdateWatermarkRequest(
                         request_header=self._client.get_request_header(),
                         conversation_id=hangouts_pb2.ConversationId(
@@ -585,8 +577,7 @@ class Conversation(object):
                 logger.warning('Failed to update read timestamp: {}'.format(e))
                 raise
 
-    @asyncio.coroutine
-    def get_events(self, event_id=None, max_events=50):
+    async def get_events(self, event_id=None, max_events=50):
         """Get events from this conversation.
 
         Makes a request to load historical events if necessary.
@@ -619,7 +610,7 @@ class Conversation(object):
             else:
                 logger.info('Loading events for conversation {} before {}'
                             .format(self.id_, conv_event.timestamp))
-                res = yield from self._client.get_conversation(
+                res = await self._client.get_conversation(
                     hangouts_pb2.GetConversationRequest(
                         request_header=self._client.get_request_header(),
                         conversation_spec=hangouts_pb2.ConversationSpec(
@@ -782,15 +773,14 @@ class ConversationList(object):
         """
         return self._conv_dict[conv_id]
 
-    @asyncio.coroutine
-    def leave_conversation(self, conv_id):
+    async def leave_conversation(self, conv_id):
         """Leave a conversation.
 
         Args:
             conv_id (str): ID of conversation to leave.
         """
         logger.info('Leaving conversation: {}'.format(conv_id))
-        yield from self._conv_dict[conv_id].leave()
+        await self._conv_dict[conv_id].leave()
         del self._conv_dict[conv_id]
 
     def _add_conversation(self, conversation, events=[]):
@@ -803,8 +793,7 @@ class ConversationList(object):
         self._conv_dict[conv_id] = conv
         return conv
 
-    @asyncio.coroutine
-    def _on_state_update(self, state_update):
+    async def _on_state_update(self, state_update):
         """Receive a StateUpdate and fan out to Conversations.
 
         Args:
@@ -818,7 +807,7 @@ class ConversationList(object):
         # conversation from this delta:
         if state_update.HasField('conversation'):
             try:
-                yield from self._handle_conversation_delta(
+                await self._handle_conversation_delta(
                     state_update.conversation
                 )
             except exceptions.NetworkError:
@@ -830,20 +819,19 @@ class ConversationList(object):
                 return
 
         if notification_type == 'typing_notification':
-            yield from self._handle_set_typing_notification(
+            await self._handle_set_typing_notification(
                 state_update.typing_notification
             )
         elif notification_type == 'watermark_notification':
-            yield from self._handle_watermark_notification(
+            await self._handle_watermark_notification(
                 state_update.watermark_notification
             )
         elif notification_type == 'event_notification':
-            yield from self._on_event(
+            await self._on_event(
                 state_update.event_notification.event
             )
 
-    @asyncio.coroutine
-    def _get_or_fetch_conversation(self, conv_id):
+    async def _get_or_fetch_conversation(self, conv_id):
         """Get a cached conversation or fetch a missing conversation.
 
         Args:
@@ -858,7 +846,7 @@ class ConversationList(object):
         conv = self._conv_dict.get(conv_id, None)
         if conv is None:
             logger.info('Fetching unknown conversation %s', conv_id)
-            res = yield from self._client.get_conversation(
+            res = await self._client.get_conversation(
                 hangouts_pb2.GetConversationRequest(
                     request_header=self._client.get_request_header(),
                     conversation_spec=hangouts_pb2.ConversationSpec(
@@ -872,8 +860,7 @@ class ConversationList(object):
         else:
             return conv
 
-    @asyncio.coroutine
-    def _on_event(self, event_):
+    async def _on_event(self, event_):
         """Receive a hangouts_pb2.Event and fan out to Conversations.
 
         Args:
@@ -881,7 +868,7 @@ class ConversationList(object):
         """
         conv_id = event_.conversation_id.id
         try:
-            conv = yield from self._get_or_fetch_conversation(conv_id)
+            conv = await self._get_or_fetch_conversation(conv_id)
         except exceptions.NetworkError:
             logger.warning(
                 'Failed to fetch conversation for event notification: %s',
@@ -892,11 +879,10 @@ class ConversationList(object):
             conv_event = conv.add_event(event_)
             # conv_event may be None if the event was a duplicate.
             if conv_event is not None:
-                yield from self.on_event.fire(conv_event)
-                yield from conv.on_event.fire(conv_event)
+                await self.on_event.fire(conv_event)
+                await conv.on_event.fire(conv_event)
 
-    @asyncio.coroutine
-    def _handle_conversation_delta(self, conversation):
+    async def _handle_conversation_delta(self, conversation):
         """Receive Conversation delta and create or update the conversation.
 
         Args:
@@ -909,13 +895,12 @@ class ConversationList(object):
         conv = self._conv_dict.get(conv_id, None)
         if conv is None:
             # Ignore the delta and fetch the complete conversation.
-            yield from self._get_or_fetch_conversation(conv_id)
+            await self._get_or_fetch_conversation(conv_id)
         else:
             # Update conversation using the delta.
             conv.update_conversation(conversation)
 
-    @asyncio.coroutine
-    def _handle_set_typing_notification(self, set_typing_notification):
+    async def _handle_set_typing_notification(self, set_typing_notification):
         """Receive SetTypingNotification and update the conversation.
 
         Args:
@@ -924,19 +909,18 @@ class ConversationList(object):
         """
         conv_id = set_typing_notification.conversation_id.id
         res = parsers.parse_typing_status_message(set_typing_notification)
-        yield from self.on_typing.fire(res)
+        await self.on_typing.fire(res)
         try:
-            conv = yield from self._get_or_fetch_conversation(conv_id)
+            conv = await self._get_or_fetch_conversation(conv_id)
         except exceptions.NetworkError:
             logger.warning(
                 'Failed to fetch conversation for typing notification: %s',
                 conv_id
             )
         else:
-            yield from conv.on_typing.fire(res)
+            await conv.on_typing.fire(res)
 
-    @asyncio.coroutine
-    def _handle_watermark_notification(self, watermark_notification):
+    async def _handle_watermark_notification(self, watermark_notification):
         """Receive WatermarkNotification and update the conversation.
 
         Args:
@@ -944,23 +928,22 @@ class ConversationList(object):
         """
         conv_id = watermark_notification.conversation_id.id
         res = parsers.parse_watermark_notification(watermark_notification)
-        yield from self.on_watermark_notification.fire(res)
+        await self.on_watermark_notification.fire(res)
         try:
-            conv = yield from self._get_or_fetch_conversation(conv_id)
+            conv = await self._get_or_fetch_conversation(conv_id)
         except exceptions.NetworkError:
             logger.warning(
                 'Failed to fetch conversation for watermark notification: %s',
                 conv_id
             )
         else:
-            yield from conv.on_watermark_notification.fire(res)
+            await conv.on_watermark_notification.fire(res)
 
-    @asyncio.coroutine
-    def _sync(self):
+    async def _sync(self):
         """Sync conversation state and events that could have been missed."""
         logger.info('Syncing events since {}'.format(self._sync_timestamp))
         try:
-            res = yield from self._client.sync_all_new_events(
+            res = await self._client.sync_all_new_events(
                 hangouts_pb2.SyncAllNewEventsRequest(
                     request_header=self._client.get_request_header(),
                     last_sync_timestamp=parsers.to_timestamp(
@@ -983,7 +966,7 @@ class ConversationList(object):
                         if timestamp > self._sync_timestamp:
                             # This updates the sync_timestamp for us, as well
                             # as triggering events.
-                            yield from self._on_event(event_)
+                            await self._on_event(event_)
                 else:
                     self._add_conversation(conv_state.conversation,
                                            conv_state.event)

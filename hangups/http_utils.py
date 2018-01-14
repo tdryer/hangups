@@ -34,8 +34,7 @@ class Session(object):
         sapisid = cookies['SAPISID']
         self._authorization_headers = _get_authorization_headers(sapisid)
 
-    @asyncio.coroutine
-    def fetch(self, method, url, params=None, headers=None, data=None):
+    async def fetch(self, method, url, params=None, headers=None, data=None):
         """Make an HTTP request.
 
         Automatically uses configured HTTP proxy, and adds Google authorization
@@ -59,11 +58,11 @@ class Session(object):
         logger.debug('Sending request %s %s:\n%r', method, url, data)
         for retry_num in range(MAX_RETRIES):
             try:
-                res = yield from self.fetch_raw(
+                res = await self.fetch_raw(
                         method, url, params=params, headers=headers, data=data,
                     )
                 try:
-                    body = yield from asyncio.wait_for(
+                    body = await asyncio.wait_for(
                         res.read(), REQUEST_TIMEOUT)
                 finally:
                     res.release()
@@ -92,8 +91,8 @@ class Session(object):
 
         return FetchResponse(res.status, body)
 
-    @asyncio.coroutine
-    def fetch_raw(self, method, url, params=None, headers=None, data=None):
+    async def fetch_raw(self, method, url,
+                        params=None, headers=None, data=None):
         """Make an HTTP request using aiohttp directly.
 
         Automatically uses configured HTTP proxy, and adds Google authorization
@@ -119,7 +118,7 @@ class Session(object):
 
         headers = headers or {}
         headers.update(self._authorization_headers)
-        return (yield from self._session.request(
+        return (await self._session.request(
             method, url, params=params, headers=headers, data=data,
             proxy=self._proxy
         ))

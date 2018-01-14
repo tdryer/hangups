@@ -10,17 +10,16 @@ import hangups
 from common import run_example
 
 
-@asyncio.coroutine
-def receive_messages(client, args):
+async def receive_messages(client, args):
     print('loading conversation list...')
     user_list, conv_list = (
-        yield from hangups.build_user_conversation_list(client)
+        await hangups.build_user_conversation_list(client)
     )
     conv_list.on_event.add_observer(on_event)
 
     print('waiting for chat messages...')
     while True:
-        yield from asyncio.sleep(1)
+        await asyncio.sleep(1)
 
 
 def on_event(conv_event):
