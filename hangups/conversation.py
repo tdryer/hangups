@@ -926,6 +926,8 @@ class ConversationList(object):
                 instance
         """
         conv_id = set_typing_notification.conversation_id.id
+        res = parsers.parse_typing_status_message(set_typing_notification)
+        yield from self.on_typing.fire(res)
         try:
             conv = yield from self._get_or_fetch_conversation(conv_id)
         except exceptions.NetworkError:
@@ -933,9 +935,8 @@ class ConversationList(object):
                 'Failed to fetch conversation for typing notification: %s',
                 conv_id
             )
-        res = parsers.parse_typing_status_message(set_typing_notification)
-        yield from self.on_typing.fire(res)
-        yield from conv.on_typing.fire(res)
+        else:
+            yield from conv.on_typing.fire(res)
 
     @asyncio.coroutine
     def _handle_watermark_notification(self, watermark_notification):
@@ -945,6 +946,8 @@ class ConversationList(object):
             watermark_notification: hangouts_pb2.WatermarkNotification instance
         """
         conv_id = watermark_notification.conversation_id.id
+        res = parsers.parse_watermark_notification(watermark_notification)
+        yield from self.on_watermark_notification.fire(res)
         try:
             conv = yield from self._get_or_fetch_conversation(conv_id)
         except exceptions.NetworkError:
@@ -952,9 +955,8 @@ class ConversationList(object):
                 'Failed to fetch conversation for watermark notification: %s',
                 conv_id
             )
-        res = parsers.parse_watermark_notification(watermark_notification)
-        yield from self.on_watermark_notification.fire(res)
-        yield from conv.on_watermark_notification.fire(res)
+        else:
+            yield from conv.on_watermark_notification.fire(res)
 
     @asyncio.coroutine
     def _sync(self):
