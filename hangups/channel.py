@@ -27,7 +27,7 @@ from hangups import event, exceptions
 logger = logging.getLogger(__name__)
 Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
-CHANNEL_URL_PREFIX = 'https://0.client-channel.google.com/client-channel/{}'
+CHANNEL_URL = 'https://0.client-channel.google.com/client-channel/channel/bind'
 # Long-polling requests send heartbeats every 15-30 seconds, so if we miss two
 # in a row, consider the connection dead.
 PUSH_TIMEOUT = 60
@@ -230,8 +230,7 @@ class Channel(object):
             for map_key, map_val in map_.items():
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
         res = yield from self._session.fetch(
-            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            params=params, data=data_dict
+            'post', CHANNEL_URL, params=params, data=data_dict
         )
         return res
 
@@ -283,8 +282,7 @@ class Channel(object):
         logger.info('Opening new long-polling request')
         try:
             res = yield from self._session.fetch_raw(
-                'GET', CHANNEL_URL_PREFIX.format('channel/bind'),
-                params=params
+                'GET', CHANNEL_URL, params=params
             )
 
             try:
