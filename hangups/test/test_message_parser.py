@@ -60,7 +60,7 @@ def test_parse_html():
         'Test <b>bold <i>bolditalic</i> bold</b> <em>italic</em> '
         '<del>strike</del><br><a href="google.com">Google</a>'
         '<img src=\'https://upload.wikimedia.org/wikipedia/en/8/80/'
-        'Wikipedia-logo-v2.svg\'>'
+        'Wikipedia-logo-v2.svg\'><i>default'
     )
     expected = [
         ('Test ', {}),
@@ -77,6 +77,7 @@ def test_parse_html():
          'Wikipedia-logo-v2.svg',
          {'link_target':
           'https://upload.wikimedia.org/wikipedia/en/8/80/'
-          'Wikipedia-logo-v2.svg'})
+          'Wikipedia-logo-v2.svg'}),
+        ('<i>default', {}),
     ]
     assert expected == parse_text(text)

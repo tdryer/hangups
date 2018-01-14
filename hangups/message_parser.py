@@ -19,8 +19,8 @@ MARKDOWN_START = B_LEFT + r'(?<!\\){tag}(?!\s)(?!{tag})(?=.+%s)' % MARKDOWN_END
 del B_LEFT
 del B_RIGHT
 markdown_link = r'(?<!\\)\[(?P<link>.+?)\]\((?P<url>.+?)\)'
-html_start = r'(?i)<{tag}>'
-html_end = r'(?i)</{tag}>'
+HTML_END = r'(?i)</{tag}>'
+HTML_START = r'(?i)<{tag}>(?=.+%s)' % HTML_END
 html_link = r'(?i)<a\s+href=[\'"](?P<url>.+?)[\'"]\s*>(?P<link>.+?)</a>'
 html_img = r'(?i)<img\s+src=[\'"](?P<url>.+?)[\'"]\s*/?>'
 html_newline = r'(?i)<br\s*/?>'
@@ -51,7 +51,7 @@ def markdown(tag):
 
 def html(tag):
     """Return sequence of start and end regex patterns for simple HTML tag"""
-    return (html_start.format(tag=tag), html_end.format(tag=tag))
+    return (HTML_START.format(tag=tag), HTML_END.format(tag=tag))
 
 
 def url_complete(url):
