@@ -277,11 +277,9 @@ class Channel(object):
         }
         logger.info('Opening new long-polling request')
         try:
-            res = await self._session.fetch_raw(
-                'GET', CHANNEL_URL, params=params
-            )
+            async with self._session.fetch_raw('GET', CHANNEL_URL,
+                                               params=params) as res:
 
-            try:
                 if res.status != 200:
                     if res.status == 400 and res.reason == 'Unknown SID':
                         raise UnknownSIDError('SID became invalid')
@@ -296,8 +294,6 @@ class Channel(object):
                         break
 
                     await self._on_push_data(chunk)
-            finally:
-                res.release()
 
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')

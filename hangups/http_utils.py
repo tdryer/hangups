@@ -58,14 +58,10 @@ class Session(object):
         logger.debug('Sending request %s %s:\n%r', method, url, data)
         for retry_num in range(MAX_RETRIES):
             try:
-                res = await self.fetch_raw(
-                        method, url, params=params, headers=headers, data=data,
-                    )
-                try:
+                async with self.fetch_raw(method, url, params=params,
+                                          headers=headers, data=data) as res:
                     body = await asyncio.wait_for(
                         res.read(), REQUEST_TIMEOUT)
-                finally:
-                    res.release()
                 logger.debug('Received response %d %s:\n%r',
                              res.status, res.reason, body)
             except asyncio.TimeoutError:
@@ -91,8 +87,7 @@ class Session(object):
 
         return FetchResponse(res.status, body)
 
-    async def fetch_raw(self, method, url,
-                        params=None, headers=None, data=None):
+    def fetch_raw(self, method, url, params=None, headers=None, data=None):
         """Make an HTTP request using aiohttp directly.
 
         Automatically uses configured HTTP proxy, and adds Google authorization
@@ -106,7 +101,7 @@ class Session(object):
             data: (str): (optional) Request body data.
 
         Returns:
-            aiohttp.ClientResponse: HTTP response.
+            aiohttp._RequestContextManager: ContextManager for a HTTP response.
 
         Raises:
             See ``aiohttp.ClientSession.request``.
@@ -118,10 +113,10 @@ class Session(object):
 
         headers = headers or {}
         headers.update(self._authorization_headers)
-        return (await self._session.request(
+        return self._session.request(
             method, url, params=params, headers=headers, data=data,
             proxy=self._proxy
-        ))
+        )
 
     def close(self):
         """Close the underlying aiohttp.ClientSession."""
