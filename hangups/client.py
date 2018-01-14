@@ -131,7 +131,7 @@ class Client(object):
             self._channel.on_receive_array.add_observer(self._on_receive_array)
 
             # Wrap the coroutine in a Future so it can be cancelled.
-            self._listen_future = asyncio.async(self._channel.listen())
+            self._listen_future = asyncio.ensure_future(self._channel.listen())
             # Listen for StateUpdate messages from the Channel until it
             # disconnects.
             try:

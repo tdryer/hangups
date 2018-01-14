@@ -250,7 +250,7 @@ class CoroutineQueue:
     This creates a problem if we need to execute a coroutine in response to
     user input.
 
-    One option is to use asyncio.async to execute a "fire and forget"
+    One option is to use asyncio.ensure_future to execute a "fire and forget"
     coroutine. If we do this, exceptions will be logged instead of propagated,
     which can obscure problems.
 

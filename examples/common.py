@@ -24,8 +24,9 @@ def run_example(example_coroutine, *extra_args):
     # standard input if necessary.
     cookies = hangups.auth.get_auth_stdin(args.token_path)
     client = hangups.Client(cookies)
-    task = asyncio.async(_async_main(example_coroutine, client, args))
     loop = asyncio.get_event_loop()
+    task = asyncio.ensure_future(_async_main(example_coroutine, client, args),
+                                 loop=loop)
 
     try:
         loop.run_until_complete(task)
@@ -59,7 +60,7 @@ def _get_parser(extra_args):
 async def _async_main(example_coroutine, client, args):
     """Run the example coroutine."""
     # Spawn a task for hangups to run in parallel with the example coroutine.
-    task = asyncio.async(client.connect())
+    task = asyncio.ensure_future(client.connect())
 
     # Wait for hangups to either finish connecting or raise an exception.
     on_connect = asyncio.Future()
