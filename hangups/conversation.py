@@ -287,24 +287,21 @@ class Conversation(object):
         # refactored, hide this by saving and restoring previous values where
         # necessary.
 
-        # delivery_medium_option
         new_state = conversation.self_conversation_state
+        old_state = self._conversation.self_conversation_state
+        self._conversation = conversation
+
+        # delivery_medium_option
         if not new_state.delivery_medium_option:
-            old_state = self._conversation.self_conversation_state
             new_state.delivery_medium_option.extend(
                 old_state.delivery_medium_option
             )
 
         # latest_read_timestamp
-        old_timestamp = self.latest_read_timestamp
-        self._conversation = conversation
-        if parsers.to_timestamp(self.latest_read_timestamp) == 0:
-            self_conversation_state = (
-                self._conversation.self_conversation_state
-            )
-            self_conversation_state.self_read_state.latest_read_timestamp = (
-                parsers.to_timestamp(old_timestamp)
-            )
+        old_timestamp = old_state.self_read_state.latest_read_timestamp
+        new_timestamp = new_state.self_read_state.latest_read_timestamp
+        if new_timestamp == 0:
+            new_state.self_read_state.latest_read_timestamp = old_timestamp
 
     @staticmethod
     def _wrap_event(event_):
