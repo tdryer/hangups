@@ -413,7 +413,7 @@ class Conversation(object):
         Raises:
             .NetworkError: If the message cannot be sent.
         """
-        with (await self._send_message_lock):
+        async with self._send_message_lock:
             if image_file:
                 try:
                     uploaded_image = await self._client.upload_image(
