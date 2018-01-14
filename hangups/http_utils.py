@@ -29,7 +29,8 @@ class Session(object):
 
     def __init__(self, cookies, proxy=None):
         self._proxy = proxy
-        self._session = aiohttp.ClientSession(cookies=cookies)
+        self._session = aiohttp.ClientSession(cookies=cookies,
+                                              conn_timeout=CONNECT_TIMEOUT)
         sapisid = cookies['SAPISID']
         self._authorization_headers = _get_authorization_headers(sapisid)
 
@@ -58,11 +59,9 @@ class Session(object):
         logger.debug('Sending request %s %s:\n%r', method, url, data)
         for retry_num in range(MAX_RETRIES):
             try:
-                res = yield from asyncio.wait_for(
-                    self.fetch_raw(
+                res = yield from self.fetch_raw(
                         method, url, params=params, headers=headers, data=data,
-                    ),
-                    CONNECT_TIMEOUT)
+                    )
                 try:
                     body = yield from asyncio.wait_for(
                         res.read(), REQUEST_TIMEOUT)

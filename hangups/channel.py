@@ -28,7 +28,6 @@ logger = logging.getLogger(__name__)
 Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
 CHANNEL_URL_PREFIX = 'https://0.client-channel.google.com/client-channel/{}'
-CONNECT_TIMEOUT = 30
 # Long-polling requests send heartbeats every 15-30 seconds, so if we miss two
 # in a row, consider the connection dead.
 PUSH_TIMEOUT = 60
@@ -283,11 +282,9 @@ class Channel(object):
         }
         logger.info('Opening new long-polling request')
         try:
-            res = yield from asyncio.wait_for(
-                self._session.fetch_raw(
-                    'GET', CHANNEL_URL_PREFIX.format('channel/bind'),
-                    params=params
-                ), CONNECT_TIMEOUT
+            res = yield from self._session.fetch_raw(
+                'GET', CHANNEL_URL_PREFIX.format('channel/bind'),
+                params=params
             )
 
             try:
