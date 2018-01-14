@@ -60,8 +60,8 @@ class Session(object):
             try:
                 async with self.fetch_raw(method, url, params=params,
                                           headers=headers, data=data) as res:
-                    body = await asyncio.wait_for(
-                        res.read(), REQUEST_TIMEOUT)
+                    async with aiohttp.Timeout(REQUEST_TIMEOUT):
+                        body = await res.read()
                 logger.debug('Received response %d %s:\n%r',
                              res.status, res.reason, body)
             except asyncio.TimeoutError:

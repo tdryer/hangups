@@ -288,8 +288,8 @@ class Channel(object):
                             res.status, res.reason))
 
                 while True:
-                    chunk = await asyncio.wait_for(
-                        res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT)
+                    async with aiohttp.Timeout(PUSH_TIMEOUT):
+                        chunk = await res.content.read(MAX_READ_BYTES)
                     if not chunk:
                         break
 
