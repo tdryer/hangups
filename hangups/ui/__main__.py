@@ -138,7 +138,7 @@ class ChatUI(object):
 
         # If an exception was stored, raise it now. This is used for exceptions
         # originating in urwid callbacks.
-        if self._exc_info:
+        if self._exc_info and self._exc_info[0] is not None:
             raise self._exc_info[0](
                 self._exc_info[1]
             ).with_traceback(self._exc_info[2])
