@@ -86,7 +86,7 @@ class ChatUI(object):
         self._conv_list = None  # hangups.ConversationList
         self._user_list = None  # hangups.UserList
         self._coroutine_queue = CoroutineQueue()
-        self._exc_info = None
+        self._exception = None
 
         # TODO Add urwid widget for getting auth.
         try:
@@ -138,23 +138,23 @@ class ChatUI(object):
 
         # If an exception was stored, raise it now. This is used for exceptions
         # originating in urwid callbacks.
-        if self._exc_info:
-            raise self._exc_info[0](
-                self._exc_info[1]
-            ).with_traceback(self._exc_info[2])
+        if self._exception:
+            raise self._exception  # pylint: disable=raising-bad-type
 
     @asyncio.coroutine
     def _connect(self):
         yield from self._client.connect()
         raise HangupsDisconnected()
 
-    def _exception_handler(self, _loop, _context):
+    def _exception_handler(self, _loop, context):
         """Handle exceptions from the asyncio loop."""
         # Start a graceful shutdown.
         self._coroutine_queue.put(self._client.disconnect())
 
-        # Store the exception info to be re-raised later.
-        self._exc_info = sys.exc_info()
+        # Store the exception to be re-raised later. If the context doesn't
+        # contain an exception, create one containing the error message.
+        default_exception = Exception(context.get('message'))
+        self._exception = context.get('exception', default_exception)
 
     def _input_filter(self, keys, _):
         """Handle global keybindings."""
