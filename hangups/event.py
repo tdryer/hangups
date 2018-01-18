@@ -50,14 +50,13 @@ class Event(object):
                              .format(callback, self))
         self._observers.remove(callback)
 
-    @asyncio.coroutine
-    def fire(self, *args, **kwargs):
+    async def fire(self, *args, **kwargs):
         """Fire this event, calling all observers with the same arguments."""
         logger.debug('Fired {}'.format(self))
         for observer in self._observers:
             gen = observer(*args, **kwargs)
             if asyncio.iscoroutinefunction(observer):
-                yield from gen
+                await gen
 
     def __repr__(self):
         return 'Event(\'{}\')'.format(self._name)

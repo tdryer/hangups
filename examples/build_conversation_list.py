@@ -1,16 +1,13 @@
 """Example of using hangups.build_user_conversation_list to data."""
 
-import asyncio
-
 import hangups
 
 from common import run_example
 
 
-@asyncio.coroutine
-def sync_recent_conversations(client, _):
+async def sync_recent_conversations(client, _):
     user_list, conversation_list = (
-        yield from hangups.build_user_conversation_list(client)
+        await hangups.build_user_conversation_list(client)
     )
     all_users = user_list.get_all()
     all_conversations = conversation_list.get_all(include_archived=True)

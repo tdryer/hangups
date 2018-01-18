@@ -1,19 +1,16 @@
 """Example of using hangups to retrieve suggested contacts."""
 
-import asyncio
-
 import hangups
 
 from common import run_example
 
 
-@asyncio.coroutine
-def retrieve_suggested_contacts(client, _):
+async def retrieve_suggested_contacts(client, _):
     request = hangups.hangouts_pb2.GetSuggestedEntitiesRequest(
         request_header=client.get_request_header(),
         max_count=100,
     )
-    res = yield from client.get_suggested_entities(request)
+    res = await client.get_suggested_entities(request)
 
     # Print the list of entities in the response.
     for entity in res.entity:

@@ -1,14 +1,11 @@
 """Example of using hangups to query presence of a user."""
 
-import asyncio
-
 import hangups
 
 from common import run_example
 
 
-@asyncio.coroutine
-def query_presence(client, args):
+async def query_presence(client, args):
     request = hangups.hangouts_pb2.QueryPresenceRequest(
         request_header=client.get_request_header(),
         participant_id=[
@@ -22,7 +19,7 @@ def query_presence(client, args):
             hangups.hangouts_pb2.FIELD_MASK_LAST_SEEN,
         ],
     )
-    res = yield from client.query_presence(request)
+    res = await client.query_presence(request)
     print(res)
 
 

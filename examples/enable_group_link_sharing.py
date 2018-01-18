@@ -1,14 +1,11 @@
 """Example of using hangups to enable group link sharing in a conversation."""
 
-import asyncio
-
 import hangups
 
 from common import run_example
 
 
-@asyncio.coroutine
-def enable_group_link_sharing(client, args):
+async def enable_group_link_sharing(client, args):
     request = hangups.hangouts_pb2.SetGroupLinkSharingEnabledRequest(
         request_header=client.get_request_header(),
         event_request_header=hangups.hangouts_pb2.EventRequestHeader(
@@ -21,7 +18,7 @@ def enable_group_link_sharing(client, args):
             hangups.hangouts_pb2.GROUP_LINK_SHARING_STATUS_ON
         ),
     )
-    yield from client.set_group_link_sharing_enabled(request)
+    await client.set_group_link_sharing_enabled(request)
     print('enabled group link sharing for conversation {}'.format(
         args.conversation_id
     ))
@@ -32,7 +29,7 @@ def enable_group_link_sharing(client, args):
             id=args.conversation_id,
         )
     )
-    response = yield from client.get_group_conversation_url(request)
+    response = await client.get_group_conversation_url(request)
     print(response.group_conversation_url)
 
 

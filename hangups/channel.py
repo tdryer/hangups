@@ -27,8 +27,7 @@ from hangups import event, exceptions
 logger = logging.getLogger(__name__)
 Utf8IncrementalDecoder = codecs.getincrementaldecoder('utf-8')
 LEN_REGEX = re.compile(r'([0-9]+)\n', re.MULTILINE)
-CHANNEL_URL_PREFIX = 'https://0.client-channel.google.com/client-channel/{}'
-CONNECT_TIMEOUT = 30
+CHANNEL_URL = 'https://0.client-channel.google.com/client-channel/channel/bind'
 # Long-polling requests send heartbeats every 15-30 seconds, so if we miss two
 # in a row, consider the connection dead.
 PUSH_TIMEOUT = 60
@@ -167,8 +166,7 @@ class Channel(object):
         """Whether the channel is currently connected."""
         return self._is_connected
 
-    @asyncio.coroutine
-    def listen(self):
+    async def listen(self):
         """Listen for messages on the backwards channel.
 
         This method only returns when the connection has been closed due to an
@@ -183,25 +181,25 @@ class Channel(object):
             if retries > 0:
                 backoff_seconds = self._retry_backoff_base ** retries
                 logger.info('Backing off for %s seconds', backoff_seconds)
-                yield from asyncio.sleep(backoff_seconds)
+                await asyncio.sleep(backoff_seconds)
 
             # Request a new SID if we don't have one yet, or the previous one
             # became invalid.
             if need_new_sid:
-                yield from self._fetch_channel_sid()
+                await self._fetch_channel_sid()
                 need_new_sid = False
             # Clear any previous push data, since if there was an error it
             # could contain garbage.
             self._chunk_parser = ChunkParser()
             try:
-                yield from self._longpoll_request()
+                await self._longpoll_request()
             except (UnknownSIDError, exceptions.NetworkError) as e:
                 logger.warning('Long-polling request failed: {}'.format(e))
                 retries += 1
                 logger.warning('retry attempt count is now {}'.format(retries))
                 if self._is_connected:
                     self._is_connected = False
-                    yield from self.on_disconnect.fire()
+                    await self.on_disconnect.fire()
                 if isinstance(e, UnknownSIDError):
                     need_new_sid = True
             else:
@@ -214,8 +212,7 @@ class Channel(object):
 
         logger.error('Ran out of retries for long-polling request')
 
-    @asyncio.coroutine
-    def send_maps(self, map_list):
+    async def send_maps(self, map_list):
         """Sends a request to the server containing maps (dicts)."""
         params = {
             'VER': 8,  # channel protocol version
@@ -230,9 +227,8 @@ class Channel(object):
         for map_num, map_ in enumerate(map_list):
             for map_key, map_val in map_.items():
                 data_dict['req{}_{}'.format(map_num, map_key)] = map_val
-        res = yield from self._session.fetch(
-            'post', CHANNEL_URL_PREFIX.format('channel/bind'),
-            params=params, data=data_dict
+        res = await self._session.fetch(
+            'post', CHANNEL_URL, params=params, data=data_dict
         )
         return res
 
@@ -240,8 +236,7 @@ class Channel(object):
     # Private methods
     ##########################################################################
 
-    @asyncio.coroutine
-    def _fetch_channel_sid(self):
+    async def _fetch_channel_sid(self):
         """Creates a new channel for receiving push data.
 
         Sending an empty forward channel request will create a new channel on
@@ -257,13 +252,12 @@ class Channel(object):
         # Set SID and gsessionid to None so they aren't sent in by send_maps.
         self._sid_param = None
         self._gsessionid_param = None
-        res = yield from self.send_maps([])
+        res = await self.send_maps([])
         self._sid_param, self._gsessionid_param = _parse_sid_response(res.body)
         logger.info('New SID: {}'.format(self._sid_param))
         logger.info('New gsessionid: {}'.format(self._gsessionid_param))
 
-    @asyncio.coroutine
-    def _longpoll_request(self):
+    async def _longpoll_request(self):
         """Open a long-polling request and receive arrays.
 
         This method uses keep-alive to make re-opening the request faster, but
@@ -283,14 +277,9 @@ class Channel(object):
         }
         logger.info('Opening new long-polling request')
         try:
-            res = yield from asyncio.wait_for(
-                self._session.fetch_raw(
-                    'GET', CHANNEL_URL_PREFIX.format('channel/bind'),
-                    params=params
-                ), CONNECT_TIMEOUT
-            )
+            async with self._session.fetch_raw('GET', CHANNEL_URL,
+                                               params=params) as res:
 
-            try:
                 if res.status != 200:
                     if res.status == 400 and res.reason == 'Unknown SID':
                         raise UnknownSIDError('SID became invalid')
@@ -299,14 +288,12 @@ class Channel(object):
                             res.status, res.reason))
 
                 while True:
-                    chunk = yield from asyncio.wait_for(
-                        res.content.read(MAX_READ_BYTES), PUSH_TIMEOUT)
+                    async with aiohttp.Timeout(PUSH_TIMEOUT):
+                        chunk = await res.content.read(MAX_READ_BYTES)
                     if not chunk:
                         break
 
-                    yield from self._on_push_data(chunk)
-            finally:
-                res.release()
+                    await self._on_push_data(chunk)
 
         except asyncio.TimeoutError:
             raise exceptions.NetworkError('Request timed out')
@@ -316,8 +303,7 @@ class Channel(object):
         except aiohttp.ClientError as err:
             raise exceptions.NetworkError('Request connection error: %s' % err)
 
-    @asyncio.coroutine
-    def _on_push_data(self, data_bytes):
+    async def _on_push_data(self, data_bytes):
         """Parse push data and trigger events."""
         logger.debug('Received chunk:\n{}'.format(data_bytes))
         for chunk in self._chunk_parser.get_chunks(data_bytes):
@@ -326,11 +312,11 @@ class Channel(object):
             if not self._is_connected:
                 if self._on_connect_called:
                     self._is_connected = True
-                    yield from self.on_reconnect.fire()
+                    await self.on_reconnect.fire()
                 else:
                     self._on_connect_called = True
                     self._is_connected = True
-                    yield from self.on_connect.fire()
+                    await self.on_connect.fire()
 
             # chunk contains a container array
             container_array = json.loads(chunk)
@@ -341,4 +327,4 @@ class Channel(object):
                 array_id, data_array = inner_array
                 logger.debug('Chunk contains data array with id %r:\n%r',
                              array_id, data_array)
-                yield from self.on_receive_array.fire(data_array)
+                await self.on_receive_array.fire(data_array)

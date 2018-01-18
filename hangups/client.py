@@ -111,8 +111,7 @@ class Client(object):
     # Public methods
     ##########################################################################
 
-    @asyncio.coroutine
-    def connect(self):
+    async def connect(self):
         """Establish a connection to the chat server.
 
         Returns when an error has occurred, or :func:`disconnect` has been
@@ -132,11 +131,11 @@ class Client(object):
             self._channel.on_receive_array.add_observer(self._on_receive_array)
 
             # Wrap the coroutine in a Future so it can be cancelled.
-            self._listen_future = asyncio.async(self._channel.listen())
+            self._listen_future = asyncio.ensure_future(self._channel.listen())
             # Listen for StateUpdate messages from the Channel until it
             # disconnects.
             try:
-                yield from self._listen_future
+                await self._listen_future
             except asyncio.CancelledError:
                 # If this task is cancelled, we need to cancel our child task
                 # as well. We don't need an additional yield because listen
@@ -148,8 +147,7 @@ class Client(object):
         finally:
             self._session.close()
 
-    @asyncio.coroutine
-    def disconnect(self):
+    async def disconnect(self):
         """Gracefully disconnect from the server.
 
         When disconnection is complete, :func:`connect` will return.
@@ -180,8 +178,7 @@ class Client(object):
         """
         return random.randint(0, 2**32)
 
-    @asyncio.coroutine
-    def set_active(self):
+    async def set_active(self):
         """Set this client as active.
 
         While a client is active, no other clients will raise notifications.
@@ -208,7 +205,7 @@ class Client(object):
                     get_self_info_request = hangouts_pb2.GetSelfInfoRequest(
                         request_header=self.get_request_header(),
                     )
-                    get_self_info_response = yield from self.get_self_info(
+                    get_self_info_response = await self.get_self_info(
                         get_self_info_request
                     )
                 except exceptions.NetworkError as e:
@@ -234,16 +231,15 @@ class Client(object):
                     full_jid="{}/{}".format(self._email, self._client_id),
                     timeout_secs=ACTIVE_TIMEOUT_SECS,
                 )
-                yield from self.set_active_client(set_active_request)
+                await self.set_active_client(set_active_request)
             except exceptions.NetworkError as e:
                 logger.warning('Failed to set active client: {}'.format(e))
             else:
                 logger.info('Set active client for {} seconds'
                             .format(ACTIVE_TIMEOUT_SECS))
 
-    @asyncio.coroutine
-    def upload_image(self, image_file, filename=None, *,
-                     return_uploaded_image=False):
+    async def upload_image(self, image_file, filename=None, *,
+                           return_uploaded_image=False):
         """Upload an image that can be later attached to a chat message.
 
         Args:
@@ -262,7 +258,7 @@ class Client(object):
         image_data = image_file.read()
 
         # request an upload URL
-        res = yield from self._base_request(
+        res = await self._base_request(
             IMAGE_UPLOAD_URL,
             'application/x-www-form-urlencoded;charset=UTF-8', 'json',
             json.dumps({
@@ -290,7 +286,7 @@ class Client(object):
             )
 
         # upload the image data using the upload_url to get the upload info
-        res = yield from self._base_request(
+        res = await self._base_request(
             upload_url, 'application/octet-stream', 'json', image_data
         )
 
@@ -343,8 +339,7 @@ class Client(object):
             ))
         return response['sessionStatus']
 
-    @asyncio.coroutine
-    def _on_receive_array(self, array):
+    async def _on_receive_array(self, array):
         """Parse channel array and call the appropriate events."""
         if array[0] == 'noop':
             pass  # This is just a keep-alive, ignore it.
@@ -359,7 +354,7 @@ class Client(object):
                 logger.info('Received new client_id: %r', self._client_id)
                 # Once client_id is received, the channel is ready to have
                 # services added.
-                yield from self._add_channel_services()
+                await self._add_channel_services()
             if '2' in wrapper:
                 pblite_message = json.loads(wrapper['2']['2'])
                 if pblite_message[0] == 'cbu':
@@ -372,12 +367,11 @@ class Client(object):
                         logger.debug('Received StateUpdate:\n%s', state_update)
                         header = state_update.state_update_header
                         self._active_client_state = header.active_client_state
-                        yield from self.on_state_update.fire(state_update)
+                        await self.on_state_update.fire(state_update)
                 else:
                     logger.info('Ignoring message: %r', pblite_message[0])
 
-    @asyncio.coroutine
-    def _add_channel_services(self):
+    async def _add_channel_services(self):
         """Add services to the channel.
 
         The services we add to the channel determine what kind of data we will
@@ -400,11 +394,10 @@ class Client(object):
             dict(p=json.dumps({"3": {"1": {"1": service}}}))
             for service in services
         ]
-        yield from self._channel.send_maps(map_list)
+        await self._channel.send_maps(map_list)
         logger.info('Channel services added')
 
-    @asyncio.coroutine
-    def _pb_request(self, endpoint, request_pb, response_pb):
+    async def _pb_request(self, endpoint, request_pb, response_pb):
         """Send a Protocol Buffer formatted chat API request.
 
         Args:
@@ -417,7 +410,7 @@ class Client(object):
         """
         logger.debug('Sending Protocol Buffer request %s:\n%s', endpoint,
                      request_pb)
-        res = yield from self._base_request(
+        res = await self._base_request(
             'https://clients6.google.com/chat/v1/{}'.format(endpoint),
             'application/x-protobuf',  # Request body is Protocol Buffer.
             'proto',  # Response body is Protocol Buffer.
@@ -442,8 +435,7 @@ class Client(object):
                 .format(status, description)
             )
 
-    @asyncio.coroutine
-    def _base_request(self, url, content_type, response_type, data):
+    async def _base_request(self, url, content_type, response_type, data):
         """Send a generic authenticated POST request.
 
         Args:
@@ -474,7 +466,7 @@ class Client(object):
             # Unauthenticated Use Exceeded. Continued use requires signup").
             'key': API_KEY,
         }
-        res = yield from self._session.fetch(
+        res = await self._session.fetch(
             'post', url, headers=headers, params=params, data=data,
         )
         return res
@@ -484,24 +476,21 @@ class Client(object):
     # particular APIs.
     ###########################################################################
 
-    @asyncio.coroutine
-    def add_user(self, add_user_request):
+    async def add_user(self, add_user_request):
         """Invite users to join an existing group conversation."""
         response = hangouts_pb2.AddUserResponse()
-        yield from self._pb_request('conversations/adduser',
-                                    add_user_request, response)
+        await self._pb_request('conversations/adduser',
+                               add_user_request, response)
         return response
 
-    @asyncio.coroutine
-    def create_conversation(self, create_conversation_request):
+    async def create_conversation(self, create_conversation_request):
         """Create a new conversation."""
         response = hangouts_pb2.CreateConversationResponse()
-        yield from self._pb_request('conversations/createconversation',
-                                    create_conversation_request, response)
+        await self._pb_request('conversations/createconversation',
+                               create_conversation_request, response)
         return response
 
-    @asyncio.coroutine
-    def delete_conversation(self, delete_conversation_request):
+    async def delete_conversation(self, delete_conversation_request):
         """Leave a one-to-one conversation.
 
         One-to-one conversations are "sticky"; they can't actually be deleted.
@@ -509,28 +498,25 @@ class Client(object):
         ``delete_upper_bound_timestamp``, hiding it if no events remain.
         """
         response = hangouts_pb2.DeleteConversationResponse()
-        yield from self._pb_request('conversations/deleteconversation',
-                                    delete_conversation_request, response)
+        await self._pb_request('conversations/deleteconversation',
+                               delete_conversation_request, response)
         return response
 
-    @asyncio.coroutine
-    def easter_egg(self, easter_egg_request):
+    async def easter_egg(self, easter_egg_request):
         """Send an easter egg event to a conversation."""
         response = hangouts_pb2.EasterEggResponse()
-        yield from self._pb_request('conversations/easteregg',
-                                    easter_egg_request, response)
+        await self._pb_request('conversations/easteregg',
+                               easter_egg_request, response)
         return response
 
-    @asyncio.coroutine
-    def get_conversation(self, get_conversation_request):
+    async def get_conversation(self, get_conversation_request):
         """Return conversation info and recent events."""
         response = hangouts_pb2.GetConversationResponse()
-        yield from self._pb_request('conversations/getconversation',
-                                    get_conversation_request, response)
+        await self._pb_request('conversations/getconversation',
+                               get_conversation_request, response)
         return response
 
-    @asyncio.coroutine
-    def get_entity_by_id(self, get_entity_by_id_request):
+    async def get_entity_by_id(self, get_entity_by_id_request):
         """Return one or more user entities.
 
         Searching by phone number only finds entities when their phone number
@@ -538,52 +524,48 @@ class Client(object):
         find Google Voice contacts.
         """
         response = hangouts_pb2.GetEntityByIdResponse()
-        yield from self._pb_request('contacts/getentitybyid',
-                                    get_entity_by_id_request, response)
+        await self._pb_request('contacts/getentitybyid',
+                               get_entity_by_id_request, response)
         return response
 
-    def get_group_conversation_url(self, get_group_conversation_url_request):
+    async def get_group_conversation_url(self,
+                                         get_group_conversation_url_request):
         """Get URL to allow others to join a group conversation."""
         response = hangouts_pb2.GetGroupConversationUrlResponse()
-        yield from self._pb_request('conversations/getgroupconversationurl',
-                                    get_group_conversation_url_request,
-                                    response)
+        await self._pb_request('conversations/getgroupconversationurl',
+                               get_group_conversation_url_request,
+                               response)
         return response
 
-    @asyncio.coroutine
-    def get_self_info(self, get_self_info_request):
+    async def get_self_info(self, get_self_info_request):
         """Return info about the current user."""
         response = hangouts_pb2.GetSelfInfoResponse()
-        yield from self._pb_request('contacts/getselfinfo',
-                                    get_self_info_request, response)
+        await self._pb_request('contacts/getselfinfo',
+                               get_self_info_request, response)
         return response
 
-    @asyncio.coroutine
-    def get_suggested_entities(self, get_suggested_entities_request):
+    async def get_suggested_entities(self, get_suggested_entities_request):
         """Return suggested contacts."""
         response = hangouts_pb2.GetSuggestedEntitiesResponse()
-        yield from self._pb_request('contacts/getsuggestedentities',
-                                    get_suggested_entities_request, response)
+        await self._pb_request('contacts/getsuggestedentities',
+                               get_suggested_entities_request, response)
         return response
 
-    @asyncio.coroutine
-    def query_presence(self, query_presence_request):
+    async def query_presence(self, query_presence_request):
         """Return presence status for a list of users."""
         response = hangouts_pb2.QueryPresenceResponse()
-        yield from self._pb_request('presence/querypresence',
-                                    query_presence_request, response)
+        await self._pb_request('presence/querypresence',
+                               query_presence_request, response)
         return response
 
-    @asyncio.coroutine
-    def remove_user(self, remove_user_request):
+    async def remove_user(self, remove_user_request):
         """Remove a participant from a group conversation."""
         response = hangouts_pb2.RemoveUserResponse()
-        yield from self._pb_request('conversations/removeuser',
-                                    remove_user_request, response)
+        await self._pb_request('conversations/removeuser',
+                               remove_user_request, response)
         return response
 
-    @asyncio.coroutine
-    def rename_conversation(self, rename_conversation_request):
+    async def rename_conversation(self, rename_conversation_request):
         """Rename a conversation.
 
         Both group and one-to-one conversations may be renamed, but the
@@ -591,120 +573,112 @@ class Client(object):
         conversations with custom names.
         """
         response = hangouts_pb2.RenameConversationResponse()
-        yield from self._pb_request('conversations/renameconversation',
-                                    rename_conversation_request, response)
+        await self._pb_request('conversations/renameconversation',
+                               rename_conversation_request, response)
         return response
 
-    @asyncio.coroutine
-    def search_entities(self, search_entities_request):
+    async def search_entities(self, search_entities_request):
         """Return user entities based on a query."""
         response = hangouts_pb2.SearchEntitiesResponse()
-        yield from self._pb_request('contacts/searchentities',
-                                    search_entities_request, response)
+        await self._pb_request('contacts/searchentities',
+                               search_entities_request, response)
         return response
 
-    @asyncio.coroutine
-    def send_chat_message(self, send_chat_message_request):
+    async def send_chat_message(self, send_chat_message_request):
         """Send a chat message to a conversation."""
         response = hangouts_pb2.SendChatMessageResponse()
-        yield from self._pb_request('conversations/sendchatmessage',
-                                    send_chat_message_request, response)
+        await self._pb_request('conversations/sendchatmessage',
+                               send_chat_message_request, response)
         return response
 
-    @asyncio.coroutine
-    def modify_otr_status(self, modify_otr_status_request):
+    async def modify_otr_status(self, modify_otr_status_request):
         """Enable or disable message history in a conversation."""
         response = hangouts_pb2.ModifyOTRStatusResponse()
-        yield from self._pb_request('conversations/modifyotrstatus',
-                                    modify_otr_status_request, response)
+        await self._pb_request('conversations/modifyotrstatus',
+                               modify_otr_status_request, response)
         return response
 
-    @asyncio.coroutine
-    def send_offnetwork_invitation(self, send_offnetwork_invitation_request):
+    async def send_offnetwork_invitation(
+            self, send_offnetwork_invitation_request
+    ):
         """Send an email to invite a non-Google contact to Hangouts."""
         response = hangouts_pb2.SendOffnetworkInvitationResponse()
-        yield from self._pb_request('devices/sendoffnetworkinvitation',
-                                    send_offnetwork_invitation_request,
-                                    response)
+        await self._pb_request('devices/sendoffnetworkinvitation',
+                               send_offnetwork_invitation_request,
+                               response)
         return response
 
-    @asyncio.coroutine
-    def set_active_client(self, set_active_client_request):
+    async def set_active_client(self, set_active_client_request):
         """Set the active client."""
         response = hangouts_pb2.SetActiveClientResponse()
-        yield from self._pb_request('clients/setactiveclient',
-                                    set_active_client_request, response)
+        await self._pb_request('clients/setactiveclient',
+                               set_active_client_request, response)
         return response
 
-    @asyncio.coroutine
-    def set_conversation_notification_level(
+    async def set_conversation_notification_level(
             self, set_conversation_notification_level_request
     ):
         """Set the notification level of a conversation."""
         response = hangouts_pb2.SetConversationNotificationLevelResponse()
-        yield from self._pb_request(
+        await self._pb_request(
             'conversations/setconversationnotificationlevel',
             set_conversation_notification_level_request, response
         )
         return response
 
-    @asyncio.coroutine
-    def set_focus(self, set_focus_request):
+    async def set_focus(self, set_focus_request):
         """Set focus to a conversation."""
         response = hangouts_pb2.SetFocusResponse()
-        yield from self._pb_request('conversations/setfocus',
-                                    set_focus_request, response)
+        await self._pb_request('conversations/setfocus',
+                               set_focus_request, response)
         return response
 
-    @asyncio.coroutine
-    def set_group_link_sharing_enabled(self,
-                                       set_group_link_sharing_enabled_request):
+    async def set_group_link_sharing_enabled(
+            self, set_group_link_sharing_enabled_request
+    ):
         """Set whether group link sharing is enabled for a conversation."""
         response = hangouts_pb2.SetGroupLinkSharingEnabledResponse()
-        yield from self._pb_request('conversations/setgrouplinksharingenabled',
-                                    set_group_link_sharing_enabled_request,
-                                    response)
+        await self._pb_request('conversations/setgrouplinksharingenabled',
+                               set_group_link_sharing_enabled_request,
+                               response)
         return response
 
-    @asyncio.coroutine
-    def set_presence(self, set_presence_request):
+    async def set_presence(self, set_presence_request):
         """Set the presence status."""
         response = hangouts_pb2.SetPresenceResponse()
-        yield from self._pb_request('presence/setpresence',
-                                    set_presence_request, response)
+        await self._pb_request('presence/setpresence',
+                               set_presence_request, response)
         return response
 
-    @asyncio.coroutine
-    def set_typing(self, set_typing_request):
+    async def set_typing(self, set_typing_request):
         """Set the typing status of a conversation."""
         response = hangouts_pb2.SetTypingResponse()
-        yield from self._pb_request('conversations/settyping',
-                                    set_typing_request, response)
+        await self._pb_request('conversations/settyping',
+                               set_typing_request, response)
         return response
 
-    @asyncio.coroutine
-    def sync_all_new_events(self, sync_all_new_events_request):
+    async def sync_all_new_events(self, sync_all_new_events_request):
         """List all events occurring at or after a timestamp."""
         response = hangouts_pb2.SyncAllNewEventsResponse()
-        yield from self._pb_request('conversations/syncallnewevents',
-                                    sync_all_new_events_request, response)
+        await self._pb_request('conversations/syncallnewevents',
+                               sync_all_new_events_request, response)
         return response
 
-    @asyncio.coroutine
-    def sync_recent_conversations(self, sync_recent_conversations_request):
+    async def sync_recent_conversations(
+            self, sync_recent_conversations_request
+    ):
         """Return info on recent conversations and their events."""
         response = hangouts_pb2.SyncRecentConversationsResponse()
-        yield from self._pb_request('conversations/syncrecentconversations',
-                                    sync_recent_conversations_request,
-                                    response)
+        await self._pb_request('conversations/syncrecentconversations',
+                               sync_recent_conversations_request,
+                               response)
         return response
 
-    @asyncio.coroutine
-    def update_watermark(self, update_watermark_request):
+    async def update_watermark(self, update_watermark_request):
         """Update the watermark (read timestamp) of a conversation."""
         response = hangouts_pb2.UpdateWatermarkResponse()
-        yield from self._pb_request('conversations/updatewatermark',
-                                    update_watermark_request, response)
+        await self._pb_request('conversations/updatewatermark',
+                               update_watermark_request, response)
         return response
 
 
