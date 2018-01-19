@@ -36,12 +36,6 @@ install_requires = [
 ]
 
 
-if sys.version_info < (3, 4, 3):
-    # For Python earlier than 3.4.3, use a backported asyncio that fixes an
-    # issue with an exception being logged on exit.
-    install_requires.append('asyncio==3.4.3')
-
-
 setup(
     name='hangups',
     version=__version__,
@@ -59,7 +53,6 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: Communications :: Chat',
