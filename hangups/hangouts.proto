@@ -86,7 +86,7 @@ message Presence {
   optional bool reachable = 1;
   optional bool available = 2;
   optional DeviceStatus device_status = 6;
-  optional MoodMessage mood_message = 9;
+  repeated MoodMessage mood_message = 9;
   optional LastSeen last_seen = 10;
 
   // TODO:
@@ -1545,7 +1545,7 @@ message SetPresenceRequest {
   optional PresenceStateSetting presence_state_setting = 2;
   optional DndSetting dnd_setting = 3;
   optional DesktopOffSetting desktop_off_setting = 5;
-  optional MoodSetting mood_setting = 8;
+  repeated MoodMessage mood_message = 8;
 }
 
 message SetPresenceResponse {

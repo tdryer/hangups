@@ -79,7 +79,7 @@ Field                 Number Type            Label    Description
 :code:`reachable`     1      bool            optional            
 :code:`available`     2      bool            optional            
 :code:`device_status` 6      `DeviceStatus`_ optional            
-:code:`mood_message`  9      `MoodMessage`_  optional            
+:code:`mood_message`  9      `MoodMessage`_  repeated            
 :code:`last_seen`     10     `LastSeen`_     optional            
 ===================== ====== =============== ======== ===========
 
@@ -1638,7 +1638,7 @@ Field                          Number Type                    Label    Descripti
 :code:`presence_state_setting` 2      `PresenceStateSetting`_ optional            
 :code:`dnd_setting`            3      `DndSetting`_           optional            
 :code:`desktop_off_setting`    5      `DesktopOffSetting`_    optional            
-:code:`mood_setting`           8      `MoodSetting`_          optional            
+:code:`mood_message`           8      `MoodMessage`_          repeated            
 ============================== ====== ======================= ======== ===========
 
 SetPresenceResponse
