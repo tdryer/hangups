@@ -86,11 +86,15 @@ message Presence {
   optional bool reachable = 1;
   optional bool available = 2;
   optional DeviceStatus device_status = 6;
-  repeated MoodMessage mood_message = 9;
+  optional StatusMessage status_message = 9;
   optional LastSeen last_seen = 10;
 
   // TODO:
   // optional CallType call_type = 5;
+}
+
+message StatusMessage {
+  repeated MessageContent status_message = 1;
 }
 
 message PresenceResult {
@@ -283,6 +287,17 @@ message Attachment {
 message MessageContent {
   repeated Segment segment = 1;
   repeated Attachment attachment = 2;
+}
+
+// Chat message specification.
+message ChatMessageSpec {
+  repeated Segment segment = 1;
+  // TODO: other fields used for attachments:
+  // optional Unknown c = 2;
+  // optional Unknown d = 3;
+  // optional Unknown e = 4;
+  // optional Unknown f = 5;
+  // optional Unknown g = 6;
 }
 
 // Annotation that can be applied to a chat message event. The only known use
@@ -847,7 +862,14 @@ enum RichPresenceType {
 }
 
 message RichPresenceState {
-  repeated RichPresenceEnabledState get_rich_presence_enabled_state = 3;
+  repeated RichPresenceEnabledState rich_presence_enabled_state = 3;
+  optional StatusMessageState status_message = 4;
+}
+
+message StatusMessageState {
+  repeated MessageContent status_message = 1;
+  // TODO:
+  //optional uint64 unknown = 2;
 }
 
 message RichPresenceEnabledState {
@@ -892,21 +914,8 @@ message PresenceStateSetting {
   optional ClientPresenceStateType type = 2;
 }
 
-message MoodMessage {
-  optional MoodContent mood_content = 1;
-}
-
-message MoodContent {
-  repeated Segment segment = 1;
-}
-
-// The user's mood message.
-message MoodSetting {
-  optional MoodMessage mood_message = 1;
-}
-
-message MoodState {
-  optional MoodSetting mood_setting = 4;
+message StatusMessageSpec {
+  repeated ChatMessageSpec status_message = 1;
 }
 
 enum DeleteType {
@@ -1158,7 +1167,7 @@ message SelfPresenceNotification {
   optional DoNotDisturbSetting do_not_disturb_setting = 3;
   optional DesktopOffSetting desktop_off_setting = 4;
   optional DesktopOffState desktop_off_state = 5;
-  optional MoodState mood_state = 6;
+  optional RichPresenceState rich_presence_state = 6;
 }
 
 message DeleteActionNotification {
@@ -1440,6 +1449,7 @@ message SendChatMessageRequest {
   optional EventRequestHeader event_request_header = 8;
   optional ParticipantId user_id = 9;
   optional Location location = 10;
+  repeated ChatMessageSpec message_spec = 12;
   // TODO: incomplete
 }
 
@@ -1545,7 +1555,7 @@ message SetPresenceRequest {
   optional PresenceStateSetting presence_state_setting = 2;
   optional DndSetting dnd_setting = 3;
   optional DesktopOffSetting desktop_off_setting = 5;
-  repeated MoodMessage mood_message = 8;
+  optional StatusMessageSpec status_message = 8;
 }
 
 message SetPresenceResponse {
