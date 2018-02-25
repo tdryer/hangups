@@ -1,12 +1,14 @@
 """HTTP request session."""
 
-import aiohttp
 import asyncio
 import collections
 import hashlib
 import logging
 import time
 import urllib.parse
+
+import aiohttp
+import async_timeout
 
 from hangups import exceptions
 
@@ -60,7 +62,7 @@ class Session(object):
             try:
                 async with self.fetch_raw(method, url, params=params,
                                           headers=headers, data=data) as res:
-                    async with aiohttp.Timeout(REQUEST_TIMEOUT):
+                    async with async_timeout.timeout(REQUEST_TIMEOUT):
                         body = await res.read()
                 logger.debug('Received response %d %s:\n%r',
                              res.status, res.reason, body)

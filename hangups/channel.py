@@ -15,12 +15,14 @@ Unofficial protocol documentation is available here:
 https://web.archive.org/web/20121226064550/http://code.google.com/p/libevent-browserchannel-server/wiki/BrowserChannelProtocol
 """
 
-import aiohttp
 import asyncio
 import codecs
 import json
 import logging
 import re
+
+import aiohttp
+import async_timeout
 
 from hangups import event, exceptions
 
@@ -288,7 +290,7 @@ class Channel(object):
                             res.status, res.reason))
 
                 while True:
-                    async with aiohttp.Timeout(PUSH_TIMEOUT):
+                    async with async_timeout.timeout(PUSH_TIMEOUT):
                         chunk = await res.content.read(MAX_READ_BYTES)
                     if not chunk:
                         break
