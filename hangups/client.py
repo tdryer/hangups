@@ -145,7 +145,7 @@ class Client(object):
                 'Client.connect returning because Channel.listen returned'
             )
         finally:
-            self._session.close()
+            await self._session.close()
 
     async def disconnect(self):
         """Gracefully disconnect from the server.

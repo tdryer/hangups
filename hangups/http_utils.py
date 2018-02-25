@@ -118,9 +118,9 @@ class Session(object):
             proxy=self._proxy
         )
 
-    def close(self):
+    async def close(self):
         """Close the underlying aiohttp.ClientSession."""
-        self._session.close()
+        await self._session.close()
 
 
 def _get_authorization_headers(sapisid_cookie):
