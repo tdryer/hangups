@@ -914,7 +914,7 @@ message PresenceStateSetting {
   optional ClientPresenceStateType type = 2;
 }
 
-message StatusMessageSpec {
+message StatusMessageSetting {
   repeated ChatMessageSpec status_message = 1;
 }
 
@@ -1555,7 +1555,7 @@ message SetPresenceRequest {
   optional PresenceStateSetting presence_state_setting = 2;
   optional DndSetting dnd_setting = 3;
   optional DesktopOffSetting desktop_off_setting = 5;
-  optional StatusMessageSpec status_message = 8;
+  optional StatusMessageSetting status_message_setting = 8;
 }
 
 message SetPresenceResponse {

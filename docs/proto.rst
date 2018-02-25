@@ -767,8 +767,8 @@ Field                Number Type                       Label    Description
 :code:`type`         2      `ClientPresenceStateType`_ optional            
 ==================== ====== ========================== ======== ===========
 
-StatusMessageSpec
------------------
+StatusMessageSetting
+--------------------
 
 ====================== ====== ================== ======== ===========
 Field                  Number Type               Label    Description
@@ -1640,7 +1640,7 @@ Field                          Number Type                    Label    Descripti
 :code:`presence_state_setting` 2      `PresenceStateSetting`_ optional            
 :code:`dnd_setting`            3      `DndSetting`_           optional            
 :code:`desktop_off_setting`    5      `DesktopOffSetting`_    optional            
-:code:`status_message`         8      `StatusMessageSpec`_    optional            
+:code:`status_message_setting` 8      `StatusMessageSetting`_ optional            
 ============================== ====== ======================= ======== ===========
 
 SetPresenceResponse

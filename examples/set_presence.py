@@ -10,8 +10,8 @@ from common import run_example
 async def set_presence(client, args):
     request = hangups.hangouts_pb2.SetPresenceRequest(
         request_header=client.get_request_header(),
-        status_message=(
-            hangups.hangouts_pb2.StatusMessageSpec(
+        status_message_setting=(
+            hangups.hangouts_pb2.StatusMessageSetting(
                 status_message=[
                     hangups.hangouts_pb2.ChatMessageSpec(
                         segment=[
