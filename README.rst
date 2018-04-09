@@ -75,22 +75,24 @@ Related projects
 
 - `Hangish`_: A Google Hangouts native client for Sailfish
 - `Hangups-UWP`_: Hangups client for Universal Windows Platform
-- `WTalk`_: Client library and desktop client for Google Hangouts written in C#
-- `hangover`_: The first native Mac OS X client for Google Hangouts
-- `hangupsjs`_: Port of hangups to Node.js
 - `Parrot`_: The next generation messenger
-- `purple-hangouts`_: Hangouts plugin for libpurple
-- `go-hangups`_: Port of hangups to Go
-- `slangouts`_: A Hangouts/Slack bridge
+- `WTalk`_: Client library and desktop client for Google Hangouts written in C#
 - `YakYak`_: Desktop client for Google Hangouts
+- `go-hangups`_: Port of hangups to Go
+- `hangover`_: The first native Mac OS X client for Google Hangouts
+- `hangups-rs`_: Port of hangups to Rust
+- `hangupsjs`_: Port of hangups to Node.js
+- `purple-hangouts`_: Hangouts plugin for libpurple
+- `slangouts`_: A Hangouts/Slack bridge
 
 .. _Hangish: https://github.com/rogora/hangish
 .. _Hangups-UWP: https://github.com/kfechter/Hangups-UWP
-.. _WTalk: https://github.com/madagaga/WTalk
-.. _hangover: https://github.com/psobot/hangover
-.. _hangupsjs: https://github.com/algesten/hangupsjs
 .. _Parrot: https://github.com/avaidyam/Parrot
-.. _purple-hangouts: https://bitbucket.org/EionRobb/purple-hangouts
-.. _go-hangups: https://github.com/gpavlidi/go-hangups
-.. _slangouts: https://github.com/gpavlidi/slangouts
+.. _WTalk: https://github.com/madagaga/WTalk
 .. _YakYak: https://github.com/yakyak/yakyak
+.. _go-hangups: https://github.com/gpavlidi/go-hangups
+.. _hangover: https://github.com/psobot/hangover
+.. _hangups-rs: https://github.com/tdryer/hangups-rs
+.. _hangupsjs: https://github.com/algesten/hangupsjs
+.. _purple-hangouts: https://bitbucket.org/EionRobb/purple-hangouts
+.. _slangouts: https://github.com/gpavlidi/slangouts
