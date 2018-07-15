@@ -3,10 +3,10 @@ import os
 import sys
 
 
-if sys.version_info < (3, 5):
+if sys.version_info < (3, 5, 3):
     # This is the minimum version which has support for `async def`/`await`/
     # `async with` syntax.
-    raise RuntimeError("hangups requires Python 3.5+")
+    raise RuntimeError("hangups requires Python 3.5.3+")
 
 
 # Find __version__ without import that requires dependencies to be installed:
