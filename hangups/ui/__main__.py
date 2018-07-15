@@ -132,7 +132,12 @@ class ChatUI(object):
                 # Cancel all of the coros, and wait for them to shut down.
                 task = asyncio.gather(*coros, return_exceptions=True)
                 task.cancel()
-                loop.run_until_complete(task)
+                try:
+                    loop.run_until_complete(task)
+                except asyncio.CancelledError:
+                    # In Python 3.7, asyncio.gather no longer swallows
+                    # CancelledError, so we need to ignore it.
+                    pass
 
                 loop.close()
 
