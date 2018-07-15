@@ -3,7 +3,8 @@ import os
 import sys
 
 
-if sys.version_info < (3, 5, 3):
+# TODO: Switch to ReadTheDocs YAML config to get a newer Python and fix #855
+if sys.version_info < (3, 5, 3) and not os.getenv('READTHEDOCS'):
     # This is the minimum version which has support for `async def`/`await`/
     # `async with` syntax.
     raise RuntimeError("hangups requires Python 3.5.3+")
