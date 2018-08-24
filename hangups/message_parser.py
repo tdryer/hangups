@@ -1,9 +1,9 @@
 """Parser for message formatting markup."""
 
+import pathlib
 import re
 
 from reparser import Parser, Token, MatchGroup
-from tld import get_tld_names
 
 from hangups import hangouts_pb2
 
@@ -24,11 +24,22 @@ html_img = r'(?i)<img\s+src=[\'"](?P<url>.+?)[\'"]\s*/?>'
 html_newline = r'(?i)<br\s*/?>'
 newline = r'\n|\r\n'
 
+
+def _get_tld_regex():
+    """get a regex for all public registered top level domains
+
+    Returns:
+        str: the regex
+    """
+    path = pathlib.Path(__file__).with_name('dist') / 'tld.names.regex'
+    raw = path.read_text()
+    return '(' + raw.strip().replace('\n', '|') + ')'
+
+
 # Based on URL regex pattern by John Gruber
 # (https://gist.github.com/gruber/8891611)
-# and a top level domain list that can be pulled besides pip-upgrades:
-#  see https://github.com/barseghyanartur/tld#update-the-list-of-tld-names
-_DOMAINS = '|'.join(re.escape(item) for item in get_tld_names())
+# and a top level domain list
+_DOMAINS = _get_tld_regex()
 _BALANCED_PARENS = r'\([^\s()]*?\([^\s()]+\)[^\s()]*?\)'
 AUTO_LINK = (
     (r'(?i)\b('
@@ -38,6 +49,7 @@ AUTO_LINK = (
      r'(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:domains)\b/?(?!@)))')
     .replace('domains', _DOMAINS).replace('balanced_parens', _BALANCED_PARENS))
 # cleanup
+del _get_tld_regex
 del _DOMAINS
 del _BALANCED_PARENS
 

@@ -1,6 +1,7 @@
 *.py[cod]
 build/
 dist/
+!hangups/dist/tld.names.regex
 docs/_build/
 *.egg-info/
 *.egg/

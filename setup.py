@@ -32,7 +32,6 @@ install_requires = [
     'protobuf>=3.1.0,<3.2.0',
     'urwid==1.3.1',
     'MechanicalSoup==0.6.0',
-    'tld==0.7.9',
 ]
 
 
@@ -66,6 +65,11 @@ setup(
         'Environment :: Console :: Curses',
     ],
     packages=['hangups', 'hangups.ui'],
+    package_data={
+        'hangups': [
+            'dist/tld.names.regex',
+        ],
+    },
     install_requires=install_requires,
     entry_points={
         'console_scripts': [
