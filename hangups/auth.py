@@ -48,6 +48,8 @@ FORM_SELECTOR = '#gaia_loginform'
 EMAIL_SELECTOR = '#Email'
 PASSWORD_SELECTOR = '#Passwd'
 VERIFICATION_FORM_SELECTOR = '#challenge'
+TOTP_CHALLENGE_SELECTOR = '[action="/signin/challenge/totp/2"]'
+PHONE_CHALLENGE_SELECTOR = '[action="/signin/challenge/ipp/4"]'
 TOTP_CODE_SELECTOR = '#totpPin'
 PHONE_CODE_SELECTOR = '#idvPreregisteredPhonePin'
 USER_AGENT = 'hangups/{} ({} {})'.format(
@@ -270,6 +272,11 @@ def _get_authorization_code(session, credentials_prompt):
 
     password = credentials_prompt.get_password()
     browser.submit_form(FORM_SELECTOR, {PASSWORD_SELECTOR: password})
+
+    if browser.has_selector(TOTP_CHALLENGE_SELECTOR):
+        browser.submit_form(TOTP_CHALLENGE_SELECTOR, {})
+    elif browser.has_selector(PHONE_CHALLENGE_SELECTOR):
+        browser.submit_form(PHONE_CHALLENGE_SELECTOR, {})
 
     if browser.has_selector(VERIFICATION_FORM_SELECTOR):
         if browser.has_selector(TOTP_CODE_SELECTOR):
