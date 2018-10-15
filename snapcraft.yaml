@@ -7,24 +7,19 @@ description: |
   text-based user interface.
 confinement: strict
 grade: stable
+base: core18
 
 apps:
   hangups:
     command: bin/hangups
-    # hangups is not a server, but the requests library seems to require the
-    # bind syscall
     plugs:
         - network
-        - network-bind
+    # force aiohttp to use certifi (like requests does), because the core18
+    # base does not include ca certificates
+    environment:
+        SSL_CERT_FILE: /snap/hangups/current/lib/python3.6/site-packages/certifi/cacert.pem
 
 parts:
   hangups:
     plugin: python
     source: .
-    # reduce the size of the snap package by only including the files needed to
-    # run hangups
-    prime:
-        - bin/hangups # hangups binary
-        - usr/bin # python binaries
-        - usr/lib/python3.5 # standard library
-        - lib/python3.5/site-packages # python packages
