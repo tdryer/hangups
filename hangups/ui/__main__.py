@@ -1048,6 +1048,8 @@ def main():
                       version='hangups {}'.format(hangups.__version__))
     general_group.add('-d', '--debug', action='store_true',
                       help='log detailed debugging messages')
+    general_group.add('--manual-login', action='store_true', 
+                      help='enable manual login method using browser')
     general_group.add('--log', default=default_log_path, help='log file path')
     key_group = parser.add_argument_group('Keybindings')
     key_group.add('--key-next-tab', default='ctrl d',
@@ -1133,6 +1135,11 @@ def main():
     notifier_ = get_notifier(
         args.notification_type, args.disable_notifications
     )
+
+    if(args.manual_login):
+        hangups.auth.get_auth_manual(args.token_path)
+        sys.exit(1)
+
 
     try:
         ChatUI(

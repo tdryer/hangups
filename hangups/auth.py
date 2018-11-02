@@ -100,7 +100,7 @@ class RefreshTokenCache(object):
     """File-based cache for refresh token.
 
     Args:
-        filename (str): Path to file where refresh token will be cached.
+        FILENAme (str): Path to file where refresh token will be cached.
     """
 
     def __init__(self, filename):
@@ -186,6 +186,21 @@ def get_auth_stdin(refresh_token_filename):
     """
     refresh_token_cache = RefreshTokenCache(refresh_token_filename)
     return get_auth(CredentialsPrompt(), refresh_token_cache)
+
+def get_auth_manual(refresh_token_filename):
+    print('Open this URL:')
+    print(OAUTH2_LOGIN_URL)
+
+    print('after logging in and reaching the loading screen, open DevTools and copy the Oauth code from Application -> Cookies -> https://accounts.google.com -> oauth_code -> value')
+
+    authorization_code = input('Enter oauth_code cookie value: ')
+
+    with requests.Session() as session:
+        session.headers = {'user-agent': USER_AGENT}
+        access_token, refresh_token = _auth_with_code(
+            session, authorization_code)
+        refresh_token_cache = RefreshTokenCache(refresh_token_filename)
+        return refresh_token_cache.set(refresh_token)
 
 
 class Browser(object):
