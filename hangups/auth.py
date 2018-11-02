@@ -177,10 +177,10 @@ def get_auth(credentials_prompt, refresh_token_cache):
 def get_auth_stdin(refresh_token_filename):
     """Simple wrapper for :func:`get_auth` that prompts the user using stdin.
 
+
     Args:
         refresh_token_filename (str): Path to file where refresh token will be
             cached.
-
     Raises:
         GoogleAuthError: If authentication with Google fails.
     """
@@ -188,6 +188,16 @@ def get_auth_stdin(refresh_token_filename):
     return get_auth(CredentialsPrompt(), refresh_token_cache)
 
 def get_auth_manual(refresh_token_filename):
+    """This function allows the user to login manually through a browser and then
+    capture the Oauth token from web inspector cookie. While tedious, this method
+    is more resiliant to changes in the Google login system
+
+    Args:
+        refresh_token_filename (str): Path to file where refresh token will be
+            cached.
+    Raises:
+        GoogleAuthError: If authentication with Google fails.
+    """
     print('Open this URL:')
     print(OAUTH2_LOGIN_URL)
 
