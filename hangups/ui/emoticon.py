@@ -15,10 +15,7 @@ def _replace_words(replacements, string):
     for line in string.split('\n'):
         output_words = []
         for word in line.split(' '):
-            if word in replacements:
-                new_word = replacements[word]
-            else:
-                new_word = word
+            new_word = replacements.get(word, word)
             output_words.append(new_word)
         output_lines.append(output_words)
     return '\n'.join(' '.join(output_words) for output_words in output_lines)
