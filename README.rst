@@ -55,6 +55,7 @@ Projects using hangups
 - `jabber-hangouts-transport`_: A Jabber/XMPP transport/gateway to Hangouts.
 - `ovkulkarni/hangoutsbot`_: Google Hangouts Bot using SQL
 - `defund/pearl`_: Google Hangouts bot framework
+- `HangupsDroid`_: Unofficial Google Hangouts client for Android
 
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
 .. _Hubot Hangouts Adapter: https://github.com/groupby/hubot-hangups
@@ -69,6 +70,7 @@ Projects using hangups
 .. _jabber-hangouts-transport: https://github.com/ZeWaren/jabber-hangouts-transport
 .. _ovkulkarni/hangoutsbot: https://github.com/ovkulkarni/hangoutsbot
 .. _defund/pearl: https://github.com/defund/pearl
+.. _HangupsDroid: https://github.com/Rudloff/hangupsdroid
 
 Related projects
 ----------------
