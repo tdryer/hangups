@@ -29,6 +29,10 @@ The first time you start hangups, you need to log into your Google account.
 You will be prompted to enter your Google email address, password, and
 verification code (if applicable).
 
+If this login method fails, try the manual login method instead::
+
+  hangups --manual-login
+
 After a successful login, hangups will save a refresh token allowing it to
 login automatically. By default, the token is saved to a file in an OS-specific
 cache directory. The default token file path can be viewed using :code:`hangups

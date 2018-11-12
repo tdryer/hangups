@@ -26,6 +26,10 @@ class FakeCredentialsPrompt(auth.CredentialsPrompt):
         self.was_prompted = True
         return '123456'
 
+    def get_authorization_code(self):
+        self.was_prompted = True
+        return 'auth_code'
+
 
 @pytest.fixture
 def credentials_prompt():
@@ -139,5 +143,16 @@ def test_refresh_token(credentials_prompt, refresh_token_cache):
     refresh_token_cache.set('foo')
     cookies = auth.get_auth(credentials_prompt, refresh_token_cache)
     assert not credentials_prompt.was_prompted
+    assert refresh_token_cache.get() is not None
+    assert cookies['session'] == 'foo'
+
+
+@httpretty.activate
+def test_manual_login(credentials_prompt, refresh_token_cache):
+    mock_google()
+    cookies = auth.get_auth(
+        credentials_prompt, refresh_token_cache, manual_login=True
+    )
+    assert credentials_prompt.was_prompted
     assert refresh_token_cache.get() is not None
     assert cookies['session'] == 'foo'
