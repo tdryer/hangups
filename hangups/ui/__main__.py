@@ -1,4 +1,5 @@
 """Reference chat client for hangups."""
+from typing import Dict, Set
 
 import appdirs
 import asyncio
@@ -35,6 +36,7 @@ COL_SCHEMES = {
         ('msg_self', '', ''),
         ('msg_text', '', ''),
         ('msg_text_self', '', ''),
+        ('msg_watermark', '', ''),
         ('msg_selected', 'standout', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'standout', ''),
@@ -47,6 +49,7 @@ COL_SCHEMES = {
         ('msg_text_self', '', ''),
         ('msg_self', 'dark green', ''),
         ('msg_text', '', ''),
+        ('msg_watermark', 'light gray', ''),
         ('msg_selected', 'standout', ''),
         ('status_line', 'standout', ''),
         ('tab_background', 'black,standout,underline', 'light green'),
@@ -567,7 +570,7 @@ class MessageWidget(WidgetBase):
     """Widget for displaying a single message in a conversation."""
 
     def __init__(self, timestamp, text, datetimefmt, user=None,
-                 show_date=False):
+                 show_date=False, watermark_users=None):
         # Save the timestamp as an attribute for sorting.
         self.timestamp = timestamp
         text = [
@@ -579,6 +582,12 @@ class MessageWidget(WidgetBase):
         if user is not None:
             text.insert(1, ('msg_self' if user.is_self else 'msg_sender',
                             user.first_name + ': '))
+
+        if watermark_users is not None and bool(watermark_users):
+            sorted_users = sorted([x.first_name for x in watermark_users])
+            watermark = "\n[ Seen by {}. ]".format(', '.join(sorted_users))
+            text.append(('msg_watermark', watermark))
+
         self._widget = urwid.SelectableIcon(text, cursor_position=0)
         super().__init__(urwid.AttrMap(
             self._widget, '', {
@@ -590,6 +599,7 @@ class MessageWidget(WidgetBase):
                 'msg_text': 'msg_selected',
                 'msg_self': 'msg_selected',
                 'msg_sender': 'msg_selected',
+                'msg_watermark': 'msg_selected',
             }
         ))
 
@@ -607,7 +617,7 @@ class MessageWidget(WidgetBase):
 
     @staticmethod
     def from_conversation_event(conversation, conv_event, prev_conv_event,
-                                datetimefmt):
+                                datetimefmt, watermark_users=None):
         """Return MessageWidget representing a ConversationEvent.
 
         Returns None if the ConversationEvent does not have a widget
@@ -623,7 +633,8 @@ class MessageWidget(WidgetBase):
             is_new_day = False
         if isinstance(conv_event, hangups.ChatMessageEvent):
             return MessageWidget(conv_event.timestamp, conv_event.text,
-                                 datetimefmt, user, show_date=is_new_day)
+                                 datetimefmt, user, show_date=is_new_day,
+                                 watermark_users=watermark_users)
         elif isinstance(conv_event, hangups.RenameEvent):
             if conv_event.new_name == '':
                 text = ('{} cleared the conversation name'
@@ -632,7 +643,8 @@ class MessageWidget(WidgetBase):
                 text = ('{} renamed the conversation to {}'
                         .format(user.first_name, conv_event.new_name))
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
-                                 show_date=is_new_day)
+                                 show_date=is_new_day,
+                                 watermark_users=watermark_users)
         elif isinstance(conv_event, hangups.MembershipChangeEvent):
             event_users = [conversation.get_user(user_id) for user_id
                            in conv_event.participant_ids]
@@ -643,7 +655,8 @@ class MessageWidget(WidgetBase):
             else:  # LEAVE
                 text = ('{} left the conversation'.format(names))
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
-                                 show_date=is_new_day)
+                                 show_date=is_new_day,
+                                 watermark_users=watermark_users)
         elif isinstance(conv_event, hangups.HangoutEvent):
             text = {
                 hangups.HANGOUT_EVENT_TYPE_START: (
@@ -657,7 +670,8 @@ class MessageWidget(WidgetBase):
                 ),
             }.get(conv_event.event_type, 'Unknown Hangout call event.')
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
-                                 show_date=is_new_day)
+                                 show_date=is_new_day,
+                                 watermark_users=watermark_users)
         elif isinstance(conv_event, hangups.GroupLinkSharingModificationEvent):
             status_on = hangups.GROUP_LINK_SHARING_STATUS_ON
             status_text = ('on' if conv_event.new_status == status_on
@@ -665,12 +679,14 @@ class MessageWidget(WidgetBase):
             text = '{} turned {} joining by link.'.format(user.first_name,
                                                           status_text)
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
-                                 show_date=is_new_day)
+                                 show_date=is_new_day,
+                                 watermark_users=watermark_users)
         else:
             # conv_event is a generic hangups.ConversationEvent.
             text = 'Unknown conversation event'
             return MessageWidget(conv_event.timestamp, text, datetimefmt,
-                                 show_date=is_new_day)
+                                 show_date=is_new_day,
+                                 watermark_users=watermark_users)
 
 
 class ConversationEventListWalker(urwid.ListWalker):
@@ -680,6 +696,7 @@ class ConversationEventListWalker(urwid.ListWalker):
     """
 
     POSITION_LOADING = 'loading'
+    _watermarked_events = Dict[str, Set[hangups.user.User]]
 
     def __init__(self, coroutine_queue, conversation, datetimefmt):
         self._coroutine_queue = coroutine_queue  # CoroutineQueue
@@ -688,6 +705,7 @@ class ConversationEventListWalker(urwid.ListWalker):
         self._is_loading = False  # Whether we're currently loading more events
         self._first_loaded = False  # Whether the first event is loaded
         self._datetimefmt = datetimefmt
+        self._watermarked_events = {}  # Users watermarked at a given event
 
         # Focus position is the first event ID, or POSITION_LOADING.
         self._focus_position = (conversation.events[-1].id_
@@ -695,6 +713,9 @@ class ConversationEventListWalker(urwid.ListWalker):
                                 else self.POSITION_LOADING)
 
         self._conversation.on_event.add_observer(self._handle_event)
+        self._conversation.on_watermark_notification.add_observer(
+            self._on_watermark_notification
+        )
 
     def _handle_event(self, conv_event):
         """Handle updating and scrolling when a new event is added.
@@ -727,6 +748,8 @@ class ConversationEventListWalker(urwid.ListWalker):
             # Otherwise, still need to invalidate in case the loading
             # indicator is showing but not focused.
             self._modified()
+        # Loading events can also update the watermarks.
+        self._refresh_watermarked_events()
         self._is_loading = False
 
     def __getitem__(self, position):
@@ -751,12 +774,35 @@ class ConversationEventListWalker(urwid.ListWalker):
                 prev_event = None
             else:
                 prev_event = self._conversation.get_event(prev_position)
+
             return MessageWidget.from_conversation_event(
                 self._conversation, self._conversation.get_event(position),
-                prev_event, self._datetimefmt
+                prev_event, self._datetimefmt,
+                watermark_users=self._watermarked_events.get(position, None)
             )
         except KeyError:
             raise IndexError('Invalid position: {}'.format(position))
+
+    def _refresh_watermarked_events(self):
+        self._watermarked_events.clear()
+        timestamps = [x.timestamp for x in self._conversation.events]
+        for user_id in self._conversation.watermarks:
+            user = self._conversation.get_user(user_id)
+            if user.is_self:
+                continue
+            timestamp = self._conversation.watermarks[user_id]
+            from bisect import bisect
+            event_idx = bisect(timestamps, timestamp) - 1
+            if event_idx >= 0:
+                event_pos = self._conversation.events[event_idx].id_
+                if event_pos not in self._watermarked_events:
+                    self._watermarked_events[event_pos] = set()
+                self._watermarked_events[event_pos].add(user)
+
+    def _on_watermark_notification(self, _):
+        """Update watermarks for this conversation."""
+        self._refresh_watermarked_events()
+        self._modified()
 
     def _get_position(self, position, prev=False):
         """Return the next/previous position or raise IndexError."""
