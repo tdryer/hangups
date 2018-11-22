@@ -3,7 +3,6 @@
 import asyncio
 import datetime
 import logging
-from typing import Dict
 
 from hangups import (parsers, event, user, conversation_event, exceptions,
                      hangouts_pb2)
@@ -133,7 +132,6 @@ class Conversation(object):
 
     Use :class:`.ConversationList` methods to get instances of this class.
     """
-    _watermarks: Dict[user.UserID, datetime.datetime]
 
     def __init__(self, client, user_list, conversation, events=[]):
         # pylint: disable=dangerous-default-value
