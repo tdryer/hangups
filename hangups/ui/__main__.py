@@ -1,5 +1,4 @@
 """Reference chat client for hangups."""
-from typing import Dict, Set
 
 import appdirs
 import asyncio
@@ -696,7 +695,6 @@ class ConversationEventListWalker(urwid.ListWalker):
     """
 
     POSITION_LOADING = 'loading'
-    _watermarked_events = Dict[str, Set[hangups.user.User]]
 
     def __init__(self, coroutine_queue, conversation, datetimefmt):
         self._coroutine_queue = coroutine_queue  # CoroutineQueue
