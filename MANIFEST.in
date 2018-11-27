@@ -1,1 +1,4 @@
 include LICENSE
+graft hangups/test
+global-exclude *.pyc
+global-exclude __pycache__
