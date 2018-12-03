@@ -9,6 +9,7 @@ import os
 import sys
 import urwid
 import readlike
+from bisect import bisect
 
 import hangups
 from hangups.ui.emoticon import replace_emoticons
@@ -789,7 +790,6 @@ class ConversationEventListWalker(urwid.ListWalker):
             if user.is_self:
                 continue
             timestamp = self._conversation.watermarks[user_id]
-            from bisect import bisect
             event_idx = bisect(timestamps, timestamp) - 1
             if event_idx >= 0:
                 event_pos = self._conversation.events[event_idx].id_
