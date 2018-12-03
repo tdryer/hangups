@@ -142,6 +142,7 @@ class Conversation(object):
         self._events_dict = {}  # {event_id: ConversationEvent}
         self._send_message_lock = asyncio.Lock()
         self._watermarks = {}  # {UserID: datetime.datetime}
+        self._event_cont_token = None
         for event_ in events:
             # Workaround to ignore observed events returned from
             # syncrecentconversations.
@@ -650,13 +651,7 @@ class Conversation(object):
                         ),
                         include_event=True,
                         max_events_per_conversation=max_events,
-                        event_continuation_token=(
-                            hangouts_pb2.EventContinuationToken(
-                                event_timestamp=parsers.to_timestamp(
-                                    conv_event.timestamp
-                                )
-                            )
-                        )
+                        event_continuation_token=self._event_cont_token
                     )
                 )
                 # Certain fields of conversation_state are not populated by
@@ -668,6 +663,9 @@ class Conversation(object):
                     self.update_conversation(
                         res.conversation_state.conversation
                     )
+                self._event_cont_token = (
+                    res.conversation_state.event_continuation_token
+                )
                 conv_events = [self._wrap_event(event) for event
                                in res.conversation_state.event]
                 logger.info('Loaded {} events for conversation {}'
