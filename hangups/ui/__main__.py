@@ -696,6 +696,7 @@ class ConversationEventListWalker(urwid.ListWalker):
     """
 
     POSITION_LOADING = 'loading'
+    WATERMARK_FAST_SEARCH_ITEMS = 10
 
     def __init__(self, coroutine_queue, conversation, datetimefmt):
         self._coroutine_queue = coroutine_queue  # CoroutineQueue
@@ -782,15 +783,32 @@ class ConversationEventListWalker(urwid.ListWalker):
         except KeyError:
             raise IndexError('Invalid position: {}'.format(position))
 
+    @staticmethod
+    def _find_watermark_event(timestamps, timestamp):
+        # Look back through the most recent events first.
+        back_idx = ConversationEventListWalker.WATERMARK_FAST_SEARCH_ITEMS
+        for i, t in list(enumerate(reversed(timestamps[-back_idx:]))):
+            if t <= timestamp:
+                return len(timestamps) - i - 1
+
+        # Bisect the rest.
+        return bisect(timestamps[:-back_idx], timestamp) - 1
+
     def _refresh_watermarked_events(self):
         self._watermarked_events.clear()
         timestamps = [x.timestamp for x in self._conversation.events]
         for user_id in self._conversation.watermarks:
             user = self._conversation.get_user(user_id)
+            # Ignore the current user.
             if user.is_self:
                 continue
+            # Skip searching if the watermark's event was not loaded yet.
             timestamp = self._conversation.watermarks[user_id]
-            event_idx = bisect(timestamps, timestamp) - 1
+            if timestamp < timestamps[0]:
+                continue
+            event_idx = ConversationEventListWalker._find_watermark_event(
+                timestamps, timestamp
+            )
             if event_idx >= 0:
                 event_pos = self._conversation.events[event_idx].id_
                 if event_pos not in self._watermarked_events:

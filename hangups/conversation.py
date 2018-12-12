@@ -658,6 +658,12 @@ class Conversation(object):
                         )
                     )
                 )
+                # Certain fields of conversation_state are not populated
+                # by SyncRecentConversations. This is the case with the
+                # user_read_state fields which are all set to 0 but
+                # for the 'self' user.
+                # It seems these fields get populated on the first call
+                # to GetConversation, so we update here.
                 if res.conversation_state.HasField('conversation'):
                     self.update_conversation(
                         res.conversation_state.conversation
