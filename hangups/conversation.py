@@ -141,7 +141,7 @@ class Conversation(object):
         self._events = []  # [hangouts_pb2.Event]
         self._events_dict = {}  # {event_id: ConversationEvent}
         self._send_message_lock = asyncio.Lock()
-        self._watermarks = {}  # {user_id: datetime.datetime}
+        self._watermarks = {}  # {UserID: datetime.datetime}
         for event_ in events:
             # Workaround to ignore observed events returned from
             # syncrecentconversations.
@@ -232,7 +232,7 @@ class Conversation(object):
     def watermarks(self):
         """Participant watermarks.
 
-        (dict of :class:`user.UserID`, :class:`datetime.datetime`).
+        (dict of :class:`.UserID`, :class:`datetime.datetime`).
         """
         return self._watermarks.copy()
 
@@ -269,9 +269,8 @@ class Conversation(object):
         return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
 
     def _on_watermark_notification(self, notif):
-        """Update the conversation's and the participants'
-        latest_read_timestamp.
-        """
+        """Handle a watermark notification."""
+        # Update the conversation:
         if self.get_user(notif.user_id).is_self:
             logger.info('latest_read_timestamp for {} updated to {}'
                         .format(self.id_, notif.read_timestamp))
@@ -281,14 +280,15 @@ class Conversation(object):
             self_conversation_state.self_read_state.latest_read_timestamp = (
                 parsers.to_timestamp(notif.read_timestamp)
             )
-
-        if notif.user_id not in self._watermarks or \
-                self._watermarks[notif.user_id] < notif.read_timestamp:
+        # Update the participants' watermarks:
+        previous_timestamp = self._watermarks.get(
+            notif.user_id, datetime.datetime.min
+        )
+        if notif.read_timestamp > previous_timestamp:
             logger.info(('latest_read_timestamp for conv {} participant {}' +
                          ' updated to {}').format(self.id_,
                                                   notif.user_id.chat_id,
                                                   notif.read_timestamp))
-
             self._watermarks[notif.user_id] = notif.read_timestamp
 
     def update_conversation(self, conversation):
@@ -658,12 +658,11 @@ class Conversation(object):
                         )
                     )
                 )
-                # Certain fields of conversation_state are not populated
-                # by SyncRecentConversations. This is the case with the
-                # user_read_state fields which are all set to 0 but
-                # for the 'self' user.
-                # It seems these fields get populated on the first call
-                # to GetConversation, so we update here.
+                # Certain fields of conversation_state are not populated by
+                # SyncRecentConversations. This is the case with the
+                # user_read_state fields which are all set to 0 but for the
+                # 'self' user. Update here so these fields get populated on the
+                # first call to GetConversation.
                 if res.conversation_state.HasField('conversation'):
                     self.update_conversation(
                         res.conversation_state.conversation

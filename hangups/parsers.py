@@ -29,14 +29,16 @@ def to_timestamp(datetime_timestamp):
     return int(datetime_timestamp.timestamp() * 1000000)
 
 
-def from_participantid(participant_id: hangouts_pb2.ParticipantId):
+def from_participantid(participant_id):
+    """Convert hangouts_pb2.ParticipantId to UserID."""
     return user.UserID(
         chat_id=participant_id.chat_id,
         gaia_id=participant_id.gaia_id
     )
 
 
-def to_participantid(user_id: user.UserID):
+def to_participantid(user_id):
+    """Convert UserID to hangouts_pb2.ParticipantId."""
     return hangouts_pb2.ParticipantId(
         chat_id=user_id.chat_id,
         gaia_id=user_id.gaia_id
