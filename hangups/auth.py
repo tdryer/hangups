@@ -16,6 +16,7 @@ import getpass
 import logging
 import platform
 import urllib.parse
+import webbrowser
 
 import mechanicalsoup
 import requests
@@ -47,6 +48,7 @@ OAUTH2_TOKEN_REQUEST_URL = 'https://accounts.google.com/o/oauth2/token'
 FORM_SELECTOR = '#gaia_loginform'
 EMAIL_SELECTOR = '#Email'
 PASSWORD_SELECTOR = '#Passwd'
+CAPTCHA_SELECTOR = '#logincaptcha'
 VERIFICATION_FORM_SELECTOR = '#challenge'
 TOTP_CHALLENGE_SELECTOR = '[action="/signin/challenge/totp/2"]'
 PHONE_CHALLENGE_SELECTOR = '[action="/signin/challenge/ipp/4"]'
@@ -129,6 +131,27 @@ class CredentialsPrompt(object):
         """
         print(MANUAL_LOGIN_INSTRUCTIONS)
         return input('Authorization code: ')
+
+    @staticmethod
+    def get_captcha_text(url):
+        """Prompt for captcha text.
+
+        Args:
+            url (str): The captcha image URL.
+
+        Returns:
+            str: Captcha text.
+
+        This method automatically opens the captcha image URL in a web browser
+        using the :mod:`webbrowser` module (exceptions are ignored) and then
+        prompts the user to enter the captcha text.
+        """
+        try:
+            logger.info('Detected captcha, opening image in browser: %s', url)
+            webbrowser.open(url)
+        except Exception as e:
+            logger.warning('Failed to open captcha image in browser! (%s)', e)
+        return input('Captcha text: ')
 
 
 class RefreshTokenCache(object):
@@ -318,6 +341,17 @@ def _get_authorization_code(session, credentials_prompt):
 
     password = credentials_prompt.get_password()
     browser.submit_form(FORM_SELECTOR, {PASSWORD_SELECTOR: password})
+
+    if browser.has_selector(CAPTCHA_SELECTOR):
+        for image in browser._page.soup.select('div.captcha-img img'):
+            captcha_text = credentials_prompt.get_captcha_text(image.attrs['src'])
+            browser.submit_form(FORM_SELECTOR, {
+                CAPTCHA_SELECTOR: captcha_text,
+                PASSWORD_SELECTOR: password,
+            })
+            break
+        else:
+            logger.warning('Detected captcha but failed to extract image!')
 
     if browser.has_selector(TOTP_CHALLENGE_SELECTOR):
         browser.submit_form(TOTP_CHALLENGE_SELECTOR, {})
