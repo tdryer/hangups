@@ -344,7 +344,9 @@ def _get_authorization_code(session, credentials_prompt):
 
     if browser.has_selector(CAPTCHA_SELECTOR):
         for image in browser._page.soup.select('div.captcha-img img'):
-            captcha_text = credentials_prompt.get_captcha_text(image.attrs['src'])
+            captcha_text = credentials_prompt.get_captcha_text(
+                image.attrs['src']
+            )
             browser.submit_form(FORM_SELECTOR, {
                 CAPTCHA_SELECTOR: captcha_text,
                 PASSWORD_SELECTOR: password,
