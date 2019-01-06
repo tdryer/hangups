@@ -23,16 +23,50 @@ html_img = r'(?i)<img\s+src=[\'"](?P<url>.+?)[\'"]\s*/?>'
 html_newline = r'(?i)<br\s*/?>'
 newline = r'\n|\r\n'
 
-# Based on URL regex pattern by John Gruber
-# (http://gist.github.com/gruber/249502)
-auto_link = (
-    r'(?i)\b('
-    r'(?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|'
-    r'[a-z0-9.\-]+[.][a-z]{2,4}/)'
-    r'(?:[^\s()<>]|\((?:[^\s()<>]|(?:\([^\s()<>]+\)))*\))+'
-    r'(?:\((?:[^\s()<>]|(?:\([^\s()<>]+\)))*\)|'
-    r'[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
+# supported minimal url pattern:
+#   - http://domain.tld
+#   - https://domain.tld
+#   - sub.domain.tld
+#   - domain.tld/
+# custom ports are supported, however there is no port range check
+# parens in the path are matched balanced only:
+#   - me.you/(yeah) is matched as me.you/(yeah)
+#   - me.you/(nope)) is matched as me.you/(nope)
+#   this is useful when parsing a wrapped url: (inner.link/path_with_(parens))
+auto_link = r"""
+\b
+(
+    (?:
+        https?://
+        |
+        (?<!@)[a-zA-Z0-9\-]{1,63}\.
+        |
+        (?=\S+/)
+    )
+    (?:[a-zA-Z0-9\-]{1,63}\.)+
+    [a-zA-Z0-9\-]{2,63}
+    (?::\d+)?
+    \b(?!@)
+    (?:
+        /
+        (?:
+            \(
+                [^\s/()]*
+                \(
+                    [^\s/()]+
+                \)
+                [^\s/()]*
+            \)
+            |
+            \(
+                [^\s/()]+
+            \)
+            |
+            [^\s/(){};:!<>«»“”"'‘’`´]*
+        )*
+    )*
 )
+""".replace(' ', '').replace('\n', '')
 
 # Precompiled regex for matching protocol part of URL
 url_proto_regex = re.compile(r'(?i)^[a-z][\w-]+:/{1,3}')
