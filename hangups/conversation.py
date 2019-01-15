@@ -282,7 +282,8 @@ class Conversation(object):
             )
         # Update the participants' watermarks:
         previous_timestamp = self._watermarks.get(
-            notif.user_id, datetime.datetime.min
+            notif.user_id,
+            datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
         )
         if notif.read_timestamp > previous_timestamp:
             logger.info(('latest_read_timestamp for conv {} participant {}' +
