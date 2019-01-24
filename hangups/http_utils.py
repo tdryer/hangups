@@ -31,8 +31,9 @@ class Session(object):
 
     def __init__(self, cookies, proxy=None):
         self._proxy = proxy
+        timeout = aiohttp.ClientTimeout(connect=CONNECT_TIMEOUT)
         self._session = aiohttp.ClientSession(cookies=cookies,
-                                              conn_timeout=CONNECT_TIMEOUT)
+                                              timeout=timeout)
         sapisid = cookies['SAPISID']
         self._authorization_headers = _get_authorization_headers(sapisid)
 
