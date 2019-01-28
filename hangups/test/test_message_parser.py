@@ -24,6 +24,7 @@ def test_parse_auto_link_minimal():
         'https://domain.tld\n'
         'sub.domain.tld\n'
         'domain.tld/\n'
+        '1.1.1.1/\n'
     )
     expected = [
         ('http://domain.tld', {'link_target': 'http://domain.tld'}),
@@ -33,6 +34,8 @@ def test_parse_auto_link_minimal():
         ('sub.domain.tld', {'link_target': 'http://sub.domain.tld'}),
         ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
         ('domain.tld/', {'link_target': 'http://domain.tld/'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('1.1.1.1/', {'link_target': 'http://1.1.1.1/'}),
         ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
     ]
     assert expected == parse_text(text)
@@ -119,6 +122,7 @@ def test_parse_auto_link_invalid():
         'hangups:hangups\n'
         'http://tld\n'
         'http://tld/path\n'
+        'version 3.5.11\n'
     )
     expected = [
         ('hangups:hangups', {}),
@@ -126,6 +130,8 @@ def test_parse_auto_link_invalid():
         ('http://tld', {}),
         ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
         ('http://tld/path', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('version 3.5.11', {}),
         ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
     ]
     assert expected == parse_text(text)
