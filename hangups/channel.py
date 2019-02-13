@@ -305,6 +305,8 @@ class Channel(object):
         except aiohttp.ServerDisconnectedError as err:
             raise exceptions.NetworkError(
                 'Server disconnected error: %s' % err)
+        except aiohttp.ClientPayloadError:
+            raise UnknownSIDError('SID is about to expire')
         except aiohttp.ClientError as err:
             raise exceptions.NetworkError('Request connection error: %s' % err)
 
