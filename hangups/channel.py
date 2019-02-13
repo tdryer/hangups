@@ -195,19 +195,22 @@ class Channel(object):
             self._chunk_parser = ChunkParser()
             try:
                 await self._longpoll_request()
-            except (UnknownSIDError, exceptions.NetworkError) as e:
-                logger.warning('Long-polling request failed: {}'.format(e))
-                retries += 1
-                logger.warning('retry attempt count is now {}'.format(retries))
-                if self._is_connected:
-                    self._is_connected = False
-                    await self.on_disconnect.fire()
-                if isinstance(e, UnknownSIDError):
-                    need_new_sid = True
+            except UnknownSIDError as err:
+                logger.warning('Long-polling interrupted: %s', err)
+                need_new_sid = True
+            except exceptions.NetworkError as err:
+                logger.warning('Long-polling request failed: %s', err)
             else:
                 # The connection closed successfully, so reset the number of
                 # retries.
                 retries = 0
+                continue
+
+            retries += 1
+            logger.info('retry attempt count is now %s', retries)
+            if self._is_connected:
+                self._is_connected = False
+                await self.on_disconnect.fire()
 
             # If the request ended with an error, the client must account for
             # messages being dropped during this time.
