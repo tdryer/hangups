@@ -33,6 +33,10 @@ login session::
 Whenever you want to start hangups, run a new container::
 
   docker run -it --rm --name hangups --volumes-from hangups-session tdryer/hangups
+  
+Whenever you want to start hangups, and want to login manualy::
+
+  docker run -it --rm --name hangups --volumes-from hangups-session tdryer/hangups --manual-login
 
 To upgrade hangups, pull the latest version of the image::
 
