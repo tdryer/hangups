@@ -40,6 +40,7 @@ OAUTH2_LOGIN_URL = (
         urllib.parse.urlencode(dict(
             scope='+'.join(OAUTH2_SCOPES),
             client_id=OAUTH2_CLIENT_ID,
+            device_name='hangups',
         ), safe='+')
     )
 )
