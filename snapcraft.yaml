@@ -1,5 +1,5 @@
 name: hangups
-version: 0
+version: git
 version-script: git describe --dirty | cut -c 2-
 summary: Third-party instant messaging client for Google Hangouts
 description: |
