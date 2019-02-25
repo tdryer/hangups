@@ -896,7 +896,12 @@ class ConversationList(object):
                     ), include_event=False
                 )
             )
-            return self._add_conversation(res.conversation_state.conversation)
+            conv_state = res.conversation_state
+            event_cont_token = None
+            if conv_state.HasField('event_continuation_token'):
+                event_cont_token = conv_state.event_continuation_token
+            return self._add_conversation(conv_state.conversation,
+                                          event_cont_token)
         else:
             return conv
 
@@ -1008,5 +1013,8 @@ class ConversationList(object):
                             # as triggering events.
                             await self._on_event(event_)
                 else:
-                    self._add_conversation(conv_state.conversation,
-                                           conv_state.event)
+                    self._add_conversation(
+                        conv_state.conversation,
+                        conv_state.event,
+                        conv_state.event_continuation_token
+                    )
