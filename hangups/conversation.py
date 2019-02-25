@@ -133,7 +133,8 @@ class Conversation(object):
     Use :class:`.ConversationList` methods to get instances of this class.
     """
 
-    def __init__(self, client, user_list, conversation, events=[], event_cont_token=None):
+    def __init__(self, client, user_list, conversation, events=[],
+                 event_cont_token=None):
         # pylint: disable=dangerous-default-value
         self._client = client  # Client
         self._user_list = user_list  # UserList
@@ -821,7 +822,8 @@ class ConversationList(object):
         await self._conv_dict[conv_id].leave()
         del self._conv_dict[conv_id]
 
-    def _add_conversation(self, conversation, events=[], event_cont_token=None):
+    def _add_conversation(self, conversation, events=[],
+                          event_cont_token=None):
         """Add new conversation from hangouts_pb2.Conversation"""
         # pylint: disable=dangerous-default-value
         conv_id = conversation.conversation_id.id
