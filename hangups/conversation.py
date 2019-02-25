@@ -901,7 +901,7 @@ class ConversationList(object):
             if conv_state.HasField('event_continuation_token'):
                 event_cont_token = conv_state.event_continuation_token
             return self._add_conversation(conv_state.conversation,
-                                          event_cont_token)
+                                          event_cont_token=event_cont_token)
         else:
             return conv
 
