@@ -133,7 +133,8 @@ class Conversation(object):
     Use :class:`.ConversationList` methods to get instances of this class.
     """
 
-    def __init__(self, client, user_list, conversation, events=[]):
+    def __init__(self, client, user_list, conversation, events=[],
+                 event_cont_token=None):
         # pylint: disable=dangerous-default-value
         self._client = client  # Client
         self._user_list = user_list  # UserList
@@ -142,7 +143,7 @@ class Conversation(object):
         self._events_dict = {}  # {event_id: ConversationEvent}
         self._send_message_lock = asyncio.Lock()
         self._watermarks = {}  # {UserID: datetime.datetime}
-        self._event_cont_token = None
+        self._event_cont_token = event_cont_token
         for event_ in events:
             # Workaround to ignore observed events returned from
             # syncrecentconversations.
@@ -747,7 +748,8 @@ class ConversationList(object):
         # Initialize the list of conversations from Client's list of
         # hangouts_pb2.ConversationState.
         for conv_state in conv_states:
-            self._add_conversation(conv_state.conversation, conv_state.event)
+            self._add_conversation(conv_state.conversation, conv_state.event,
+                                   conv_state.event_continuation_token)
 
         self._client.on_state_update.add_observer(self._on_state_update)
         self._client.on_connect.add_observer(self._sync)
@@ -820,13 +822,14 @@ class ConversationList(object):
         await self._conv_dict[conv_id].leave()
         del self._conv_dict[conv_id]
 
-    def _add_conversation(self, conversation, events=[]):
+    def _add_conversation(self, conversation, events=[],
+                          event_cont_token=None):
         """Add new conversation from hangouts_pb2.Conversation"""
         # pylint: disable=dangerous-default-value
         conv_id = conversation.conversation_id.id
         logger.debug('Adding new conversation: {}'.format(conv_id))
         conv = Conversation(self._client, self._user_list, conversation,
-                            events)
+                            events, event_cont_token)
         self._conv_dict[conv_id] = conv
         return conv
 
@@ -893,7 +896,12 @@ class ConversationList(object):
                     ), include_event=False
                 )
             )
-            return self._add_conversation(res.conversation_state.conversation)
+            conv_state = res.conversation_state
+            event_cont_token = None
+            if conv_state.HasField('event_continuation_token'):
+                event_cont_token = conv_state.event_continuation_token
+            return self._add_conversation(conv_state.conversation,
+                                          event_cont_token=event_cont_token)
         else:
             return conv
 
@@ -1005,5 +1013,8 @@ class ConversationList(object):
                             # as triggering events.
                             await self._on_event(event_)
                 else:
-                    self._add_conversation(conv_state.conversation,
-                                           conv_state.event)
+                    self._add_conversation(
+                        conv_state.conversation,
+                        conv_state.event,
+                        conv_state.event_continuation_token
+                    )
