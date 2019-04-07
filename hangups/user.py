@@ -113,7 +113,11 @@ class User(object):
         """
         user_id = UserID(chat_id=conv_part_data.id.chat_id,
                          gaia_id=conv_part_data.id.gaia_id)
-        return User(user_id, conv_part_data.fallback_name, None, None, [],
+        if conv_part_data.fallback_name == 'unknown':
+            full_name = None
+        else:
+            full_name = conv_part_data.fallback_name
+        return User(user_id, full_name, None, None, [],
                     (self_user_id == user_id) or (self_user_id is None))
 
 
