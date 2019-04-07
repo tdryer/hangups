@@ -39,7 +39,6 @@ class User(object):
             first_name = full_name
             name_type = NameType.NUMERIC
         else:
-            full_name = full_name if full_name else DEFAULT_NAME
             first_name = first_name if first_name else full_name.split()[0]
             name_type = NameType.REAL
 
