@@ -40,6 +40,7 @@ OAUTH2_LOGIN_URL = (
         urllib.parse.urlencode(dict(
             scope='+'.join(OAUTH2_SCOPES),
             client_id=OAUTH2_CLIENT_ID,
+            device_name='hangups',
         ), safe='+')
     )
 )
@@ -48,11 +49,38 @@ FORM_SELECTOR = '#gaia_loginform'
 EMAIL_SELECTOR = '#Email'
 PASSWORD_SELECTOR = '#Passwd'
 VERIFICATION_FORM_SELECTOR = '#challenge'
+TOTP_CHALLENGE_SELECTOR = '[action="/signin/challenge/totp/2"]'
+PHONE_CHALLENGE_SELECTOR = '[action="/signin/challenge/ipp/4"]'
 TOTP_CODE_SELECTOR = '#totpPin'
 PHONE_CODE_SELECTOR = '#idvPreregisteredPhonePin'
 USER_AGENT = 'hangups/{} ({} {})'.format(
     version.__version__, platform.system(), platform.machine()
 )
+
+MANUAL_LOGIN_INSTRUCTIONS = '''
+To sign in with your Google account:
+
+    1) Open the URL provided below in your browser.
+
+    2) Log into your Google account normally.
+
+    3) You should be redirected to a loading screen. Copy the `oauth_code`
+    cookie value set by this page and paste it here.
+
+To obtain the cookie value using Chrome or Firefox:
+
+    1) Press F12 to open developer tools.
+
+    2) Select the "Application" (Chrome) or "Storage" (Firefox) tab.
+
+    3) In the sidebar, expand "Cookies" and select
+    `https://accounts.google.com`.
+
+    4) In the cookie list, double click on the value for the `oauth_code`
+    cookie to select it, and copy the value.
+
+{}
+'''.format(OAUTH2_LOGIN_URL)
 
 
 class GoogleAuthError(Exception):
@@ -92,6 +120,16 @@ class CredentialsPrompt(object):
             str: Google account verification code.
         """
         return input('Verification code: ')
+
+    @staticmethod
+    def get_authorization_code():
+        """Prompt for authorization code.
+
+        Returns:
+            str: Google account authorization code.
+        """
+        print(MANUAL_LOGIN_INSTRUCTIONS)
+        return input('Authorization code: ')
 
 
 class RefreshTokenCache(object):
@@ -133,7 +171,7 @@ class RefreshTokenCache(object):
             logger.warning('Failed to save refresh_token: %s', e)
 
 
-def get_auth(credentials_prompt, refresh_token_cache):
+def get_auth(credentials_prompt, refresh_token_cache, manual_login=False):
     """Authenticate with Google.
 
     Args:
@@ -141,6 +179,8 @@ def get_auth(credentials_prompt, refresh_token_cache):
             logins may not require credentials.
         credentials_prompt (CredentialsPrompt): Prompt to use if credentials
             are required to log in.
+        manual_login (bool): If true, prompt user to log in through a browser
+            and enter authorization code manually. Defaults to false.
 
     Returns:
         dict: Google session cookies.
@@ -160,9 +200,14 @@ def get_auth(credentials_prompt, refresh_token_cache):
         except GoogleAuthError as e:
             logger.info('Failed to authenticate using refresh token: %s', e)
             logger.info('Authenticating with credentials')
-            authorization_code = _get_authorization_code(
-                session, credentials_prompt
-            )
+            if manual_login:
+                authorization_code = (
+                    credentials_prompt.get_authorization_code()
+                )
+            else:
+                authorization_code = _get_authorization_code(
+                    session, credentials_prompt
+                )
             access_token, refresh_token = _auth_with_code(
                 session, authorization_code
             )
@@ -172,18 +217,22 @@ def get_auth(credentials_prompt, refresh_token_cache):
         return _get_session_cookies(session, access_token)
 
 
-def get_auth_stdin(refresh_token_filename):
+def get_auth_stdin(refresh_token_filename, manual_login=False):
     """Simple wrapper for :func:`get_auth` that prompts the user using stdin.
 
     Args:
         refresh_token_filename (str): Path to file where refresh token will be
             cached.
+        manual_login (bool): If true, prompt user to log in through a browser
+            and enter authorization code manually. Defaults to false.
 
     Raises:
         GoogleAuthError: If authentication with Google fails.
     """
     refresh_token_cache = RefreshTokenCache(refresh_token_filename)
-    return get_auth(CredentialsPrompt(), refresh_token_cache)
+    return get_auth(
+        CredentialsPrompt(), refresh_token_cache, manual_login=manual_login
+    )
 
 
 class Browser(object):
@@ -270,6 +319,11 @@ def _get_authorization_code(session, credentials_prompt):
 
     password = credentials_prompt.get_password()
     browser.submit_form(FORM_SELECTOR, {PASSWORD_SELECTOR: password})
+
+    if browser.has_selector(TOTP_CHALLENGE_SELECTOR):
+        browser.submit_form(TOTP_CHALLENGE_SELECTOR, {})
+    elif browser.has_selector(PHONE_CHALLENGE_SELECTOR):
+        browser.submit_form(PHONE_CHALLENGE_SELECTOR, {})
 
     if browser.has_selector(VERIFICATION_FORM_SELECTOR):
         if browser.has_selector(TOTP_CODE_SELECTOR):

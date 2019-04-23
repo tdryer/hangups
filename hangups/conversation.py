@@ -133,7 +133,8 @@ class Conversation(object):
     Use :class:`.ConversationList` methods to get instances of this class.
     """
 
-    def __init__(self, client, user_list, conversation, events=[]):
+    def __init__(self, client, user_list, conversation, events=[],
+                 event_cont_token=None):
         # pylint: disable=dangerous-default-value
         self._client = client  # Client
         self._user_list = user_list  # UserList
@@ -141,6 +142,8 @@ class Conversation(object):
         self._events = []  # [hangouts_pb2.Event]
         self._events_dict = {}  # {event_id: ConversationEvent}
         self._send_message_lock = asyncio.Lock()
+        self._watermarks = {}  # {UserID: datetime.datetime}
+        self._event_cont_token = event_cont_token
         for event_ in events:
             # Workaround to ignore observed events returned from
             # syncrecentconversations.
@@ -228,6 +231,14 @@ class Conversation(object):
         return list(self._events)
 
     @property
+    def watermarks(self):
+        """Participant watermarks.
+
+        (dict of :class:`.UserID`, :class:`datetime.datetime`).
+        """
+        return self._watermarks.copy()
+
+    @property
     def unread_events(self):
         """Loaded events which are unread sorted oldest to newest.
 
@@ -260,7 +271,8 @@ class Conversation(object):
         return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
 
     def _on_watermark_notification(self, notif):
-        """Update the conversations latest_read_timestamp."""
+        """Handle a watermark notification."""
+        # Update the conversation:
         if self.get_user(notif.user_id).is_self:
             logger.info('latest_read_timestamp for {} updated to {}'
                         .format(self.id_, notif.read_timestamp))
@@ -270,6 +282,17 @@ class Conversation(object):
             self_conversation_state.self_read_state.latest_read_timestamp = (
                 parsers.to_timestamp(notif.read_timestamp)
             )
+        # Update the participants' watermarks:
+        previous_timestamp = self._watermarks.get(
+            notif.user_id,
+            datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+        )
+        if notif.read_timestamp > previous_timestamp:
+            logger.info(('latest_read_timestamp for conv {} participant {}' +
+                         ' updated to {}').format(self.id_,
+                                                  notif.user_id.chat_id,
+                                                  notif.read_timestamp))
+            self._watermarks[notif.user_id] = notif.read_timestamp
 
     def update_conversation(self, conversation):
         """Update the internal state of the conversation.
@@ -300,6 +323,15 @@ class Conversation(object):
         new_timestamp = new_state.self_read_state.latest_read_timestamp
         if new_timestamp == 0:
             new_state.self_read_state.latest_read_timestamp = old_timestamp
+
+        # user_read_state(s)
+        for new_entry in conversation.read_state:
+            tstamp = parsers.from_timestamp(new_entry.latest_read_timestamp)
+            if tstamp == 0:
+                continue
+            uid = parsers.from_participantid(new_entry.participant_id)
+            if uid not in self._watermarks or self._watermarks[uid] < tstamp:
+                self._watermarks[uid] = tstamp
 
     @staticmethod
     def _wrap_event(event_):
@@ -620,14 +652,20 @@ class Conversation(object):
                         ),
                         include_event=True,
                         max_events_per_conversation=max_events,
-                        event_continuation_token=(
-                            hangouts_pb2.EventContinuationToken(
-                                event_timestamp=parsers.to_timestamp(
-                                    conv_event.timestamp
-                                )
-                            )
-                        )
+                        event_continuation_token=self._event_cont_token
                     )
+                )
+                # Certain fields of conversation_state are not populated by
+                # SyncRecentConversations. This is the case with the
+                # user_read_state fields which are all set to 0 but for the
+                # 'self' user. Update here so these fields get populated on the
+                # first call to GetConversation.
+                if res.conversation_state.HasField('conversation'):
+                    self.update_conversation(
+                        res.conversation_state.conversation
+                    )
+                self._event_cont_token = (
+                    res.conversation_state.event_continuation_token
                 )
                 conv_events = [self._wrap_event(event) for event
                                in res.conversation_state.event]
@@ -710,7 +748,8 @@ class ConversationList(object):
         # Initialize the list of conversations from Client's list of
         # hangouts_pb2.ConversationState.
         for conv_state in conv_states:
-            self._add_conversation(conv_state.conversation, conv_state.event)
+            self._add_conversation(conv_state.conversation, conv_state.event,
+                                   conv_state.event_continuation_token)
 
         self._client.on_state_update.add_observer(self._on_state_update)
         self._client.on_connect.add_observer(self._sync)
@@ -783,13 +822,14 @@ class ConversationList(object):
         await self._conv_dict[conv_id].leave()
         del self._conv_dict[conv_id]
 
-    def _add_conversation(self, conversation, events=[]):
+    def _add_conversation(self, conversation, events=[],
+                          event_cont_token=None):
         """Add new conversation from hangouts_pb2.Conversation"""
         # pylint: disable=dangerous-default-value
         conv_id = conversation.conversation_id.id
         logger.debug('Adding new conversation: {}'.format(conv_id))
         conv = Conversation(self._client, self._user_list, conversation,
-                            events)
+                            events, event_cont_token)
         self._conv_dict[conv_id] = conv
         return conv
 
@@ -856,7 +896,12 @@ class ConversationList(object):
                     ), include_event=False
                 )
             )
-            return self._add_conversation(res.conversation_state.conversation)
+            conv_state = res.conversation_state
+            event_cont_token = None
+            if conv_state.HasField('event_continuation_token'):
+                event_cont_token = conv_state.event_continuation_token
+            return self._add_conversation(conv_state.conversation,
+                                          event_cont_token=event_cont_token)
         else:
             return conv
 
@@ -968,5 +1013,8 @@ class ConversationList(object):
                             # as triggering events.
                             await self._on_event(event_)
                 else:
-                    self._add_conversation(conv_state.conversation,
-                                           conv_state.event)
+                    self._add_conversation(
+                        conv_state.conversation,
+                        conv_state.event,
+                        conv_state.event_continuation_token
+                    )

@@ -26,13 +26,13 @@ with open('README.rst') as f:
 # especially for end-users (non-developers) who use pip to install hangups.
 install_requires = [
     'ConfigArgParse==0.11.0',
-    'aiohttp>=1.3,<4',
+    'aiohttp>=3.3,<4',
     'async-timeout>=2,<4',
     'appdirs>=1.4,<1.5',
     'readlike==0.1.2',
     'requests>=2.6.0,<3',  # uses semantic versioning (after 2.6)
     'ReParser==1.4.3',
-    'protobuf>=3.1.0,<3.2.0',
+    'protobuf>=3.1.0,<3.8',
     'urwid==1.3.1',
     'MechanicalSoup==0.6.0',
 ]

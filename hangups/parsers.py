@@ -4,7 +4,7 @@ from collections import namedtuple
 import datetime
 import logging
 
-from hangups import user
+from hangups import user, hangouts_pb2
 
 
 logger = logging.getLogger(__name__)
@@ -28,6 +28,21 @@ def to_timestamp(datetime_timestamp):
     """Convert UTC datetime to microsecond timestamp used by Hangouts."""
     return int(datetime_timestamp.timestamp() * 1000000)
 
+
+def from_participantid(participant_id):
+    """Convert hangouts_pb2.ParticipantId to UserID."""
+    return user.UserID(
+        chat_id=participant_id.chat_id,
+        gaia_id=participant_id.gaia_id
+    )
+
+
+def to_participantid(user_id):
+    """Convert UserID to hangouts_pb2.ParticipantId."""
+    return hangouts_pb2.ParticipantId(
+        chat_id=user_id.chat_id,
+        gaia_id=user_id.gaia_id
+    )
 
 ##############################################################################
 # Message types and parsers
@@ -58,8 +73,7 @@ def parse_typing_status_message(p):
     """
     return TypingStatusMessage(
         conv_id=p.conversation_id.id,
-        user_id=user.UserID(chat_id=p.sender_id.chat_id,
-                            gaia_id=p.sender_id.gaia_id),
+        user_id=from_participantid(p.sender_id),
         timestamp=from_timestamp(p.timestamp),
         status=p.type,
     )
@@ -81,10 +95,7 @@ def parse_watermark_notification(p):
     """Return WatermarkNotification from hangouts_pb2.WatermarkNotification."""
     return WatermarkNotification(
         conv_id=p.conversation_id.id,
-        user_id=user.UserID(
-            chat_id=p.sender_id.chat_id,
-            gaia_id=p.sender_id.gaia_id,
-        ),
+        user_id=from_participantid(p.sender_id),
         read_timestamp=from_timestamp(
             p.latest_read_timestamp
         ),

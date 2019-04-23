@@ -36,11 +36,8 @@ PUSH_TIMEOUT = 60
 MAX_READ_BYTES = 1024 * 1024
 
 
-class UnknownSIDError(exceptions.HangupsError):
-
-    """hangups channel session expired."""
-
-    pass
+class ChannelSessionError(exceptions.HangupsError):
+    """hangups channel session error"""
 
 
 def _best_effort_decode(data_bytes):
@@ -195,19 +192,22 @@ class Channel(object):
             self._chunk_parser = ChunkParser()
             try:
                 await self._longpoll_request()
-            except (UnknownSIDError, exceptions.NetworkError) as e:
-                logger.warning('Long-polling request failed: {}'.format(e))
-                retries += 1
-                logger.warning('retry attempt count is now {}'.format(retries))
-                if self._is_connected:
-                    self._is_connected = False
-                    await self.on_disconnect.fire()
-                if isinstance(e, UnknownSIDError):
-                    need_new_sid = True
+            except ChannelSessionError as err:
+                logger.warning('Long-polling interrupted: %s', err)
+                need_new_sid = True
+            except exceptions.NetworkError as err:
+                logger.warning('Long-polling request failed: %s', err)
             else:
                 # The connection closed successfully, so reset the number of
                 # retries.
                 retries = 0
+                continue
+
+            retries += 1
+            logger.info('retry attempt count is now %s', retries)
+            if self._is_connected:
+                self._is_connected = False
+                await self.on_disconnect.fire()
 
             # If the request ended with an error, the client must account for
             # messages being dropped during this time.
@@ -265,7 +265,7 @@ class Channel(object):
         This method uses keep-alive to make re-opening the request faster, but
         the remote server will set the "Connection: close" header once an hour.
 
-        Raises hangups.NetworkError or UnknownSIDError.
+        Raises hangups.NetworkError or ChannelSessionError.
         """
         params = {
             'VER': 8,  # channel protocol version
@@ -284,7 +284,7 @@ class Channel(object):
 
                 if res.status != 200:
                     if res.status == 400 and res.reason == 'Unknown SID':
-                        raise UnknownSIDError('SID became invalid')
+                        raise ChannelSessionError('SID became invalid')
                     raise exceptions.NetworkError(
                         'Request return unexpected status: {}: {}'.format(
                             res.status, res.reason))
@@ -302,6 +302,8 @@ class Channel(object):
         except aiohttp.ServerDisconnectedError as err:
             raise exceptions.NetworkError(
                 'Server disconnected error: %s' % err)
+        except aiohttp.ClientPayloadError:
+            raise ChannelSessionError('SID is about to expire')
         except aiohttp.ClientError as err:
             raise exceptions.NetworkError('Request connection error: %s' % err)
 

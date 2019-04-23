@@ -18,6 +18,125 @@ def test_parse_linebreaks():
     assert expected == parse_text(text)
 
 
+def test_parse_auto_link_minimal():
+    text = (
+        'http://domain.tld\n'
+        'https://domain.tld\n'
+        'sub.domain.tld\n'
+        'domain.tld/\n'
+        '1.1.1.1/\n'
+    )
+    expected = [
+        ('http://domain.tld', {'link_target': 'http://domain.tld'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('https://domain.tld', {'link_target': 'https://domain.tld'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('sub.domain.tld', {'link_target': 'http://sub.domain.tld'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('domain.tld/', {'link_target': 'http://domain.tld/'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('1.1.1.1/', {'link_target': 'http://1.1.1.1/'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+    ]
+    assert expected == parse_text(text)
+
+
+def test_parse_auto_link_port():
+    text = (
+        'http://domain.tld:8080\n'
+        'https://domain.tld:8080\n'
+        'sub.domain.tld:8080\n'
+        'domain.tld:8080/\n'
+    )
+    expected = [
+        ('http://domain.tld:8080',
+         {'link_target': 'http://domain.tld:8080'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('https://domain.tld:8080',
+         {'link_target': 'https://domain.tld:8080'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('sub.domain.tld:8080',
+         {'link_target': 'http://sub.domain.tld:8080'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('domain.tld:8080/',
+         {'link_target': 'http://domain.tld:8080/'}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+    ]
+    assert expected == parse_text(text)
+
+
+def test_parse_auto_link_parens():
+    text = (
+        'pre (https://domain.tld) post\n'
+        'pre (inner https://domain.tld inner) post\n'
+        'pre (inner (https://domain.tld) inner) post\n'
+        'pre https://domain.tld/path(inner) post\n'
+        'pre (https://domain.tld/path(inner)) post\n'
+    )
+    expected = [
+        ('pre (', {}),
+        ('https://domain.tld', {'link_target': 'https://domain.tld'}),
+        (') post', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('pre (inner ', {}),
+        ('https://domain.tld', {'link_target': 'https://domain.tld'}),
+        (' inner) post', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('pre (inner (', {}),
+        ('https://domain.tld', {'link_target': 'https://domain.tld'}),
+        (') inner) post', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('pre ', {}),
+        ('https://domain.tld/path(inner)',
+         {'link_target': 'https://domain.tld/path(inner)'}),
+        (' post', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('pre (', {}),
+        ('https://domain.tld/path(inner)',
+         {'link_target': 'https://domain.tld/path(inner)'}),
+        (') post', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+    ]
+    assert expected == parse_text(text)
+
+
+def test_parse_auto_link_email():
+    text = (
+        'name@domain.tld\n'
+        'name.other.name@domain.tld\n'
+        'name.other.name@sub.domain.tld\n'
+    )
+    expected = [
+        ('name@domain.tld', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('name.other.name@domain.tld', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('name.other.name@sub.domain.tld', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+    ]
+    assert expected == parse_text(text)
+
+
+def test_parse_auto_link_invalid():
+    text = (
+        'hangups:hangups\n'
+        'http://tld\n'
+        'http://tld/path\n'
+        'version 3.5.11\n'
+    )
+    expected = [
+        ('hangups:hangups', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('http://tld', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('http://tld/path', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+        ('version 3.5.11', {}),
+        ('\n', {'segment_type': hangouts_pb2.SEGMENT_TYPE_LINE_BREAK}),
+    ]
+    assert expected == parse_text(text)
+
+
 def test_parse_autolinks():
     text = ('www.google.com google.com/maps '
             '(https://en.wikipedia.org/wiki/Parenthesis_(disambiguation))')
