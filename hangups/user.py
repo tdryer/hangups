@@ -39,7 +39,6 @@ class User(object):
             first_name = full_name
             name_type = NameType.NUMERIC
         else:
-            full_name = full_name if full_name else DEFAULT_NAME
             first_name = first_name if first_name else full_name.split()[0]
             name_type = NameType.REAL
 
@@ -114,7 +113,11 @@ class User(object):
         """
         user_id = UserID(chat_id=conv_part_data.id.chat_id,
                          gaia_id=conv_part_data.id.gaia_id)
-        return User(user_id, conv_part_data.fallback_name, None, None, [],
+        if conv_part_data.fallback_name == 'unknown':
+            full_name = None
+        else:
+            full_name = conv_part_data.fallback_name
+        return User(user_id, full_name, None, None, [],
                     (self_user_id == user_id) or (self_user_id is None))
 
 
