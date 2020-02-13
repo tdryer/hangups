@@ -573,6 +573,7 @@ class MessageWidget(WidgetBase):
                  show_date=False, watermark_users=None):
         # Save the timestamp as an attribute for sorting.
         self.timestamp = timestamp
+        self._text = text
         text = [
             ('msg_date', self._get_date_str(timestamp, datetimefmt,
                                             show_date=show_date) + ' '),
@@ -910,13 +911,14 @@ class ConversationWidget(WidgetBase):
         )
 
     def keypress(self, size, key):
-        """Handle marking messages as read and keeping client active."""
+        """Handle marking messages as read and keeping client active.
+        Additionally, handle copying messages."""
         # Set the client as active.
         self._coroutine_queue.put(self._client.set_active())
 
         # Mark the newest event as read.
         self._coroutine_queue.put(self._conversation.update_read_timestamp())
-
+        
         return super().keypress(size, key)
 
     def _set_title(self):
@@ -946,6 +948,7 @@ class ConversationWidget(WidgetBase):
                 )
             )
         )
+    
 
     async def _handle_send_message(self, coro):
         """Handle showing an error if a message fails to send."""
@@ -999,7 +1002,7 @@ class TabbedWindowWidget(WidgetBase):
         self._frame.contents['body'] = (self._widgets[self._tab_index], None)
 
     def keypress(self, size, key):
-        """Handle keypresses for changing tabs."""
+        """Handle keypresses for changing tabs and copying."""
         key = super().keypress(size, key)
         num_tabs = len(self._widgets)
         if key == self._keys['prev_tab']:
@@ -1016,6 +1019,13 @@ class TabbedWindowWidget(WidgetBase):
                 del self._widget_title[curr_tab]
                 self._tab_index -= 1
                 self._update_tabs()
+        elif key == self._keys['copy']:
+            _convo = self.get_current_widget()
+            if hasattr(_convo, '_list_walker'):
+                _lw = _convo._list_walker
+                focus = _lw[_lw._focus_position]
+                _message = focus._text
+                _copy_to_clip(_message)
         else:
             return key
 
@@ -1134,6 +1144,8 @@ def main():
                   help='keybinding for alternate page up')
     key_group.add('--key-page-down', default='ctrl f',
                   help='keybinding for alternate page down')
+    key_group.add('--key-copy', default='ctrl o',
+                  help='keybinding for copy')
     notification_group = parser.add_argument_group('Notifications')
     # deprecated in favor of --notification-type=none:
     notification_group.add('-n', '--disable-notifications',
@@ -1194,6 +1206,7 @@ def main():
         'down': args.key_down,
         'page_up': args.key_page_up,
         'page_down': args.key_page_down,
+        'copy': args.key_copy,
     }
 
     notifier_ = get_notifier(
@@ -1210,5 +1223,38 @@ def main():
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
 
 
+def _copy_to_clip(var):
+    '''Copy a variable of type str to clipboard.
+
+    Argument:
+    var -- Variable of type str to be copied.
+
+    Example:
+    var = 'test'
+        Copytoclip(var)
+
+        >>>
+        >>>(Ctrl shift v)
+        >>>test
+
+    Credit to Dirk Mittler
+    https://dirkmittler.homeip.net/blog/archives/6928
+
+    Can only work on POSIX. May not work with your shell. 
+
+    If an exception is caught the function will be passed.'''
+    if type(var) == str:
+        try:
+            cmd = ("echo "
+                  + var
+                  + " | tr -d \'\\n\'"
+                  + " | xsel -i --clipboard")
+            os.system(cmd)
+        except:
+            pass
+    pass
+
+
 if __name__ == '__main__':
     main()
+
