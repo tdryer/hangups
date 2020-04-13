@@ -57,6 +57,7 @@ Projects using hangups
 - `defund/pearl`_: Google Hangouts bot framework
 - `HangupsDroid`_: Unofficial Google Hangouts client for Android
 - `chat-archive`_: Easy to use offline chat archive
+- `SoulSen/Hanger`_: Modern, Simple, Asynchronous bot framework for Google Hangouts
 
 .. _HangupsBot: https://github.com/xmikos/hangupsbot
 .. _Hubot Hangouts Adapter: https://github.com/groupby/hubot-hangups
@@ -73,6 +74,7 @@ Projects using hangups
 .. _defund/pearl: https://github.com/defund/pearl
 .. _HangupsDroid: https://github.com/Rudloff/hangupsdroid
 .. _chat-archive: https://github.com/xolox/python-chat-archive
+.. _SoulSen/Hanger: https://github.com/SoulSen/Hanger
 
 Related projects
 ----------------
