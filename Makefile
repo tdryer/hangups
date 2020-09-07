@@ -27,7 +27,7 @@ style:
 
 .PHONY: lint
 lint:
-	$(venv)/bin/pylint -j 4 --reports=n hangups
+	$(venv)/bin/pylint --reports=n hangups
 
 .PHONY: check
 check:

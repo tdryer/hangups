@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 chat_message_parser = message_parser.ChatMessageParser()
 
 
-class ConversationEvent(object):
+class ConversationEvent:
     """An event which becomes part of the permanent record of a conversation.
 
     This is a wrapper for the ``Event`` message, which may contain one of many
@@ -47,7 +47,7 @@ class ConversationEvent(object):
         return self._event.event_id
 
 
-class ChatMessageSegment(object):
+class ChatMessageSegment:
     """A segment of a chat message in :class:`ChatMessageEvent`.
 
     Args:

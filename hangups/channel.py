@@ -46,7 +46,7 @@ def _best_effort_decode(data_bytes):
     return decoder.decode(data_bytes)
 
 
-class ChunkParser(object):
+class ChunkParser:
     """Parse data from the backward channel into chunks.
 
     Responses from the backward channel consist of a sequence of chunks which
@@ -118,7 +118,7 @@ def _parse_sid_response(res):
     return (sid, gsessionid)
 
 
-class Channel(object):
+class Channel:
     """BrowserChannel client."""
 
     ##########################################################################

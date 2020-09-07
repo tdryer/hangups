@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Event(object):
+class Event:
     """An event that can notify subscribers with arguments when fired.
 
     Args:

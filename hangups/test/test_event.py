@@ -19,8 +19,10 @@ def coroutine_test(coro):
 async def test_event():
     e = event.Event('MyEvent')
     res = []
+
     async def a(arg):
         res.append('a' + arg)
+
     async def b(arg):
         res.append('b' + arg)
     e.add_observer(a)
@@ -47,6 +49,7 @@ async def test_function_observer():
 async def test_coroutine_observer():
     e = event.Event('MyEvent')
     res = []
+
     async def a(arg):
         res.append('a' + arg)
     e.add_observer(a)

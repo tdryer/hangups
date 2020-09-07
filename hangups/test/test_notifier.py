@@ -1,7 +1,7 @@
 import subprocess
 import unittest.mock
 
-from hangups.ui import notifier as notifier
+from hangups.ui import notifier
 
 
 NOTIFICATION = notifier.Notification(

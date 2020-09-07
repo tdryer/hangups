@@ -21,7 +21,7 @@ full name is available.
 """
 
 
-class User(object):
+class User:
     """A chat user.
 
     Use :class:`.UserList` or :class:`.ConversationList` methods to get
@@ -121,7 +121,7 @@ class User(object):
                     (self_user_id == user_id) or (self_user_id is None))
 
 
-class UserList(object):
+class UserList:
     """Maintains a list of all the users.
 
     Using :func:`build_user_conversation_list` to initialize this class is

@@ -147,8 +147,10 @@ class Tokens:
 
 class ChatMessageParser(Parser):
     """Chat message parser"""
-    def __init__(self, tokens=Tokens.markdown + Tokens.html + Tokens.basic):
+    def __init__(self, tokens=None):
         # we add default tokens here.
+        if not tokens:
+            tokens = Tokens.markdown + Tokens.html + Tokens.basic
         # pylint:disable=useless-super-delegation
         super().__init__(tokens)
 

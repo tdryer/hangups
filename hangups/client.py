@@ -25,7 +25,7 @@ SETACTIVECLIENT_LIMIT_SECS = 60
 API_KEY = 'AIzaSyAfFJCeph-euFSwtmqFZi0kaKk-cZ5wufM'
 
 
-class Client(object):
+class Client:
     """Instant messaging client for Hangouts.
 
     Maintains a connections to the servers, emits events, and accepts commands.

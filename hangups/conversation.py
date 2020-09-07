@@ -127,7 +127,7 @@ async def _sync_all_conversations(client):
     return conv_states, sync_timestamp
 
 
-class Conversation(object):
+class Conversation:
     """A single chat conversation.
 
     Use :class:`.ConversationList` methods to get instances of this class.
@@ -727,7 +727,7 @@ class Conversation(object):
         return self._events_dict[event_id]
 
 
-class ConversationList(object):
+class ConversationList:
     """Maintains a list of the user's conversations.
 
     Using :func:`build_user_conversation_list` to initialize this class is

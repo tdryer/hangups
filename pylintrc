@@ -28,6 +28,10 @@ disable=
     too-many-statements,
     too-many-lines,
     no-else-return,
+    inconsistent-return-statements,
+    no-else-raise,
+    no-else-break,
+    raise-missing-from,
 
 [FORMAT]
 

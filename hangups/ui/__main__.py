@@ -69,7 +69,7 @@ class HangupsDisconnected(Exception):
     """Raised when hangups is disconnected."""
 
 
-class ChatUI(object):
+class ChatUI:
     """User interface for hangups."""
 
     def __init__(self, refresh_token_path, keybindings, palette,

@@ -21,7 +21,7 @@ ORIGIN_URL = 'https://talkgadget.google.com'
 FetchResponse = collections.namedtuple('FetchResponse', ['code', 'body'])
 
 
-class Session(object):
+class Session:
     """Session for making HTTP requests to Google.
 
     Args:

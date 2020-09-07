@@ -87,7 +87,7 @@ class GoogleAuthError(Exception):
     """A Google authentication request failed."""
 
 
-class CredentialsPrompt(object):
+class CredentialsPrompt:
     """Callbacks for prompting user for their Google account credentials.
 
     This implementation prompts the user in a terminal using standard in/out.
@@ -132,7 +132,7 @@ class CredentialsPrompt(object):
         return input('Authorization code: ')
 
 
-class RefreshTokenCache(object):
+class RefreshTokenCache:
     """File-based cache for refresh token.
 
     Args:
@@ -235,7 +235,7 @@ def get_auth_stdin(refresh_token_filename, manual_login=False):
     )
 
 
-class Browser(object):
+class Browser:
     """Virtual browser for submitting forms and moving between pages.
 
     Raises GoogleAuthError if URL fails to load.
