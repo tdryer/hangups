@@ -19,8 +19,10 @@ def coroutine_test(coro):
 async def test_event():
     e = event.Event('MyEvent')
     res = []
-    a = asyncio.coroutine(lambda arg: res.append('a' + arg))
-    b = asyncio.coroutine(lambda arg: res.append('b' + arg))
+    async def a(arg):
+        res.append('a' + arg)
+    async def b(arg):
+        res.append('b' + arg)
     e.add_observer(a)
     await e.fire('1')
     e.add_observer(b)
@@ -45,7 +47,8 @@ async def test_function_observer():
 async def test_coroutine_observer():
     e = event.Event('MyEvent')
     res = []
-    a = asyncio.coroutine(lambda arg: res.append('a' + arg))
+    async def a(arg):
+        res.append('a' + arg)
     e.add_observer(a)
     await e.fire('1')
     assert res == ['a1']
