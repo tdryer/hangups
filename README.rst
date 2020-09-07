@@ -9,8 +9,8 @@ hangups
     :target: https://hangups.readthedocs.io/
     :alt: Documentation Status
 
-.. image:: https://build.snapcraft.io/badge/tdryer/hangups.svg
-    :target: https://build.snapcraft.io/user/tdryer/hangups
+.. image:: https://snapcraft.io//hangups/badge.svg
+    :target: https://snapcraft.io/hangups
     :alt: Snap Status
 
 hangups is the first third-party instant messaging client for `Google
