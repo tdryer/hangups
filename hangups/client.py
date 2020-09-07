@@ -22,7 +22,9 @@ ACTIVE_TIMEOUT_SECS = 120
 # Minimum timeout between subsequent setactiveclient requests:
 SETACTIVECLIENT_LIMIT_SECS = 60
 # API key for `key` parameter (from Hangouts web client)
-API_KEY = 'AIzaSyAfFJCeph-euFSwtmqFZi0kaKk-cZ5wufM'
+API_KEY = 'AIzaSyD7InnYR3VKdb4j2rMUEbTCIr2VyEazl6k'
+# Base URL for API requests:
+BASE_URL = 'https://chat-pa.clients6.google.com'
 
 
 class Client:
@@ -411,7 +413,7 @@ class Client:
         logger.debug('Sending Protocol Buffer request %s:\n%s', endpoint,
                      request_pb)
         res = await self._base_request(
-            'https://clients6.google.com/chat/v1/{}'.format(endpoint),
+            '{}/chat/v1/{}'.format(BASE_URL, endpoint),
             'application/x-protobuf',  # Request body is Protocol Buffer.
             'proto',  # Response body is Protocol Buffer.
             request_pb.SerializeToString()
