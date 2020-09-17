@@ -100,5 +100,5 @@ Related projects
 .. _hangover: https://github.com/psobot/hangover
 .. _hangups-rs: https://github.com/tdryer/hangups-rs
 .. _hangupsjs: https://github.com/algesten/hangupsjs
-.. _purple-hangouts: https://bitbucket.org/EionRobb/purple-hangouts
+.. _purple-hangouts: https://github.com/EionRobb/purple-hangouts
 .. _slangouts: https://github.com/gpavlidi/slangouts
