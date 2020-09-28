@@ -716,6 +716,7 @@ class ConversationEventListWalker(urwid.ListWalker):
         self._conversation.on_watermark_notification.add_observer(
             self._on_watermark_notification
         )
+        super().__init__()
 
     def _handle_event(self, conv_event):
         """Handle updating and scrolling when a new event is added.
