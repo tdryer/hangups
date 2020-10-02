@@ -1,20 +1,20 @@
 """Reference chat client for hangups."""
+
+import appdirs
 import asyncio
+import configargparse
 import contextlib
 import logging
 import os
 import sys
+import urwid
+import readlike
 from bisect import bisect
 
-import appdirs
-import configargparse
 import hangups
-import readlike
-import urwid
-from hangups.ui import notifier
 from hangups.ui.emoticon import replace_emoticons
-from hangups.ui.utils import add_color_to_scheme
-from hangups.ui.utils import get_conv_name
+from hangups.ui import notifier
+from hangups.ui.utils import get_conv_name, add_color_to_scheme
 
 
 # hangups used to require a fork of urwid called hangups-urwid which may still
@@ -298,7 +298,6 @@ class WidgetBase(urwid.WidgetWrap):
     Args:
         target: urwid.Widget instance
     """
-
     def keypress(self, size, key):
         """forward the call"""
         # pylint:disable=not-callable, useless-super-delegation
