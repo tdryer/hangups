@@ -74,12 +74,13 @@ class ChatUI:
 
     def __init__(self, refresh_token_path, keybindings, palette,
                  palette_colors, datetimefmt, notifier_,
-                 discreet_notifications, manual_login):
+                 discreet_notifications, manual_login, keep_emoticons):
         """Start the user interface."""
         self._keys = keybindings
         self._datetimefmt = datetimefmt
         self._notifier = notifier_
         self._discreet_notifications = discreet_notifications
+        self._keep_emoticons = keep_emoticons
 
         set_terminal_title('hangups')
 
@@ -201,7 +202,7 @@ class ChatUI:
             widget = ConversationWidget(
                 self._client, self._coroutine_queue,
                 self._conv_list.get(conv_id), set_title_cb, self._keys,
-                self._datetimefmt
+                self._datetimefmt, self._keep_emoticons
             )
             self._conv_widgets[conv_id] = widget
         return self._conv_widgets[conv_id]
@@ -868,7 +869,7 @@ class ConversationWidget(WidgetBase):
     """Widget for interacting with a conversation."""
 
     def __init__(self, client, coroutine_queue, conversation, set_title_cb,
-                 keybindings, datetimefmt):
+                 keybindings, datetimefmt, keep_emoticons):
         self._client = client
         self._coroutine_queue = coroutine_queue
         self._conversation = conversation
@@ -877,6 +878,7 @@ class ConversationWidget(WidgetBase):
             self._on_watermark_notification
         )
         self._keys = keybindings
+        self._keep_emoticons = keep_emoticons
 
         self.title = ''
         self._set_title_cb = set_title_cb
@@ -938,7 +940,8 @@ class ConversationWidget(WidgetBase):
             text = ''
         else:
             image_file = None
-        text = replace_emoticons(text)
+        if not self._keep_emoticons:
+            text = replace_emoticons(text)
         segments = hangups.ChatMessageSegment.from_str(text)
         self._coroutine_queue.put(
             self._handle_send_message(
@@ -1116,6 +1119,8 @@ def main():
     general_group.add('--manual-login', action='store_true',
                       help='enable manual login method')
     general_group.add('--log', default=default_log_path, help='log file path')
+    general_group.add('--keep-emoticons', action='store_true',
+                      help='do not replace emoticons with corresponding emoji')
     key_group = parser.add_argument_group('Keybindings')
     key_group.add('--key-next-tab', default='ctrl d',
                   help='keybinding for next tab')
@@ -1205,7 +1210,7 @@ def main():
         ChatUI(
             args.token_path, keybindings, col_scheme, palette_colors,
             datetimefmt, notifier_, args.discreet_notifications,
-            args.manual_login
+            args.manual_login, args.keep_emoticons
         )
     except KeyboardInterrupt:
         sys.exit('Caught KeyboardInterrupt, exiting abnormally')
