@@ -1,9 +1,9 @@
 hangups
 =======
 
-.. image:: https://travis-ci.org/tdryer/hangups.svg?branch=master
-    :target: https://travis-ci.org/tdryer/hangups
-    :alt: Build Status
+.. image:: https://github.com/tdryer/hangups/workflows/CI/badge.svg
+    :target: https://github.com/tdryer/hangups/actions?query=workflow%3ACI+branch%3Amaster
+    :alt: CI Status
 
 .. image:: https://readthedocs.org/projects/hangups/badge/?version=latest
     :target: https://hangups.readthedocs.io/
