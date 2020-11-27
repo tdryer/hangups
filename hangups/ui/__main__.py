@@ -936,7 +936,12 @@ class ConversationWidget(WidgetBase):
         elif text.startswith('/image') and len(text.split(' ')) == 2:
             # Temporary UI for testing image uploads
             filename = text.split(' ')[1]
-            image_file = open(filename, 'rb')
+            try:
+                image_file = open(filename, 'rb')
+            except FileNotFoundError:
+                message = 'Failed to find image {}'.format(filename)
+                self._status_widget.show_message(message)
+                return
             text = ''
         else:
             image_file = None
