@@ -5,26 +5,24 @@
 #    pip-compile requirements-dev.in
 #
 astroid==2.4.2            # via pylint
-attrs==20.2.0             # via pytest
+attrs==20.3.0             # via pytest
 click==7.1.2              # via pip-tools
 docutils==0.16            # via -r requirements-dev.in
-httpretty==1.0.2          # via -r requirements-dev.in
-iniconfig==1.0.1          # via pytest
+httpretty==1.0.3          # via -r requirements-dev.in
+iniconfig==1.1.1          # via pytest
 isort==4.3.21             # via -r requirements-dev.in, pylint
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via pylint
-more-itertools==8.5.0     # via pytest
-packaging==20.4           # via pytest
-pip-tools==5.3.1          # via -r requirements-dev.in
+packaging==20.5           # via pytest
+pip-tools==5.4.0          # via -r requirements-dev.in
 pluggy==0.13.1            # via pytest
 py==1.9.0                 # via pytest
 pycodestyle==2.6.0        # via -r requirements-dev.in
 pylint==2.6.0             # via -r requirements-dev.in
 pyparsing==2.4.7          # via packaging
-pytest==6.0.1             # via -r requirements-dev.in
-six==1.15.0               # via astroid, packaging, pip-tools
-toml==0.10.1              # via pylint, pytest
-urllib3==1.25.11          # via -r requirements-dev.in
+pytest==6.1.2             # via -r requirements-dev.in
+six==1.15.0               # via astroid, pip-tools
+toml==0.10.2              # via pylint, pytest
 wrapt==1.12.1             # via astroid
 
 # The following packages are considered to be unsafe in a requirements file:

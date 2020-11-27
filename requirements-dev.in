@@ -5,4 +5,3 @@ pycodestyle
 pylint
 pytest
 isort<5  # workaround for Python 3.5 compatibility
-urllib3<1.26  # https://github.com/gabrielfalcao/HTTPretty/issues/409
