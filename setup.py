@@ -26,7 +26,7 @@ with open('README.rst') as f:
 # especially for end-users (non-developers) who use pip to install hangups.
 install_requires = [
     'ConfigArgParse>=0.11.0,<2',
-    'aiohttp>=3.3,<4',
+    'aiohttp>=3.7,<4',
     'async-timeout>=2,<4',
     'appdirs>=1.4,<1.5',
     'readlike>=0.1.2,<0.2',
