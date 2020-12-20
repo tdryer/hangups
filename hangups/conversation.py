@@ -444,6 +444,9 @@ class Conversation:
 
         Raises:
             .NetworkError: If the message cannot be sent.
+
+        Returns:
+            :class:`.ConversationEvent` representing the new message.
         """
         async with self._send_message_lock:
             if image_file:
@@ -468,7 +471,8 @@ class Conversation:
                 if image_user_id is not None:
                     request.existing_media.photo.user_id = image_user_id
                     request.existing_media.photo.is_custom_user_id = True
-                await self._client.send_chat_message(request)
+                response = await self._client.send_chat_message(request)
+                return self._wrap_event(response.created_event)
             except exceptions.NetworkError as e:
                 logger.warning('Failed to send message: {}'.format(e))
                 raise
