@@ -1,7 +1,10 @@
-build:
-    image: latest
-
+version: 2
+formats:
+  - htmlzip
+  - pdf
+  - epub
 python:
-    version: 3.6
-
-requirements_file: requirements-docs.txt
+  version: 3.8
+  install:
+    - path: .
+    - requirements: requirements-docs.txt
