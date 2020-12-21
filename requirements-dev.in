@@ -4,4 +4,3 @@ pip-tools
 pycodestyle
 pylint
 pytest
-isort<5  # workaround for Python 3.5 compatibility

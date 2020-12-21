@@ -1,7 +1,7 @@
 Installation
 ============
 
-hangups requires `Python`_ 3.5.3+ and is known to work on Linux, Mac OS X, and
+hangups requires `Python`_ 3.6+ and is known to work on Linux, Mac OS X, and
 Windows (with `Cygwin`_).
 
 .. _Python: https://www.python.org/

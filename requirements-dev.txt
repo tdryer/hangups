@@ -10,7 +10,7 @@ click==7.1.2              # via pip-tools
 docutils==0.16            # via -r requirements-dev.in
 httpretty==1.0.3          # via -r requirements-dev.in
 iniconfig==1.1.1          # via pytest
-isort==4.3.21             # via -r requirements-dev.in, pylint
+isort==4.3.21             # via pylint
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via pylint
 packaging==20.5           # via pytest
