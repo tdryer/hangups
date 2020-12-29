@@ -477,11 +477,32 @@ class Conversation:
                 logger.warning('Failed to send message: {}'.format(e))
                 raise
 
-    async def add_user(self, *user_ids):
+    @staticmethod
+    def _wrap_user_id(id_):
+        """Convert a user ID into a hangouts_pb2.InviteeID object."""
+        if isinstance(id_, hangouts_pb2.InviteeID):
+            return id_
+        elif isinstance(id_, user.UserID):
+            return hangouts_pb2.InviteeID(gaia_id=id_.gaia_id)
+        else:
+            return hangouts_pb2.InviteeID(gaia_id=id_)
+
+    @staticmethod
+    def _wrap_participant_id(id_):
+        """Convert a user ID into a hangouts_pb2.ParticipantId object."""
+        if isinstance(id_, hangouts_pb2.ParticipantId):
+            return id_
+        elif isinstance(id_, user.UserID):
+            return hangouts_pb2.ParticipantId(gaia_id=id_.gaia_id)
+        else:
+            return hangouts_pb2.ParticipantId(gaia_id=id_)
+
+    async def add_users(self, user_ids):
         """Add one or more users to this conversation.
 
         Args:
-            user_ids (str...): IDs of the new users.
+            user_ids: List of IDs of the new users to be added; accepts
+                :class:`.UserID`, :class:`.InviteeID` or just :class:`str` IDs.
 
         Raises:
             ConversationTypeError: If conversation is not a group.
@@ -496,7 +517,7 @@ class Conversation:
                 hangouts_pb2.AddUserRequest(
                     request_header=self._client.get_request_header(),
                     event_request_header=self._get_event_request_header(),
-                    invitee_id=[hangouts_pb2.InviteeID(gaia_id=user_id)
+                    invitee_id=[self._wrap_user_id(user_id)
                                 for user_id in user_ids],
                 )
             )
@@ -508,7 +529,8 @@ class Conversation:
         """Remove a user from this conversation.
 
         Args:
-            user_id (str): ID of the existing user.
+            user_id: ID of the user to be removed; accepts :class:`.UserID`,
+                :class:`.ParticipantId` or just :class:`str` IDs.
 
         Raises:
             ConversationTypeError: If conversation is not a group.
@@ -523,7 +545,7 @@ class Conversation:
                 hangouts_pb2.RemoveUserRequest(
                     request_header=self._client.get_request_header(),
                     event_request_header=self._get_event_request_header(),
-                    participant_id=hangouts_pb2.ParticipantId(gaia_id=user_id),
+                    participant_id=self._wrap_participant_id(user_id),
                 )
             )
         except exceptions.NetworkError as e:
@@ -601,22 +623,24 @@ class Conversation:
             )
         )
 
-    async def modify_otr_status(self, otr=hangouts_pb2.
-                                OFF_THE_RECORD_STATUS_OFF_THE_RECORD):
+    async def modify_otr_status(self, off_record):
         """Set the OTR mode of this conversation.
 
         Args:
-            otr: ``OFF_THE_RECORD_STATUS_OFF_THE_RECORD`` to disable history,
-                or ``OFF_THE_RECORD_STATUS_ON_THE_RECORD`` enable it.
+            off_record: ``True`` to disable history, or ``False`` to enable it.
 
         Raises:
             NetworkError: If the request fails.
         """
+        if off_record:
+            status = hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
+        else:
+            status = hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD
         try:
             await self._client.modify_otr_status(
                 hangouts_pb2.ModifyOTRStatusRequest(
                     request_header=self._client.get_request_header(),
-                    otr_status=otr,
+                    otr_status=status,
                     event_request_header=self._get_event_request_header(),
                 )
             )
