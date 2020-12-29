@@ -484,11 +484,13 @@ class Conversation:
             user_ids (str...): IDs of the new users.
 
         Raises:
-            TypeError: If conversation is not a group.
+            ConversationTypeError: If conversation is not a group.
             NetworkError: If conversation cannot be invited to.
         """
         if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
-            raise TypeError('Conversation is not a group')
+            raise exceptions.ConversationTypeError(
+                'Can only add users to group conversations'
+            )
         try:
             await self._client.add_user(
                 hangouts_pb2.AddUserRequest(
@@ -509,11 +511,13 @@ class Conversation:
             user_id (str): ID of the existing user.
 
         Raises:
-            TypeError: If conversation is not a group.
+            ConversationTypeError: If conversation is not a group.
             NetworkError: If conversation cannot be removed from.
         """
         if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
-            raise TypeError('Conversation is not a group')
+            raise exceptions.ConversationTypeError(
+                'Can only remove users to group conversations'
+            )
         try:
             await self._client.remove_user(
                 hangouts_pb2.RemoveUserRequest(
