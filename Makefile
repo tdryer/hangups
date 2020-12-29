@@ -17,6 +17,7 @@ venv-deps:
 	$(venv)/bin/pip install --upgrade pip
 	$(venv)/bin/pip install --editable .
 	$(venv)/bin/pip install --requirement requirements-dev.txt
+	$(venv)/bin/pip install --requirement requirements-docs.txt
 
 .PHONY: test-all
 test-all: style lint check test
@@ -36,6 +37,10 @@ check:
 .PHONY: test
 test:
 	$(venv)/bin/pytest hangups
+
+.PHONY: docs
+docs:
+	$(venv)/bin/sphinx-build docs docs/_build/html
 
 .PHONY: clean
 clean:
