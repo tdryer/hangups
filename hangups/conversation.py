@@ -270,6 +270,14 @@ class Conversation:
         status = self._conversation.otr_status
         return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
 
+    @property
+    def is_group_link_shared(self):
+        """``True`` if joining conversation by link is enabled."""
+        if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
+            return False
+        status = self._conversation.group_link_sharing_status
+        return status == hangouts_pb2.GROUP_LINK_SHARING_STATUS_ON
+
     def _on_watermark_notification(self, notif):
         """Handle a watermark notification."""
         # Update the conversation:
@@ -658,6 +666,40 @@ class Conversation:
             return self._wrap_event(response.created_event)
         except exceptions.NetworkError as e:
             logger.warning('Failed to set OTR mode: {}'.format(e))
+            raise
+
+    async def set_group_link_sharing_enabled(self, enabled):
+        """Set the link sharing mode of this conversation.
+
+        Args:
+            enabled: ``True`` to allow joining the conversation by link, or
+                ``False`` to prevent it.
+
+        Raises:
+            NetworkError: If the request fails.
+
+        Returns:
+            :class:`.ConversationEvent` representing the change.
+        """
+        if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
+            raise exceptions.ConversationTypeError(
+                'Can only set link sharing in group conversations'
+            )
+        if enabled:
+            status = hangouts_pb2.GROUP_LINK_SHARING_STATUS_ON
+        else:
+            status = hangouts_pb2.GROUP_LINK_SHARING_STATUS_OFF
+        try:
+            response = await self._client.set_group_link_sharing_enabled(
+                hangouts_pb2.SetGroupLinkSharingEnabledRequest(
+                    request_header=self._client.get_request_header(),
+                    group_link_sharing_status=status,
+                    event_request_header=self._get_event_request_header(),
+                )
+            )
+            return self._wrap_event(response.created_event)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to set link sharing mode: {}'.format(e))
             raise
 
     async def set_typing(self, typing=hangouts_pb2.TYPING_TYPE_STARTED):
