@@ -510,11 +510,11 @@ class Conversation:
 
         Args:
             user_ids: List of IDs of the new users to be added; accepts
-                :class:`.UserID`, :class:`.InviteeID` or just :class:`str` IDs.
+                :class:`.UserID`, ``InviteeID`` or just :class:`str` IDs.
 
         Raises:
-            ConversationTypeError: If conversation is not a group.
-            NetworkError: If conversation cannot be invited to.
+            .ConversationTypeError: If conversation is not a group.
+            .NetworkError: If conversation cannot be invited to.
 
         Returns:
             :class:`.ConversationEvent` representing the change.
@@ -542,11 +542,11 @@ class Conversation:
 
         Args:
             user_id: ID of the user to be removed; accepts :class:`.UserID`,
-                :class:`.ParticipantId` or just :class:`str` IDs.
+                ``ParticipantId`` or just :class:`str` IDs.
 
         Raises:
-            ConversationTypeError: If conversation is not a group.
-            NetworkError: If conversation cannot be removed from.
+            .ConversationTypeError: If conversation is not a group.
+            .NetworkError: If conversation cannot be removed from.
 
         Returns:
             :class:`.ConversationEvent` representing the change.
@@ -646,7 +646,7 @@ class Conversation:
             off_record: ``True`` to disable history, or ``False`` to enable it.
 
         Raises:
-            NetworkError: If the request fails.
+            .NetworkError: If the request fails.
 
         Returns:
             :class:`.ConversationEvent` representing the change.
@@ -676,7 +676,8 @@ class Conversation:
                 ``False`` to prevent it.
 
         Raises:
-            NetworkError: If the request fails.
+            .ConversationTypeError: If conversation is not a group.
+            .NetworkError: If the request fails.
 
         Returns:
             :class:`.ConversationEvent` representing the change.
