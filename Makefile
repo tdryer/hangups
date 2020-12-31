@@ -40,7 +40,7 @@ test:
 
 .PHONY: docs
 docs:
-	$(venv)/bin/sphinx-build docs docs/_build/html
+	. $(venv)/bin/activate && make -C docs html
 
 .PHONY: clean
 clean:
