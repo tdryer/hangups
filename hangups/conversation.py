@@ -271,8 +271,8 @@ class Conversation:
         return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
 
     @property
-    def is_group_link_shared(self):
-        """``True`` if joining conversation by link is enabled."""
+    def is_group_link_sharing_enabled(self):
+        """``True`` if group link sharing (joining by link) is enabled."""
         if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
             return False
         status = self._conversation.group_link_sharing_status
