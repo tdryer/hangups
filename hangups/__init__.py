@@ -10,7 +10,7 @@ from .auth import (
     get_auth, get_auth_stdin, GoogleAuthError, CredentialsPrompt,
     RefreshTokenCache
 )
-from .exceptions import HangupsError, NetworkError
+from .exceptions import HangupsError, NetworkError, ConversationTypeError
 from .conversation_event import (
     ChatMessageSegment, ConversationEvent, ChatMessageEvent, OTREvent,
     RenameEvent, MembershipChangeEvent, HangoutEvent,

@@ -7,3 +7,7 @@ class HangupsError(Exception):
 
 class NetworkError(HangupsError):
     """A network error occurred."""
+
+
+class ConversationTypeError(HangupsError):
+    """An action was performed on a conversation that doesn't support it."""

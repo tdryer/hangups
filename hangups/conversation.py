@@ -270,6 +270,14 @@ class Conversation:
         status = self._conversation.otr_status
         return status == hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
 
+    @property
+    def is_group_link_shared(self):
+        """``True`` if joining conversation by link is enabled."""
+        if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
+            return False
+        status = self._conversation.group_link_sharing_status
+        return status == hangouts_pb2.GROUP_LINK_SHARING_STATUS_ON
+
     def _on_watermark_notification(self, notif):
         """Handle a watermark notification."""
         # Update the conversation:
@@ -477,6 +485,89 @@ class Conversation:
                 logger.warning('Failed to send message: {}'.format(e))
                 raise
 
+    @staticmethod
+    def _wrap_user_id(id_):
+        """Convert a user ID into a hangouts_pb2.InviteeID object."""
+        if isinstance(id_, hangouts_pb2.InviteeID):
+            return id_
+        elif isinstance(id_, user.UserID):
+            return hangouts_pb2.InviteeID(gaia_id=id_.gaia_id)
+        else:
+            return hangouts_pb2.InviteeID(gaia_id=id_)
+
+    @staticmethod
+    def _wrap_participant_id(id_):
+        """Convert a user ID into a hangouts_pb2.ParticipantId object."""
+        if isinstance(id_, hangouts_pb2.ParticipantId):
+            return id_
+        elif isinstance(id_, user.UserID):
+            return hangouts_pb2.ParticipantId(gaia_id=id_.gaia_id)
+        else:
+            return hangouts_pb2.ParticipantId(gaia_id=id_)
+
+    async def add_users(self, user_ids):
+        """Add one or more users to this conversation.
+
+        Args:
+            user_ids: List of IDs of the new users to be added; accepts
+                :class:`.UserID`, :class:`.InviteeID` or just :class:`str` IDs.
+
+        Raises:
+            ConversationTypeError: If conversation is not a group.
+            NetworkError: If conversation cannot be invited to.
+
+        Returns:
+            :class:`.ConversationEvent` representing the change.
+        """
+        if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
+            raise exceptions.ConversationTypeError(
+                'Can only add users to group conversations'
+            )
+        try:
+            response = await self._client.add_user(
+                hangouts_pb2.AddUserRequest(
+                    request_header=self._client.get_request_header(),
+                    event_request_header=self._get_event_request_header(),
+                    invitee_id=[self._wrap_user_id(user_id)
+                                for user_id in user_ids],
+                )
+            )
+            return self._wrap_event(response.created_event)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to add user: {}'.format(e))
+            raise
+
+    async def remove_user(self, user_id):
+        """Remove a user from this conversation.
+
+        Args:
+            user_id: ID of the user to be removed; accepts :class:`.UserID`,
+                :class:`.ParticipantId` or just :class:`str` IDs.
+
+        Raises:
+            ConversationTypeError: If conversation is not a group.
+            NetworkError: If conversation cannot be removed from.
+
+        Returns:
+            :class:`.ConversationEvent` representing the change.
+        """
+        if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
+            raise exceptions.ConversationTypeError(
+                'Can only remove users to group conversations'
+            )
+        try:
+            response = await self._client.remove_user(
+                hangouts_pb2.RemoveUserRequest(
+                    request_header=self._client.get_request_header(),
+                    event_request_header=self._get_event_request_header(),
+                    participant_id=self._wrap_participant_id(user_id),
+                )
+            )
+            return self._wrap_event(response.created_event)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to remove user: {}'.format(e))
+            raise
+
     async def leave(self):
         """Leave this conversation.
 
@@ -547,6 +638,69 @@ class Conversation:
                 level=level,
             )
         )
+
+    async def modify_otr_status(self, off_record):
+        """Set the OTR mode of this conversation.
+
+        Args:
+            off_record: ``True`` to disable history, or ``False`` to enable it.
+
+        Raises:
+            NetworkError: If the request fails.
+
+        Returns:
+            :class:`.ConversationEvent` representing the change.
+        """
+        if off_record:
+            status = hangouts_pb2.OFF_THE_RECORD_STATUS_OFF_THE_RECORD
+        else:
+            status = hangouts_pb2.OFF_THE_RECORD_STATUS_ON_THE_RECORD
+        try:
+            response = await self._client.modify_otr_status(
+                hangouts_pb2.ModifyOTRStatusRequest(
+                    request_header=self._client.get_request_header(),
+                    otr_status=status,
+                    event_request_header=self._get_event_request_header(),
+                )
+            )
+            return self._wrap_event(response.created_event)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to set OTR mode: {}'.format(e))
+            raise
+
+    async def set_group_link_sharing_enabled(self, enabled):
+        """Set the link sharing mode of this conversation.
+
+        Args:
+            enabled: ``True`` to allow joining the conversation by link, or
+                ``False`` to prevent it.
+
+        Raises:
+            NetworkError: If the request fails.
+
+        Returns:
+            :class:`.ConversationEvent` representing the change.
+        """
+        if not self._conversation.type == hangouts_pb2.CONVERSATION_TYPE_GROUP:
+            raise exceptions.ConversationTypeError(
+                'Can only set link sharing in group conversations'
+            )
+        if enabled:
+            status = hangouts_pb2.GROUP_LINK_SHARING_STATUS_ON
+        else:
+            status = hangouts_pb2.GROUP_LINK_SHARING_STATUS_OFF
+        try:
+            response = await self._client.set_group_link_sharing_enabled(
+                hangouts_pb2.SetGroupLinkSharingEnabledRequest(
+                    request_header=self._client.get_request_header(),
+                    group_link_sharing_status=status,
+                    event_request_header=self._get_event_request_header(),
+                )
+            )
+            return self._wrap_event(response.created_event)
+        except exceptions.NetworkError as e:
+            logger.warning('Failed to set link sharing mode: {}'.format(e))
+            raise
 
     async def set_typing(self, typing=hangouts_pb2.TYPING_TYPE_STARTED):
         """Set your typing status in this conversation.

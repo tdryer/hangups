@@ -35,6 +35,8 @@ Exceptions
 
 .. autoexception:: hangups.NetworkError
 
+.. autoexception:: hangups.ConversationTypeError
+
 Event
 -----
 
