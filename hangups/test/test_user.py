@@ -15,6 +15,7 @@ def test_default_type_detection_empty_0():
         full_name='',
         first_name='',
         photo_url='',
+        canonical_email='',
         emails=[],
         is_self=False,
     )
@@ -31,6 +32,7 @@ def test_default_type_detection_empty_1():
         full_name=None,
         first_name=None,
         photo_url='',
+        canonical_email='',
         emails=[],
         is_self=False,
     )
@@ -70,6 +72,7 @@ def test_real_type():
         full_name='Joe Doe',
         first_name='Joe',
         photo_url='',
+        canonical_email='',
         emails=[],
         is_self=False,
     )
