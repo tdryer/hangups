@@ -58,10 +58,10 @@ class User:
         """The user's profile photo URL (:class:`str`)."""
 
         self.canonical_email = canonical_email
-        """The user's email address (:class:`str`)."""
+        """The user's canonical email address (:class:`str`)."""
 
         self.emails = emails
-        """The user's other Google Contacts email addresses (:class:`str`)."""
+        """The user's email addresses (:class:`list`)."""
 
         self.is_self = is_self
         """Whether this user is the current user (:class:`bool`)."""
