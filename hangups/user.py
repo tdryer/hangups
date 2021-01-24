@@ -28,8 +28,8 @@ class User:
     instances of this class.
     """
 
-    def __init__(self, user_id, full_name, first_name, photo_url, emails,
-                 is_self):
+    def __init__(self, user_id, full_name, first_name, photo_url,
+                 canonical_email, emails, is_self):
         # Handle full_name or first_name being None by creating an approximate
         # first_name from the full_name, or setting both to DEFAULT_NAME.
         if not full_name:
@@ -57,8 +57,11 @@ class User:
         self.photo_url = photo_url
         """The user's profile photo URL (:class:`str`)."""
 
+        self.canonical_email = canonical_email
+        """The user's canonical email address (:class:`str`)."""
+
         self.emails = emails
-        """The user's email address (:class:`str`)."""
+        """The user's email addresses (:class:`list`)."""
 
         self.is_self = is_self
         """Whether this user is the current user (:class:`bool`)."""
@@ -96,6 +99,7 @@ class User:
         return User(user_id, entity.properties.display_name,
                     entity.properties.first_name,
                     entity.properties.photo_url,
+                    entity.properties.canonical_email,
                     entity.properties.email,
                     (self_user_id == user_id) or (self_user_id is None))
 
@@ -117,7 +121,7 @@ class User:
             full_name = None
         else:
             full_name = conv_part_data.fallback_name
-        return User(user_id, full_name, None, None, [],
+        return User(user_id, full_name, None, None, [], None,
                     (self_user_id == user_id) or (self_user_id is None))
 
 
@@ -172,7 +176,7 @@ class UserList:
         except KeyError:
             logger.warning('UserList returning unknown User for UserID %s',
                            user_id)
-            return User(user_id, None, None, None, [], False)
+            return User(user_id, None, None, None, [], None, False)
 
     def get_all(self):
         """Get all known users.
