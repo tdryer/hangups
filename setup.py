@@ -29,7 +29,7 @@ install_requires = [
     'readlike>=0.1.2,<0.2',
     'requests>=2.6.0,<3',  # uses semantic versioning (after 2.6)
     'ReParser==1.4.3',
-    'protobuf>=3.1.0,<3.14',
+    'protobuf>=3.1.0,<3.16',
     'urwid>=1.3.1,<2.2',
     'MechanicalSoup>=0.6.0,<0.13',
 ]
