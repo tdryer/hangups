@@ -121,7 +121,7 @@ class User:
             full_name = None
         else:
             full_name = conv_part_data.fallback_name
-        return User(user_id, full_name, None, None, [], None,
+        return User(user_id, full_name, None, None, None, [],
                     (self_user_id == user_id) or (self_user_id is None))
 
 
@@ -176,7 +176,7 @@ class UserList:
         except KeyError:
             logger.warning('UserList returning unknown User for UserID %s',
                            user_id)
-            return User(user_id, None, None, None, [], None, False)
+            return User(user_id, None, None, None, None, [], False)
 
     def get_all(self):
         """Get all known users.
