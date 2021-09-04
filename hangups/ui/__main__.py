@@ -1097,7 +1097,7 @@ def main():
     # Create a default empty config file if does not exist.
     dir_maker(user_config_path)
     if not os.path.isfile(user_config_path):
-        with open(user_config_path, 'a') as cfg:
+        with open(user_config_path, 'a', encoding="utf-8") as cfg:
             cfg.write("")
 
     parser = configargparse.ArgumentParser(
