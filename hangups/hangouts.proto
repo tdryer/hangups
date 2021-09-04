@@ -517,6 +517,8 @@ message ConversationParticipantData {
 enum ForceHistory {
   FORCE_HISTORY_UNKNOWN = 0;
   FORCE_HISTORY_NO = 1;
+  FORCE_HISTORY_ON = 2;
+  FORCE_HISTORY_OFF = 3;
 }
 
 enum NetworkType {

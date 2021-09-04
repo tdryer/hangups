@@ -2001,6 +2001,8 @@ Name                          Number Description
 ============================= ====== ===========
 :code:`FORCE_HISTORY_UNKNOWN` 0                 
 :code:`FORCE_HISTORY_NO`      1                 
+:code:`FORCE_HISTORY_ON`      2                 
+:code:`FORCE_HISTORY_OFF`     3                 
 ============================= ====== ===========
 
 NetworkType
