@@ -32,7 +32,6 @@ disable=
     no-else-raise,
     no-else-break,
     raise-missing-from,
-    unspecified-encoding,
     consider-using-with,
 
 [FORMAT]

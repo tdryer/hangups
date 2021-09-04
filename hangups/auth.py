@@ -152,7 +152,7 @@ class RefreshTokenCache:
             'Loading refresh_token from %s', repr(self._filename)
         )
         try:
-            with open(self._filename) as f:
+            with open(self._filename, encoding="utf-8") as f:
                 return f.read()
         except IOError as e:
             logger.info('Failed to load refresh_token: %s', e)
@@ -165,7 +165,7 @@ class RefreshTokenCache:
         """
         logger.info('Saving refresh_token to %s', repr(self._filename))
         try:
-            with open(self._filename, 'w') as f:
+            with open(self._filename, 'w', encoding="utf-8") as f:
                 f.write(refresh_token)
         except IOError as e:
             logger.warning('Failed to save refresh_token: %s', e)
