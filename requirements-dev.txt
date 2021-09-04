@@ -4,26 +4,30 @@
 #
 #    pip-compile requirements-dev.in
 #
-astroid==2.4.2            # via pylint
-attrs==20.3.0             # via pytest
-click==7.1.2              # via pip-tools
-docutils==0.16            # via -r requirements-dev.in
-httpretty==1.0.3          # via -r requirements-dev.in
+astroid==2.7.3            # via pylint
+attrs==21.2.0             # via pytest
+click==8.0.1              # via pip-tools
+docutils==0.17.1          # via -r requirements-dev.in
+httpretty==1.1.4          # via -r requirements-dev.in
 iniconfig==1.1.1          # via pytest
-isort==4.3.21             # via pylint
-lazy-object-proxy==1.4.3  # via astroid
+isort==5.9.3              # via pylint
+lazy-object-proxy==1.6.0  # via astroid
 mccabe==0.6.1             # via pylint
-packaging==20.5           # via pytest
-pip-tools==5.4.0          # via -r requirements-dev.in
-pluggy==0.13.1            # via pytest
-py==1.9.0                 # via pytest
-pycodestyle==2.6.0        # via -r requirements-dev.in
-pylint==2.6.0             # via -r requirements-dev.in
+packaging==21.0           # via pytest
+pep517==0.11.0            # via pip-tools
+pip-tools==6.2.0          # via -r requirements-dev.in
+platformdirs==2.3.0       # via pylint
+pluggy==1.0.0             # via pytest
+py==1.10.0                # via pytest
+pycodestyle==2.7.0        # via -r requirements-dev.in
+pylint==2.10.2            # via -r requirements-dev.in
 pyparsing==2.4.7          # via packaging
-pytest==6.1.2             # via -r requirements-dev.in
-six==1.15.0               # via astroid, pip-tools
+pytest==6.2.5             # via -r requirements-dev.in
 toml==0.10.2              # via pylint, pytest
+tomli==1.2.1              # via pep517
+wheel==0.37.0             # via pip-tools
 wrapt==1.12.1             # via astroid
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
+# setuptools
