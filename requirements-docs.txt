@@ -2,5 +2,5 @@
 # configured to use this file.
 
 Sphinx>=1.6, <1.7
-docutils>=0.14
+docutils>=0.14,<0.18
 sphinxcontrib-asyncio==0.2.0
