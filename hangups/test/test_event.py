@@ -66,7 +66,7 @@ def test_already_added():
         e.add_observer(a)
 
 
-def test_remove_nonexistant():
+def test_remove_nonexistent():
     e = event.Event('MyEvent')
     with pytest.raises(ValueError):
         e.remove_observer(lambda a: print('A: got {}'.format(a)))

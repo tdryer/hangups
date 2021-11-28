@@ -332,9 +332,9 @@ def _get_authorization_code(session, credentials_prompt):
             input_selector = PHONE_CODE_SELECTOR
         else:
             raise GoogleAuthError('Unknown verification code input')
-        verfification_code = credentials_prompt.get_verification_code()
+        verification_code = credentials_prompt.get_verification_code()
         browser.submit_form(
-            VERIFICATION_FORM_SELECTOR, {input_selector: verfification_code}
+            VERIFICATION_FORM_SELECTOR, {input_selector: verification_code}
         )
 
     try:
