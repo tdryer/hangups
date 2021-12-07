@@ -93,8 +93,7 @@ class CredentialsPrompt:
     This implementation prompts the user in a terminal using standard in/out.
     """
 
-    @staticmethod
-    def get_email():
+    def get_email(self):  # pylint: disable=no-self-use
         """Prompt for email.
 
         Returns:
@@ -103,8 +102,7 @@ class CredentialsPrompt:
         print('Sign in with your Google account:')
         return input('Email: ')
 
-    @staticmethod
-    def get_password():
+    def get_password(self):  # pylint: disable=no-self-use
         """Prompt for password.
 
         Returns:
@@ -112,8 +110,7 @@ class CredentialsPrompt:
         """
         return getpass.getpass()
 
-    @staticmethod
-    def get_verification_code():
+    def get_verification_code(self):  # pylint: disable=no-self-use
         """Prompt for verification code.
 
         Returns:
@@ -121,8 +118,7 @@ class CredentialsPrompt:
         """
         return input('Verification code: ')
 
-    @staticmethod
-    def get_authorization_code():
+    def get_authorization_code(self):  # pylint: disable=no-self-use
         """Prompt for authorization code.
 
         Returns:
