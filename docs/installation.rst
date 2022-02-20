@@ -38,6 +38,10 @@ To upgrade hangups, pull the latest version of the image::
 
   docker pull tdryer/hangups
 
+Or you can locally build an image from latest sources on Github (no need to clone):
+
+  docker build --force-rm -t hangups github.com/tdryer/hangups#master
+
 .. _Docker Hub: https://hub.docker.com/
 
 Arch Linux
