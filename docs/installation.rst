@@ -20,25 +20,22 @@ hangups is listed in `PyPI`_, and may be installed using `pip`_::
 Docker
 ------
 
-hangups is available as an automated build on `Docker Hub`_ as
-`tdryer/hangups`_.
+An official `hangups Docker image`_ is available.
 
-.. _tdryer/hangups: https://registry.hub.docker.com/u/tdryer/hangups/
+.. _hangups Docker image: https://registry.hub.docker.com/r/tdryer/hangups
 
-Create a data-only container for hangups to allow upgrading without losing your
-login session::
+Use Docker to run hangups in a container::
 
-  docker run --name hangups-session --entrypoint true tdryer/hangups
+    docker run -it --rm tdryer/hangups
 
-Whenever you want to start hangups, run a new container::
+To remember your login session between runs, specify a bind mount for the
+hangups cache directory::
 
-  docker run -it --rm --name hangups --volumes-from hangups-session tdryer/hangups
+    docker run -it --rm --mount type=bind,source=$HOME/.cache/hangups,target=/home/hangups/.cache/hangups tdryer/hangups
 
 To upgrade hangups, pull the latest version of the image::
 
   docker pull tdryer/hangups
-
-.. _Docker Hub: https://hub.docker.com/
 
 Arch Linux
 ----------
