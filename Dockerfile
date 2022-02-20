@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.10
 MAINTAINER Tom Dryer <tomdryer.com@gmail.com>
 
 RUN useradd --create-home hangups
