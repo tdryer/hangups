@@ -86,11 +86,15 @@ message Presence {
   optional bool reachable = 1;
   optional bool available = 2;
   optional DeviceStatus device_status = 6;
-  optional MoodMessage mood_message = 9;
+  optional StatusMessageState status_message = 9;
   optional LastSeen last_seen = 10;
 
   // TODO:
   // optional CallType call_type = 5;
+}
+
+message StatusMessageState {
+  repeated MessageContent status_message = 1;
 }
 
 message PresenceResult {
@@ -228,7 +232,6 @@ message PlusPhoto {
   optional MediaType media_type = 13;
   // List of stream ID parameters.
   repeated string stream_id = 14;
-
 }
 
 // Place that can be embedded in a chat message via Google Maps.
@@ -481,17 +484,17 @@ enum InvitationAffinity {
 }
 
 message UserConversationState {
-   optional string client_generated_id = 2;
-   optional UserReadState self_read_state = 7;
-   optional ConversationStatus status = 8;
-   optional NotificationLevel notification_level = 9;
-   repeated ConversationView view = 10;
-   optional ParticipantId inviter_id = 11;
-   optional uint64 invite_timestamp = 12;
-   optional uint64 sort_timestamp = 13;
-   optional uint64 active_timestamp = 14;
-   optional InvitationAffinity invite_affinity = 15;
-   repeated DeliveryMediumOption delivery_medium_option = 17;
+  optional string client_generated_id = 2;
+  optional UserReadState self_read_state = 7;
+  optional ConversationStatus status = 8;
+  optional NotificationLevel notification_level = 9;
+  repeated ConversationView view = 10;
+  optional ParticipantId inviter_id = 11;
+  optional uint64 invite_timestamp = 12;
+  optional uint64 sort_timestamp = 13;
+  optional uint64 active_timestamp = 14;
+  optional InvitationAffinity invite_affinity = 15;
+  repeated DeliveryMediumOption delivery_medium_option = 17;
 }
 
 enum ParticipantType {
@@ -751,7 +754,6 @@ message EntityLookupSpec {
   //optional string chat_id = 5;
 }
 
-
 // A type of binary configuration option.
 enum ConfigurationBitType {
 
@@ -892,23 +894,6 @@ message DndSetting {
 message PresenceStateSetting {
   optional uint64 timeout_secs = 1;
   optional ClientPresenceStateType type = 2;
-}
-
-message MoodMessage {
-  optional MoodContent mood_content = 1;
-}
-
-message MoodContent {
-  repeated Segment segment = 1;
-}
-
-// The user's mood message.
-message MoodSetting {
-  optional MoodMessage mood_message = 1;
-}
-
-message MoodState {
-  optional MoodSetting mood_setting = 4;
 }
 
 enum DeleteType {
@@ -1154,13 +1139,19 @@ message EasterEggNotification {
   optional EasterEgg easter_egg = 3;
 }
 
-// Notifies the status of other clients and mood.
+// Notifies the status of other clients and status message.
 message SelfPresenceNotification {
   optional ClientPresenceState client_presence_state = 1;
   optional DoNotDisturbSetting do_not_disturb_setting = 3;
   optional DesktopOffSetting desktop_off_setting = 4;
   optional DesktopOffState desktop_off_state = 5;
   optional MoodState mood_state = 6;
+}
+
+message MoodState {
+  // TODO: Merge with RichPresenceState?
+
+  optional StatusMessageState status_message = 4;
 }
 
 message DeleteActionNotification {
@@ -1442,7 +1433,17 @@ message SendChatMessageRequest {
   optional EventRequestHeader event_request_header = 8;
   optional ParticipantId user_id = 9;
   optional Location location = 10;
+  repeated ChatMessageSpec chat_message_spec = 12;
+
   // TODO: incomplete
+}
+
+message ChatMessageSpec {
+  repeated Segment segment = 1;
+
+  // TODO
+  // optional message unknown = 2;
+  // optional message unknown = 3;
 }
 
 message SendChatMessageResponse {
@@ -1530,7 +1531,6 @@ message SetGroupLinkSharingEnabledRequest {
   optional EventRequestHeader event_request_header = 2;
   // New group link sharing status.
   optional GroupLinkSharingStatus group_link_sharing_status = 4;
-
 }
 
 message SetGroupLinkSharingEnabledResponse {
@@ -1547,7 +1547,11 @@ message SetPresenceRequest {
   optional PresenceStateSetting presence_state_setting = 2;
   optional DndSetting dnd_setting = 3;
   optional DesktopOffSetting desktop_off_setting = 5;
-  optional MoodSetting mood_setting = 8;
+  optional StatusMessageSetting status_message_setting = 8;
+}
+
+message StatusMessageSetting {
+  repeated ChatMessageSpec status_message = 1;
 }
 
 message SetPresenceResponse {

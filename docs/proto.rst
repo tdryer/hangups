@@ -73,15 +73,24 @@ Field                            Number Type   Label    Description
 Presence
 --------
 
-===================== ====== =============== ======== ===========
-Field                 Number Type            Label    Description
-===================== ====== =============== ======== ===========
-:code:`reachable`     1      bool            optional            
-:code:`available`     2      bool            optional            
-:code:`device_status` 6      `DeviceStatus`_ optional            
-:code:`mood_message`  9      `MoodMessage`_  optional            
-:code:`last_seen`     10     `LastSeen`_     optional            
-===================== ====== =============== ======== ===========
+====================== ====== ===================== ======== ===========
+Field                  Number Type                  Label    Description
+====================== ====== ===================== ======== ===========
+:code:`reachable`      1      bool                  optional            
+:code:`available`      2      bool                  optional            
+:code:`device_status`  6      `DeviceStatus`_       optional            
+:code:`status_message` 9      `StatusMessageState`_ optional            
+:code:`last_seen`      10     `LastSeen`_           optional            
+====================== ====== ===================== ======== ===========
+
+StatusMessageState
+------------------
+
+====================== ====== ================= ======== ===========
+Field                  Number Type              Label    Description
+====================== ====== ================= ======== ===========
+:code:`status_message` 1      `MessageContent`_ repeated            
+====================== ====== ================= ======== ===========
 
 PresenceResult
 --------------
@@ -737,44 +746,6 @@ Field                Number Type                       Label    Description
 :code:`type`         2      `ClientPresenceStateType`_ optional            
 ==================== ====== ========================== ======== ===========
 
-MoodMessage
------------
-
-==================== ====== ============== ======== ===========
-Field                Number Type           Label    Description
-==================== ====== ============== ======== ===========
-:code:`mood_content` 1      `MoodContent`_ optional            
-==================== ====== ============== ======== ===========
-
-MoodContent
------------
-
-=============== ====== ========== ======== ===========
-Field           Number Type       Label    Description
-=============== ====== ========== ======== ===========
-:code:`segment` 1      `Segment`_ repeated            
-=============== ====== ========== ======== ===========
-
-MoodSetting
------------
-
-The user's mood message.
-
-==================== ====== ============== ======== ===========
-Field                Number Type           Label    Description
-==================== ====== ============== ======== ===========
-:code:`mood_message` 1      `MoodMessage`_ optional            
-==================== ====== ============== ======== ===========
-
-MoodState
----------
-
-==================== ====== ============== ======== ===========
-Field                Number Type           Label    Description
-==================== ====== ============== ======== ===========
-:code:`mood_setting` 4      `MoodSetting`_ optional            
-==================== ====== ============== ======== ===========
-
 DeleteAction
 ------------
 
@@ -1063,7 +1034,7 @@ Field                   Number Type              Label    Description
 SelfPresenceNotification
 ------------------------
 
-Notifies the status of other clients and mood.
+Notifies the status of other clients and status message.
 
 ============================== ====== ====================== ======== ===========
 Field                          Number Type                   Label    Description
@@ -1074,6 +1045,15 @@ Field                          Number Type                   Label    Descriptio
 :code:`desktop_off_state`      5      `DesktopOffState`_     optional            
 :code:`mood_state`             6      `MoodState`_           optional            
 ============================== ====== ====================== ======== ===========
+
+MoodState
+---------
+
+====================== ====== ===================== ======== ===========
+Field                  Number Type                  Label    Description
+====================== ====== ===================== ======== ===========
+:code:`status_message` 4      `StatusMessageState`_ optional            
+====================== ====== ===================== ======== ===========
 
 DeleteActionNotification
 ------------------------
@@ -1460,17 +1440,27 @@ Field         Number Type     Label    Description
 SendChatMessageRequest
 ----------------------
 
-============================ ====== ===================== ======== ================
-Field                        Number Type                  Label    Description     
-============================ ====== ===================== ======== ================
-:code:`request_header`       1      `RequestHeader`_      optional                 
-:code:`annotation`           5      `EventAnnotation`_    repeated                 
-:code:`message_content`      6      `MessageContent`_     optional                 
-:code:`existing_media`       7      `ExistingMedia`_      optional                 
-:code:`event_request_header` 8      `EventRequestHeader`_ optional                 
-:code:`user_id`              9      `ParticipantId`_      optional                 
-:code:`location`             10     `Location`_           optional TODO: incomplete
-============================ ====== ===================== ======== ================
+============================ ====== ===================== ======== ===========
+Field                        Number Type                  Label    Description
+============================ ====== ===================== ======== ===========
+:code:`request_header`       1      `RequestHeader`_      optional            
+:code:`annotation`           5      `EventAnnotation`_    repeated            
+:code:`message_content`      6      `MessageContent`_     optional            
+:code:`existing_media`       7      `ExistingMedia`_      optional            
+:code:`event_request_header` 8      `EventRequestHeader`_ optional            
+:code:`user_id`              9      `ParticipantId`_      optional            
+:code:`location`             10     `Location`_           optional            
+:code:`chat_message_spec`    12     `ChatMessageSpec`_    repeated            
+============================ ====== ===================== ======== ===========
+
+ChatMessageSpec
+---------------
+
+=============== ====== ========== ======== ===========
+Field           Number Type       Label    Description
+=============== ====== ========== ======== ===========
+:code:`segment` 1      `Segment`_ repeated            
+=============== ====== ========== ======== ===========
 
 SendChatMessageResponse
 -----------------------
@@ -1638,8 +1628,17 @@ Field                          Number Type                    Label    Descripti
 :code:`presence_state_setting` 2      `PresenceStateSetting`_ optional            
 :code:`dnd_setting`            3      `DndSetting`_           optional            
 :code:`desktop_off_setting`    5      `DesktopOffSetting`_    optional            
-:code:`mood_setting`           8      `MoodSetting`_          optional            
+:code:`status_message_setting` 8      `StatusMessageSetting`_ optional            
 ============================== ====== ======================= ======== ===========
+
+StatusMessageSetting
+--------------------
+
+====================== ====== ================== ======== ===========
+Field                  Number Type               Label    Description
+====================== ====== ================== ======== ===========
+:code:`status_message` 1      `ChatMessageSpec`_ repeated            
+====================== ====== ================== ======== ===========
 
 SetPresenceResponse
 -------------------
